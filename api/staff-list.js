@@ -1,13 +1,11 @@
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  // ===== 간사 명단 - 이곤 수정하세요 =====
   const STAFF = [
-    { name: "간사1 (샘플)", dept: "유아부 (Infant)" },
-    { name: "간사2 (샘플)", dept: "유치부 (Preschool)" },
-    { name: "간사3 (샘플)", dept: "유년부 (Elementary Jr)" },
-    { name: "간사4 (샘플)", dept: "초등부 (Elementary)" },
-    { name: "간사5 (샘플)", dept: "중고등부 (Middle/High)" },
+    { name: "\uC774\uC9C0\uD61C", dept: "\uC720\uC544\uBD80 (Infant)" },
+    { name: "\uAE40\uD5A5\uC219", dept: "\uC720\uCE58\uBD80 (Preschool)" },
+    { name: "\uBC15\uC740\uD61C", dept: "\uC720\uB144\uBD80 (Elementary Jr)" },
+    { name: "\uBC31\uC9C4\uC8FC", dept: "\uCD08\uB4F1\uBD80 (Elementary)" },
+    { name: "\uBC15\uBA85\uCCA0", dept: "\uC911\uACE0\uB4F1\uBD80 (Middle/High)" },
   ];
-  // ==========================================
   return res.status(200).json({ staff: STAFF });
 };
