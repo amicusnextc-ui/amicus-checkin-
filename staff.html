@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>ê°ì¬/ì¬ì­ì í¬í¸ | ìë¯¸ì¿ ì¤</title>
+<title>간사/사역자 포털 | 아미쿠스</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -36,29 +36,29 @@ tbody tr:hover { background:#fafafa; }
       <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
         <svg class="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       </div>
-      <h1 class="text-2xl font-bold text-gray-900">ê°ì¬/ì¬ì­ì í¬í¸</h1>
-      <p class="text-sm text-gray-400 mt-1">Amicus Next â Staff Portal</p>
+      <h1 class="text-2xl font-bold text-gray-900">간사/사역자 포털</h1>
+      <p class="text-sm text-gray-400 mt-1">Amicus Next — Staff Portal</p>
     </div>
     <div class="card p-6 space-y-4">
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">ì´ë¦ / NAME</label>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">이름 / NAME</label>
         <select id="nameSelect" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm">
-          <option value="">ì´ë¦ì ì ííì¸ì...</option>
-          <option value="ì ìë¶ (Infant)">ì´ì§í â ì ìë¶</option>
-          <option value="ì ì¹ë¶ (Preschool)">ê¹í¥ì â ì ì¹ë¶</option>
-          <option value="ì ëë¶ (Elementary Jr)">ë°ìí â ì ëë¶</option>
-          <option value="ì´ë±ë¶ (Elementary)">ë°±ì§ì£¼ â ì´ë±ë¶</option>
-          <option value="ì¤ê³ ë±ë¶ (Middle/High)">ë°ëªì²  ì ëì¬ë â ì¤ê³ ë±ë¶</option>
+          <option value="">이름을 선택하세요...</option>
+          <option value="유아부 (Infant)">이지혜 — 유아부</option>
+          <option value="유치부 (Preschool)">김향숙 — 유치부</option>
+          <option value="유년부 (Elementary Jr)">박은혜 — 유년부</option>
+          <option value="초등부 (Elementary)">백진주 — 초등부</option>
+          <option value="중고등부 (Middle/High)">박명철 전도사님 — 중고등부</option>
         </select>
       </div>
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">ë¹ë°ë²í¸ / PASSWORD</label>
-        <input id="pwInput" type="password" placeholder="ê³µíµ ë¹ë°ë²í¸" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm"/>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">비밀번호 / PASSWORD</label>
+        <input id="pwInput" type="password" placeholder="공통 비밀번호" class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm"/>
       </div>
       <div id="loginError" class="hidden text-red-500 text-sm text-center py-1 bg-red-50 rounded-lg"></div>
-      <button onclick="doLogin()" class="w-full py-3.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors text-sm">ë¡ê·¸ì¸ / Login</button>
+      <button onclick="doLogin()" class="w-full py-3.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors text-sm">로그인 / Login</button>
     </div>
-    <a href="/" class="block text-center text-sm text-gray-400 mt-4">â ì²´í¬ì¸ íì´ì§ë¡</a>
+    <a href="/" class="block text-center text-sm text-gray-400 mt-4">← 체크인 페이지로</a>
   </div>
 </div><div id="dashboard" class="hidden min-h-screen">
   <nav class="bg-white border-b border-gray-100 sticky top-0 z-40">
@@ -71,31 +71,31 @@ tbody tr:hover { background:#fafafa; }
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button id="tabAttendance" onclick="switchTab('attendance')" class="tab-btn active">ì¶ì</button>
-        <button id="tabRoster" onclick="switchTab('roster')" class="tab-btn">ëªë¨</button>
-        <button onclick="doLogout()" class="text-xs text-gray-400 ml-2">ë¡ê·¸ìì</button>
+        <button id="tabAttendance" onclick="switchTab('attendance')" class="tab-btn active">출석</button>
+        <button id="tabRoster" onclick="switchTab('roster')" class="tab-btn">명단</button>
+        <button onclick="doLogout()" class="text-xs text-gray-400 ml-2">로그아웃</button>
       </div>
     </div>
   </nav>
   <div class="max-w-6xl mx-auto px-4 py-6">
     <div id="attendanceTab" class="fade-in">
       <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
-        <div class="stat-card" style="--c1:#6366f1;--c2:#8b5cf6"><p class="text-xs opacity-75 mb-1">ì ì²´</p><p id="statTotal" class="text-2xl font-bold">â</p></div>
-        <div class="stat-card" style="--c1:#10b981;--c2:#059669"><p class="text-xs opacity-75 mb-1">ì²´í¬ì¸</p><p id="statIn" class="text-2xl font-bold">â</p></div>
-        <div class="stat-card" style="--c1:#f59e0b;--c2:#d97706"><p class="text-xs opacity-75 mb-1">ì²´í¬ìì</p><p id="statOut" class="text-2xl font-bold">â</p></div>
-        <div class="stat-card" style="--c1:#ec4899;--c2:#db2777"><p class="text-xs opacity-75 mb-1">ë°©ë¬¸ì</p><p id="statNew" class="text-2xl font-bold">â</p></div>
+        <div class="stat-card" style="--c1:#6366f1;--c2:#8b5cf6"><p class="text-xs opacity-75 mb-1">전체</p><p id="statTotal" class="text-2xl font-bold">—</p></div>
+        <div class="stat-card" style="--c1:#10b981;--c2:#059669"><p class="text-xs opacity-75 mb-1">체크인</p><p id="statIn" class="text-2xl font-bold">—</p></div>
+        <div class="stat-card" style="--c1:#f59e0b;--c2:#d97706"><p class="text-xs opacity-75 mb-1">체크아웃</p><p id="statOut" class="text-2xl font-bold">—</p></div>
+        <div class="stat-card" style="--c1:#ec4899;--c2:#db2777"><p class="text-xs opacity-75 mb-1">방문자</p><p id="statNew" class="text-2xl font-bold">—</p></div>
       </div>
       <div class="card overflow-hidden">
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 class="font-bold text-gray-900">ì¤ë ì¶ì</h2>
+          <h2 class="font-bold text-gray-900">오늘 출석</h2>
           <p id="lastUpdated" class="text-xs text-gray-400"></p>
         </div>
         <div class="overflow-x-auto"><table class="w-full">
           <thead class="bg-gray-50 border-b border-gray-100"><tr>
-            <th>ì´ë¦</th><th>íë</th><th>ìì¼</th><th>ìë¬ì§</th><th>ë¶ëª¨</th>
-            <th style="text-align:center">ì²´í¬ì¸</th><th style="text-align:center">ì²´í¬ìì</th><th style="text-align:center">ìí</th>
+            <th>이름</th><th>학년</th><th>생일</th><th>알러지</th><th>부모</th>
+            <th style="text-align:center">체크인</th><th style="text-align:center">체크아웃</th><th style="text-align:center">상태</th>
           </tr></thead>
-          <tbody id="attendanceTable"><tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">ë¡ë© ì¤...</td></tr></tbody>
+          <tbody id="attendanceTable"><tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
         </table></div>
       </div>
     </div>
@@ -103,21 +103,21 @@ tbody tr:hover { background:#fafafa; }
       <div class="card overflow-hidden">
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
           <div class="flex items-center gap-2">
-            <h2 class="font-bold text-gray-900">íì ëªë¨</h2>
+            <h2 class="font-bold text-gray-900">학생 명단</h2>
             <span id="rosterCount" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold"></span>
           </div>
           <div class="flex items-center gap-2">
-            <input id="rosterSearch" type="text" placeholder="ì´ë¦ ê²ì..." oninput="filterRoster()" class="px-3 py-2 rounded-xl border border-gray-200 text-sm w-44"/>
-            <button onclick="openAddStudent()" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-xl font-bold">ì¶ê° +</button>
+            <input id="rosterSearch" type="text" placeholder="이름 검색..." oninput="filterRoster()" class="px-3 py-2 rounded-xl border border-gray-200 text-sm w-44"/>
+            <button onclick="openAddStudent()" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-xl font-bold">추가 +</button>
           </div>
         </div>
         <div class="overflow-x-auto"><table class="w-full">
           <thead class="bg-gray-50 border-b border-gray-100"><tr>
-            <th>ì´ë¦</th><th>íë/ëì´</th><th>ë¶/ëª¨</th>
-            <th style="text-align:center">ì¬ì§</th><th style="text-align:center">ì¸ë¡</th>
-            <th style="text-align:center">Liability</th><th style="text-align:center">ìì¼</th><th></th>
+            <th>이름</th><th>학년/나이</th><th>부/모</th>
+            <th style="text-align:center">사진</th><th style="text-align:center">세례</th>
+            <th style="text-align:center">Liability</th><th style="text-align:center">생일</th><th></th>
           </tr></thead>
-          <tbody id="rosterTable"><tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">ë¡ë© ì¤...</td></tr></tbody>
+          <tbody id="rosterTable"><tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
         </table></div>
       </div>
     </div>
@@ -125,83 +125,83 @@ tbody tr:hover { background:#fafafa; }
 </div><div id="studentModal" class="hidden modal-overlay" onclick="if(event.target===this)closeStudentModal()">
 <div class="modal-box fade-in">
   <div class="sticky top-0 bg-white flex items-center justify-between px-5 py-4 border-b border-gray-100 z-10">
-    <h2 id="modalTitle" class="text-base font-bold text-gray-900">íì ì¶ê°</h2>
+    <h2 id="modalTitle" class="text-base font-bold text-gray-900">학생 추가</h2>
     <button onclick="closeStudentModal()" class="text-gray-400"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
   </div>
   <div class="p-5 space-y-3">
     <div class="grid grid-cols-2 gap-3">
-      <div><label class="text-xs font-bold text-gray-500 uppercase">ì´ë¦ *</label><input id="f-name" type="text" placeholder="íê¸ ì´ë¦" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
+      <div><label class="text-xs font-bold text-gray-500 uppercase">이름 *</label><input id="f-name" type="text" placeholder="한글 이름" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
       <div><label class="text-xs font-bold text-gray-500 uppercase">English Name</label><input id="f-nameEN" type="text" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
     </div>
     <div class="grid grid-cols-2 gap-3">
-      <div><label class="text-xs font-bold text-gray-500 uppercase">ìëìì¼</label><input id="f-dob" type="date" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase">ë¶ì</label>
+      <div><label class="text-xs font-bold text-gray-500 uppercase">생년월일</label><input id="f-dob" type="date" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
+      <div><label class="text-xs font-bold text-gray-500 uppercase">부서</label>
         <select id="f-dept" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm">
-          <option value="">ì í...</option>
-          <option value="ì ìë¶ (Infant)">ì ìë¶ (Infant)</option>
-          <option value="ì ì¹ë¶ (Preschool)">ì ì¹ë¶ (Preschool)</option>
-          <option value="ì ëë¶ (Elementary Jr)">ì ëë¶ (Elementary Jr)</option>
-          <option value="ì´ë±ë¶ (Elementary)">ì´ë±ë¶ (Elementary)</option>
-          <option value="ì¤ê³ ë±ë¶ (Middle/High)">ì¤ê³ ë±ë¶ (Middle/High)</option>
+          <option value="">선택...</option>
+          <option value="유아부 (Infant)">유아부 (Infant)</option>
+          <option value="유치부 (Preschool)">유치부 (Preschool)</option>
+          <option value="유년부 (Elementary Jr)">유년부 (Elementary Jr)</option>
+          <option value="초등부 (Elementary)">초등부 (Elementary)</option>
+          <option value="중고등부 (Middle/High)">중고등부 (Middle/High)</option>
         </select>
       </div>
     </div>
     <div class="grid grid-cols-2 gap-3">
-      <div><label class="text-xs font-bold text-gray-500 uppercase">íë</label><input id="f-grade" type="text" placeholder="6th grade" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase">íêµ</label><input id="f-school" type="text" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
+      <div><label class="text-xs font-bold text-gray-500 uppercase">학년</label><input id="f-grade" type="text" placeholder="6th grade" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
+      <div><label class="text-xs font-bold text-gray-500 uppercase">학교</label><input id="f-school" type="text" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
     </div>
     <div class="border-t border-gray-100 pt-3">
-      <p class="text-xs font-bold text-gray-400 uppercase mb-2">ìë²ì§ (Father)</p>
+      <p class="text-xs font-bold text-gray-400 uppercase mb-2">아버지 (Father)</p>
       <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-xs text-gray-500">ì´ë¦</label><input id="f-fatherName" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
-        <div><label class="text-xs text-gray-500">ì°ë½ì²</label><input id="f-fatherPhone" type="tel" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
+        <div><label class="text-xs text-gray-500">이름</label><input id="f-fatherName" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
+        <div><label class="text-xs text-gray-500">연락처</label><input id="f-fatherPhone" type="tel" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
       </div>
-      <div class="mt-2"><label class="text-xs text-gray-500">ì´ë©ì¼</label><input id="f-fatherEmail" type="email" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
+      <div class="mt-2"><label class="text-xs text-gray-500">이메일</label><input id="f-fatherEmail" type="email" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
     </div>
     <div class="border-t border-gray-100 pt-3">
-      <p class="text-xs font-bold text-gray-400 uppercase mb-2">ì´ë¨¸ë (Mother)</p>
+      <p class="text-xs font-bold text-gray-400 uppercase mb-2">어머니 (Mother)</p>
       <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-xs text-gray-500">ì´ë¦</label><input id="f-motherName" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
-        <div><label class="text-xs text-gray-500">ì°ë½ì²</label><input id="f-motherPhone" type="tel" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
+        <div><label class="text-xs text-gray-500">이름</label><input id="f-motherName" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
+        <div><label class="text-xs text-gray-500">연락처</label><input id="f-motherPhone" type="tel" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
       </div>
-      <div class="mt-2"><label class="text-xs text-gray-500">ì´ë©ì¼</label><input id="f-motherEmail" type="email" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
+      <div class="mt-2"><label class="text-xs text-gray-500">이메일</label><input id="f-motherEmail" type="email" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 text-sm"/></div>
     </div>
     <div class="border-t border-gray-100 pt-3">
-      <label class="text-xs font-bold text-gray-500 uppercase">ì§ì£¼ì</label>
+      <label class="text-xs font-bold text-gray-500 uppercase">집주소</label>
       <input id="f-address" type="text" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/>
     </div>
     <div class="grid grid-cols-3 gap-2 border-t border-gray-100 pt-3">
-      <div><label class="text-xs font-bold text-gray-500 uppercase">ì¸ë¡</label>
-        <select id="f-baptized" class="w-full mt-1 px-2 py-2 rounded-xl border border-gray-200 text-xs"><option value="">-</option><option value="ì¸ë¡">ì¸ë¡</option><option value="ë¯¸ì¸ë¡">ë¯¸ì¸ë¡</option><option value="íì¸íì">íì¸íì</option></select>
+      <div><label class="text-xs font-bold text-gray-500 uppercase">세례</label>
+        <select id="f-baptized" class="w-full mt-1 px-2 py-2 rounded-xl border border-gray-200 text-xs"><option value="">-</option><option value="세례">세례</option><option value="미세례">미세례</option><option value="확인필요">확인필요</option></select>
       </div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase">ì¬ì§</label>
-        <select id="f-photo" class="w-full mt-1 px-2 py-2 rounded-xl border border-gray-200 text-xs"><option value="">-</option><option value="ì´¬ì ìë£">ì´¬ì ìë£</option><option value="ë¯¸ì´¬ì">ë¯¸ì´¬ì</option></select>
+      <div><label class="text-xs font-bold text-gray-500 uppercase">사진</label>
+        <select id="f-photo" class="w-full mt-1 px-2 py-2 rounded-xl border border-gray-200 text-xs"><option value="">-</option><option value="촬영 완료">촬영 완료</option><option value="미촬영">미촬영</option></select>
       </div>
       <div><label class="text-xs font-bold text-gray-500 uppercase">Liability</label>
-        <select id="f-liability" class="w-full mt-1 px-2 py-2 rounded-xl border border-gray-200 text-xs"><option value="">-</option><option value="ì ì¶ ìë£">ì ì¶ ìë£</option><option value="ë¯¸ì ì¶">ë¯¸ì ì¶</option><option value="íì¸ íì">íì¸ íì</option></select>
+        <select id="f-liability" class="w-full mt-1 px-2 py-2 rounded-xl border border-gray-200 text-xs"><option value="">-</option><option value="제출 완료">제출 완료</option><option value="미제출">미제출</option><option value="확인 필요">확인 필요</option></select>
       </div>
     </div>
-    <div><label class="text-xs font-bold text-gray-500 uppercase">ìë¬ì§</label><input id="f-allergy" type="text" placeholder="ìì" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
-    <div><label class="text-xs font-bold text-gray-500 uppercase">í¹ì´ì¬í­</label><textarea id="f-notes" rows="2" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm resize-none"></textarea></div>
+    <div><label class="text-xs font-bold text-gray-500 uppercase">알러지</label><input id="f-allergy" type="text" placeholder="없음" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm"/></div>
+    <div><label class="text-xs font-bold text-gray-500 uppercase">특이사항</label><textarea id="f-notes" rows="2" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm resize-none"></textarea></div>
   </div>
   <div id="modalError" class="hidden mx-5 mb-3 p-3 bg-red-50 rounded-xl text-red-500 text-sm"></div>
   <div class="flex gap-3 px-5 pb-5">
-    <button onclick="closeStudentModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100">ì·¨ì</button>
-    <button onclick="submitStudent()" id="submitStudentBtn" class="flex-1 py-3 rounded-xl font-bold text-white bg-emerald-600">ì ì¥</button>
+    <button onclick="closeStudentModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100">취소</button>
+    <button onclick="submitStudent()" id="submitStudentBtn" class="flex-1 py-3 rounded-xl font-bold text-white bg-emerald-600">저장</button>
   </div>
 </div>
 </div><script>
-var DEPT_DOT={"ì ìë¶ (Infant)":"bg-blue-500","ì ì¹ë¶ (Preschool)":"bg-emerald-500","ì ëë¶ (Elementary Jr)":"bg-yellow-400","ì´ë±ë¶ (Elementary)":"bg-orange-400","ì¤ê³ ë±ë¶ (Middle/High)":"bg-purple-500"};
+var DEPT_DOT={"유아부 (Infant)":"bg-blue-500","유치부 (Preschool)":"bg-emerald-500","유년부 (Elementary Jr)":"bg-yellow-400","초등부 (Elementary)":"bg-orange-400","중고등부 (Middle/High)":"bg-purple-500"};
 function doLogin(){
   var sel=document.getElementById("nameSelect"),dept=sel.value;
   var nameText=(sel.options[sel.selectedIndex]||{}).text||"",staffName=nameText.split(" \u2014")[0].trim();
   var pw=document.getElementById("pwInput").value;
-  if(!dept){showLoginError("ì´ë¦ì ì íí´ì£¼ì¸ì");return;}
-  if(pw!=="3"){showLoginError("ë¹ë°ë²í¸ê° íë ¸ìµëë¤");return;}
+  if(!dept){showLoginError("이름을 선택해주세요");return;}
+  if(pw!=="3"){showLoginError("비밀번호가 틀렸습니다");return;}
   window._dept=dept;window._user=staffName;
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
-  document.getElementById("dashName").textContent=staffName+" ê°ì¬ë";
+  document.getElementById("dashName").textContent=staffName+(staffName.indexOf("전도사님")>=0?"":" 간사님"));
   document.getElementById("dashDept").textContent=dept.split(" ")[0];
   var dot=document.getElementById("deptDot");if(dot)dot.className="w-2.5 h-2.5 rounded-full "+(DEPT_DOT[dept]||"bg-gray-400");
   switchTab("attendance");
@@ -227,7 +227,7 @@ function switchTab(tab){
 }
 async function loadAttendance(){
   var tbody=document.getElementById("attendanceTable");if(!tbody)return;
-  tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>ë¡ë© ì¤...</td></tr>";
+  tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>로딩 중...</td></tr>";
   try{
     var dept=window._dept||"",url="/api/attendance"+(dept?"?dept="+encodeURIComponent(dept):"");
     var res=await fetch(url),data=await res.json(),records=data.records||[];
@@ -235,15 +235,15 @@ async function loadAttendance(){
     document.getElementById("statIn").textContent=records.filter(function(r){return r.checkIn;}).length;
     document.getElementById("statOut").textContent=records.filter(function(r){return r.checkOut;}).length;
     document.getElementById("statNew").textContent=records.filter(function(r){return r.isNew;}).length;
-    document.getElementById("lastUpdated").textContent=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})+" ìë°ì´í¸";
-    if(!records.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>ì¤ë ì²ê±´ ì°¨í¬ì¸ ê¸°ë¡ì´ ììµëë¤</td></tr>";return;}
+    document.getElementById("lastUpdated").textContent=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})+" 업데이트";
+    if(!records.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>오늘 체크인 기록이 없습니다</td></tr>";return;}
     var html="";
     for(var i=0;i<records.length;i++){
       var r=records[i];
-      var allergyBadge=(r.hasAllergy&&r.allergy&&r.allergy!=="ìì")?"<span class='badge' style='background:#fee2e2;color:#b91c1c'>â ï¸ "+r.allergy+"</span>":"-";
-      var parentInfo=(r.fatherName?"ð¨ "+r.fatherName+" ":"")+((r.motherName?"ð© "+r.motherName:""));
+      var allergyBadge=(r.hasAllergy&&r.allergy&&r.allergy!=="없음")?"<span class='badge' style='background:#fee2e2;color:#b91c1c'>⚠️ "+r.allergy+"</span>":"-";
+      var parentInfo=(r.fatherName?"👨 "+r.fatherName+" ":"")+((r.motherName?"👩 "+r.motherName:""));
       if(!parentInfo&&r.guardian)parentInfo=r.guardian;
-      var statusBadge=r.checkOut?"<span class='badge' style='background:#f3f4f6;color:#6b7280'>ì²´í¬ìì</span>":r.checkIn?"<span class='badge' style='background:#d1fae5;color:#065f46'>ì²´í¬ì¸</span>":"-";
+      var statusBadge=r.checkOut?"<span class='badge' style='background:#f3f4f6;color:#6b7280'>체크아웃</span>":r.checkIn?"<span class='badge' style='background:#d1fae5;color:#065f46'>체크인</span>":"-";
       html+="<tr><td><div style='font-weight:600'>"+(r.name||"")+"</div>"+(r.nameEN?"<div style='font-size:11px;color:#9ca3af'>"+r.nameEN+"</div>":"")+"</td>";
       html+="<td style='color:#6b7280'>"+(r.grade||"-")+"</td>";
       html+="<td style='color:#9ca3af;font-size:12px'>"+(r.dob||"-")+"</td>";
@@ -254,18 +254,18 @@ async function loadAttendance(){
       html+="<td style='text-align:center'>"+statusBadge+"</td></tr>";
     }
     tbody.innerHTML=html;
-  }catch(e){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444'>ìë¬: "+e.message+"</td></tr>";}
+  }catch(e){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444'>오류: "+e.message+"</td></tr>";}
 }var _allStudents=[];
 async function loadRoster(){
   var tbody=document.getElementById("rosterTable");if(!tbody)return;
-  tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>ë¡ë© ì¤...</td></tr>";
+  tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>로딩 중...</td></tr>";
   try{
     var dept=window._dept||"",url="/api/roster"+(dept?"?dept="+encodeURIComponent(dept):"");
     var res=await fetch(url),data=await res.json();
     _allStudents=data.students||[];
-    document.getElementById("rosterCount").textContent=_allStudents.length+"ëª";
+    document.getElementById("rosterCount").textContent=_allStudents.length+"명";
     renderRoster(_allStudents);
-  }catch(e){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444'>ìë¬: "+e.message+"</td></tr>";}
+  }catch(e){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444'>오류: "+e.message+"</td></tr>";}
 }
 function filterRoster(){
   var q=(document.getElementById("rosterSearch").value||"").toLowerCase();
@@ -274,40 +274,40 @@ function filterRoster(){
 }
 function renderRoster(students){
   var tbody=document.getElementById("rosterTable");
-  if(!students||!students.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>ë±ë¡ë íìì´ ììµëë¤</td></tr>";return;}
+  if(!students||!students.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>등록된 학생이 없습니다</td></tr>";return;}
   var now=new Date(),html="";
   for(var i=0;i<students.length;i++){
     var s=students[i];
     var bday=s.dob?new Date(s.dob):null;
     var isBday=bday&&bday.getMonth()===now.getMonth();
-    var age="";if(bday){var a=now.getFullYear()-bday.getFullYear()-(now.getMonth()<bday.getMonth()||(now.getMonth()===bday.getMonth()&&now.getDate()<bday.getDate())?1:0);age=a+"ì¸";}
-    var hasAllergy=s.allergy&&s.allergy!=="ìì"&&s.allergy.trim()!=="";
-    var photoBadge=s.photo==="ì´¬ì ìë£"?"<span style='background:#d1fae5;color:#065f46' class='badge'>â</span>":"-";
-    var baptBadge=s.baptized==="ì¸ë¡"?"<span style='background:#dbeafe;color:#1d4ed8' class='badge'>ð§</span>":"-";
-    var liabBadge=s.liabilityForm==="ì ì¶ ìë£"?"<span style='background:#d1fae5;color:#065f46' class='badge'>â</span>":s.liabilityForm==="ë¯¸ì ì¶"?"<span style='background:#fee2e2;color:#b91c1c' class='badge'>X</span>":"-";
-    var bdayBadge=isBday?"<span style='background:#fce7f3;color:#9d174d' class='badge'>ð</span>":"-";
+    var age="";if(bday){var a=now.getFullYear()-bday.getFullYear()-(now.getMonth()<bday.getMonth()||(now.getMonth()===bday.getMonth()&&now.getDate()<bday.getDate())?1:0);age=a+"세";}
+    var hasAllergy=s.allergy&&s.allergy!=="없음"&&s.allergy.trim()!=="";
+    var photoBadge=s.photo==="촬영 완료"?"<span style='background:#d1fae5;color:#065f46' class='badge'>✔</span>":"-";
+    var baptBadge=s.baptized==="세례"?"<span style='background:#dbeafe;color:#1d4ed8' class='badge'>💧</span>":"-";
+    var liabBadge=s.liabilityForm==="제출 완료"?"<span style='background:#d1fae5;color:#065f46' class='badge'>✔</span>":s.liabilityForm==="미제출"?"<span style='background:#fee2e2;color:#b91c1c' class='badge'>X</span>":"-";
+    var bdayBadge=isBday?"<span style='background:#fce7f3;color:#9d174d' class='badge'>🎂</span>":"-";
     html+="<tr>";
     html+="<td><div style='font-weight:600'>"+(s.name||"")+"</div>";
     if(s.nameEN)html+="<div style='font-size:11px;color:#9ca3af'>"+s.nameEN+"</div>";
-    if(hasAllergy)html+="<span style='font-size:11px;background:#fee2e2;color:#b91c1c;padding:1px 6px;border-radius:999px'>â ï¸ "+s.allergy+"</span>";
+    if(hasAllergy)html+="<span style='font-size:11px;background:#fee2e2;color:#b91c1c;padding:1px 6px;border-radius:999px'>⚠️ "+s.allergy+"</span>";
     html+="</td>";
     html+="<td><div style='font-weight:500'>"+(s.grade||"")+(age?" ("+age+")":"")+"</div>";
     if(s.school)html+="<div style='font-size:11px;color:#9ca3af'>"+s.school+"</div>";
     if(s.dob)html+="<div style='font-size:11px;color:#d1d5db'>"+s.dob+"</div>";
     html+="</td>";
     html+="<td style='font-size:12px'>";
-    if(s.fatherName||s.fatherPhone)html+="<div>ð¨ "+(s.fatherName||"")+(s.fatherPhone?" "+s.fatherPhone:"")+"</div>";
+    if(s.fatherName||s.fatherPhone)html+="<div>👨 "+(s.fatherName||"")+(s.fatherPhone?" "+s.fatherPhone:"")+"</div>";
     if(s.fatherEmail)html+="<div style='color:#9ca3af'>"+s.fatherEmail+"</div>";
-    if(s.motherName||s.motherPhone)html+="<div>ð© "+(s.motherName||"")+(s.motherPhone?" "+s.motherPhone:"")+"</div>";
+    if(s.motherName||s.motherPhone)html+="<div>👩 "+(s.motherName||"")+(s.motherPhone?" "+s.motherPhone:"")+"</div>";
     if(s.motherEmail)html+="<div style='color:#9ca3af'>"+s.motherEmail+"</div>";
     if(!s.fatherName&&!s.motherName&&s.guardian)html+="<div>"+(s.guardian||"")+(s.phone?" "+s.phone:"")+"</div>";
-    if(s.address)html+="<div style='color:#d1d5db;font-size:11px'>ð  "+s.address+"</div>";
+    if(s.address)html+="<div style='color:#d1d5db;font-size:11px'>🏠 "+s.address+"</div>";
     html+="</td>";
     html+="<td style='text-align:center'>"+photoBadge+"</td>";
     html+="<td style='text-align:center'>"+baptBadge+"</td>";
     html+="<td style='text-align:center'>"+liabBadge+"</td>";
     html+="<td style='text-align:center'>"+bdayBadge+"</td>";
-    html+="<td style='text-align:center'><button data-sid='"+s.id+"' onclick='openEditById(this)' style='font-size:12px;padding:4px 10px;border-radius:8px;background:#eef2ff;color:#4f46e5;font-weight:600'>ìì </button></td>";
+    html+="<td style='text-align:center'><button data-sid='"+s.id+"' onclick='openEditById(this)' style='font-size:12px;padding:4px 10px;border-radius:8px;background:#eef2ff;color:#4f46e5;font-weight:600'>수정</button></td>";
     html+="</tr>";
   }
   tbody.innerHTML=html;
@@ -316,16 +316,16 @@ var _editPageId=null;
 function openEditById(btn){var sid=btn.getAttribute("data-sid"),s=_allStudents.find(function(x){return x.id===sid;});if(s)openEditStudent(s);}
 function openAddStudent(){
   _editPageId=null;
-  document.getElementById("modalTitle").textContent="íì ì¶ê°";
+  document.getElementById("modalTitle").textContent="학생 추가";
   ["f-name","f-nameEN","f-grade","f-school","f-dob","f-fatherName","f-fatherPhone","f-fatherEmail","f-motherName","f-motherPhone","f-motherEmail","f-address","f-notes"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
-  document.getElementById("f-allergy").value="ìì";
+  document.getElementById("f-allergy").value="없음";
   ["f-dept","f-baptized","f-photo","f-liability"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
   document.getElementById("modalError").classList.add("hidden");
   document.getElementById("studentModal").classList.remove("hidden");
 }
 function openEditStudent(s){
   _editPageId=s.id;
-  document.getElementById("modalTitle").textContent="íì ìì ";
+  document.getElementById("modalTitle").textContent="학생 수정";
   document.getElementById("f-name").value=s.name||"";
   document.getElementById("f-nameEN").value=s.nameEN||"";
   document.getElementById("f-grade").value=s.grade||"";
@@ -338,7 +338,7 @@ function openEditStudent(s){
   document.getElementById("f-motherPhone").value=s.motherPhone||"";
   document.getElementById("f-motherEmail").value=s.motherEmail||"";
   document.getElementById("f-address").value=s.address||"";
-  document.getElementById("f-allergy").value=s.allergy||"ìì";
+  document.getElementById("f-allergy").value=s.allergy||"없음";
   document.getElementById("f-notes").value=s.notes||"";
   document.getElementById("f-dept").value=s.department||"";
   document.getElementById("f-baptized").value=s.baptized||"";
@@ -350,15 +350,15 @@ function openEditStudent(s){
 function closeStudentModal(){document.getElementById("studentModal").classList.add("hidden");_editPageId=null;}
 async function submitStudent(){
   var name=document.getElementById("f-name").value.trim();
-  if(!name){var e=document.getElementById("modalError");e.textContent="ì´ë¦ì ìë ¥í´ì£¼ì¸ì";e.classList.remove("hidden");return;}
-  var btn=document.getElementById("submitStudentBtn");btn.textContent="ì ì¥ ì¤...";btn.disabled=true;
+  if(!name){var e=document.getElementById("modalError");e.textContent="이름을 입력해주세요";e.classList.remove("hidden");return;}
+  var btn=document.getElementById("submitStudentBtn");btn.textContent="저장 중...";btn.disabled=true;
   try{
-    var body={pageId:_editPageId,name:name,nameEN:document.getElementById("f-nameEN").value,department:document.getElementById("f-dept").value,grade:document.getElementById("f-grade").value,school:document.getElementById("f-school").value,dob:document.getElementById("f-dob").value||null,fatherName:document.getElementById("f-fatherName").value,fatherPhone:document.getElementById("f-fatherPhone").value,fatherEmail:document.getElementById("f-fatherEmail").value,motherName:document.getElementById("f-motherName").value,motherPhone:document.getElementById("f-motherPhone").value,motherEmail:document.getElementById("f-motherEmail").value,address:document.getElementById("f-address").value,allergy:document.getElementById("f-allergy").value||"ìì",notes:document.getElementById("f-notes").value,liabilityForm:document.getElementById("f-liability").value||null,baptized:document.getElementById("f-baptized").value||null,photo:document.getElementById("f-photo").value||null,status:"íì± (Active)"};
+    var body={pageId:_editPageId,name:name,nameEN:document.getElementById("f-nameEN").value,department:document.getElementById("f-dept").value,grade:document.getElementById("f-grade").value,school:document.getElementById("f-school").value,dob:document.getElementById("f-dob").value||null,fatherName:document.getElementById("f-fatherName").value,fatherPhone:document.getElementById("f-fatherPhone").value,fatherEmail:document.getElementById("f-fatherEmail").value,motherName:document.getElementById("f-motherName").value,motherPhone:document.getElementById("f-motherPhone").value,motherEmail:document.getElementById("f-motherEmail").value,address:document.getElementById("f-address").value,allergy:document.getElementById("f-allergy").value||"없음",notes:document.getElementById("f-notes").value,liabilityForm:document.getElementById("f-liability").value||null,baptized:document.getElementById("f-baptized").value||null,photo:document.getElementById("f-photo").value||null,status:"활성 (Active)"};
     var r=await fetch("/api/update-student",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
     var d=await r.json();if(!r.ok)throw new Error(d.error);
     closeStudentModal();loadRoster();
   }catch(e){var errEl=document.getElementById("modalError");errEl.textContent=e.message;errEl.classList.remove("hidden");}
-  btn.textContent="ì ì¥";btn.disabled=false;
+  btn.textContent="저장";btn.disabled=false;
 }
 </script>
 </body>
