@@ -1,4 +1,74 @@
-<!DOCTYPE html>
+<!DOCTYconst STAFF_MAP = {
+  "이지혜": "유아부 (Infant)",
+  "김향숙": "유치부 (Preschool)",
+  "박은혜": "유년부 (Elementary Jr)",
+  "백진주": "초등부 (Elementary)",
+  "박명철 전도사님": "중고등부 (Middle/High)",
+};
+const ADMIN_PW = "3";
+const DEPT_COLORS = {
+  "유아부 (Infant)": "bg-blue-500",
+  "유치부 (Preschool)": "bg-emerald-500",
+  "유년부 (Elementary Jr)": "bg-yellow-500",
+  "초등부 (Elementary)": "bg-orange-500",
+  "중고등부 (Middle/High)": "bg-purple-500",
+};
+
+let currentUser = null;
+let currentDept = null;
+
+function doLogin() {
+  const sel = document.getElementById("nameSelect");
+  const pw = document.getElementById("pwInput").value;
+  const dept = sel.value;
+  const nameText = sel.options[sel.selectedIndex]?.text || "";
+  const staffName = nameText.split(" —")[0].trim();
+  if (!dept) { showLoginError("이름을 선택해주세요"); return; }
+  if (pw !== ADMIN_PW) { showLoginError("비밀번호가 틀렸습니다"); return; }
+  currentUser = staffName;
+  currentDept = dept;
+  // Show dashboard
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+  // Set user info
+  const deptShort = dept.split(" ")[0];
+  document.getElementById("userNameDisplay").textContent = staffName + " 간사님";
+  document.getElementById("userDeptDisplay").textContent = deptShort;
+  const dot = document.getElementById("userDot");
+  if (dot) { dot.className = "w-2 h-2 rounded-full " + (DEPT_COLORS[dept]||"bg-gray-400"); }
+  loadRoster();
+  loadAttendance();
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById("loginError");
+  if (el) { el.textContent = msg; el.classList.remove("hidden"); }
+}
+
+function doLogout() {
+  currentUser = null; currentDept = null;
+  document.getElementById("loginScreen").classList.remove("hidden");
+  document.getElementById("dashboard").classList.add("hidden");
+  document.getElementById("pwInput").value = "";
+}
+
+function switchTab(tab) {
+  const tabs = ["attendance","roster"];
+  tabs.forEach(t => {
+    const panel = document.getElementById(t+"Panel");
+    const btn = document.getElementById(t+"Tab");
+    if (panel) panel.classList.toggle("hidden", t!==tab);
+    if (btn) {
+      btn.classList.toggle("bg-indigo-600", t===tab);
+      btn.classList.toggle("text-white", t===tab);
+      btn.classList.toggle("text-gray-500", t!==tab);
+    }
+  });
+  if (tab==="roster") loadRoster();
+  else loadAttendance();
+}
+
+PE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8"/>
@@ -23,9 +93,7 @@
   </div>
   <div class="space-y-4">
     <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">이름 / Name</label>
-      <select id="nameSelect" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-        <option value="">이름을 선택하세요...</option>
-      </select></div>
+      <select id="nameSelect" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"><option value="">이름을 선택하세요...</option><option value="유아부 (Infant)">이지혜 — 유아부</option><option value="유치부 (Preschool)">김향숙 — 유치부</option><option value="유년부 (Elementary Jr)">박은혜 — 유년부</option><option value="초등부 (Elementary)">백진주 — 초등부</option><option value="중고등부 (Middle/High)">박명철 전도사님 — 중고등부</option></select></div>
     <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">비밀번호 / Password</label>
       <input id="pwInput" type="password" placeholder="공통 비밀번호" onkeydown="if(event.key==='Enter')doLogin()"
         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"/></div>
