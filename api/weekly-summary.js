@@ -107,6 +107,46 @@ module.exports = async (req, res) => {
     });
     absentList.sort(function(a,b){ return (a.dept||"").localeCompare(b.dept||""); });
 
+    // Build liabilityList: active non-visitor students without "제출 완료"
+    const liabilityList = [];
+    allStu.forEach(function(p) {
+      const liab = p.properties["Liability Form"]?.select?.name || "";
+      if (liab !== "제출 완료") {
+        const dept = p.properties["부서 (Department)"]?.select?.name || "";
+        const nameArr = p.properties["이름 (Name)"]?.title || [];
+        const nameEN = p.properties["English Name"]?.rich_text?.[0]?.text?.content || "";
+        liabilityList.push({
+          id: p.id,
+          name: nameArr[0]?.text?.content || "(이름없음)",
+          nameEN: nameEN,
+          dept: dept,
+          staff: STAFF_MAP[dept] || dept.split(" ")[0],
+          liabilityStatus: liab || "미제출"
+        });
+      }
+    });
+    liabilityList.sort(function(a,b){ return (a.dept||"").localeCompare(b.dept||""); });
+
+    // Build photoList: active non-visitor students without "촬영 완료"
+    const photoList = [];
+    allStu.forEach(function(p) {
+      const photo = p.properties["사진 촬영 (Photo)"]?.select?.name || "";
+      if (photo !== "촬영 완료") {
+        const dept = p.properties["부서 (Department)"]?.select?.name || "";
+        const nameArr = p.properties["이름 (Name)"]?.title || [];
+        const nameEN = p.properties["English Name"]?.rich_text?.[0]?.text?.content || "";
+        photoList.push({
+          id: p.id,
+          name: nameArr[0]?.text?.content || "(이름없음)",
+          nameEN: nameEN,
+          dept: dept,
+          staff: STAFF_MAP[dept] || dept.split(" ")[0],
+          photoStatus: photo || "미촬영"
+        });
+      }
+    });
+    photoList.sort(function(a,b){ return (a.dept||"").localeCompare(b.dept||""); });
+
     const depts = DEPT_ORDER.filter(function(d){ return ds[d] && (ds[d].total>0||ds[d].attended>0); }).map(function(d) {
       const st = ds[d];
       return { dept: d, short: d.split(" ")[0], attended: st.attended, visitors: st.visitors, absent: Math.max(0,st.total-st.attended), total: st.total, newThisMonth: st.newThisMonth };
@@ -153,7 +193,7 @@ module.exports = async (req, res) => {
       saved = true;
     }
 
-    return res.status(200).json({ depts, total, rows, grand, sundayStr, date: today, saved, absentList });
+    return res.status(200).json({ depts, total, rows, grand, sundayStr, date: today, saved, absentList, liabilityList, photoList });
   } catch(e) {
     return res.status(500).json({ error: e.message });
   }
