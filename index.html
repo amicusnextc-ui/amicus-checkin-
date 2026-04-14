@@ -24,3 +24,17 @@
     <a href="/staff.html" class="text-xs text-gray-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50">간사/사역자 포털 →</a>
   </div>
 </header>
+
+<!-- 부서 정보 패널 -->
+<div id="deptInfo" class="hidden bg-white border-b border-gray-100 shadow-sm">
+  <div class="max-w-lg mx-auto px-4 py-3">
+    <div class="grid grid-cols-5 gap-1 text-center text-xs">
+      <button onclick="selectDept('유아부 (Infant)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유아부 (Infant)"><div class="text-blue-500 font-bold text-sm">👶</div><div class="font-semibold text-gray-700">유아부</div><div class="text-gray-400 text-xs">만2~3세</div></button>
+      <button onclick="selectDept('유치부 (Preschool)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유치부 (Preschool)"><div class="text-emerald-500 font-bold text-sm">🌱hing</div><div class="font-semibold text-gray-700">유치부</div><div class="text-gray-400 text-xs">만4~5세</div></button>
+      <button onclick="selectDept('유년부 (Elementary Jr)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유년부 (Elementary Jr)"><div class="text-yellow-500 font-bold text-sm">📚</div><div class="font-semibold text-gray-700">유년부</div><div class="text-gray-400 text-xs">K~2학년</div></button>
+      <button onclick="selectDept('초등부 (Elementary)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="�Y�등부 (Elementary)"><div class="text-orange-500 font-bold text-sm">⭐</div><div class="font-semibold text-gray-700">초등부</div><div class="text-gray-400 text-xs">3~5앙년</div></button>
+      <button onclick="selectDept('중고등부 (Middle/High)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="중고등부 (Middle/High)"><div class="text-purple-500 font-bold text-sm">🎓</div><div class="font-semibold text-gray-700">중고등부</div><div class="text-gray-400 text-xs">6~12학년</div></button>
+    </div>
+  </div>
+</div>
+<main class="max-w-lg mx-auto px-4 py-6"><script>alert("test")</script></main></body></html>
