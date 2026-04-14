@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-<title>ìë¯¸ì¿ ì¤ êµì¡ë¶ | ì¶ì ì²´í¬</title>
+<title>아미쿠스 교육부 | 출석 체크</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
@@ -21,60 +21,60 @@
       <h1 class="text-sm font-bold text-gray-900">Amicus Next Church</h1>
       <p class="text-xs text-gray-400" id="todayDate"></p>
     </div>
-    <a href="/staff.html" class="text-xs text-gray-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50">ê°ì¬/ì¬ì­ì í¬í¸ â</a>
+    <a href="/staff.html" class="text-xs text-gray-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50">간사/사역자 포털 →</a>
   </div>
 </header>
 
-<!-- ë¶ì ì ë³´ í¨ë -->
+<!-- 부서 정보 패널 -->
 <div id="deptInfo" class="bg-white border-b border-gray-100 shadow-sm">
   <div class="max-w-lg mx-auto px-4 py-3">
     <div class="grid grid-cols-5 gap-1 text-center text-xs">
-      <button onclick="selectDept('ì ìë¶ (Infant)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="ì ìë¶ (Infant)">
-        <div class="text-blue-500 font-bold text-sm">ð¶</div>
-        <div class="font-semibold text-gray-700">ì ìë¶</div>
-        <div class="text-gray-400 text-xs">ë§2~3ì¸</div>
+      <button onclick="selectDept('유아부 (Infant)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유아부 (Infant)">
+        <div class="text-blue-500 font-bold text-sm">👶</div>
+        <div class="font-semibold text-gray-700">유아부</div>
+        <div class="text-gray-400 text-xs">만2~3세</div>
       </button>
-      <button onclick="selectDept('ì ì¹ë¶ (Preschool)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="ì ì¹ë¶ (Preschool)">
-        <div class="text-emerald-500 font-bold text-sm">ð±</div>
-        <div class="font-semibold text-gray-700">ì ì¹ë¶</div>
-        <div class="text-gray-400 text-xs">ë§4~5ì¸</div>
+      <button onclick="selectDept('유치부 (Preschool)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유치부 (Preschool)">
+        <div class="text-emerald-500 font-bold text-sm">🌱</div>
+        <div class="font-semibold text-gray-700">유치부</div>
+        <div class="text-gray-400 text-xs">만4~5세</div>
       </button>
-      <button onclick="selectDept('ì ëë¶ (Elementary Jr)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="ì ëë¶ (Elementary Jr)">
-        <div class="text-yellow-500 font-bold text-sm">ð</div>
-        <div class="font-semibold text-gray-700">ì ëë¶</div>
-        <div class="text-gray-400 text-xs">K~2íë</div>
+      <button onclick="selectDept('유년부 (Elementary Jr)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유년부 (Elementary Jr)">
+        <div class="text-yellow-500 font-bold text-sm">📚</div>
+        <div class="font-semibold text-gray-700">유년부</div>
+        <div class="text-gray-400 text-xs">K~2학년</div>
       </button>
-      <button onclick="selectDept('ì´ë±ë¶ (Elementary)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="ì´ë±ë¶ (Elementary)">
-        <div class="text-orange-500 font-bold text-sm">â­</div>
-        <div class="font-semibold text-gray-700">ì´ë±ë¶</div>
-        <div class="text-gray-400 text-xs">3~5íë</div>
+      <button onclick="selectDept('초등부 (Elementary)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="초등부 (Elementary)">
+        <div class="text-orange-500 font-bold text-sm">⭐</div>
+        <div class="font-semibold text-gray-700">초등부</div>
+        <div class="text-gray-400 text-xs">3~5학년</div>
       </button>
-      <button onclick="selectDept('ì¤ê³ ë±ë¶ (Middle/High)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="ì¤ê³ ë±ë¶ (Middle/High)">
-        <div class="text-purple-500 font-bold text-sm">ð</div>
-        <div class="font-semibold text-gray-700">ì¤ê³ ë±ë¶</div>
-        <div class="text-gray-400 text-xs">6~12íë</div>
+      <button onclick="selectDept('중고등부 (Middle/High)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="중고등부 (Middle/High)">
+        <div class="text-purple-500 font-bold text-sm">🎓</div>
+        <div class="font-semibold text-gray-700">중고등부</div>
+        <div class="text-gray-400 text-xs">6~12학년</div>
       </button>
     </div>
   </div>
 </div>
 
 <main class="max-w-lg mx-auto px-4 py-6">
-  <!-- ì íë ë¶ì ì¹´ë -->
+  <!-- 선택된 부서 카드 -->
   <div id="selectedDeptCard" class="hidden mb-5 rounded-2xl p-4 fade-in">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-xs text-white/70 font-semibold uppercase">ì íë ë¶ì</p>
+        <p class="text-xs text-white/70 font-semibold uppercase">선택된 부서</p>
         <p id="selectedDeptName" class="text-xl font-black text-white mt-0.5"></p>
-        <p id="selectedDeptLocation" class="text-sm text-white/80 mt-0.5">ð</p>
-        <p id="selectedDeptStaff" class="text-xs text-white/70 mt-0.5">ð¤</p>
+        <p id="selectedDeptLocation" class="text-sm text-white/80 mt-0.5">📍</p>
+        <p id="selectedDeptStaff" class="text-xs text-white/70 mt-0.5">👤</p>
       </div>
-      <button onclick="clearDept()" class="text-white/60 hover:text-white text-xs border border-white/30 px-2 py-1 rounded-lg">ë³ê²½</button>
+      <button onclick="clearDept()" class="text-white/60 hover:text-white text-xs border border-white/30 px-2 py-1 rounded-lg">변경</button>
     </div>
   </div>
 
   <div class="text-center mb-6">
-    <div class="text-4xl mb-2">âª</div>
-    <h2 class="text-2xl font-bold text-gray-900">ì¶ì ì²´í¬</h2>
+    <div class="text-4xl mb-2">⛪</div>
+    <h2 class="text-2xl font-bold text-gray-900">출석 체크</h2>
     <p class="text-gray-400 text-sm mt-1">Check-In / Check-Out</p>
     
   </div>
@@ -84,48 +84,48 @@
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
     </svg>
     <input id="searchInput" type="text" autocomplete="off" autocorrect="off" spellcheck="false"
-      placeholder="ì´ë¦ ê²ì / Search name..."
+      placeholder="이름 검색 / Search name..."
       class="w-full pl-12 pr-12 py-4 text-lg rounded-2xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-gray-300"/>
     <button id="clearBtn" onclick="clearSearch()" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
     </button>
   </div>
 
-  <!-- ë°©ë¬¸ì ì²´í¬ì¸ ë²í¼ -->
+  <!-- 방문자 체크인 버튼 -->
   <button onclick="openVisitorModal()" class="w-full mb-5 py-3 rounded-2xl border-2 border-dashed border-indigo-300 text-indigo-600 font-semibold text-sm hover:bg-indigo-50 hover:border-indigo-400 transition-all">
-    ð ë°©ë¬¸ì ì²´í¬ì¸ (ì²ì ì¤ì  ë¶)
+    🆕 방문자 체크인 (처음 오신 분)
   </button>
 
   <div id="results"></div>
 </main>
 
-<!-- ì²´í¬ì¸/ìì íì¸ ëª¨ë¬ -->
+<!-- 체크인/아웃 확인 모달 -->
 <div id="modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
 <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 fade-in max-h-[90vh] overflow-y-auto">
   <div id="modalHeader" class="text-center mb-4 p-4 rounded-2xl"></div>
   <div id="modalInfo" class="space-y-1 mb-3"></div>
   <div id="allergyAlert" class="hidden mb-3 p-3 bg-red-50 border border-red-300 rounded-xl text-red-700 text-sm font-semibold"></div>
   <div id="liabilityAlert" class="hidden mb-3 p-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-700 text-sm"></div>
-  <!-- í½ì ìë´ ë©ìì§ -->
+  <!-- 픽업 안내 메시지 -->
   <div id="pickupMsg" class="hidden mb-3 p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-sm">
-    <p class="font-semibold">ð£ í½ì ìë´</p>
-    <p class="mt-1">ìë°° ì¢ë£ í <strong>ì¦ì í½ì</strong>ì ë¶íëë¦½ëë¤. ìì´ë¥¼ ë§¡ê¸´ ìê° ëì ìì íê² ëë³´ê² ìµëë¤. ê°ì¬í©ëë¤! ð</p>
+    <p class="font-semibold">📣 픽업 안내</p>
+    <p class="mt-1">예배 종료 후 <strong>즉시 픽업</strong>을 부탁드립니다. 아이를 맡긴 시간 동안 안전하게 돌보겠습니다. 감사합니다! 🙏</p>
     <p class="text-xs mt-1 text-blue-600">Please pick up your child <strong>immediately after service</strong>. Thank you!</p>
   </div>
   <div id="guardianRow" class="hidden mb-3">
     <label class="flex items-center gap-3 cursor-pointer p-3 bg-indigo-50 rounded-xl">
       <input type="checkbox" id="guardianCheck" class="w-5 h-5 rounded accent-indigo-600"/>
-      <span class="text-sm font-semibold text-indigo-700">ë³´í¸ì ì¸ê³ íì¸</span>
+      <span class="text-sm font-semibold text-indigo-700">보호자 인계 확인</span>
     </label>
   </div>
   <div class="flex gap-3">
-    <button onclick="closeModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">ì·¨ì</button>
-    <button id="confirmBtn" onclick="doAction()" class="flex-1 py-3 rounded-xl font-bold text-white">íì¸ / Confirm</button>
+    <button onclick="closeModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">취소</button>
+    <button id="confirmBtn" onclick="doAction()" class="flex-1 py-3 rounded-xl font-bold text-white">확인 / Confirm</button>
   </div>
 </div>
 </div>
 
-<!-- ì±ê³µ + íê·¸ ëª¨ë¬ -->
+<!-- 성공 + 태그 모달 -->
 <div id="success" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
 <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 fade-in max-h-[90vh] overflow-y-auto">
   <div class="text-center mb-4">
@@ -133,14 +133,14 @@
     <h2 id="successTitle" class="text-xl font-bold text-gray-900"></h2>
     <p id="successTime" class="text-sm text-gray-400 mt-1"></p>
   </div>
-  <!-- í½ì íì¸ ë©ìì§ -->
+  <!-- 픽업 확인 메시지 -->
   <div id="successPickup" class="hidden mb-4 p-4 bg-blue-50 border border-blue-200 rounded-2xl text-center">
-    <p class="text-blue-800 font-bold text-sm">ð£ í½ì ìë´ / Pickup Reminder</p>
-    <p class="text-blue-700 text-sm mt-1">ìë°° ì¢ë£ í <strong>ì¦ì í½ì</strong>ì ë¶íëë¦½ëë¤.</p>
-    <p class="text-blue-600 text-xs mt-1">Please pick up your child immediately after service ends. Thank you! ð</p>
+    <p class="text-blue-800 font-bold text-sm">📣 픽업 안내 / Pickup Reminder</p>
+    <p class="text-blue-700 text-sm mt-1">예배 종료 후 <strong>즉시 픽업</strong>을 부탁드립니다.</p>
+    <p class="text-blue-600 text-xs mt-1">Please pick up your child immediately after service ends. Thank you! 🙏</p>
   </div>
   <div id="tagContainer" class="hidden mb-4">
-    <p class="text-xs font-bold text-gray-500 uppercase mb-2">íê·¸ ë¯¸ë¦¬ë³´ê¸°</p>
+    <p class="text-xs font-bold text-gray-500 uppercase mb-2">태그 미리보기</p>
     <div id="childTag" class="bg-white border-2 border-gray-200 rounded-xl p-3 mb-2 relative overflow-hidden">
       <div id="tagDeptBar" class="absolute top-0 left-0 right-0 h-2 rounded-t-xl"></div>
       <div class="flex justify-between items-start mt-2">
@@ -149,7 +149,7 @@
           <p id="tagNameEN" class="text-xs text-gray-500"></p>
           <p id="tagDept" class="text-xs font-semibold mt-1"></p>
           <p id="tagGrade" class="text-xs text-gray-500"></p>
-          <div id="tagAllergyBadge" class="hidden mt-1.5 inline-block text-xs font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full border border-red-300">â ï¸ ìë¬ì§ ì£¼ì</div>
+          <div id="tagAllergyBadge" class="hidden mt-1.5 inline-block text-xs font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full border border-red-300">⚠️ 알러지 주의</div>
         </div>
         <div class="text-right ml-2">
           <canvas id="tagQR" width="56" height="56"></canvas>
@@ -157,14 +157,14 @@
         </div>
       </div>
       <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500">
-        <span>ë³´í¸ì: <span id="tagGuardian" class="font-semibold text-gray-700"></span></span>
+        <span>보호자: <span id="tagGuardian" class="font-semibold text-gray-700"></span></span>
         <span id="tagDate" class="text-gray-400"></span>
       </div>
     </div>
     <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
       <div class="flex justify-between items-center">
         <div>
-          <p class="text-xs font-bold text-indigo-600 uppercase">ë³´í¸ì í½ì íê·¸</p>
+          <p class="text-xs font-bold text-indigo-600 uppercase">보호자 픽업 태그</p>
           <p id="guardianTagName" class="text-base font-black text-gray-900 mt-0.5"></p>
           <p id="guardianTagId" class="text-xs font-mono text-indigo-500"></p>
         </div>
@@ -173,19 +173,19 @@
     </div>
   </div>
   <div class="flex gap-2">
-    <button onclick="closeSuccess()" class="flex-1 py-3 rounded-xl text-gray-600 bg-gray-100 font-semibold text-sm">ë«ê¸°</button>
-    <button onclick="printTag()" id="printBtn" class="hidden flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold text-sm">íê·¸ ì¸ì ð¨ï¸</button>
+    <button onclick="closeSuccess()" class="flex-1 py-3 rounded-xl text-gray-600 bg-gray-100 font-semibold text-sm">닫기</button>
+    <button onclick="printTag()" id="printBtn" class="hidden flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold text-sm">태그 인쇄 🖨️</button>
   </div>
 </div>
 </div>
 
-<!-- ë°©ë¬¸ì ì²´í¬ì¸ ëª¨ë¬ -->
+<!-- 방문자 체크인 모달 -->
 <div id="visitorModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center">
 <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 fade-in max-h-[95vh] overflow-y-auto">
   <div class="flex items-center justify-between mb-5">
     <div>
-      <h2 class="text-lg font-bold text-gray-900">ð ë°©ë¬¸ì ì²´í¬ì¸</h2>
-      <p class="text-xs text-gray-400">ì²ì ë°©ë¬¸íìë ë¶ë¤ì ìí ë±ë¡</p>
+      <h2 class="text-lg font-bold text-gray-900">🆕 방문자 체크인</h2>
+      <p class="text-xs text-gray-400">처음 방문하시는 분들을 위한 등록</p>
     </div>
     <button onclick="closeVisitorModal()" class="text-gray-400 hover:text-gray-600">
       <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -193,48 +193,48 @@
   </div>
   <div class="space-y-3">
     <div>
-      <label class="text-xs font-bold text-gray-500 uppercase">ìì´ ì´ë¦ *</label>
-      <input id="v-name" type="text" placeholder="íê¸ ì´ë¦" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+      <label class="text-xs font-bold text-gray-500 uppercase">아이 이름 *</label>
+      <input id="v-name" type="text" placeholder="한글 이름" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
     </div>
     <div>
       <label class="text-xs font-bold text-gray-500 uppercase">English Name</label>
       <input id="v-nameEN" type="text" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
     </div>
     <div>
-      <label class="text-xs font-bold text-gray-500 uppercase">ìëìì¼ (Date of Birth) *</label>
+      <label class="text-xs font-bold text-gray-500 uppercase">생년월일 (Date of Birth) *</label>
       <input id="v-dob" type="date" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
-      <p id="v-deptPreview" class="text-xs text-indigo-600 mt-1 hidden">â ìë ë°°ì  ë¶ì: <strong id="v-deptPreviewName"></strong></p>
+      <p id="v-deptPreview" class="text-xs text-indigo-600 mt-1 hidden">→ 자동 배정 부서: <strong id="v-deptPreviewName"></strong></p>
     </div>
     <div>
-      <label class="text-xs font-bold text-gray-500 uppercase">íë / Grade</label>
-      <input id="v-grade" type="text" placeholder="ì: 3rd grade, ì ì¹ì" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+      <label class="text-xs font-bold text-gray-500 uppercase">학년 / Grade</label>
+      <input id="v-grade" type="text" placeholder="예: 3rd grade, 유치원" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
     </div>
     <div>
-      <label class="text-xs font-bold text-gray-500 uppercase">ë³´í¸ì ì´ë¦ *</label>
+      <label class="text-xs font-bold text-gray-500 uppercase">보호자 이름 *</label>
       <input id="v-guardian" type="text" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
     </div>
     <div>
-      <label class="text-xs font-bold text-gray-500 uppercase">ì°ë½ì² (Phone)</label>
+      <label class="text-xs font-bold text-gray-500 uppercase">연락처 (Phone)</label>
       <input id="v-phone" type="tel" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
     </div>
     <div>
-      <label class="text-xs font-bold text-gray-500 uppercase">ìë¬ì§ (Allergy)</label>
-      <input id="v-allergy" type="text" placeholder="ìì" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+      <label class="text-xs font-bold text-gray-500 uppercase">알러지 (Allergy)</label>
+      <input id="v-allergy" type="text" placeholder="없음" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
     </div>
-    <!-- í½ì ìë´ -->
+    <!-- 픽업 안내 -->
     <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-xs">
-      <p class="font-semibold">ð£ í½ì ìë´ / Pickup Notice</p>
-      <p class="mt-1">ìë°° ì¢ë£ í ì¢ì í½ìì ë¶íëë¦½ëë¤. Please pick up your child immediately after service.</p>
+      <p class="font-semibold">📣 픽업 안내 / Pickup Notice</p>
+      <p class="mt-1">예배 종료 후 좉시 픽업을 부탁드립니다. Please pick up your child immediately after service.</p>
     </div>
     <label class="flex items-center gap-3 cursor-pointer p-2.5 bg-blue-50 rounded-xl">
       <input type="checkbox" id="v-pickupAck" class="w-4 h-4 accent-blue-600"/>
-      <span class="text-sm font-semibold text-blue-700">í½ì ìë´ íì¸íìµëë¤ / I acknowledge the pickup notice</span>
+      <span class="text-sm font-semibold text-blue-700">픽업 안내 확인했습니다 / I acknowledge the pickup notice</span>
     </label>
   </div>
   <div id="visitorError" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm"></div>
   <div class="flex gap-3 mt-5">
-    <button onclick="closeVisitorModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100">ì·¨ì</button>
-    <button onclick="submitVisitor()" id="visitorBtn" class="flex-1 py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700">ì²´í¬ì¸ ë±ë¡</button>
+    <button onclick="closeVisitorModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100">취소</button>
+    <button onclick="submitVisitor()" id="visitorBtn" class="flex-1 py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700">체크인 등록</button>
   </div>
 </div>
 </div>
@@ -243,42 +243,42 @@
 
 <script>
 const DEPT_INFO = {
-  "ì ìë¶ (Infant)": {
+  "유아부 (Infant)": {
     color: { bg: "bg-blue-600", bar: "bg-blue-500", left: "border-l-blue-400", badge: "bg-blue-100 text-blue-800 border-blue-200", card: "bg-blue-600" },
-    staff: "ì´ì§í ê°ì¬",
-    location: "ì ì¹ë¶ ë°© (Preschool Room)",
-    ageRange: "ë§ 24ê°ì ~ ë§ 3ì¸",
+    staff: "이지혜 간사",
+    location: "유치부 방 (Preschool Room)",
+    ageRange: "만 24개월 ~ 만 3세",
   },
-  "ì ì¹ë¶ (Preschool)": {
+  "유치부 (Preschool)": {
     color: { bg: "bg-emerald-600", bar: "bg-emerald-500", left: "border-l-emerald-400", badge: "bg-emerald-100 text-emerald-800 border-emerald-200", card: "bg-emerald-600" },
-    staff: "ê¹í¥ì ê°ì¬",
-    location: "ì ì¹ë¶ ë°© (Preschool Room)",
-    ageRange: "ë§ 4ì¸ ~ Pre-K",
+    staff: "김향숙 간사",
+    location: "유치부 방 (Preschool Room)",
+    ageRange: "만 4세 ~ Pre-K",
   },
-  "ì ëë¶ (Elementary Jr)": {
+  "유년부 (Elementary Jr)": {
     color: { bg: "bg-yellow-500", bar: "bg-yellow-400", left: "border-l-yellow-400", badge: "bg-yellow-100 text-yellow-800 border-yellow-200", card: "bg-yellow-500" },
-    staff: "ë°ìí ê°ì¬",
-    location: "ì ëë¶ ë°© (Jr. Room)",
-    ageRange: "Kindergarten ~ 2íë",
+    staff: "박은혜 간사",
+    location: "유년부 방 (Jr. Room)",
+    ageRange: "Kindergarten ~ 2학년",
   },
-  "ì´ë±ë¶ (Elementary)": {
+  "초등부 (Elementary)": {
     color: { bg: "bg-orange-500", bar: "bg-orange-400", left: "border-l-orange-400", badge: "bg-orange-100 text-orange-800 border-orange-200", card: "bg-orange-500" },
-    staff: "ë°±ì§ì£¼ ê°ì¬",
-    location: "ì´ë±ë¶ ë°© (Elementary Room)",
-    ageRange: "3íë ~ 5íë",
+    staff: "백진주 간사",
+    location: "초등부 방 (Elementary Room)",
+    ageRange: "3학년 ~ 5학년",
   },
-  "ì¤ê³ ë±ë¶ (Middle/High)": {
+  "중고등부 (Middle/High)": {
     color: { bg: "bg-purple-600", bar: "bg-purple-500", left: "border-l-purple-400", badge: "bg-purple-100 text-purple-800 border-purple-200", card: "bg-purple-600" },
-    staff: "ë°ëªì²  ì ëì¬ë",
-    location: "ì¤ê³ ë±ë¶ ë°© (Youth Room)",
-    ageRange: "6íë ~ 12íë",
+    staff: "박명철 전도사님",
+    location: "중고등부 방 (Youth Room)",
+    ageRange: "6학년 ~ 12학년",
   },
 };
 
-function hasAllergy(a){ return a && a.trim() && a.toLowerCase() !== 'ìì' && a.toLowerCase() !== 'none'; }
+function hasAllergy(a){ return a && a.trim() && a.toLowerCase() !== '없음' && a.toLowerCase() !== 'none'; }
 function deptBadge(d) {
   const c = (DEPT_INFO[d]?.color || {}).badge || 'bg-gray-100 text-gray-600 border-gray-200';
-  return `<span class="text-xs font-semibold px-2 py-0.5 rounded-full border ${c}">${d || 'ë¯¸ì§ì '}</span>`;
+  return `<span class="text-xs font-semibold px-2 py-0.5 rounded-full border ${c}">${d || '미지정'}</span>`;
 }
 function isBirthdayThisMonth(dobStr) {
   if (!dobStr) return false;
@@ -287,11 +287,11 @@ function isBirthdayThisMonth(dobStr) {
 }
 function getDeptFromAge(ageMonths) {
   const ageYears = ageMonths / 12;
-  if (ageMonths < 48) return "ì ìë¶ (Infant)";
-  if (ageYears < 6) return "ì ì¹ë¶ (Preschool)";
-  if (ageYears < 9) return "ì ëë¶ (Elementary Jr)";
-  if (ageYears < 12) return "ì´ë±ë¶ (Elementary)";
-  return "ì¤ê³ ë±ë¶ (Middle/High)";
+  if (ageMonths < 48) return "유아부 (Infant)";
+  if (ageYears < 6) return "유치부 (Preschool)";
+  if (ageYears < 9) return "유년부 (Elementary Jr)";
+  if (ageYears < 12) return "초등부 (Elementary)";
+  return "중고등부 (Middle/High)";
 }
 
 document.getElementById('todayDate').textContent = new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric',weekday:'long'});
@@ -313,9 +313,9 @@ function selectDept(dept) {
   card.className = `mb-5 rounded-2xl p-4 fade-in ${info.color.card}`;
   card.classList.remove('hidden');
   document.getElementById('selectedDeptName').textContent = dept;
-  document.getElementById('selectedDeptLocation').textContent = 'ð ' + info.location;
-  document.getElementById('selectedDeptStaff').textContent = 'ð¤ ' + info.staff;
-  // dept info always visible
+  document.getElementById('selectedDeptLocation').textContent = '📍 ' + info.location;
+  document.getElementById('selectedDeptStaff').textContent = '👤 ' + info.staff;
+  // dept always visible
 }
 function clearDept() { selectedDept = null; document.getElementById('selectedDeptCard').classList.add('hidden'); }
 
@@ -334,24 +334,24 @@ input.addEventListener('input', () => {
 
 function clearSearch() { input.value = ''; clearBtn.classList.add('hidden'); results.innerHTML = placeholder(); input.focus(); }
 function placeholder() {
-  return `<div class="text-center py-12 text-gray-300"><div class="text-4xl mb-3">ð</div><p class="text-sm">ì´ë¦ì ìë ¥íì¸ì</p><p class="text-xs mt-1">Type a name to search</p></div>`;
+  return `<div class="text-center py-12 text-gray-300"><div class="text-4xl mb-3">👆</div><p class="text-sm">이름을 입력하세요</p><p class="text-xs mt-1">Type a name to search</p></div>`;
 }
 results.innerHTML = placeholder();
 
 async function searchStudents(q) {
-  results.innerHTML = `<div class="text-center py-10 text-gray-400"><div class="w-8 h-8 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-3"></div><p class="text-sm">ê²ì ì¤...</p></div>`;
+  results.innerHTML = `<div class="text-center py-10 text-gray-400"><div class="w-8 h-8 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-3"></div><p class="text-sm">검색 중...</p></div>`;
   try {
     const res = await fetch(`/api/search-student?name=${encodeURIComponent(q)}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     if (!data.students?.length) {
-      results.innerHTML = `<div class="text-center py-10"><div class="text-3xl mb-2">ð</div><p class="text-gray-500 font-medium">ê²ì ê²°ê³¼ ìì</p><p class="text-gray-400 text-sm mt-1 mb-4">No results for "${q}"</p><button onclick="openVisitorModal()" class="text-xs text-indigo-600 bg-indigo-50 px-4 py-2 rounded-full hover:bg-indigo-100">ì²ì ë°©ë¬¸ìì´ì ê°ì? ì¬ê¸° í´ë¦­</button></div>`;
+      results.innerHTML = `<div class="text-center py-10"><div class="text-3xl mb-2">🔍</div><p class="text-gray-500 font-medium">검색 결과 없음</p><p class="text-gray-400 text-sm mt-1 mb-4">No results for "${q}"</p><button onclick="openVisitorModal()" class="text-xs text-indigo-600 bg-indigo-50 px-4 py-2 rounded-full hover:bg-indigo-100">처음 방문자이신가요? 여기 클릭</button></div>`;
       return;
     }
     results.innerHTML = `<div class="space-y-3">${data.students.map(s => studentCard(s)).join('')}</div>`;
     data.students.forEach(s => loadStatus(s));
   } catch(e) {
-    results.innerHTML = `<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">â ï¸ ${e.message}</div>`;
+    results.innerHTML = `<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠️ ${e.message}</div>`;
   }
 }
 
@@ -359,7 +359,7 @@ function studentCard(s) {
   const dc = DEPT_INFO[s.department]?.color || {};
   const leftColor = dc.left || 'border-l-gray-300';
   const allergy = hasAllergy(s.allergy);
-  const noLiability = s.liabilityForm && s.liabilityForm !== 'ì ì¶ ìë£';
+  const noLiability = s.liabilityForm && s.liabilityForm !== '제출 완료';
   const isBday = isBirthdayThisMonth(s.dob);
   const today = new Date();
   let absenceWarn = false;
@@ -375,16 +375,16 @@ function studentCard(s) {
       <span class="text-xl font-bold text-gray-900">${s.name}</span>
       ${s.nameEN ? `<span class="text-sm text-gray-400">${s.nameEN}</span>` : ''}
       ${s.studentId ? `<span class="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">${s.studentId}</span>` : ''}
-      ${s.isVisitor ? `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200">ð ë°©ë¬¸ì</span>` : ''}
-      ${isBday ? `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200">ð ì´ë²ë¬ ìì¼!</span>` : ''}
-      ${allergy ? `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200">â ï¸ ìë¬ì§</span>` : ''}
+      ${s.isVisitor ? `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200">🆕 방문자</span>` : ''}
+      ${isBday ? `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200">🎂 이번달 생일!</span>` : ''}
+      ${allergy ? `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200">⚠️ 알러지</span>` : ''}
     </div>
     <div class="flex flex-wrap gap-2 mb-2">${deptBadge(s.department)}${s.grade ? `<span class="text-xs text-gray-400">${s.grade}</span>` : ''}</div>
-    ${allergy ? `<p class="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-1.5 border border-red-200 mb-1.5"><strong>ìë¬ì§:</strong> ${s.allergy}</p>` : ''}
-    ${noLiability ? `<p class="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-1.5 border border-amber-200 mb-1.5">ð Liability Form ë¯¸ì ì¶</p>` : ''}
-    ${absenceWarn ? `<p class="text-xs text-orange-600 bg-orange-50 rounded-lg px-3 py-1.5 border border-orange-200 mb-1.5">ð 2ì£¼ ì´ì ê²°ì â ì°ë½ íì</p>` : ''}
-    ${s.guardian ? `<p class="text-xs text-gray-400 mb-2">ë³´í¸ì: ${s.guardian}${s.phone ? ' Â· ' + s.phone : ''}</p>` : ''}
-    <div id="action-${s.id}" class="mt-2"><div class="text-center py-2 text-gray-400 text-sm"><span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full spin align-middle mr-1"></span>ìí íì¸ ì¤...</div></div>
+    ${allergy ? `<p class="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-1.5 border border-red-200 mb-1.5"><strong>알러지:</strong> ${s.allergy}</p>` : ''}
+    ${noLiability ? `<p class="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-1.5 border border-amber-200 mb-1.5">📋 Liability Form 미제출</p>` : ''}
+    ${absenceWarn ? `<p class="text-xs text-orange-600 bg-orange-50 rounded-lg px-3 py-1.5 border border-orange-200 mb-1.5">📞 2주 이상 결석 — 연락 필요</p>` : ''}
+    ${s.guardian ? `<p class="text-xs text-gray-400 mb-2">보호자: ${s.guardian}${s.phone ? ' · ' + s.phone : ''}</p>` : ''}
+    <div id="action-${s.id}" class="mt-2"><div class="text-center py-2 text-gray-400 text-sm"><span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full spin align-middle mr-1"></span>상태 확인 중...</div></div>
   </div>`;
 }
 
@@ -395,16 +395,16 @@ async function loadStatus(s) {
     const el = document.getElementById(`action-${s.id}`);
     if (!el) return;
     if (data.status === 'checked_out') {
-      el.innerHTML = `<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center">â ì²´í¬ìì ìë£ Â· ${data.record.checkIn} â ${data.record.checkOut}</div>`;
+      el.innerHTML = `<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center">✅ 체크아웃 완료 · ${data.record.checkIn} → ${data.record.checkOut}</div>`;
     } else if (data.status === 'checked_in') {
-      el.innerHTML = `<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 mb-2 text-sm text-emerald-700">â ì²´í¬ì¸ë¨ Â· ${data.record.checkIn} ìì¤</div>
-        <button onclick='openModal("checkout",${JSON.stringify(s)},${JSON.stringify(data.record)})' class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700">ì²´í¬ìì / Check Out</button>`;
+      el.innerHTML = `<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 mb-2 text-sm text-emerald-700">✅ 체크인됨 · ${data.record.checkIn} 입실</div>
+        <button onclick='openModal("checkout",${JSON.stringify(s)},${JSON.stringify(data.record)})' class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700">체크아웃 / Check Out</button>`;
     } else {
-      el.innerHTML = `<button onclick='openModal("checkin",${JSON.stringify(s)},null)' class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700">ì²´í¬ì¸ / Check In</button>`;
+      el.innerHTML = `<button onclick='openModal("checkin",${JSON.stringify(s)},null)' class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700">체크인 / Check In</button>`;
     }
   } catch(e) {
     const el = document.getElementById(`action-${s.id}`);
-    if (el) el.innerHTML = `<div class="text-xs text-gray-400 text-center py-2">ìí íì¸ ì¤í¨</div>`;
+    if (el) el.innerHTML = `<div class="text-xs text-gray-400 text-center py-2">상태 확인 실패</div>`;
   }
 }
 
@@ -413,22 +413,22 @@ function openModal(action, student, record) {
   _action = action; _student = student; _record = record;
   const isIn = action === 'checkin';
   const allergy = hasAllergy(student.allergy);
-  const noLiability = student.liabilityForm && student.liabilityForm !== 'ì ì¶ ìë£';
+  const noLiability = student.liabilityForm && student.liabilityForm !== '제출 완료';
   document.getElementById('modalHeader').className = `text-center mb-4 p-4 rounded-2xl ${isIn ? 'bg-emerald-50' : 'bg-indigo-50'}`;
-  document.getElementById('modalHeader').innerHTML = `<div class="text-4xl mb-2">${isIn ? 'ð' : 'ð'}|/div><h2 class="text-xl font-bold text-gray-900">${isIn ? 'ì²´í¬ì¸ íì¸' : 'ì²´í¬ìì íì¸'}</h2>`;
+  document.getElementById('modalHeader').innerHTML = `<div class="text-4xl mb-2">${isIn ? '👋' : '🙏'}|/div><h2 class="text-xl font-bold text-gray-900">${isIn ? '체크인 확인' : '체크아웃 확인'}</h2>`;
   const rows = [
-    ['ì´ë¦', `<strong>${student.name}</strong>${student.studentId ? ` <span class="text-xs font-mono text-gray-400">${student.studentId}</span>` : ''}`],
-    ['ë¶ì', deptBadge(student.department)],
-    student.guardian ? ['ë³´í¸ì', student.guardian] : null,
-    !isIn && record?.checkIn ? ['ì²´í¬ì¸', record.checkIn] : null,
+    ['이름', `<strong>${student.name}</strong>${student.studentId ? ` <span class="text-xs font-mono text-gray-400">${student.studentId}</span>` : ''}`],
+    ['부서', deptBadge(student.department)],
+    student.guardian ? ['보호자', student.guardian] : null,
+    !isIn && record?.checkIn ? ['체크인', record.checkIn] : null,
   ].filter(Boolean);
   document.getElementById('modalInfo').innerHTML = rows.map(([k,v]) =>
     `<div class="flex justify-between items-center py-2 border-b border-gray-100"><span class="text-xs text-gray-400">${k}</span><span class="text-sm text-gray-800">${v}</span></div>`
   ).join('');
   const aa = document.getElementById('allergyAlert');
-  if (allergy) { aa.classList.remove('hidden'); aa.innerHTML = `â ï¸ ìë¬ì§ ì£¼ì: ${student.allergy}`; } else aa.classList.add('hidden');
+  if (allergy) { aa.classList.remove('hidden'); aa.innerHTML = `⚠️ 알러지 주의: ${student.allergy}`; } else aa.classList.add('hidden');
   const la = document.getElementById('liabilityAlert');
-  if (noLiability) { la.classList.remove('hidden'); la.innerHTML = 'ð Liability Form ë¯¸ì ì¶!'; } else la.classList.add('hidden');
+  if (noLiability) { la.classList.remove('hidden'); la.innerHTML = '📋 Liability Form 미제출!'; } else la.classList.add('hidden');
   const pm = document.getElementById('pickupMsg');
   if (isIn) pm.classList.remove('hidden'); else pm.classList.add('hidden');
   document.getElementById('guardianRow').classList.toggle('hidden', isIn);
@@ -441,7 +441,7 @@ function closeModal() { document.getElementById('modal').classList.add('hidden')
 
 async function doAction() {
   const btn = document.getElementById('confirmBtn');
-  btn.textContent = 'ì²ë¦¬ ì¤...'; btn.disabled = true;
+  btn.textContent = '처리 중...'; btn.disabled = true;
   const isIn = _action === 'checkin';
   try {
     let time;
@@ -451,7 +451,7 @@ async function doAction() {
         body: JSON.stringify({ name: _student.name, department: _student.department, isNew: _student.isVisitor, hasAllergy: hasAllergy(_student.allergy), notes: _student.notes, staff: sessionStorage.getItem('sName') || '', studentId: _student.id })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'ì²´í¬ì¸ ì¤í¨');
+      if (!res.ok) throw new Error(data.error || '체크인 실패');
       if (data.alreadyCheckedIn) { closeModal(); loadStatus(_student); return; }
       time = data.checkInTime;
     } else {
@@ -460,20 +460,20 @@ async function doAction() {
         body: JSON.stringify({ pageId: _record.id, guardianConfirmed: document.getElementById('guardianCheck').checked })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'ì²´í¬ìì ì¤í¨');
+      if (!res.ok) throw new Error(data.error || '체크아웃 실패');
       time = data.checkOutTime;
     }
     closeModal();
     showSuccess(isIn, _student, time);
     loadStatus(_student);
-  } catch(e) { alert(e.message || 'ì¤ë¥ê° ë°ìíìµëë¤'); }
-  btn.textContent = 'íì¸ / Confirm'; btn.disabled = false;
+  } catch(e) { alert(e.message || '오류가 발생했습니다'); }
+  btn.textContent = '확인 / Confirm'; btn.disabled = false;
 }
 
 let _successTimer;
 function showSuccess(isIn, student, time) {
-  document.getElementById('successIcon').textContent = isIn ? 'ð' : 'ð';
-  document.getElementById('successTitle').textContent = isIn ? `${student.name} ì²´í¬ì¸ ìë£!` : `${student.name} ì²´í¬ìì ìë£!`;
+  document.getElementById('successIcon').textContent = isIn ? '🎉' : '👋';
+  document.getElementById('successTitle').textContent = isIn ? `${student.name} 체크인 완료!` : `${student.name} 체크아웃 완료!`;
   document.getElementById('successTime').textContent = time || '';
   document.getElementById('success').classList.remove('hidden');
   const sp = document.getElementById('successPickup');
@@ -497,7 +497,7 @@ function buildTag(s, time) {
   document.getElementById('tagGuardian').textContent = s.guardian || '';
   document.getElementById('tagDate').textContent = new Date().toLocaleDateString('ko-KR', {month:'short',day:'numeric'}) + ' ' + time;
   const ab = document.getElementById('tagAllergyBadge');
-  if (hasAllergy(s.allergy)) { ab.classList.remove('hidden'); ab.textContent = `â ï¸ ìë¬ì§: ${s.allergy}`; } else ab.classList.add('hidden');
+  if (hasAllergy(s.allergy)) { ab.classList.remove('hidden'); ab.textContent = `⚠️ 알러지: ${s.allergy}`; } else ab.classList.add('hidden');
   document.getElementById('guardianTagName').textContent = s.name;
   document.getElementById('guardianTagId').textContent = s.studentId || '';
   const qrData = JSON.stringify({id:s.id,name:s.name,sid:s.studentId,dept:s.department,date:new Date().toLocaleDateString('sv-SE')});
@@ -518,7 +518,7 @@ function closeSuccess() { document.getElementById('success').classList.add('hidd
 function openVisitorModal() {
   ['v-name','v-nameEN','v-grade','v-guardian','v-phone'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('v-dob').value = '';
-  document.getElementById('v-allergy').value = 'ìì';
+  document.getElementById('v-allergy').value = '없음';
   document.getElementById('v-pickupAck').checked = false;
   document.getElementById('v-deptPreview').classList.add('hidden');
   document.getElementById('visitorError').classList.add('hidden');
@@ -544,11 +544,11 @@ async function submitVisitor() {
   const guardian = document.getElementById('v-guardian').value.trim();
   const err = document.getElementById('visitorError');
   err.classList.add('hidden');
-  if (!name) { err.textContent = 'ì´ë¦ì ìë ¥í´ì£¼ì¸ì'; err.classList.remove('hidden'); return; }
-  if (!dob) { err.textContent = 'ìëìì¼ì ìë ¥í´ì£¼ì¸ì'; err.classList.remove('hidden'); return; }
-  if (!guardian) { err.textContent = 'ë³´í¸ì ì´ë¦ì ìë ¥í´ì£¼ì¸ì'; err.classList.remove('hidden'); return; }
-  if (!document.getElementById('v-pickupAck').checked) { err.textContent = 'í½ì ìë´ íì¸ ì²´í¬ê° íìí©ëë¤'; err.classList.remove('hidden'); return; }
-  const btn = document.getElementById('visitorBtn'); btn.textContent = 'ë±ë¡ ì¤...'; btn.disabled = true;
+  if (!name) { err.textContent = '이름을 입력해주세요'; err.classList.remove('hidden'); return; }
+  if (!dob) { err.textContent = '생년월일을 입력해주세요'; err.classList.remove('hidden'); return; }
+  if (!guardian) { err.textContent = '보호자 이름을 입력해주세요'; err.classList.remove('hidden'); return; }
+  if (!document.getElementById('v-pickupAck').checked) { err.textContent = '픽업 안내 확인 체크가 필요합니다'; err.classList.remove('hidden'); return; }
+  const btn = document.getElementById('visitorBtn'); btn.textContent = '등록 중...'; btn.disabled = true;
   try {
     const res = await fetch('/api/visitor-checkin', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -556,16 +556,16 @@ async function submitVisitor() {
         name, nameEN: document.getElementById('v-nameEN').value, dob,
         grade: document.getElementById('v-grade').value,
         guardian, phone: document.getElementById('v-phone').value,
-        allergy: document.getElementById('v-allergy').value || 'ìì',
+        allergy: document.getElementById('v-allergy').value || '없음',
       })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'ë±ë¡ ì¤í¨');
+    if (!res.ok) throw new Error(data.error || '등록 실패');
     closeVisitorModal();
     const fakeStudent = { id: data.studentId, name, nameEN: document.getElementById('v-nameEN').value, department: data.department, guardian, studentId: '', isVisitor: true, allergy: document.getElementById('v-allergy').value };
     showSuccess(true, fakeStudent, data.checkInTime);
   } catch(e) { err.textContent = e.message; err.classList.remove('hidden'); }
-  btn.textContent = 'ì²´í¬ì¸ ë±ë¡'; btn.disabled = false;
+  btn.textContent = '체크인 등록'; btn.disabled = false;
 }
 </script>
 </body>
