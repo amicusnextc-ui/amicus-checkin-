@@ -9,7 +9,31 @@
 <style>
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn .25s ease}
 @keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin .7s linear infinite}
-@media print{body>*{display:none!important}#printArea{display:block!important;position:fixed;top:0;left:0;width:100%}}
+@media print{
+  body>*{display:none!important}
+  #printArea{display:block!important;position:fixed;top:0;left:0;width:100%;margin:0;padding:0}
+  #printContent{margin:0;padding:4px 6px;width:100%;box-sizing:border-box}
+  #printContent *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  #printContent #childTag{
+    border:1.5px solid #333!important;
+    border-radius:4px!important;
+    box-shadow:none!important;
+    font-family:Arial,sans-serif!important;
+    overflow:hidden!important;
+    max-width:100%;
+    page-break-inside:avoid
+  }
+  #printContent #tagDeptBar{height:10px!important}
+  #printContent #tagName{font-size:17pt!important;font-weight:900!important;line-height:1.1!important;margin:0!important}
+  #printContent #tagNameEN{font-size:9pt!important;color:#555!important}
+  #printContent #tagDept{font-size:8pt!important;font-weight:700!important}
+  #printContent #tagGrade{font-size:8pt!important;color:#666!important}
+  #printContent #tagId{font-size:7pt!important;color:#888!important}
+  #printContent #tagAllergyBadge,#printContent #tagBirthdayBadge{font-size:8pt!important;padding:1px 4px!important}
+  #printContent #tagGuardian{font-size:8pt!important;font-weight:700!important}
+  #printContent #tagDate{font-size:7pt!important}
+  @page{size:auto;margin:4mm}
+}
 #printArea{display:none}
 </style>
 </head>
@@ -60,16 +84,31 @@
 <div id="successPickup" class="hidden mb-4 p-4 bg-blue-50 border border-blue-200 rounded-2xl text-center"><p class="text-blue-800 font-bold text-sm">📣 픽업 안내 / Pickup Reminder</p><p class="text-blue-700 text-sm mt-1">예배 종료 후 <strong>즉시 픽업</strong>을 부탁드립니다.</p><p class="text-blue-600 text-xs mt-1">Please pick up your child immediately after service ends. Thank you! 🙏</p></div>
 <div id="tagContainer" class="hidden mb-4">
 <p class="text-xs font-bold text-gray-500 uppercase mb-2">태그 미리보기</p>
-<div id="childTag" class="bg-white border-2 border-gray-200 rounded-xl p-3 mb-2 relative overflow-hidden">
-<div id="tagDeptBar" class="absolute top-0 left-0 right-0 h-2 rounded-t-xl"></div>
-<div class="flex justify-between items-start mt-2"><div class="flex-1">
-<p id="tagName" class="text-lg font-black text-gray-900 leading-tight"></p>
-<p id="tagNameEN" class="text-xs text-gray-500"></p>
-<p id="tagDept" class="text-xs font-semibold mt-1"></p>
-<p id="tagGrade" class="text-xs text-gray-500"></p>
-<div id="tagAllergyBadge" class="hidden mt-1.5 inline-block text-xs font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full border border-red-300">⚠️ 알러지 주의</div>
-</div><div class="text-right ml-2"><canvas id="tagQR" width="56" height="56"></canvas><p id="tagId" class="text-xs font-mono text-gray-400 mt-0.5 text-center"></p></div></div>
-<div class="mt-2 pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500"><span>보호자: <span id="tagGuardian" class="font-semibold text-gray-700"></span></span><span id="tagDate" class="text-gray-400"></span></div>
+<div id="childTag" class="bg-white border-2 border-gray-200 rounded-xl overflow-hidden mb-2" style="font-family:'Arial',sans-serif">
+  <div id="tagDeptBar" class="h-3 w-full"></div>
+  <div class="px-3 pt-2 pb-2">
+    <div class="flex justify-between items-start">
+      <div class="flex-1 min-w-0">
+        <p id="tagName" class="text-xl font-black text-gray-900 leading-tight"></p>
+        <p id="tagNameEN" class="text-sm text-gray-500 font-medium"></p>
+        <div class="flex flex-wrap gap-1 mt-1">
+          <span id="tagDeptBadge" class="inline-block text-xs font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-700" id="tagDept"></span>
+          <p id="tagDept" class="text-xs font-semibold text-gray-600"></p>
+          <p id="tagGrade" class="text-xs text-gray-500"></p>
+        </div>
+        <div id="tagAllergyBadge" class="hidden mt-1 inline-block text-xs font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded border border-red-300">⚠️ 알러지 주의</div>
+        <div id="tagBirthdayBadge" class="hidden mt-1 inline-block text-xs font-bold bg-pink-100 text-pink-700 px-2 py-0.5 rounded border border-pink-300">🎂 생일 축하해요!</div>
+      </div>
+      <div class="ml-3 text-center flex-shrink-0">
+        <canvas id="tagQR" width="64" height="64"></canvas>
+        <p id="tagId" class="text-xs font-mono text-gray-400 mt-0.5 text-center"></p>
+      </div>
+    </div>
+    <div class="mt-2 pt-1.5 border-t border-gray-200 flex justify-between items-center">
+      <span class="text-xs text-gray-500">보호자: <span id="tagGuardian" class="font-bold text-gray-700"></span></span>
+      <span id="tagDate" class="text-xs text-gray-400 font-mono"></span>
+    </div>
+  </div>
 </div>
 <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3"><div class="flex justify-between items-center"><div><p class="text-xs font-bold text-indigo-600 uppercase">보호자 픽업 태그</p><p id="guardianTagName" class="text-base font-black text-gray-900 mt-0.5"></p><p id="guardianTagId" class="text-xs font-mono text-indigo-500"></p></div><canvas id="guardianQR" width="48" height="48"></canvas></div></div>
 </div>
@@ -110,6 +149,7 @@ function deptBadge(d) {
   return "<span class=\"text-xs font-semibold px-2 py-0.5 rounded-full border " + c + "\">" + (d || "미지정") + "<\/span>";
 }
 function isBirthdayThisMonth(dobStr) { if (!dobStr) return false; return new Date(dobStr).getMonth() === new Date().getMonth(); }
+function isBirthdayToday(dobStr) { if (!dobStr) return false; var dob = new Date(dobStr); var now = new Date(); return dob.getMonth() === now.getMonth() && dob.getDate() === now.getDate(); }
 function getDeptFromAge(ageMonths) { var y = ageMonths / 12; if (ageMonths < 48) return "유아부 (Infant)"; if (y < 6) return "유치부 (Preschool)"; if (y < 9) return "유년부 (Elementary Jr)"; if (y < 12) return "초등부 (Elementary)"; return "중고등부 (Middle/High)"; }
 document.getElementById("todayDate").textContent = new Date().toLocaleDateString("ko-KR", {year:"numeric",month:"long",day:"numeric",weekday:"long"});
 var selectedDept = null;
@@ -175,14 +215,15 @@ function studentCard(s) {
   var dc = (DEPT_INFO[s.department] && DEPT_INFO[s.department].color) || {};
   var leftColor = dc.left || "border-l-gray-300";
   var allergy = hasAllergy(s.allergy);
-  var isBday = isBirthdayThisMonth(s.dob);
+  var isBdayToday = isBirthdayToday(s.dob);
+  var isBday = isBdayToday || isBirthdayThisMonth(s.dob);
   var h = "<div id=\"card-" + s.id + "\" class=\"bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 " + leftColor + " p-4 fade-in\">";
   h += "<div class=\"mb-1\">";
   h += "<div class=\"flex flex-wrap items-center gap-2\">";
   h += "<span class=\"text-xl font-bold text-gray-900\">" + s.name + "<\/span>";
   if (s.studentId) h += "<span class=\"text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded\">" + s.studentId + "<\/span>";
   if (s.isVisitor) h += "<span class=\"text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200\">🆕 방문자<\/span>";
-  if (isBday) h += "<span class=\"text-xs font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200\">🎂 이번달 생일!<\/span>";
+  if (isBdayToday) h += "<span class=\"text-xs font-bold px-2 py-0.5 rounded-full bg-pink-200 text-pink-800 border border-pink-400\">🎂 오늘 생일!<\/span>"; else if (isBday) h += "<span class=\"text-xs font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200\">🎂 이번달 생일!<\/span>";
   if (allergy) h += "<span class=\"text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200\">⚠️ 알러지<\/span>";
   h += "<\/div>";
   if (s.nameEN) h += "<div class=\"text-sm text-gray-400 mt-0.5\">" + s.nameEN + "<\/div>";
@@ -297,6 +338,8 @@ function buildTag(s, time) {
   document.getElementById("tagDate").textContent = new Date().toLocaleDateString("ko-KR", {month:"short",day:"numeric"}) + " " + (time || "");
   var ab = document.getElementById("tagAllergyBadge");
   if (hasAllergy(s.allergy)) { ab.classList.remove("hidden"); ab.textContent = "⚠️ 알러지: " + s.allergy; } else ab.classList.add("hidden");
+  var bdayTag = document.getElementById("tagBirthdayBadge");
+  if (bdayTag) { if (isBirthdayToday(s.dob)) { bdayTag.classList.remove("hidden"); } else bdayTag.classList.add("hidden"); }
   document.getElementById("guardianTagName").textContent = s.name;
   document.getElementById("guardianTagId").textContent = s.studentId || "";
   var qrData = JSON.stringify({id:s.id,name:s.name,sid:s.studentId,dept:s.department,date:new Date().toLocaleDateString("sv-SE")});
