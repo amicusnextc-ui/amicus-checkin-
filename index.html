@@ -49,9 +49,7 @@
 <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 fade-in max-h-[90vh] overflow-y-auto">
 <div id="modalHeader" class="text-center mb-4 p-4 rounded-2xl"></div>
 <div id="modalInfo" class="space-y-1 mb-3"></div>
-<div id="allergyAlert" class="hidden mb-3 p-3 bg-red-50 border border-red-300 rounded-xl text-red-700 text-sm font-semibold"></div>
-<div id="liabilityAlert" class="hidden mb-3 p-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-700 text-sm"></div>
-    <div id="absenceAlert" class="hidden mb-3 p-3 bg-orange-50 border border-orange-300 rounded-xl text-orange-700 text-sm font-semibold"></div>
+
 <div id="pickupMsg" class="hidden mb-3 p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-sm"><p class="font-semibold">📣 픽업 안내</p><p class="mt-1">예배 종료 후 <strong>즉시 픽업</strong>을 부탁드립니다. 감사합니다! 🙏</p><p class="text-xs mt-1 text-blue-600">Please pick up your child <strong>immediately after service</strong>. Thank you!</p></div>
 <div id="guardianRow" class="hidden mb-3"><label class="flex items-center gap-3 cursor-pointer p-3 bg-indigo-50 rounded-xl"><input type="checkbox" id="guardianCheck" class="w-5 h-5 rounded accent-indigo-600"/><span class="text-sm font-semibold text-indigo-700">보호자 인계 확인</span></label></div>
 <div class="flex gap-3"><button onclick="closeModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">취소</button><button id="confirmBtn" onclick="doAction()" class="flex-1 py-3 rounded-xl font-bold text-white">확인 / Confirm</button></div>
@@ -226,12 +224,6 @@ var _action, _student, _record;
 function openModal(action, student, record) {
   _action = action; _student = student; _record = record;
   var isIn = action === "checkin";
-  var allergy = hasAllergy(student.allergy);
-  var noLiability = student.liabilityForm && student.liabilityForm !== "제출 완료";
-  var today = new Date();
-  var absenceWarn = false;
-  if (student.lastAttended) { var diff = Math.floor((today - new Date(student.lastAttended)) / 86400000); absenceWarn = diff >= 14; }
-  else if (!student.isVisitor) { absenceWarn = true; }
   var hdr = document.getElementById("modalHeader");
   hdr.className = "text-center mb-4 p-4 rounded-2xl " + (isIn ? "bg-emerald-50" : "bg-indigo-50");
   hdr.innerHTML = "<div class=\"text-4xl mb-2\">" + (isIn ? "👋" : "🙏") + "<\/div><h2 class=\"text-xl font-bold text-gray-900\">" + (isIn ? "체크인 확인" : "체크아웃 확인") + "<\/h2>";
@@ -242,12 +234,6 @@ function openModal(action, student, record) {
   if (gd) infoRows.push(["보호자", gd]);
   if (!isIn && record && record.checkIn) infoRows.push(["체크인", record.checkIn]);
   document.getElementById("modalInfo").innerHTML = infoRows.map(function(r){ return "<div class=\"flex justify-between items-center py-2 border-b border-gray-100\"><span class=\"text-xs text-gray-400\">" + r[0] + "<\/span><span class=\"text-sm text-gray-800\">" + r[1] + "<\/span><\/div>"; }).join("");
-  var aa = document.getElementById("allergyAlert");
-  if (allergy) { aa.classList.remove("hidden"); aa.innerHTML = "⚠️ 알러지 주의: <strong>" + student.allergy + "<\/strong>"; } else aa.classList.add("hidden");
-  var la = document.getElementById("liabilityAlert");
-  if (noLiability) { la.classList.remove("hidden"); la.innerHTML = "📋 Liability Form 미제출"; } else la.classList.add("hidden");
-  var aw = document.getElementById("absenceAlert");
-  if (aw) { if (absenceWarn && !student.isVisitor) { aw.classList.remove("hidden"); aw.innerHTML = "📞 2주 이상 결석 — 연락 필요"; } else aw.classList.add("hidden"); }
   var pm = document.getElementById("pickupMsg");
   if (isIn) pm.classList.remove("hidden"); else pm.classList.add("hidden");
   document.getElementById("guardianRow").classList.toggle("hidden", isIn);
