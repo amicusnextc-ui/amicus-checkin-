@@ -1,6 +1,6 @@
 const { Client } = require('@notionhq/client');
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
-const DB_STUDENTS = process.env.NOTION_DB_STUDENTS;
+const DB_STUDENTS = process.env.NOTION_STUDENT_DB_ID;
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
