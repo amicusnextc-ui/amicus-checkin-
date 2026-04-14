@@ -32,12 +32,11 @@ function doLogin() {
   document.getElementById("dashboard").classList.remove("hidden");
   // Set user info
   const deptShort = dept.split(" ")[0];
-  document.getElementById("userNameDisplay").textContent = staffName + " 간사님";
-  document.getElementById("userDeptDisplay").textContent = deptShort;
-  const dot = document.getElementById("userDot");
+  document.getElementById("dashName").textContent = staffName + " 간사님";
+  document.getElementById("dashDept").textContent = deptShort;
+  const dot = document.getElementById("deptDot");
   if (dot) { dot.className = "w-2 h-2 rounded-full " + (DEPT_COLORS[dept]||"bg-gray-400"); }
-  loadRoster();
-  loadAttendance();
+  switchTab("attendance");
 }
 
 function showLoginError(msg) {
@@ -52,19 +51,17 @@ function doLogout() {
   document.getElementById("pwInput").value = "";
 }
 
-function switchTab(tab) {
-  const tabs = ["attendance","roster"];
-  tabs.forEach(t => {
-    const panel = document.getElementById(t+"Panel");
-    const btn = document.getElementById(t+"Tab");
-    if (panel) panel.classList.toggle("hidden", t!==tab);
-    if (btn) {
-      btn.classList.toggle("bg-indigo-600", t===tab);
-      btn.classList.toggle("text-white", t===tab);
-      btn.classList.toggle("text-gray-500", t!==tab);
-    }
-  });
-  if (tab==="roster") loadRoster();
+function switchTab(tab){
+  const attPanel=document.getElementById("attendanceTab");
+  const rosPanel=document.getElementById("rosterTab");
+  const attBtn=document.getElementById("tabAttendance");
+  const rosBtn=document.getElementById("tabRoster");
+  if(attPanel) attPanel.classList.toggle("hidden",tab!=="attendance");
+  if(rosPanel) rosPanel.classList.toggle("hidden",tab!=="roster");
+  [attBtn,rosBtn].forEach(b=>{ if(b){b.classList.remove("bg-indigo-600","text-white","text-gray-500");} });
+  if(tab==="attendance"&&attBtn){attBtn.classList.add("bg-indigo-600","text-white");}
+  if(tab==="roster"&&rosBtn){rosBtn.classList.add("bg-indigo-600","text-white");}
+  if(tab==="roster")loadRoster();
   else loadAttendance();
 }
 
@@ -112,8 +109,8 @@ PE html>
       <div><p class="text-xs text-gray-400" id="dashName"></p><p class="text-sm font-bold text-gray-900" id="dashDept"></p></div>
     </div>
     <div class="flex items-center gap-2">
-      <button onclick="showTab('attendance')" id="tabAttendance" class="text-xs px-3 py-1.5 rounded-lg font-semibold">출석</button>
-      <button onclick="showTab('roster')" id="tabRoster" class="text-xs px-3 py-1.5 rounded-lg font-semibold">명단</button>
+      <button onclick="switchTab('attendance')" id="tabAttendance" class="text-xs px-3 py-1.5 rounded-lg font-semibold">출석</button>
+      <button onclick="switchTab('roster')" id="tabRoster" class="text-xs px-3 py-1.5 rounded-lg font-semibold">명단</button>
       <button onclick="logout()" class="text-xs text-gray-400 hover:text-red-500 ml-1">로그아웃</button>
     </div>
   </div>
@@ -219,6 +216,8 @@ function doLogout(){
   document.getElementById("loginScreen").classList.remove("hidden");
   document.getElementById("dashboard").classList.add("hidden");
   document.getElementById("pwInput").value="";
+  document.getElementById("dashName").textContent="";
+  document.getElementById("dashDept").textContent="";
 }
 function switchTab(tab){
   ["attendance","roster"].forEach(t=>{
