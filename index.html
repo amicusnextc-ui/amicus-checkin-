@@ -469,7 +469,7 @@ function saveTodayData() {
 async function fetchStudentsFromNotion() {
   document.getElementById('load-status').textContent = 'Notion에서 불러오는 중...';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/notion', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -712,7 +712,7 @@ async function doCheckin() {
 async function saveAttendanceToNotion(s, time, notes) {
   const hasAllergy = s.allergy && s.allergy!=='없음' && s.allergy!=='';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/notion', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -749,7 +749,7 @@ async function updateCheckoutInNotion(s, checkoutTime) {
   const pageId = todayData[s.id]?.notionPageId;
   if (!pageId) return;
   try {
-    await fetch('https://api.anthropic.com/v1/messages', {
+    await fetch('/api/notion', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -856,7 +856,7 @@ async function doRegister() {
 
   // Save to Notion
   try {
-    await fetch('https://api.anthropic.com/v1/messages', {
+    await fetch('/api/notion', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
