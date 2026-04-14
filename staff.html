@@ -181,6 +181,20 @@ tbody tr:hover { background:#fafafa; }
         <div id="ldrAllDeptBody" class="p-5"><div class="text-center text-gray-400 py-8">로딩 중...</div></div>
       </div>
       <div id="ldrSaveNotionStatus" class="hidden card p-4 text-center text-sm font-semibold"></div>
+      <div class="card overflow-hidden mb-4 mt-4">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div><h2 class="font-bold text-gray-900">Liability Form 미제출</h2><p class="text-xs text-gray-400 mt-0.5">제출 완료가 아닌 전체 학생</p></div>
+          <span id="ldrLiabCount" class="text-xs bg-red-100 text-red-700 font-bold px-3 py-1 rounded-full"></span>
+        </div>
+        <div id="ldrLiabBody" class="p-5"><div class="text-center text-gray-400 py-6">로딩 중...</div></div>
+      </div>
+      <div class="card overflow-hidden mb-4">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div><h2 class="font-bold text-gray-900">사진 미촬영</h2><p class="text-xs text-gray-400 mt-0.5">촬영 완료가 아닌 전체 학생</p></div>
+          <span id="ldrPhotoCount" class="text-xs bg-purple-100 text-purple-700 font-bold px-3 py-1 rounded-full"></span>
+        </div>
+        <div id="ldrPhotoBody" class="p-5"><div class="text-center text-gray-400 py-6">로딩 중...</div></div>
+      </div>
     </div>
     <div id="ldrAbsentTab" class="hidden fade-in">
       <div class="card overflow-hidden">
@@ -580,6 +594,10 @@ function loadLeaderSummary(){
   var body=document.getElementById("ldrAllDeptBody");
   if(!body)return;
   body.innerHTML="<div class='text-center text-gray-400 py-8'>로딩 중...</div>";
+  var liabBody=document.getElementById("ldrLiabBody");
+  var photoBody=document.getElementById("ldrPhotoBody");
+  if(liabBody)liabBody.innerHTML="<div class='text-center text-gray-400 py-6'>로딩 중...</div>";
+  if(photoBody)photoBody.innerHTML="<div class='text-center text-gray-400 py-6'>로딩 중...</div>";
   (async function(){
     try{
       var r=await fetch("/api/weekly-summary"),d=await r.json();
@@ -612,9 +630,60 @@ function loadLeaderSummary(){
       html+="<td style='padding:10px 14px;text-align:center;font-weight:800;color:#374151'>"+d.total.newThisMonth+"</td>";
       html+="</tr></tbody></table></div>";
       body.innerHTML=html;
+      var liabList=d.liabilityList||[];
+      var liabCount=document.getElementById("ldrLiabCount");
+      if(liabCount)liabCount.textContent=liabList.length+"명";
+      if(liabBody){
+        if(liabList.length===0){liabBody.innerHTML="<div class='text-center text-green-600 py-6 font-semibold'>✅ 모든 학생 Liability Form 제출 완료!</div>";}
+        else{
+          var lhtml="<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:13px'>";
+          lhtml+="<thead><tr style='background:#fef2f2;border-bottom:2px solid #fecaca'>";
+          lhtml+="<th style='padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#991b1b'>이름</th>";
+          lhtml+="<th style='padding:8px 12px;font-size:11px;font-weight:700;color:#991b1b'>부서</th>";
+          lhtml+="<th style='padding:8px 12px;font-size:11px;font-weight:700;color:#991b1b'>담당 간사</th>";
+          lhtml+="<th style='padding:8px 12px;font-size:11px;font-weight:700;color:#991b1b'>상태</th>";
+          lhtml+="</tr></thead><tbody>";
+          liabList.forEach(function(s){
+            lhtml+="<tr style='border-bottom:1px solid #fee2e2'>";
+            lhtml+="<td style='padding:8px 12px;font-weight:600'>"+s.name+(s.nameEN?" ("+s.nameEN+")":"")+"</td>";
+            lhtml+="<td style='padding:8px 12px;color:#6b7280;font-size:12px'>"+s.dept.split(" ")[0]+"</td>";
+            lhtml+="<td style='padding:8px 12px;color:#6b7280;font-size:12px'>"+s.staff+"</td>";
+            lhtml+="<td style='padding:8px 12px'><span style='background:#fee2e2;color:#b91c1c;font-size:11px;padding:2px 8px;border-radius:999px;font-weight:700'>"+(s.liabilityStatus||"미제출")+"</span></td>";
+            lhtml+="</tr>";
+          });
+          lhtml+="</tbody></table></div>";
+          liabBody.innerHTML=lhtml;
+        }
+      }
+      var photoList=d.photoList||[];
+      var photoCount=document.getElementById("ldrPhotoCount");
+      if(photoCount)photoCount.textContent=photoList.length+"명";
+      if(photoBody){
+        if(photoList.length===0){photoBody.innerHTML="<div class='text-center text-green-600 py-6 font-semibold'>✅ 모든 학생 사진 촬영 완료!</div>";}
+        else{
+          var phtml="<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:13px'>";
+          phtml+="<thead><tr style='background:#faf5ff;border-bottom:2px solid #e9d5ff'>";
+          phtml+="<th style='padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#6d28d9'>이름</th>";
+          phtml+="<th style='padding:8px 12px;font-size:11px;font-weight:700;color:#6d28d9'>부서</th>";
+          phtml+="<th style='padding:8px 12px;font-size:11px;font-weight:700;color:#6d28d9'>담당 간사</th>";
+          phtml+="<th style='padding:8px 12px;font-size:11px;font-weight:700;color:#6d28d9'>상태</th>";
+          phtml+="</tr></thead><tbody>";
+          photoList.forEach(function(s){
+            phtml+="<tr style='border-bottom:1px solid #ede9fe'>";
+            phtml+="<td style='padding:8px 12px;font-weight:600'>"+s.name+(s.nameEN?" ("+s.nameEN+")":"")+"</td>";
+            phtml+="<td style='padding:8px 12px;color:#6b7280;font-size:12px'>"+s.dept.split(" ")[0]+"</td>";
+            phtml+="<td style='padding:8px 12px;color:#6b7280;font-size:12px'>"+s.staff+"</td>";
+            phtml+="<td style='padding:8px 12px'><span style='background:#ede9fe;color:#5b21b6;font-size:11px;padding:2px 8px;border-radius:999px;font-weight:700'>"+(s.photoStatus||"미촬영")+"</span></td>";
+            phtml+="</tr>";
+          });
+          phtml+="</tbody></table></div>";
+          photoBody.innerHTML=phtml;
+        }
+      }
     }catch(e){body.innerHTML="<div class='text-center text-red-400 py-8'>오류: "+e.message+"</div>";}
   })();
 }
+
 function saveLeaderSummaryToNotion(){
   var btn=document.getElementById("ldrSaveNotionBtn"),st=document.getElementById("ldrSaveNotionStatus");
   if(btn){btn.textContent="저장 중...";btn.disabled=true;}
