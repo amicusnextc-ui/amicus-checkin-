@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | 아미쿠스 교육부</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in { animation: fadeIn .25s ease; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin .7s linear infinite; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ───── LOGIN GATE ───── -->
+<div id="loginGate" class="min-h-screen bg-gradient-to-br from-slate-100 to-indigo-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl shadow-xl w-full max-w-sm p-8">
+    <div class="text-center mb-6">
+      <div class="text-5xl mb-3">🔐</div>
+      <h1 class="text-xl font-bold text-gray-900">Staff Admin</h1>
+      <p class="text-gray-400 text-sm mt-1">관리자 로그인</p>
+    </div>
+    <form onsubmit="doLogin(event)">
+      <input id="pwInput" type="password" placeholder="비밀번호 / Password"
+        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-center text-lg tracking-widest mb-3" autofocus />
+      <p id="loginError" class="text-red-500 text-sm text-center mb-3 hidden"></p>
+      <button type="submit" id="loginBtn"
+        class="w-full py-3.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">
+        로그인 / Login
+      </button>
+    </form>
+    <p class="text-center mt-4">
+      <a href="/" class="text-xs text-gray-400 hover:text-indigo-600">← 체크인 페이지로</a>
+    </p>
+  </div>
+</div>
+
+<!-- ───── DASHBOARD ───── -->
+<div id="dashboard" class="hidden">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-lg font-bold text-gray-900">관리자 대시보드</h1>
+        <p id="dashDate" class="text-xs text-gray-400"></p>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span id="lastRefreshed" class="text-xs text-gray-400 hidden sm:block"></span>
+        <button onclick="loadAttendance()" id="refreshBtn"
+          class="px-3 py-1.5 rounded-lg text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+          🔄 새로고침
+        </button>
+        <button onclick="openManualModal()"
+          class="px-3 py-1.5 rounded-lg text-sm bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors">
+          + 체크인
+        </button>
+        <a href="/" class="px-3 py-1.5 rounded-lg text-sm bg-indigo-100 text-indigo-700 font-semibold hover:bg-indigo-200 transition-colors">
+          ← 체크인 페이지
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+    <!-- Allergy Banner -->
+    <div id="allergyBanner" class="hidden bg-red-50 border border-red-300 rounded-2xl p-4">
+      <h3 class="font-bold text-red-700 mb-2" id="allergyBannerTitle"></h3>
+      <div id="allergyBannerList" class="flex flex-wrap gap-2"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="statsGrid"></div>
+
+    <!-- Dept Breakdown -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <h3 class="text-sm font-bold text-gray-700 mb-3">부서별 출석 현황</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2" id="deptBreakdown"></div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <!-- Filter tabs -->
+      <div class="flex gap-1 p-3 bg-gray-50 border-b border-gray-100 overflow-x-auto" id="filterTabs"></div>
+      <!-- Table body -->
+      <div id="tableArea"></div>
+      <div id="tableFooter" class="px-4 py-2 bg-gray-50 border-t border-gray-100 text-xs text-gray-400 text-right"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ───── MANUAL CHECKIN MODAL ───── -->
+<div id="manualModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 fade-in">
+    <h3 class="text-lg font-bold text-gray-900 mb-4">✏️ 수동 체크인</h3>
+    <form onsubmit="doManualCheckin(event)" class="space-y-3">
+      <div>
+        <label class="text-xs font-medium text-gray-500 mb-1 block">이름 *</label>
+        <input id="mName" type="text" placeholder="학생 이름" required autofocus
+          class="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-500 mb-1 block">부서</label>
+        <select id="mDept" class="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
+          <option value="">선택 안함</option>
+          <option>유아부 (Infant)</option>
+          <option>유치부 (Preschool)</option>
+          <option>유년부 (Elementary Jr)</option>
+          <option>초등부 (Elementary)</option>
+          <option>중고등부 (Middle/High)</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-500 mb-1 block">담당 간사</label>
+        <input id="mStaff" type="text" placeholder="간사 이름 (선택)"
+          class="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+      </div>
+      <div>
+        <label class="text-xs font-medium text-gray-500 mb-1 block">특이사항</label>
+        <input id="mNotes" type="text" placeholder="메모 (선택)"
+          class="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+      </div>
+      <div class="flex gap-5 pt-1">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="mNew" class="accent-pink-500" />
+          <span class="text-sm text-gray-600">새신자</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="mAllergy" class="accent-red-500" />
+          <span class="text-sm text-gray-600">알러지</span>
+        </label>
+      </div>
+      <p id="manualError" class="text-red-500 text-sm hidden"></p>
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closeManualModal()"
+          class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-semibold hover:bg-gray-200 text-sm">취소</button>
+        <button type="submit" id="manualSubmitBtn"
+          class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 text-sm">체크인</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// ─── Constants ────────────────────────────────────────────────────────────────
+const DEPTS = ["유아부 (Infant)","유치부 (Preschool)","유년부 (Elementary Jr)","초등부 (Elementary)","중고등부 (Middle/High)"];
+const DEPT_STYLE = {
+  "유아부 (Infant)":        { badge:"bg-blue-100 text-blue-800 border-blue-300",   card:"bg-blue-50 border-blue-200"   },
+  "유치부 (Preschool)":     { badge:"bg-emerald-100 text-emerald-800 border-emerald-300", card:"bg-emerald-50 border-emerald-200" },
+  "유년부 (Elementary Jr)": { badge:"bg-yellow-100 text-yellow-800 border-yellow-300", card:"bg-yellow-50 border-yellow-200" },
+  "초등부 (Elementary)":    { badge:"bg-orange-100 text-orange-800 border-orange-300", card:"bg-orange-50 border-orange-200" },
+  "중고등부 (Middle/High)": { badge:"bg-purple-100 text-purple-800 border-purple-300", card:"bg-purple-50 border-purple-200" },
+};
+
+let _password = "";
+let _records  = [];
+let _filter   = "전체";
+let _autoRefresh;
+
+// ─── Login ────────────────────────────────────────────────────────────────────
+async function doLogin(e) {
+  e.preventDefault();
+  const pw  = document.getElementById("pwInput").value;
+  const btn = document.getElementById("loginBtn");
+  const err = document.getElementById("loginError");
+  btn.textContent = "확인 중..."; btn.disabled = true; err.classList.add("hidden");
+
+  const res = await fetch(`/api/attendance-today?password=${encodeURIComponent(pw)}`);
+  const data = await res.json();
+  if (res.status === 401) {
+    err.textContent = "비밀번호가 올바르지 않습니다";
+    err.classList.remove("hidden");
+    btn.textContent = "로그인 / Login"; btn.disabled = false;
+    return;
+  }
+  if (!res.ok) {
+    err.textContent = data.error || "오류가 발생했습니다";
+    err.classList.remove("hidden");
+    btn.textContent = "로그인 / Login"; btn.disabled = false;
+    return;
+  }
+  _password = pw;
+  document.getElementById("loginGate").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+  renderDashboard(data);
+  // Auto-refresh every 30s
+  _autoRefresh = setInterval(loadAttendance, 30000);
+}
+
+// ─── Load attendance ──────────────────────────────────────────────────────────
+async function loadAttendance() {
+  const btn = document.getElementById("refreshBtn");
+  if (btn) btn.textContent = "⏳";
+  try {
+    const res  = await fetch(`/api/attendance-today?password=${encodeURIComponent(_password)}`);
+    const data = await res.json();
+    if (res.ok) {
+      renderDashboard(data);
+      const ts = new Date().toLocaleTimeString("ko-KR", { hour:"2-digit", minute:"2-digit" });
+      const el = document.getElementById("lastRefreshed");
+      if (el) el.textContent = ts + " 업데이트";
+    }
+  } catch(e) { console.error(e); }
+  if (btn) btn.textContent = "🔄 새로고침";
+}
+
+// ─── Render dashboard ─────────────────────────────────────────────────────────
+function renderDashboard(data) {
+  _records = data.records || [];
+
+  // Date
+  const dateEl = document.getElementById("dashDate");
+  if (dateEl && data.date) {
+    dateEl.textContent = new Date(data.date + "T00:00:00").toLocaleDateString("ko-KR",
+      { year:"numeric", month:"long", day:"numeric", weekday:"long" });
+  }
+
+  const total      = _records.length;
+  const checkedIn  = _records.filter(r => !r.checkOut).length;
+  const checkedOut = _records.filter(r => r.checkOut).length;
+  const newCount   = _records.filter(r => r.isNew).length;
+
+  // Stats
+  document.getElementById("statsGrid").innerHTML = [
+    ["👥","총 출석",total,"bg-indigo-100 text-indigo-900"],
+    ["✅","재실 중",checkedIn,"bg-emerald-100 text-emerald-900"],
+    ["🏠","귀가 완료",checkedOut,"bg-gray-100 text-gray-700"],
+    ["🎉","새신자",newCount,"bg-pink-100 text-pink-900"],
+  ].map(([icon,label,val,cls]) =>
+    `<div class="rounded-2xl p-4 ${cls} flex items-center gap-3">
+      <span class="text-2xl">${icon}</span>
+      <div><p class="text-2xl font-bold leading-none">${val}</p><p class="text-xs font-medium mt-0.5 opacity-70">${label}</p></div>
+    </div>`
+  ).join("");
+
+  // Allergy banner
+  const allergyActive = _records.filter(r => r.hasAllergy && !r.checkOut);
+  const banner = document.getElementById("allergyBanner");
+  if (allergyActive.length) {
+    banner.classList.remove("hidden");
+    document.getElementById("allergyBannerTitle").textContent =
+      `⚠️ 현재 재실 중인 알러지 주의 학생 (${allergyActive.length}명)`;
+    document.getElementById("allergyBannerList").innerHTML =
+      allergyActive.map(r =>
+        `<span class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded-full border border-red-300">
+          ${r.name} (${(r.department||"").split(" ")[0]||r.department})
+         </span>`).join("");
+  } else banner.classList.add("hidden");
+
+  // Dept breakdown
+  const deptCounts = {};
+  DEPTS.forEach(d => { deptCounts[d] = { total:0, active:0 }; });
+  _records.forEach(r => {
+    if (deptCounts[r.department]) {
+      deptCounts[r.department].total++;
+      if (!r.checkOut) deptCounts[r.department].active++;
+    }
+  });
+  document.getElementById("deptBreakdown").innerHTML = DEPTS.map(d => {
+    const s = DEPT_STYLE[d]||{};
+    const c = deptCounts[d];
+    const selected = _filter === d;
+    return `<button onclick="setFilter('${d}')"
+      class="rounded-xl p-3 text-left border transition-all ${s.card||"bg-gray-50 border-gray-200"}
+             ${selected ? "ring-2 ring-offset-1 ring-indigo-400" : "hover:opacity-80"}">
+      <p class="text-lg font-bold text-gray-800">${c.total}</p>
+      <p class="text-xs font-medium text-gray-600 truncate">${d.split(" ")[0]}</p>
+      <p class="text-xs text-gray-400 mt-0.5">${c.active}명 재실</p>
+    </button>`;
+  }).join("");
+
+  renderTable();
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+function setFilter(f) { _filter = f; renderTable(); renderDepts(); }
+
+function renderDepts() {
+  // Re-render dept buttons (selected state)
+  const deptCounts = {};
+  DEPTS.forEach(d => { deptCounts[d] = 0; });
+  _records.forEach(r => { if (deptCounts[r.department] !== undefined) deptCounts[r.department]++; });
+  document.getElementById("deptBreakdown").querySelectorAll("button").forEach((btn, i) => {
+    btn.classList.toggle("ring-2", _filter === DEPTS[i]);
+    btn.classList.toggle("ring-offset-1", _filter === DEPTS[i]);
+    btn.classList.toggle("ring-indigo-400", _filter === DEPTS[i]);
+  });
+}
+
+function deptBadge(d) {
+  const c = (DEPT_STYLE[d]||{}).badge || "bg-gray-100 text-gray-600 border-gray-200";
+  return `<span class="text-xs font-semibold px-2 py-0.5 rounded-full border ${c}">${d||"미지정"}</span>`;
+}
+
+function renderTable() {
+  const filtered = _filter === "전체" ? _records : _records.filter(r => r.department === _filter);
+  const total    = _records.length;
+
+  // Filter tabs
+  const allDepts = ["전체", ...DEPTS];
+  const deptCounts = {};
+  DEPTS.forEach(d => { deptCounts[d] = _records.filter(r => r.department === d).length; });
+  document.getElementById("filterTabs").innerHTML = allDepts.map(d =>
+    `<button onclick="setFilter('${d}')"
+      class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors
+             ${_filter===d ? "bg-indigo-600 text-white" : "text-gray-500 hover:bg-gray-200"}">
+      ${d==="전체" ? `전체 (${total})` : `${d.split(" ")[0]} (${deptCounts[d]||0})`}
+    </button>`
+  ).join("");
+
+  if (!filtered.length) {
+    document.getElementById("tableArea").innerHTML =
+      `<div class="text-center py-12 text-gray-400"><p class="text-2xl mb-2">📋</p><p class="text-sm">출석 기록이 없습니다</p></div>`;
+    document.getElementById("tableFooter").textContent = "";
+    return;
+  }
+
+  document.getElementById("tableArea").innerHTML = `
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="text-xs text-gray-400 font-medium border-b border-gray-100">
+            <th class="text-left py-3 px-4">이름</th>
+            <th class="text-left py-3 px-4 hidden sm:table-cell">부서</th>
+            <th class="text-left py-3 px-4">체크인</th>
+            <th class="text-left py-3 px-4">체크아웃</th>
+            <th class="text-center py-3 px-4 hidden md:table-cell">보호자</th>
+            <th class="text-left py-3 px-4">액션</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map(r => tableRow(r)).join("")}
+        </tbody>
+      </table>
+    </div>`;
+  document.getElementById("tableFooter").textContent = `총 ${filtered.length}명 표시 중`;
+}
+
+function tableRow(r) {
+  const allergyRow = r.hasAllergy ? "bg-red-50/30" : "";
+  const checkoutBtn = r.checkOut
+    ? `<span class="text-xs text-gray-400 px-2 py-1 rounded-lg bg-gray-100">완료</span>`
+    : `<button onclick="adminCheckout('${r.id}')" id="co-btn-${r.id}"
+         class="text-xs px-3 py-1.5 rounded-lg bg-indigo-100 text-indigo-700 font-semibold hover:bg-indigo-200 transition-colors whitespace-nowrap">
+         체크아웃</button>`;
+  return `
+  <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors ${allergyRow}">
+    <td class="py-3 px-4">
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-gray-900">${r.name}</span>
+        ${r.isNew ? `<span class="text-xs px-1.5 py-0.5 rounded-full bg-pink-100 text-pink-600 font-bold">NEW</span>` : ""}
+        ${r.hasAllergy ? `<span class="text-xs px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 font-bold">⚠️</span>` : ""}
+      </div>
+      ${r.notes ? `<p class="text-xs text-amber-600 mt-0.5 truncate max-w-[140px]">${r.notes}</p>` : ""}
+    </td>
+    <td class="py-3 px-4 hidden sm:table-cell">${deptBadge(r.department)}</td>
+    <td class="py-3 px-4 text-sm text-gray-600 font-mono">${r.checkIn||"—"}</td>
+    <td class="py-3 px-4 text-sm font-mono">${r.checkOut
+      ? `<span class="text-gray-600">${r.checkOut}</span>`
+      : `<span class="text-emerald-600 font-semibold">재실 중</span>`}</td>
+    <td class="py-3 px-4 hidden md:table-cell text-center">${r.guardianConfirmed ? "✅" : "<span class='text-gray-300'>—</span>"}</td>
+    <td class="py-3 px-4">${checkoutBtn}</td>
+  </tr>`;
+}
+
+async function adminCheckout(pageId) {
+  const btn = document.getElementById(`co-btn-${pageId}`);
+  if (btn) { btn.textContent = "..."; btn.disabled = true; }
+  try {
+    const res  = await fetch("/api/checkout", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ pageId, guardianConfirmed:true })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      _records = _records.map(r => r.id === pageId
+        ? { ...r, checkOut:data.checkOutTime, guardianConfirmed:true }
+        : r);
+      renderTable();
+      renderStats();
+    }
+  } catch(e) { alert("체크아웃 실패"); }
+}
+
+function renderStats() {
+  const checkedIn  = _records.filter(r => !r.checkOut).length;
+  const checkedOut = _records.filter(r => r.checkOut).length;
+  const total      = _records.length;
+  const newCount   = _records.filter(r => r.isNew).length;
+  document.getElementById("statsGrid").innerHTML = [
+    ["👥","총 출석",total,"bg-indigo-100 text-indigo-900"],
+    ["✅","재실 중",checkedIn,"bg-emerald-100 text-emerald-900"],
+    ["🏠","귀가 완료",checkedOut,"bg-gray-100 text-gray-700"],
+    ["🎉","새신자",newCount,"bg-pink-100 text-pink-900"],
+  ].map(([icon,label,val,cls]) =>
+    `<div class="rounded-2xl p-4 ${cls} flex items-center gap-3">
+      <span class="text-2xl">${icon}</span>
+      <div><p class="text-2xl font-bold leading-none">${val}</p><p class="text-xs font-medium mt-0.5 opacity-70">${label}</p></div>
+    </div>`
+  ).join("");
+}
+
+// ─── Manual Checkin ───────────────────────────────────────────────────────────
+function openManualModal() {
+  document.getElementById("mName").value = "";
+  document.getElementById("mDept").value = "";
+  document.getElementById("mStaff").value = "";
+  document.getElementById("mNotes").value = "";
+  document.getElementById("mNew").checked = false;
+  document.getElementById("mAllergy").checked = false;
+  document.getElementById("manualError").classList.add("hidden");
+  document.getElementById("manualModal").classList.remove("hidden");
+  setTimeout(() => document.getElementById("mName").focus(), 50);
+}
+function closeManualModal() { document.getElementById("manualModal").classList.add("hidden"); }
+
+async function doManualCheckin(e) {
+  e.preventDefault();
+  const btn = document.getElementById("manualSubmitBtn");
+  const err = document.getElementById("manualError");
+  btn.textContent = "처리 중..."; btn.disabled = true; err.classList.add("hidden");
+  try {
+    const res = await fetch("/api/checkin", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        name:    document.getElementById("mName").value.trim(),
+        department: document.getElementById("mDept").value,
+        staff:   document.getElementById("mStaff").value.trim(),
+        notes:   document.getElementById("mNotes").value.trim(),
+        isNew:   document.getElementById("mNew").checked,
+        hasAllergy: document.getElementById("mAllergy").checked,
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    closeManualModal();
+    await loadAttendance();
+  } catch(e) {
+    err.textContent = e.message || "오류가 발생했습니다";
+    err.classList.remove("hidden");
+    btn.textContent = "체크인"; btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
