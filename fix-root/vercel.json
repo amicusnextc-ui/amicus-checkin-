@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "search-student.js",  "use": "@vercel/node" },
+    { "src": "checkin.js",         "use": "@vercel/node" },
+    { "src": "checkout.js",        "use": "@vercel/node" },
+    { "src": "check-status.js",    "use": "@vercel/node" },
+    { "src": "attendance-today.js","use": "@vercel/node" },
+    { "src": "index.html",         "use": "@vercel/static" },
+    { "src": "admin.html",         "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/search-student",  "dest": "/search-student.js"  },
+    { "src": "/api/checkin",         "dest": "/checkin.js"         },
+    { "src": "/api/checkout",        "dest": "/checkout.js"        },
+    { "src": "/api/check-status",    "dest": "/check-status.js"    },
+    { "src": "/api/attendance-today","dest": "/attendance-today.js" },
+    { "src": "/admin",               "dest": "/admin.html"         },
+    { "src": "/(.*)",                "dest": "/$1"                 }
+  ]
+}
