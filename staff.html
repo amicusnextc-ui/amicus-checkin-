@@ -250,7 +250,8 @@ async function loadAttendance(){
       var parentInfo=(r.fatherName?"👨 "+r.fatherName+" ":"")+((r.motherName?"👩 "+r.motherName:""));
       if(!parentInfo&&r.guardian)parentInfo=r.guardian;
       var statusBadge=r.checkOut?"<span class='badge' style='background:#f3f4f6;color:#6b7280'>체크아웃</span>":r.checkIn?"<span class='badge' style='background:#d1fae5;color:#065f46'>체크인</span>":"-";
-      html+="<tr><td><div style='font-weight:600'>"+(r.name||"")+"</div>"+(r.nameEN?"<div style='font-size:11px;color:#9ca3af'>"+r.nameEN+"</div>":"")+"</td>";
+      var bdayNow2=new Date();var rDob2=r.dob?new Date(r.dob):null;var isBdayRow=rDob2&&rDob2.getMonth()===bdayNow2.getMonth()&&rDob2.getDate()===bdayNow2.getDate();
+      html+="<tr>"+(isBdayRow?"<td style='background:#fdf2f8'>": "<td>")+"<div style='font-weight:600'>"+(r.name||"")+"</div>"+(r.nameEN?"<div style='font-size:11px;color:#9ca3af'>"+r.nameEN+"</div>":"")+(isBdayRow?"<div style='font-size:11px;color:#be185d;font-weight:700'>🎂 오늘 생일!</div>":"")+"</td>";
       html+="<td style='color:#6b7280'>"+(r.grade||"-")+"</td>";
       html+="<td style='color:#9ca3af;font-size:12px'>"+(r.dob||"-")+"</td>";
       html+="<td>"+allergyBadge+"</td>";
