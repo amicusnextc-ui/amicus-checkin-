@@ -1,4 +1,4 @@
-const ATTENDANCE_DB = process.env.NOTION_ATTENDANCE_DB_ID || "90c5f86f-1123-4b62-94a1-12c183efd8b1";
+const ATTENDANCE_DB = process.env.NOTION_ATTENDANCE_DB_ID || "89b6c47f85a842968493ce28ad93f8de";
 const NOTION_VERSION = "2022-06-28";
 const TIMEZONE = "America/Los_Angeles";
 module.exports = async (req, res) => {
@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   if (req.method !== "GET") return res.status(405).end();
   const { password } = req.query;
   if (!password || password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: "인증이 필요합니다" });
+    return res.status(401).json({ error: "ì¸ì¦ì´ íìí©ëë¤" });
   }
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
   try {
@@ -14,8 +14,8 @@ module.exports = async (req, res) => {
     let start_cursor = undefined;
     do {
       const body = {
-        filter: { property: "주일 날짜 (Date)", date: { equals: today } },
-        sorts:  [{ property: "체크인 시간 (Check-in)", direction: "ascending" }],
+        filter: { property: "ì£¼ì¼ ë ì§ (Date)", date: { equals: today } },
+        sorts:  [{ property: "ì²´í¬ì¸ ìê° (Check-in)", direction: "ascending" }],
         page_size: 100,
       };
       if (start_cursor) body.start_cursor = start_cursor;
@@ -29,24 +29,24 @@ module.exports = async (req, res) => {
         body: JSON.stringify(body),
       });
       const data = await response.json();
-      if (!response.ok) return res.status(500).json({ error: data.message || "Notion API 오류" });
+      if (!response.ok) return res.status(500).json({ error: data.message || "Notion API ì¤ë¥" });
       allResults = [...allResults, ...(data.results || [])];
       start_cursor = data.has_more ? data.next_cursor : undefined;
     } while (start_cursor);
     const records = allResults.map(p => ({
       id:                p.id,
-      name:              p.properties["이름 (Name)"]?.title?.[0]?.plain_text || "",
-      department:        p.properties["부서 (Department)"]?.select?.name || "",
-      checkIn:           p.properties["체크인 시간 (Check-in)"]?.rich_text?.[0]?.plain_text  || "",
-      checkOut:          p.properties["체크아웃 시간 (Check-out)"]?.rich_text?.[0]?.plain_text || "",
-      staff:             p.properties["간사 (Staff)"]?.rich_text?.[0]?.plain_text || "",
-      guardianConfirmed: p.properties["보호자 인계 확인 (Guardian)"]?.checkbox || false,
-      isNew:             p.properties["새신자 (New)"]?.checkbox || false,
-      hasAllergy:        p.properties["알러지 알림 (Allergy Alert)"]?.checkbox || false,
-      notes:             p.properties["특이사항 (Notes)"]?.rich_text?.[0]?.plain_text || "",
+      name:              p.properties["ì´ë¦ (Name)"]?.title?.[0]?.plain_text || "",
+      department:        p.properties["ë¶ì (Department)"]?.select?.name || "",
+      checkIn:           p.properties["ì²´í¬ì¸ ìê° (Check-in)"]?.rich_text?.[0]?.plain_text  || "",
+      checkOut:          p.properties["ì²´í¬ìì ìê° (Check-out)"]?.rich_text?.[0]?.plain_text || "",
+      staff:             p.properties["ê°ì¬ (Staff)"]?.rich_text?.[0]?.plain_text || "",
+      guardianConfirmed: p.properties["ë³´í¸ì ì¸ê³ íì¸ (Guardian)"]?.checkbox || false,
+      isNew:             p.properties["ìì ì (New)"]?.checkbox || false,
+      hasAllergy:        p.properties["ìë¬ì§ ìë¦¼ (Allergy Alert)"]?.checkbox || false,
+      notes:             p.properties["í¹ì´ì¬í­ (Notes)"]?.rich_text?.[0]?.plain_text || "",
     }));
     return res.status(200).json({ records, date: today, total: records.length });
   } catch (e) {
-    return res.status(500).json({ error: "데이터 로드 오류: " + e.message });
+    return res.status(500).json({ error: "ë°ì´í° ë¡ë ì¤ë¥: " + e.message });
   }
 };
