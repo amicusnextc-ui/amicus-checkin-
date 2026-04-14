@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
       const fatherName = rt("\uC544\uBC84\uC9C0 \uC774\uB984 (Father Name)");
       const motherName = rt("\uC5B4\uBA38\uB2C8 \uC774\uB984 (Mother Name)");
       const fatherPhone = ph("\uC544\uBC84\uC9C0 \uC5F0\uB77D\uCC98 (Father Phone)");
-      const motherPhone = ph("\uC5B4\uMA38\uB2C8 \uC5F0\uB77D\uCC98 (Mother Phone)");
+      const motherPhone = ph("\uC5B4\uBA38\uB2C8 \uC5F0\uB77D\uCC98 (Mother Phone)");
 
       // Build guardian display string from father/mother
       let guardian = "";
