@@ -62,7 +62,7 @@
       <div class="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
         <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse"></div>실시간 30초
       </div>
-      <button onclick="loadAttendance()" class="text-xs text-indigo-600 font-semibold px-2.5 py-1 rounded-full bg-indigo-50 hover:bg-indigo-100">새로고침</button>
+      <button onclick="loadRoster()" class="text-xs text-indigo-600 font-semibold px-2.5 py-1 rounded-full bg-indigo-50 hover:bg-indigo-100">새로고침</button>
     </div>
   </div>
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -160,7 +160,7 @@ function switchTab(tab){
   if(tab==="attendance"&&attBtn){attBtn.classList.add("bg-indigo-600","text-white");}
   if(tab==="roster"&&rosBtn){rosBtn.classList.add("bg-indigo-600","text-white");}
   if(tab==="roster")loadRoster();
-  else loadAttendance();
+  else loadRoster();
 }
 
 const STAFF_MAP = {
@@ -172,6 +172,24 @@ const STAFF_MAP = {
 };
 const DEPT_COLORS={"유아부 (Infant)":"bg-blue-500","유치부 (Preschool)":"bg-emerald-500","유년부 (Elementary Jr)":"bg-yellow-500","초등부 (Elementary)":"bg-orange-500","중고등부 (Middle/High)":"bg-purple-500"};
 
+
+async function loadAttendance() {
+  const tbody = document.getElementById("attendanceTable");
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-gray-400">\ubd88\ub7ec\uc624\ub294 \uc911...</td></tr>';
+  try {
+    const res = await fetch("/api/attendance");
+    const data = await res.json();
+    const records = data.records || [];
+    if (!records.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-400">\uc624\ub298 \ucc28\ud06c\uc778 \uae30\ub85d\uc774 \uc5c6\uc2b5\ub2c8\ub2e4</td></tr>';
+      return;
+    }
+    tbody.innerHTML = records.map(r => `<tr class="border-b border-gray-50 hover:bg-gray-50"><td class="px-4 py-3"><div class="font-semibold text-sm">${r.name||""}</div>${r.nameEN?'<div class="text-xs text-gray-400">'+r.nameEN+'</div>':""}</td><td class="px-3 py-3 text-xs text-gray-600">${r.grade||"-"}</td><td class="px-3 py-3 text-xs text-gray-600">${r.dob||"-"}</td><td class="px-3 py-3 text-xs">${r.hasAllergy?'<span class="bg-red-100 text-red-700 px-1.5 rounded-full">\u26a0\ufe0f '+r.allergy+'</span>':"-"}</td><td class="px-3 py-3 text-xs text-gray-600">${r.fatherName?'\ud83d\udc68 '+r.fatherName:""}${r.motherName?'\ud83d\udc69 '+r.motherName:""}</td><td class="px-3 py-3 text-center text-xs text-emerald-600 font-semibold">${r.checkIn||"-"}</td><td class="px-3 py-3 text-center text-xs text-indigo-600 font-semibold">${r.checkOut||"-"}</td><td class="px-3 py-3 text-center text-xs">${r.checkOut?'<span class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">\uccb4\ud06c\uc544\uc6c3</span>':r.checkIn?'<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">\uccb4\ud06c\uc778</span>':'-'}</td></tr>`).join("");
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-red-400">\ub85c\ub4dc \uc2e4\ud328: '+e.message+'</td></tr>';
+  }
+}
 async function loadRoster() {
   document.getElementById('rosterTable').innerHTML = '<tr><td colspan="4" class="text-center py-10 text-gray-400"><div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-xs">로딩 중...</p></td></tr>';
   try {
