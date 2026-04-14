@@ -313,7 +313,7 @@ function openAddStudent() {
   document.getElementById('editId').value = '';
   ['name','nameEN','grade','guardian','phone','notes'].forEach(f => document.getElementById('f-'+f).value = '');
   document.getElementById('f-allergy').value = '없음';
-  false = false;
+  
   document.getElementById('modalError').classList.add('hidden');
   document.getElementById('studentModal').classList.remove('hidden');
 }
@@ -329,7 +329,7 @@ function editStudent(s) {
   document.getElementById('f-phone').value = s.phone || '';
   document.getElementById('f-allergy').value = s.allergy || '없음';
   document.getElementById('f-notes').value = s.notes || '';
-  false = s.isNew || false;
+  s.isNew || false;
   document.getElementById('modalError').classList.add('hidden');
   document.getElementById('studentModal').classList.remove('hidden');
 }
