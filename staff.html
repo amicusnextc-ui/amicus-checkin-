@@ -17,7 +17,7 @@
   <div class="text-center mb-6">
     <div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
       <svg class="w-7 h-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-    </div>
+    </div><div class="border-t border-gray-100 pt-3"><p class="text-xs font-bold text-gray-400 uppercase mb-2">이메일 / Email</p><div class="grid grid-cols-2 gap-3"><div><label class="text-xs text-gray-500">아버지 이메일</label><input id="f-fatherEmail" type="email" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div><div><label class="text-xs text-gray-500">어머니 이메일</label><input id="f-motherEmail" type="email" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div></div><div class="mt-3"><label class="text-xs text-gray-500">집주소 (Address)</label><input id="f-address" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div></div>
     <h1 class="text-2xl font-bold text-gray-900">간사/사역자 포털</h1>
     <p class="text-gray-400 text-sm mt-1">Amicus Next — Staff Portal</p>
   </div>
@@ -71,7 +71,7 @@
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
-        <thead><tr class="bg-gray-50 border-b border-gray-100"><th class="text-left px-4 py-3 text-xs font-bold text-gray-500">이름</th><th class="text-left px-3 py-3 text-xs font-bold text-gray-500">학년/학교</th><th class="text-left px-3 py-3 text-xs font-bold text-gray-500">부/모</th><th class="text-center px-2 py-3 text-xs font-bold text-gray-500">사진</th><th class="text-center px-2 py-3 text-xs font-bold text-gray-500">세례</th><th class="text-center px-2 py-3 text-xs font-bold text-gray-500">Liability</th><th class="text-center px-2 py-3 text-xs font-bold text-gray-500">생일</th><th class="px-2 py-3"></th></tr></thead>
+        <thead><tr class="bg-gray-50 border-b border-gray-100"><th class="text-left px-3 py-3 text-xs font-bold text-gray-500">이름</th><th class="text-left px-3 py-3 text-xs font-bold text-gray-500">학년/나이</th><th class="text-left px-3 py-3 text-xs font-bold text-gray-500">부/모</th><th class="text-center px-2 py-3 text-xs font-bold text-gray-500">사진</th><th class="text-center px-2 py-3 text-xs font-bold text-gray-500">세례</th><th class="text-center px-2 py-3 text-xs font-bold text-gray-500">Liability</th><th class="text-center px-2 py-3 text-xs font-bold text-gray-500">생일</th><th class="px-2 py-3"></th></tr></thead>
         <tbody id="attendanceTable"><tr><td colspan="4" class="text-center py-10 text-gray-400">
           <div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div>
           <p class="text-xs">로딩 중...</p>
@@ -92,115 +92,7 @@
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
-        <thead><tr class="bg-gray-50 border-b border-gray-100">
-          <th class="text-left px-4 py-3 text-xs font-bold text-gray-500">이름</th>
-          <th class="text-left px-3 py-3 text-xs font-bold text-gray-500">학년</th>
-          <th class="text-left px-3 py-3 text-xs font-bold text-gray-500">보호자</th>
-          <th class="text-center px-3 py-3 text-xs font-bold text-gray-500"></th>
-        </tr></thead>
-        <tbody id="rosterTable"><tr><td colspan="4" class="text-center py-10 text-gray-400">
-          <div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div>
-          <p class="text-xs">로딩 중...</p>
-        </td></tr></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- 학생 추가/수정 모달 -->
-<div id="studentModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center"><div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg max-h-[95vh] overflow-y-auto"><div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 sticky top-0 bg-white"><h2 id="modalTitle" class="text-lg font-bold text-gray-900">학생 추가</h2><button onclick="closeStudentModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div class="p-5 space-y-3"><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold text-gray-500 uppercase">이름 *</label><input id="f-name" type="text" placeholder="한글 이름" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div><div><label class="text-xs font-bold text-gray-500 uppercase">English Name</label><input id="f-nameEN" type="text" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div></div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold text-gray-500 uppercase">생년월일</label><input id="f-dob" type="date" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div><div><label class="text-xs font-bold text-gray-500 uppercase">부서</label><select id="f-dept" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"><option value="">선택...</option><option value="유아부 (Infant)">유아부 (Infant)</option><option value="유치부 (Preschool)">유치부 (Preschool)</option><option value="유년부 (Elementary Jr)">유년부 (Elementary Jr)</option><option value="초등부 (Elementary)">초등부 (Elementary)</option><option value="중고등부 (Middle/High)">중고등부 (Middle/High)</option></select></div></div><div class="grid grid-cols-2 gap-3"><div><label class="text-xs font-bold text-gray-500 uppercase">학년</label><input id="f-grade" type="text" placeholder="6th grade" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div><div><label class="text-xs font-bold text-gray-500 uppercase">학교</label><input id="f-school" type="text" placeholder="Bernardo Heights" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div></div><div class="border-t border-gray-100 pt-3"><p class="text-xs font-bold text-gray-400 uppercase mb-2">아버지 (Father)</p><div class="grid grid-cols-2 gap-3"><div><label class="text-xs text-gray-500">이름</label><input id="f-fatherName" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div><div><label class="text-xs text-gray-500">연락처</label><input id="f-fatherPhone" type="tel" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div></div></div><div class="border-t border-gray-100 pt-3"><p class="text-xs font-bold text-gray-400 uppercase mb-2">어머니 (Mother)</p><div class="grid grid-cols-2 gap-3"><div><label class="text-xs text-gray-500">이름</label><input id="f-motherName" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div><div><label class="text-xs text-gray-500">연락처</label><input id="f-motherPhone" type="tel" class="w-full mt-1 px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div></div></div><div class="grid grid-cols-3 gap-2 border-t border-gray-100 pt-3"><div><label class="text-xs font-bold text-gray-500 uppercase">세례</label><select id="f-baptized" class="w-full mt-1 px-2 py-2 rounded-xl border border-gray-200 focus:outline-none text-xs"><option value="">-</option><option value="세례">세례</option><option value="미세례">미세례</option><option value="확인필요">확인필요</option></select></div><div><label class="text-xs font-bold text-gray-500 uppercase">사진</label><select id="f-photo" class="w-full mt-1 px-2 py-2 rounded-xl border border-gray-200 focus:outline-none text-xs"><option value="">-</option><option value="촬영 완료">촬영 완료</option><option value="미촬영">미촬영</option></select></div><div><label class="text-xs font-bold text-gray-500 uppercase">Liability</label><select id="f-liability" class="w-full mt-1 px-2 py-2 rounded-xl border border-gray-200 focus:outline-none text-xs"><option value="">-</option><option value="제출 완료">제출 완료</option><option value="미제출">미제출</option><option value="확인 필요">확인 필요</option></select></div></div><div><label class="text-xs font-bold text-gray-500 uppercase">알러지</label><input id="f-allergy" type="text" placeholder="없음" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div><div><label class="text-xs font-bold text-gray-500 uppercase">특이사항</label><textarea id="f-notes" rows="2" class="w-full mt-1 px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm resize-none"></textarea></div></div><div id="modalError" class="hidden mx-5 mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm"></div><div class="flex gap-3 px-5 pb-5"><button onclick="closeStudentModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100">취소</button><button onclick="submitStudent()" id="submitStudentBtn" class="flex-1 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700">저장</button></div></div></div>
-
-<script>
-const DEPT_COLORS = {
-  "유아부 (Infant)": "bg-blue-500",
-  "유치부 (Preschool)": "bg-emerald-500",
-  "유년부 (Elementary Jr)": "bg-yellow-500",
-  "초등부 (Elementary)": "bg-orange-500",
-  "중고등부 (Middle/High)": "bg-purple-500"
-};
-let currentName=null, currentDept=null, currentPw=null, rosterData=[], refreshTimer=null;
-
-async function loadStaffList() {
-  try {
-    const r = await fetch('/api/staff-list');
-    const d = await r.json();
-    const sel = document.getElementById('nameSelect');
-    (d.staff||[]).forEach(s => {
-      const o = document.createElement('option');
-      o.value = s.name;
-      o.textContent = s.name + ' — ' + s.dept.split(' ')[0];
-      sel.appendChild(o);
-    });
-  } catch(e) {}
-}
-loadStaffList();
-
-async function doLogin() {
-  const name = document.getElementById('nameSelect').value;
-  const pw = document.getElementById('pwInput').value;
-  const err = document.getElementById('loginError');
-  err.classList.add('hidden');
-  if (!name) { err.textContent = '이름을 선택해주세요'; err.classList.remove('hidden'); return; }
-  if (!pw) { err.textContent = '비밀번호를 입력해주세요'; err.classList.remove('hidden'); return; }
-  try {
-    const r = await fetch(`/api/staff-auth?name=${encodeURIComponent(name)}&password=${encodeURIComponent(pw)}`);
-    const d = await r.json();
-    if (!d.ok) { err.textContent = d.error || '로그인 실패'; err.classList.remove('hidden'); return; }
-    currentName = d.name; currentDept = d.dept; currentPw = pw;
-    sessionStorage.setItem('sName', currentName);
-    sessionStorage.setItem('sDept', currentDept);
-    sessionStorage.setItem('sPw', currentPw);
-    showDashboard();
-  } catch(e) { err.textContent = '오류: ' + e.message; err.classList.remove('hidden'); }
-}
-
-function showDashboard() {
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('dashboard').classList.remove('hidden');
-  document.getElementById('dashName').textContent = currentName + ' 간사님';
-  document.getElementById('dashDept').textContent = currentDept;
-  const dot = document.getElementById('deptDot');
-  dot.className = 'w-3 h-3 rounded-full ' + (DEPT_COLORS[currentDept] || 'bg-indigo-500');
-  showTab('attendance');
-}
-
-function logout() {
-  clearInterval(refreshTimer);
-  sessionStorage.clear();
-  currentName = currentDept = currentPw = null;
-  document.getElementById('dashboard').classList.add('hidden');
-  document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('pwInput').value = '';
-}
-
-function showTab(tab) {
-  ['attendance','roster'].forEach(t => {
-    document.getElementById(t+'Tab').classList.toggle('hidden', t!==tab);
-    const btn = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
-    btn.className = t===tab
-      ? 'text-xs px-3 py-1.5 rounded-lg font-semibold bg-indigo-600 text-white'
-      : 'text-xs px-3 py-1.5 rounded-lg font-semibold text-gray-500 hover:bg-gray-100';
-  });
-  clearInterval(refreshTimer);
-  if (tab === 'attendance') { loadAttendance(); refreshTimer = setInterval(loadAttendance, 30000); }
-  if (tab === 'roster') loadRoster();
-}
-
-async function loadAttendance() {
-  try {
-    const r = await fetch(`/api/attendance-today?password=${encodeURIComponent(currentPw)}`);
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error);
-    const my = d.records.filter(rec => rec.department === currentDept);
-    document.getElementById('statTotal').textContent = my.length;
-    document.getElementById('statIn').textContent = my.filter(rec => rec.checkIn && !rec.checkOut).length;
-    document.getElementById('statOut').textContent = my.filter(rec => rec.checkOut).length;
-    document.getElementById('statNew').textContent = my.filter(rec => rec.isNew).length;
-    document.getElementById('lastUpdated').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
-    const tbody = document.getElementById('attendanceTable');
-    if (!my.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="text-center py-12 text-gray-300"><div class="text-3xl mb-2">📅</div><p class="text-sm">오늘 출석 기록 없음</p></td></tr>';
+        <thead><tr class="border-b border-gray-50 hover:bg-gray-50"><td class="px-4 py-3"><div class="font-semibold text-gray-900 text-sm">${r.name}</div>${r.nameEN ? '<div class="text-xs text-gray-400">'+r.nameEN+'</div>' : ''}${r.isNew ? '<span class="text-xs bg-indigo-100 text-indigo-700 px-1.5 rounded-full">\ubc29\ubb38\uc790</span>' : ''}</td><td class="px-3 py-3 text-xs text-gray-600">${r.grade||'<span class="text-gray-300">-</span>'}</td><td class="px-3 py-3 text-xs text-gray-600">${r.dob||'<span class="text-gray-300">-</span>'}</td><td class="px-3 py-3 text-xs">${(r.allergy && r.allergy !== '없음' && r.hasAllergy) ? '<span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-semibold">\u26a0\ufe0f '+r.allergy+'</span>' : '<span class="text-gray-300">-</span>'}</td><td class="px-3 py-3 text-xs text-gray-600">${r.fatherName ? '<div>\ud83d\udc68 '+r.fatherName+'</div>' : ''}${r.motherName ? '<div>\ud83d\udc69 '+r.motherName+'</div>' : ''}${(!r.fatherName&&!r.motherName&&r.guardian) ? r.guardian : ''}</td><td class="px-3 py-3 text-center text-xs text-emerald-600 font-semibold">${r.checkIn||'<span class="text-gray-300">-</span>'}</td><td class="px-3 py-3 text-center text-xs text-indigo-600 font-semibold">${r.checkOut||'<span class="text-gray-300">-</span>'}</td><td class="px-3 py-3 text-center">${r.checkOut ? '<span class="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full">\uccb4\ud06c\uc544\uc6c3</span>' : r.checkIn ? '<span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full">\uccb4\ud06c\uc778</span>' : '<span class="text-gray-300">-</span>'}</td></tr>';
       return;
     }
     tbody.innerHTML = my.sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')).map((rec,i) => `
@@ -249,7 +141,7 @@ function renderRoster(students) {
     return;
   }
   document.getElementById('rosterTable').innerHTML = students.map((s,i) => `
-    <tr class="border-b border-gray-50 hover:bg-gray-50"><td class="px-4 py-3"><div class="font-semibold text-gray-900 text-sm">${s.name}${s.isBirthdayMonth ? ' 🎂' : ''}</div>${s.nameEN ? '<div class="text-xs text-gray-400">'+s.nameEN+'</div>' : ''}${s.studentId ? '<div class="text-xs font-mono text-gray-300">'+s.studentId+'</div>' : ''}${(s.allergy && s.allergy !== '없음') ? '<span class="text-xs bg-red-100 text-red-700 px-1.5 rounded-full">⚠️ '+s.allergy+'</span>' : ''}</td><td class="px-3 py-3 text-xs text-gray-600">${s.grade ? '<div>'+s.grade+'</div>' : ''}${s.school ? '<div class="text-gray-400">'+s.school+'</div>' : ''}</td><td class="px-3 py-3 text-xs text-gray-600">${(s.fatherName||s.fatherPhone) ? '<div>👨 '+(s.fatherName||'')+' '+(s.fatherPhone||'')+ '</div>' : ''}${(s.motherName||s.motherPhone) ? '<div>👩 '+(s.motherName||'')+' '+(s.motherPhone||'')+ '</div>' : ''}${(!s.fatherName&&!s.motherName&&s.guardian) ? '<div class="text-gray-400">'+s.guardian+(s.phone?' '+s.phone:'')+ '</div>' : ''}</td><td class="px-2 py-3 text-center text-xs">${s.photo==='촬영 완료' ? '<span class="bg-green-100 text-green-700 px-1.5 rounded-full">✔</span>' : '<span class="text-gray-300">-</span>'}</td><td class="px-2 py-3 text-center text-xs">${s.baptized==='세례' ? '<span class="bg-blue-100 text-blue-700 px-1.5 rounded-full">💧</span>' : '<span class="text-gray-300">-</span>'}</td><td class="px-2 py-3 text-center text-xs">${s.liabilityForm==='제출 완료' ? '<span class="bg-green-100 text-green-700 px-1.5 rounded-full">✔</span>' : s.liabilityForm==='미제출' ? '<span class="bg-red-100 text-red-600 px-1.5 rounded-full">X</span>' : '<span class="text-gray-300">-</span>'}</td><td class="px-2 py-3 text-center text-xs">${s.isBirthdayMonth ? '<span class="bg-pink-100 text-pink-600 px-1.5 rounded-full">🎂</span>' : '<span class="text-gray-200">-</span>'}</td><td class="px-2 py-3 text-center"><button onclick='openEditStudent(${JSON.stringify(s)})' class="text-xs px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-semibold">수정</button></td></tr>`).join('');
+    <tr class="border-b border-gray-50 hover:bg-gray-50 cursor-pointer" onclick='openEditStudent(${JSON.stringify(s)})'><td class="px-3 py-3"><div class="font-semibold text-gray-900 text-sm">${s.name}${s.isBirthdayMonth ? ' \ud83c\udf82' : ''}</div>${s.nameEN ? '<div class="text-xs text-gray-400">'+s.nameEN+'</div>' : ''}${s.studentId ? '<div class="text-xs font-mono text-gray-300">'+s.studentId+'</div>' : ''}${(s.allergy && s.allergy !== '없음') ? '<span class="inline-block text-xs bg-red-100 text-red-700 px-1.5 rounded-full mt-0.5">\u26a0\ufe0f '+s.allergy+'</span>' : ''}</td><td class="px-3 py-3 text-xs text-gray-600">${s.grade ? '<div class="font-medium">'+s.grade+'</div>' : ''}${s.school ? '<div class="text-gray-400">'+s.school+'</div>' : ''}${s.age ? '<div class="text-gray-400">'+s.age+'\uc138</div>' : ''}${s.dob ? '<div class="text-gray-300">'+s.dob+'</div>' : ''}</td><td class="px-3 py-3 text-xs text-gray-600">${(s.fatherName||s.fatherPhone) ? '<div>\ud83d\udc68 '+(s.fatherName||'')+(s.fatherPhone?' \u00b7 '+s.fatherPhone:'')+'</div>' : ''}${s.fatherEmail ? '<div class="text-gray-400">'+s.fatherEmail+'</div>' : ''}${(s.motherName||s.motherPhone) ? '<div>\ud83d\udc69 '+(s.motherName||'')+(s.motherPhone?' \u00b7 '+s.motherPhone:'')+'</div>' : ''}${s.motherEmail ? '<div class="text-gray-400">'+s.motherEmail+'</div>' : ''}${(!s.fatherName&&!s.motherName&&s.guardian) ? '<div class="text-gray-500">'+s.guardian+(s.phone?' \u00b7 '+s.phone:'')+'</div>' : ''}${s.address ? '<div class="text-gray-300 text-xs mt-0.5">\ud83c\udfe0 '+s.address+'</div>' : ''}</td><td class="px-2 py-3 text-center text-xs">${s.photo==='촬영 완료' ? '<span class="bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">\u2714</span>' : '<span class="text-gray-300">-</span>'}</td><td class="px-2 py-3 text-center text-xs">${s.baptized==='세례' ? '<span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">\ud83d\udca7</span>' : '<span class="text-gray-300">-</span>'}</td><td class="px-2 py-3 text-center text-xs">${s.liabilityForm==='제출 완료' ? '<span class="bg-green-100 text-green-700 px-1.5 rounded-full">\u2714</span>' : s.liabilityForm==='미제출' ? '<span class="bg-red-100 text-red-600 px-1.5 rounded-full">X</span>' : '<span class="text-gray-300">-</span>'}</td><td class="px-2 py-3 text-center text-xs">${s.isBirthdayMonth ? '<span class="bg-pink-100 text-pink-600 px-1.5 rounded-full">\ud83c\udf82</span>' : '<span class="text-gray-200">-</span>'}</td><td class="px-2 py-3 text-center"><button onclick='event.stopPropagation();openEditStudent(${JSON.stringify(s)})' class="text-xs px-2 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-semibold">수정</button></td></tr>`).join('');
 }
 
 let _editPageId = null;
@@ -274,6 +166,9 @@ function openEditStudent(s) {
   document.getElementById('f-fatherPhone').value = s.fatherPhone||'';
   document.getElementById('f-motherName').value = s.motherName||'';
   document.getElementById('f-motherPhone').value = s.motherPhone||'';
+  document.getElementById('f-fatherEmail').value = s.fatherEmail||'';
+  document.getElementById('f-motherEmail').value = s.motherEmail||'';
+  document.getElementById('f-address').value = s.address||'';
   document.getElementById('f-allergy').value = s.allergy||'없음';
   document.getElementById('f-notes').value = s.notes||'';
   document.getElementById('f-dept').value = s.department||'';
@@ -302,6 +197,9 @@ async function submitStudent() {
       fatherPhone: document.getElementById('f-fatherPhone').value,
       motherName: document.getElementById('f-motherName').value,
       motherPhone: document.getElementById('f-motherPhone').value,
+      fatherEmail: document.getElementById('f-fatherEmail').value,
+      motherEmail: document.getElementById('f-motherEmail').value,
+      address: document.getElementById('f-address').value,
       allergy: document.getElementById('f-allergy').value||'없음',
       notes: document.getElementById('f-notes').value,
       liabilityForm: document.getElementById('f-liability').value||null,
