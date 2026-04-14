@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-<title>간사 포털털 | 아미쿠스</title>
+<title>간사 포털 | 아미쿠스</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn .2s ease}
@@ -18,7 +18,7 @@
     <div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
       <svg class="w-7 h-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
     </div>
-    <h1 class="text-2xl font-bold text-gray-900">간사 포털털</h1>
+    <h1 class="text-2xl font-bold text-gray-900">간사 포털</h1>
     <p class="text-gray-400 text-sm mt-1">Amicus Next — Staff Portal</p>
   </div>
   <div class="space-y-4">
@@ -35,6 +35,7 @@
   <a href="/" class="block text-center text-sm text-gray-400 mt-5 hover:text-indigo-500">← 체크인 페이지로</a>
 </div>
 </div>
+
 <div id="dashboard" class="hidden">
 <header class="bg-white border-b border-gray-100 sticky top-0 z-20 shadow-sm">
   <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -49,6 +50,8 @@
     </div>
   </div>
 </header>
+
+<!-- 출석 탭 -->
 <div id="attendanceTab" class="hidden max-w-3xl mx-auto px-4 py-5">
   <div class="grid grid-cols-4 gap-3 mb-5">
     <div class="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100"><div class="text-2xl font-black text-indigo-600" id="statTotal">-</div><div class="text-xs text-gray-400">전체</div></div>
@@ -59,7 +62,9 @@
   <div class="flex items-center justify-between mb-3">
     <div><h2 class="text-sm font-bold text-gray-800">오늘 출석 현황</h2><p class="text-xs text-gray-400" id="lastUpdated"></p></div>
     <div class="flex items-center gap-2">
-      <div class="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse"></div>실시간 30초</div>
+      <div class="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse"></div>실시간 30초
+      </div>
       <button onclick="loadAttendance()" class="text-xs text-indigo-600 font-semibold px-2.5 py-1 rounded-full bg-indigo-50 hover:bg-indigo-100">새로고침</button>
     </div>
   </div>
@@ -72,11 +77,16 @@
           <th class="text-center px-3 py-3 text-xs font-bold text-gray-500">체크아웃</th>
           <th class="text-center px-3 py-3 text-xs font-bold text-gray-500">상태</th>
         </tr></thead>
-        <tbody id="attendanceTable"><tr><td colspan="4" class="text-center py-10 text-gray-400"><div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-xs">로딩 중...</p></td></tr></tbody>
+        <tbody id="attendanceTable"><tr><td colspan="4" class="text-center py-10 text-gray-400">
+          <div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div>
+          <p class="text-xs">로딩 중...</p>
+        </td></tr></tbody>
       </table>
     </div>
   </div>
 </div>
+
+<!-- 명단 탭 -->
 <div id="rosterTab" class="hidden max-w-3xl mx-auto px-4 py-5">
   <div class="flex items-center justify-between mb-4">
     <h2 class="text-sm font-bold text-gray-800">학생 명단 <span id="rosterCount" class="text-gray-400 font-normal"></span></h2>
@@ -93,28 +103,45 @@
           <th class="text-left px-3 py-3 text-xs font-bold text-gray-500">보호자</th>
           <th class="text-center px-3 py-3 text-xs font-bold text-gray-500"></th>
         </tr></thead>
-        <tbody id="rosterTable"><tr><td colspan="4" class="text-center py-10 text-gray-400"><div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-xs">로딩 중...</p></td></tr></tbody>
+        <tbody id="rosterTable"><tr><td colspan="4" class="text-center py-10 text-gray-400">
+          <div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div>
+          <p class="text-xs">로딩 중...</p>
+        </td></tr></tbody>
       </table>
     </div>
   </div>
 </div>
 </div>
+
+<!-- 학생 추가/수정 모달 -->
 <div id="studentModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center">
 <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 fade-in max-h-[90vh] overflow-y-auto">
   <div class="flex items-center justify-between mb-5">
     <h2 class="text-lg font-bold text-gray-900" id="modalTitle">학생 추가</h2>
-    <button onclick="closeStudentModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <button onclick="closeStudentModal()" class="text-gray-400 hover:text-gray-600">
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
   </div>
   <input type="hidden" id="editId"/>
   <div class="space-y-3">
-    <div><label class="text-xs font-bold text-gray-500 uppercase">이름 *</label><input id="f-name" type="text" placeholder="한글 이름" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-    <div><label class="text-xs font-bold text-gray-500 uppercase">English Name</label><input id="f-nameEN" type="text" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-    <div><label class="text-xs font-bold text-gray-500 uppercase">학년</label><input id="f-grade" type="text" placeholder="1st grade" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-    <div><label class="text-xs font-bold text-gray-500 uppercase">보호자 *</label><input id="f-guardian" type="text" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-    <div><label class="text-xs font-bold text-gray-500 uppercase">연락처</label><input id="f-phone" type="tel" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-    <div><label class="text-xs font-bold text-gray-500 uppercase">알러지</label><input id="f-allergy" type="text" placeholder="없음" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-    <div><label class="text-xs font-bold text-gray-500 uppercase">특이사항</label><textarea id="f-notes" rows="2" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm resize-none"></textarea></div>
-    <label class="flex items-center gap-3 p-3 rounded-xl bg-pink-50 cursor-pointer"><input type="checkbox" id="f-isNew" class="w-4 h-4 accent-pink-500"/><span class="text-sm font-semibold text-pink-700">새신자 (New Student)</span></label>
+    <div><label class="text-xs font-bold text-gray-500 uppercase">이름 *</label>
+      <input id="f-name" type="text" placeholder="한글 이름" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
+    <div><label class="text-xs font-bold text-gray-500 uppercase">English Name</label>
+      <input id="f-nameEN" type="text" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
+    <div><label class="text-xs font-bold text-gray-500 uppercase">학년</label>
+      <input id="f-grade" type="text" placeholder="1st grade" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
+    <div><label class="text-xs font-bold text-gray-500 uppercase">보호자 *</label>
+      <input id="f-guardian" type="text" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
+    <div><label class="text-xs font-bold text-gray-500 uppercase">연락처</label>
+      <input id="f-phone" type="tel" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
+    <div><label class="text-xs font-bold text-gray-500 uppercase">알러지</label>
+      <input id="f-allergy" type="text" placeholder="없음" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
+    <div><label class="text-xs font-bold text-gray-500 uppercase">특이사항</label>
+      <textarea id="f-notes" rows="2" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm resize-none"></textarea></div>
+    <label class="flex items-center gap-3 p-3 rounded-xl bg-pink-50 cursor-pointer">
+      <input type="checkbox" id="f-isNew" class="w-4 h-4 accent-pink-500"/>
+      <span class="text-sm font-semibold text-pink-700">새신자 (New Student)</span>
+    </label>
   </div>
   <div id="modalError" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm"></div>
   <div class="flex gap-3 mt-5">
@@ -123,80 +150,229 @@
   </div>
 </div>
 </div>
+
 <script>
-const DEPT_COLORS={"유아부 (Infant)":"bg-blue-500","유치부 (Preschool)":"bg-emerald-500","유년부 (Elementary Jr)":"bg-yellow-500","초등부 (Elementary)":"bg-orange-500","중고등부 (Middle/High)":"bg-purple-500"};
-let currentName=null,currentDept=null,currentPw=null,rosterData=[],refreshTimer=null;
-async function loadStaffList(){try{const r=await fetch('/api/staff-list');const d=await r.json();const sel=document.getElementById('nameSelect');(d.staff||[]).forEach(s=>{const o=document.createElement('option');o.value=s.name;o.textContent=s.name+' — '+s.dept.split(' ')[0];sel.appendChild(o);});}catch(e){}}
-loadStaffList();
-async function doLogin(){
-  const name=document.getElementById('nameSelect').value,pw=document.getElementById('pwInput').value,err=document.getElementById('loginError');
-  err.classList.add('hidden');
-  if(!name){err.textContent='이름을 선택해주세요';err.classList.remove('hidden');return;}
-  if(!pw){err.textContent='비밀번호를 입력해주세요';err.classList.remove('hidden');return;}
-  try{const r=await fetch(`/api/staff-auth?name=${encodeURIComponent(name)}&password=${encodeURIComponent(pw)}`);const d=await r.json();
-  if(!d.ok){err.textContent=d.error||'로그인 실패';err.classList.remove('hidden');return;}
-  currentName=d.name;currentDept=d.dept;currentPw=pw;
-  sessionStorage.setItem('sName',currentName);sessionStorage.setItem('sDept',currentDept);sessionStorage.setItem('sPw',currentPw);
-  showDashboard();}catch(e){err.textContent='오류: '+e.message;err.classList.remove('hidden');}
+const DEPT_COLORS = {
+  "유아부 (Infant)": "bg-blue-500",
+  "유치부 (Preschool)": "bg-emerald-500",
+  "유년부 (Elementary Jr)": "bg-yellow-500",
+  "초등부 (Elementary)": "bg-orange-500",
+  "중고등부 (Middle/High)": "bg-purple-500"
+};
+let currentName=null, currentDept=null, currentPw=null, rosterData=[], refreshTimer=null;
+
+async function loadStaffList() {
+  try {
+    const r = await fetch('/api/staff-list');
+    const d = await r.json();
+    const sel = document.getElementById('nameSelect');
+    (d.staff||[]).forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.name;
+      o.textContent = s.name + ' — ' + s.dept.split(' ')[0];
+      sel.appendChild(o);
+    });
+  } catch(e) {}
 }
-function showDashboard(){
-  document.getElementById('loginScreen').classList.add('hidden');document.getElementById('dashboard').classList.remove('hidden');
-  document.getElementById('dashName').textContent=currentName+' 간사님';document.getElementById('dashDept').textContent=currentDept;
-  const dot=document.getElementById('deptDot');dot.className='w-3 h-3 rounded-full '+(DEPT_COLORS[currentDept]||'bg-indigo-500');
+loadStaffList();
+
+async function doLogin() {
+  const name = document.getElementById('nameSelect').value;
+  const pw = document.getElementById('pwInput').value;
+  const err = document.getElementById('loginError');
+  err.classList.add('hidden');
+  if (!name) { err.textContent = '이름을 선택해주세요'; err.classList.remove('hidden'); return; }
+  if (!pw) { err.textContent = '비밀번호를 입력해주세요'; err.classList.remove('hidden'); return; }
+  try {
+    const r = await fetch(`/api/staff-auth?name=${encodeURIComponent(name)}&password=${encodeURIComponent(pw)}`);
+    const d = await r.json();
+    if (!d.ok) { err.textContent = d.error || '로그인 실패'; err.classList.remove('hidden'); return; }
+    currentName = d.name; currentDept = d.dept; currentPw = pw;
+    sessionStorage.setItem('sName', currentName);
+    sessionStorage.setItem('sDept', currentDept);
+    sessionStorage.setItem('sPw', currentPw);
+    showDashboard();
+  } catch(e) { err.textContent = '오류: ' + e.message; err.classList.remove('hidden'); }
+}
+
+function showDashboard() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  document.getElementById('dashName').textContent = currentName + ' 간사님';
+  document.getElementById('dashDept').textContent = currentDept;
+  const dot = document.getElementById('deptDot');
+  dot.className = 'w-3 h-3 rounded-full ' + (DEPT_COLORS[currentDept] || 'bg-indigo-500');
   showTab('attendance');
 }
-function logout(){clearInterval(refreshTimer);sessionStorage.clear();currentName=currentDept=currentPw=null;document.getElementById('dashboard').classList.add('hidden');document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('pwInput').value='';}
-function showTab(tab){
-  ['attendance','roster'].forEach(t=>{document.getElementById(t+'Tab').classList.toggle('hidden',t!==tab);const btn=document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1));btn.className=t===tab?'text-xs px-3 py-1.5 rounded-lg font-semibold bg-indigo-600 text-white':'text-xs px-3 py-1.5 rounded-lg font-semibold text-gray-500 hover:bg-gray-100';});
+
+function logout() {
   clearInterval(refreshTimer);
-  if(tab==='attendance'){loadAttendance();refreshTimer=setInterval(loadAttendance,30000);}
-  if(tab==='roster')loadRoster();
+  sessionStorage.clear();
+  currentName = currentDept = currentPw = null;
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('pwInput').value = '';
 }
-async function loadAttendance(){
-  try{const r=await fetch(`/api/attendance-today?password=${encodeURIComponent(currentPw)}`);const d=await r.json();
-  if(!r.ok)throw new Error(d.error);
-  const my=d.records.filter(rec=>rec.department===currentDept);
-  document.getElementById('statTotal').textContent=my.length;
-  document.getElementById('statIn').textContent=my.filter(rec=>rec.checkIn&&!rec.checkOut).length;
-  document.getElementById('statOut').textContent=my.filter(rec=>rec.checkOut).length;
-  document.getElementById('statNew').textContent=my.filter(rec=>rec.isNew).length;
-  document.getElementById('lastUpdated').textContent='업데이트: '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-  const tbody=document.getElementById('attendanceTable');
-  if(!my.length){tbody.innerHTML='<tr><td colspan="4" class="text-center py-12 text-gray-300"><div class="text-3xl mb-2">📅</div><p class="text-sm">오늘 출석 기록 없음</p></td></tr>';return;}
-  tbody.innerHTML=my.sort((a,b)=>(a.checkIn||'').localeCompare(b.checkIn||'')).map((rec,i)=>`
+
+function showTab(tab) {
+  ['attendance','roster'].forEach(t => {
+    document.getElementById(t+'Tab').classList.toggle('hidden', t!==tab);
+    const btn = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+    btn.className = t===tab
+      ? 'text-xs px-3 py-1.5 rounded-lg font-semibold bg-indigo-600 text-white'
+      : 'text-xs px-3 py-1.5 rounded-lg font-semibold text-gray-500 hover:bg-gray-100';
+  });
+  clearInterval(refreshTimer);
+  if (tab === 'attendance') { loadAttendance(); refreshTimer = setInterval(loadAttendance, 30000); }
+  if (tab === 'roster') loadRoster();
+}
+
+async function loadAttendance() {
+  try {
+    const r = await fetch(`/api/attendance-today?password=${encodeURIComponent(currentPw)}`);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    const my = d.records.filter(rec => rec.department === currentDept);
+    document.getElementById('statTotal').textContent = my.length;
+    document.getElementById('statIn').textContent = my.filter(rec => rec.checkIn && !rec.checkOut).length;
+    document.getElementById('statOut').textContent = my.filter(rec => rec.checkOut).length;
+    document.getElementById('statNew').textContent = my.filter(rec => rec.isNew).length;
+    document.getElementById('lastUpdated').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+    const tbody = document.getElementById('attendanceTable');
+    if (!my.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="text-center py-12 text-gray-300"><div class="text-3xl mb-2">📅</div><p class="text-sm">오늘 출석 기록 없음</p></td></tr>';
+      return;
+    }
+    tbody.innerHTML = my.sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||'')).map((rec,i) => `
+      <tr class="${i%2===0?'bg-white':'bg-gray-50'} border-b border-gray-50 hover:bg-indigo-50">
+        <td class="px-4 py-3">
+          <div class="flex items-center gap-1.5">
+            <span class="font-semibold text-gray-900">${rec.name}</span>
+            ${rec.isNew ? '<span class="text-xs bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded-full">새</span>' : ''}
+            ${rec.hasAllergy ? '<span class="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">⚠️</span>' : ''}
+          </div>
+          ${rec.notes ? '<p class="text-xs text-amber-600">📝 '+rec.notes+'</p>' : ''}
+        </td>
+        <td class="px-3 py-3 text-center font-mono text-sm text-gray-700">${rec.checkIn||'—'}</td>
+        <td class="px-3 py-3 text-center font-mono text-sm ${rec.checkOut?'text-gray-700':'text-gray-300'}">${rec.checkOut||'—'}</td>
+        <td class="px-3 py-3 text-center">
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full ${rec.checkOut?'bg-gray-100 text-gray-500':'bg-emerald-100 text-emerald-700'}">${rec.checkOut?'침실':'입실'}</span>
+        </td>
+      </tr>`).join('');
+  } catch(e) {
+    document.getElementById('attendanceTable').innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-red-500 text-sm">⚠️ ${e.message}</td></tr>`;
+  }
+}
+
+async function loadRoster() {
+  document.getElementById('rosterTable').innerHTML = '<tr><td colspan="4" class="text-center py-10 text-gray-400"><div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-xs">로딩 중...</p></td></tr>';
+  try {
+    const r = await fetch(`/api/roster?dept=${encodeURIComponent(currentDept)}&password=${encodeURIComponent(currentPw)}`);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '명단 로딩 실패');
+    rosterData = d.students || [];
+    document.getElementById('rosterCount').textContent = '(' + rosterData.length + '명)';
+    renderRoster(rosterData);
+  } catch(e) {
+    document.getElementById('rosterTable').innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-red-500 text-sm">⚠️ ${e.message}</td></tr>`;
+  }
+}
+
+function filterRoster() {
+  const q = document.getElementById('rosterSearch').value.toLowerCase();
+  renderRoster(q ? rosterData.filter(s => s.name.toLowerCase().includes(q)||(s.nameEN||'').toLowerCase().includes(q)) : rosterData);
+}
+
+function renderRoster(students) {
+  if (!students.length) {
+    document.getElementById('rosterTable').innerHTML = '<tr><td colspan="4" class="text-center py-10 text-gray-300">학생 없음</td></tr>';
+    return;
+  }
+  document.getElementById('rosterTable').innerHTML = students.map((s,i) => `
     <tr class="${i%2===0?'bg-white':'bg-gray-50'} border-b border-gray-50 hover:bg-indigo-50">
-      <td class="px-4 py-3"><div class="flex items-center gap-1.5"><span class="font-semibold text-gray-900">${rec.name}</span>${rec.isNew?'<span class="text-xs bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded-full">새</span>':''}${rec.hasAllergy?'<span class="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">⚠</span>':''}</div>${rec.notes?'<p class="text-xs text-amber-600">📝 '+rec.notes+'</p>':''}</td>
-      <td class="px-3 py-3 text-center font-mono text-sm text-gray-700">${rec.checkIn||'—'}</td>
-      <td class="px-3 py-3 text-center font-mono text-sm ${rec.checkOut?'text-gray-700':'text-gray-300'}">${rec.checkOut||'—'}</td>
-      <td class="px-3 py-3 text-center"><span class="text-xs font-bold px-2.5 py-1 rounded-full ${rec.checkOut?'bg-gray-100 text-gray-500':'bg-emerald-100 text-emerald-700'}">${rec.checkOut?'침실':'입실'}</span></td>
-    </tr>`).join('');
-  }catch(e){document.getElementById('attendanceTable').innerHTML=`<tr><td colspan="4" class="px-4 py-8 text-center text-red-500 text-sm">⚠️ ${e.message}</td></tr>`;}
-}
-async function loadRoster(){
-  document.getElementById('rosterTable').innerHTML='<tr><td colspan="4" class="text-center py-10 text-gray-400"><div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-xs">로딩 중...</p></td></tr>';
-  try{const r=await fetch(`/api/roster?dept=${encodeURIComponent(currentDept)}&password=${encodeURIComponent(currentPw)}`);const d=await r.json();
-  if(!r.ok)throw new Error(d.error);
-  rosterData=d.students||[];document.getElementById('rosterCount').textContent='('+rosterData.length+'명)';
-  renderRoster(rosterData);}catch(e){document.getElementById('rosterTable').innerHTML=`<tr><td colspan="4" class="px-4 py-8 text-center text-red-500 text-sm">⚠️ ${e.message}</td></tr>`;}
-}
-function filterRoster(){const q=document.getElementById('rosterSearch').value.toLowerCase();renderRoster(q?rosterData.filter(s=>s.name.toLowerCase().includes(q)||(s.nameEN||'').toLowerCase().includes(q)):rosterData);}
-function renderRoster(students){
-  if(!students.length){document.getElementById('rosterTable').innerHTML='<tr><td colspan="4" class="text-center py-10 text-gray-300">학생 없음</td></tr>';return;}
-  document.getElementById('rosterTable').innerHTML=students.map((s,i)=>`
-    <tr class="${i%2===0?'bg-white':'bg-gray-50'} border-b border-gray-50 hover:bg-indigo-50">
-      <td class="px-4 py-3"><div class="flex items-center gap-1.5"><span class="font-semibold text-gray-900">${s.name}</span>${s.nameEN?'<span class="text-xs text-gray-400">'+s.nameEN+'</span>':''}${s.isNew?'<span class="text-xs bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded-full">새신자</span>':''}</div>${s.allergy&&s.allergy!=='없음'?'<p class="text-xs text-red-500">⚠️ '+s.allergy+'</p>':''}</td>
+      <td class="px-4 py-3">
+        <div class="flex items-center gap-1.5">
+          <span class="font-semibold text-gray-900">${s.name}</span>
+          ${s.nameEN ? '<span class="text-xs text-gray-400">'+s.nameEN+'</span>' : ''}
+          ${s.studentId ? '<span class="text-xs font-mono text-gray-300 bg-gray-100 px-1 rounded">'+s.studentId+'</span>' : ''}
+          ${s.isNew ? '<span class="text-xs bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded-full">새신자</span>' : ''}
+        </div>
+        ${s.allergy && s.allergy !== '없음' ? '<p class="text-xs text-red-500">⚠️ '+s.allergy+'</p>' : ''}
+      </td>
       <td class="px-3 py-3 text-sm text-gray-500">${s.grade||'—'}</td>
-      <td class="px-3 py-3 text-sm text-gray-500"><div>${s.guardian||'—'}</div>${s.phone?'<div class="text-xs text-gray-400">'+s.phone+'</div>':''}</td>
-      <td class="px-3 py-3 text-center"><button onclick='editStudent(${JSON.stringify(s).replace(/"/g,"&quot;")})' class="text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 font-semibold hover:bg-indigo-100">수정</button></td>
+      <td class="px-3 py-3 text-sm text-gray-500">
+        <div>${s.guardian||'—'}</div>
+        ${s.phone ? '<div class="text-xs text-gray-400">'+s.phone+'</div>' : ''}
+      </td>
+      <td class="px-3 py-3 text-center">
+        <button onclick='editStudent(${JSON.stringify(s).replace(/"/g,"&quot;")})'
+          class="text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 font-semibold hover:bg-indigo-100">수정</button>
+      </td>
     </tr>`).join('');
 }
-function openAddStudent(){document.getElementById('modalTitle').textContent='학생 추가';document.getElementById('editId').value='';['name','nameEN','grade','guardian','phone','notes'].forEach(f=>document.getElementById('f-'+f).value='');document.getElementById('f-allergy').value='없음';document.getElementById('f-isNew').checked=false;document.getElementById('modalError').classList.add('hidden');document.getElementById('studentModal').classList.remove('hidden');}
-function editStudent(s){if(typeof s==='string')s=JSON.parse(s.replace(/&quot;/g,'"'));document.getElementById('modalTitle').textContent='정보 수정';document.getElementById('editId').value=s.id||'';document.getElementById('f-name').value=s.name||'';document.getElementById('f-nameEN').value=s.nameEN||'';document.getElementById('f-grade').value=s.grade||'';document.getElementById('f-guardian').value=s.guardian||'';document.getElementById('f-phone').value=s.phone||'';document.getElementById('f-allergy').value=s.allergy||'없음';document.getElementById('f-notes').value=s.notes||'';document.getElementById('f-isNew').checked=s.isNew||false;document.getElementById('modalError').classList.add('hidden');document.getElementById('studentModal').classList.remove('hidden');}
-function closeStudentModal(){document.getElementById('studentModal').classList.add('hidden');}
-async function saveStudent(){const name=document.getElementById('f-name').value.trim(),guardian=document.getElementById('f-guardian').value.trim();if(!name||!guardian){document.getElementById('modalError').textContent='이름과 보호자는 필수';document.getElementById('modalError').classList.remove('hidden');return;}const btn=document.getElementById('saveBtn');btn.textContent='저장 중...';btn.disabled=true;
-try{const r=await fetch('/api/update-student',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:document.getElementById('editId').value,name,dept:currentDept,password:currentPw,nameEN:document.getElementById('f-nameEN').value,grade:document.getElementById('f-grade').value,guardian,phone:document.getElementById('f-phone').value,allergy:document.getElementById('f-allergy').value||'없음',notes:document.getElementById('f-notes').value,isNew:document.getElementById('f-isNew').checked})});const d=await r.json();if(!r.ok)throw new Error(d.error||'저장 실패');closeStudentModal();loadRoster();}catch(e){document.getElementById('modalError').textContent=e.message;document.getElementById('modalError').classList.remove('hidden');}btn.textContent='저장';btn.disabled=false;}
-const sn=sessionStorage.getItem('sName'),sd=sessionStorage.getItem('sDept'),sp=sessionStorage.getItem('sPw');
-if(sn&&sd&&sp){currentName=sn;currentDept=sd;currentPw=sp;showDashboard();}
+
+function openAddStudent() {
+  document.getElementById('modalTitle').textContent = '학생 추가';
+  document.getElementById('editId').value = '';
+  ['name','nameEN','grade','guardian','phone','notes'].forEach(f => document.getElementById('f-'+f).value = '');
+  document.getElementById('f-allergy').value = '없음';
+  document.getElementById('f-isNew').checked = false;
+  document.getElementById('modalError').classList.add('hidden');
+  document.getElementById('studentModal').classList.remove('hidden');
+}
+
+function editStudent(s) {
+  if (typeof s === 'string') s = JSON.parse(s.replace(/&quot;/g, '"'));
+  document.getElementById('modalTitle').textContent = '정보 수정';
+  document.getElementById('editId').value = s.id || '';
+  document.getElementById('f-name').value = s.name || '';
+  document.getElementById('f-nameEN').value = s.nameEN || '';
+  document.getElementById('f-grade').value = s.grade || '';
+  document.getElementById('f-guardian').value = s.guardian || '';
+  document.getElementById('f-phone').value = s.phone || '';
+  document.getElementById('f-allergy').value = s.allergy || '없음';
+  document.getElementById('f-notes').value = s.notes || '';
+  document.getElementById('f-isNew').checked = s.isNew || false;
+  document.getElementById('modalError').classList.add('hidden');
+  document.getElementById('studentModal').classList.remove('hidden');
+}
+
+function closeStudentModal() { document.getElementById('studentModal').classList.add('hidden'); }
+
+async function saveStudent() {
+  const name = document.getElementById('f-name').value.trim();
+  const guardian = document.getElementById('f-guardian').value.trim();
+  if (!name || !guardian) {
+    document.getElementById('modalError').textContent = '이름과 보호자는 필수입니다';
+    document.getElementById('modalError').classList.remove('hidden'); return;
+  }
+  const btn = document.getElementById('saveBtn'); btn.textContent = '저장 중...'; btn.disabled = true;
+  try {
+    const r = await fetch('/api/update-student', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        id: document.getElementById('editId').value, name, dept: currentDept, password: currentPw,
+        nameEN: document.getElementById('f-nameEN').value,
+        grade: document.getElementById('f-grade').value,
+        guardian, phone: document.getElementById('f-phone').value,
+        allergy: document.getElementById('f-allergy').value || '없음',
+        notes: document.getElementById('f-notes').value,
+        isNew: document.getElementById('f-isNew').checked
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '저장 실패');
+    closeStudentModal(); loadRoster();
+  } catch(e) {
+    document.getElementById('modalError').textContent = e.message;
+    document.getElementById('modalError').classList.remove('hidden');
+  }
+  btn.textContent = '저장'; btn.disabled = false;
+}
+
+// Auto-login from session
+const sn = sessionStorage.getItem('sName'), sd = sessionStorage.getItem('sDept'), sp = sessionStorage.getItem('sPw');
+if (sn && sd && sp) { currentName=sn; currentDept=sd; currentPw=sp; showDashboard(); }
 </script>
 </body>
 </html>
