@@ -85,10 +85,16 @@ tbody tr:hover { background:#fafafa; }
         <div class="stat-card" style="--c1:#f59e0b;--c2:#d97706"><p class="text-xs opacity-75 mb-1">체크아웃</p><p id="statOut" class="text-2xl font-bold">—</p></div>
         <div class="stat-card" style="--c1:#ec4899;--c2:#db2777"><p class="text-xs opacity-75 mb-1">방문자</p><p id="statNew" class="text-2xl font-bold">—</p></div>
       </div>
+            <div id="weeklySummary" class="card overflow-hidden mb-4 hidden">
+        <div class="px-5 py-4 border-b border-gray-100">
+          <h2 class="font-bold text-gray-900" id="weeklySummaryTitle">이번 주 출석 요약</h2>
+        </div>
+        <div id="weeklySummaryBody" class="p-5"></div>
+      </div>
       <div class="card overflow-hidden">
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 class="font-bold text-gray-900">오늘 출석</h2>
-          <p id="lastUpdated" class="text-xs text-gray-400"></p>
+          <div class="flex items-center gap-2"><p id="lastUpdated" class="text-xs text-gray-400"></p><button onclick="loadAttendance()" class="text-xs text-indigo-600 font-semibold px-2 py-1 rounded-lg hover:bg-indigo-50">새로고침</button></div>
         </div>
         <div class="overflow-x-auto"><table class="w-full">
           <thead class="bg-gray-50 border-b border-gray-100"><tr>
@@ -115,9 +121,9 @@ tbody tr:hover { background:#fafafa; }
           <thead class="bg-gray-50 border-b border-gray-100"><tr>
             <th>이름</th><th>학년/나이</th><th>부/모</th>
             <th style="text-align:center">사진</th><th style="text-align:center">세례</th>
-            <th style="text-align:center">Liability</th><th style="text-align:center">생일</th><th></th>
+            <th style="text-align:center">Liability</th><th style="text-align:center">결석</th><th style="text-align:center">생일</th><th></th>
           </tr></thead>
-          <tbody id="rosterTable"><tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
+          <tbody id="rosterTable"><tr><td colspan="9" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
         </table></div>
       </div>
     </div>
@@ -254,18 +260,81 @@ async function loadAttendance(){
       html+="<td style='text-align:center'>"+statusBadge+"</td></tr>";
     }
     tbody.innerHTML=html;
+    // Weekly summary
+    try{
+      var today=new Date();
+      var dayOfWeek=today.getDay();
+      var sunday=new Date(today);
+      sunday.setDate(today.getDate()-(dayOfWeek===0?0:dayOfWeek));
+      var mm=String(sunday.getMonth()+1).padStart(2,"0");
+      var dd=String(sunday.getDate()).padStart(2,"0");
+      var yy=String(sunday.getFullYear()).slice(2);
+      var titleEl=document.getElementById("weeklySummaryTitle");
+      if(titleEl)titleEl.textContent="이번 주 출석 요약 — "+mm+"/"+dd+"/"+yy+" (주일)";
+      var depts=["유아부 (Infant)","유치부 (Preschool)","유년부 (Elementary Jr)","초등부 (Elementary)","중고등부 (Middle/High)"];
+      // Count from attendance records
+      var deptStats={};
+      depts.forEach(function(d){deptStats[d]={checkin:0,checkout:0,visitor:0,total:0};});
+      records.forEach(function(r){
+        var dep=r.department||"";
+        if(!deptStats[dep])deptStats[dep]={checkin:0,checkout:0,visitor:0,total:0};
+        if(r.checkIn)deptStats[dep].checkin++;
+        if(r.checkOut)deptStats[dep].checkout++;
+        if(r.isNew)deptStats[dep].visitor++;
+      });
+      // Fetch roster totals
+      var rosterUrl="/api/roster"+(dept?"?dept="+encodeURIComponent(dept):"");
+      var rRes=await fetch(rosterUrl),rData=await rRes.json(),allStu=rData.students||[];
+      allStu.forEach(function(st){var dep=st.department||"";if(!deptStats[dep])deptStats[dep]={checkin:0,checkout:0,visitor:0,total:0};deptStats[dep].total++;});
+      // Build summary HTML
+      var activeDepts=Object.keys(deptStats).filter(function(d){return deptStats[d].checkin>0||deptStats[d].total>0;});
+      var sumHtml="";
+      var grandCheckin=0,grandTotal=0,grandVisitor=0,grandAbsent=0;
+      sumHtml+="<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:13px'>";
+      sumHtml+="<thead><tr style='background:#f8fafc'>";
+      sumHtml+="<th style='padding:8px 12px;text-align:left;color:#6b7280;font-size:11px;font-weight:700;text-transform:uppercase'>부서</th>";
+      sumHtml+="<th style='padding:8px 12px;text-align:center;color:#059669;font-size:11px;font-weight:700'>출석</th>";
+      sumHtml+="<th style='padding:8px 12px;text-align:center;color:#dc2626;font-size:11px;font-weight:700'>결석</th>";
+      sumHtml+="<th style='padding:8px 12px;text-align:center;color:#7c3aed;font-size:11px;font-weight:700'>방문자</th>";
+      sumHtml+="<th style='padding:8px 12px;text-align:center;color:#6b7280;font-size:11px;font-weight:700'>총 등록</th>";
+      sumHtml+="</tr></thead><tbody>";
+      activeDepts.forEach(function(d){
+        var st=deptStats[d];
+        var absent=st.total>0?Math.max(0,st.total-st.checkin):0;
+        grandCheckin+=st.checkin;grandTotal+=st.total;grandVisitor+=st.visitor;grandAbsent+=absent;
+        var shortDept=d.split(" ")[0];
+        sumHtml+="<tr style='border-top:1px solid #f3f4f6'>";
+        sumHtml+="<td style='padding:8px 12px;font-weight:600'>"+(shortDept||d)+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:600'>"+st.checkin+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#dc2626'>"+(absent||"-")+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#7c3aed'>"+(st.visitor||"-")+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#6b7280'>"+st.total+"</td>";
+        sumHtml+="</tr>";
+      });
+      sumHtml+="<tr style='border-top:2px solid #e5e7eb;background:#f8fafc'>";
+      sumHtml+="<td style='padding:8px 12px;font-weight:700'>전체</td>";
+      sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:700'>"+grandCheckin+"</td>";
+      sumHtml+="<td style='padding:8px 12px;text-align:center;color:#dc2626;font-weight:700'>"+(grandAbsent||"-")+"</td>";
+      sumHtml+="<td style='padding:8px 12px;text-align:center;color:#7c3aed;font-weight:700'>"+(grandVisitor||"-")+"</td>";
+      sumHtml+="<td style='padding:8px 12px;text-align:center;color:#6b7280;font-weight:700'>"+grandTotal+"</td>";
+      sumHtml+="</tr></tbody></table></div>";
+      var sumBody=document.getElementById("weeklySummaryBody");
+      var sumCard=document.getElementById("weeklySummary");
+      if(sumBody)sumBody.innerHTML=sumHtml;
+      if(sumCard)sumCard.classList.remove("hidden");
+    }catch(e2){console.warn("summary error",e2);}
   }catch(e){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444'>오류: "+e.message+"</td></tr>";}
 }var _allStudents=[];
 async function loadRoster(){
   var tbody=document.getElementById("rosterTable");if(!tbody)return;
-  tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>로딩 중...</td></tr>";
+  tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:40px;color:#9ca3af'>로딩 중...</td></tr>";
   try{
     var dept=window._dept||"",url="/api/roster"+(dept?"?dept="+encodeURIComponent(dept):"");
     var res=await fetch(url),data=await res.json();
     _allStudents=data.students||[];
     document.getElementById("rosterCount").textContent=_allStudents.length+"명";
     renderRoster(_allStudents);
-  }catch(e){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444'>오류: "+e.message+"</td></tr>";}
+  }catch(e){tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:20px;color:#ef4444'>오류: "+e.message+"</td></tr>";}
 }
 function filterRoster(){
   var q=(document.getElementById("rosterSearch").value||"").toLowerCase();
@@ -274,7 +343,7 @@ function filterRoster(){
 }
 function renderRoster(students){
   var tbody=document.getElementById("rosterTable");
-  if(!students||!students.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>등록된 학생이 없습니다</td></tr>";return;}
+  if(!students||!students.length){tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:40px;color:#9ca3af'>등록된 학생이 없습니다</td></tr>";return;}
   var now=new Date(),html="";
   for(var i=0;i<students.length;i++){
     var s=students[i];
@@ -282,6 +351,8 @@ function renderRoster(students){
     var isBday=bday&&bday.getMonth()===now.getMonth();
     var age="";if(bday){var a=now.getFullYear()-bday.getFullYear()-(now.getMonth()<bday.getMonth()||(now.getMonth()===bday.getMonth()&&now.getDate()<bday.getDate())?1:0);age=a+"세";}
     var hasAllergy=s.allergy&&s.allergy!=="없음"&&s.allergy.trim()!=="";
+    var nowMs=Date.now();var isAbsent=false;if(s.lastAttended){var daysAgo=Math.floor((nowMs-new Date(s.lastAttended).getTime())/86400000);isAbsent=daysAgo>=14;}else if(!s.isVisitor){isAbsent=true;}
+    var absenceBadge=isAbsent?"<span style='background:#fee2e2;color:#b91c1c' class='badge'>⚠️ 결석</span>":"-";
     var photoBadge=s.photo==="촬영 완료"?"<span style='background:#d1fae5;color:#065f46' class='badge'>✔</span>":"-";
     var baptBadge=s.baptized==="세례"?"<span style='background:#dbeafe;color:#1d4ed8' class='badge'>💧</span>":"-";
     var liabBadge=s.liabilityForm==="제출 완료"?"<span style='background:#d1fae5;color:#065f46' class='badge'>✔</span>":s.liabilityForm==="미제출"?"<span style='background:#fee2e2;color:#b91c1c' class='badge'>X</span>":"-";
@@ -306,6 +377,7 @@ function renderRoster(students){
     html+="<td style='text-align:center'>"+photoBadge+"</td>";
     html+="<td style='text-align:center'>"+baptBadge+"</td>";
     html+="<td style='text-align:center'>"+liabBadge+"</td>";
+    html+="<td style='text-align:center'>"+absenceBadge+"</td>";
     html+="<td style='text-align:center'>"+bdayBadge+"</td>";
     html+="<td style='text-align:center'><button data-sid='"+s.id+"' onclick='openEditById(this)' style='font-size:12px;padding:4px 10px;border-radius:8px;background:#eef2ff;color:#4f46e5;font-weight:600'>수정</button></td>";
     html+="</tr>";
