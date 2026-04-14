@@ -365,7 +365,11 @@ async function searchStudents(q) {
     }
     html += '</div>';
     results.innerHTML = html;
-    data.students.forEach(function(s) { loadStatus(s); });
+    data.students.forEach(function(s) {
+      window._studentMap = window._studentMap || {};
+      window._studentMap[s.id] = s;
+      loadStatus(s);
+    });
   } catch(e) {
     results.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠️ ' + e.message + '</div>';
   }
@@ -425,17 +429,20 @@ async function loadStatus(s) {
     var el = document.getElementById('action-' + s.id);
     if (!el) return;
     if (data.status === 'checked_out') {
-      el.innerHTML = '<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center">✅ 체크아웃 완료 · ' + data.record.checkIn + ' → ' + data.record.checkOut + '</div>';
+      el.innerHTML = '<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center">\u2705 \uCCB4\uD06C\uC544\uC6C3 \uC644\uB8CC \u00B7 ' + data.record.checkIn + ' \u2192 ' + data.record.checkOut + '</div>';
     } else if (data.status === 'checked_in') {
-      el.innerHTML = '<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 mb-2 text-sm text-emerald-700">✅ 체크인됨 · ' + data.record.checkIn + ' 입실</div><button onclick='openModal("checkout",' + JSON.stringify(s) + ',' + JSON.stringify(data.record) + ')' class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700">체크아웃 / Check Out</button>';
+      window._recordMap = window._recordMap || {};
+      window._recordMap[s.id] = data.record;
+      el.innerHTML = '<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 mb-2 text-sm text-emerald-700">\u2705 \uCCB4\uD06C\uC778\uB428 \u00B7 ' + data.record.checkIn + ' \uC785\uC2E4</div><button onclick="openModalById(\'checkout\','' + s.id + '')" class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700">\uCCB4\uD06C\uC544\uC6C3 / Check Out</button>';
     } else {
-      el.innerHTML = '<button onclick='openModal("checkin",' + JSON.stringify(s) + ',null)' class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700">체크인 / Check In</button>';
+      el.innerHTML = '<button onclick="openModalById(\'checkin\','' + s.id + '\')" class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700">\uCCB4\uD06C\uC778 / Check In</button>';
     }
   } catch(e) {
     var el2 = document.getElementById('action-' + s.id);
-    if (el2) el2.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">상태 확인 실패</div>';
+    if (el2) el2.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">\uC0C1\uD0DC \uD655\uC778 \uC2E4\uD328</div>';
   }
 }
+
 
 var _action, _student, _record;
 function openModal(action, student, record) {
@@ -545,6 +552,13 @@ function printTag() {
 }
 
 function closeSuccess() { document.getElementById('success').classList.add('hidden'); clearTimeout(_successTimer); }
+
+
+function openModalById(action, sid) {
+  var s = window._studentMap && window._studentMap[sid];
+  var rec = (action === 'checkout' && window._recordMap) ? window._recordMap[sid] : null;
+  if (s) openModal(action, s, rec);
+}
 
 // Visitor modal
 function openVisitorModal() {
