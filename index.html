@@ -17,11 +17,9 @@
 <header class="bg-white/90 backdrop-blur border-b border-gray-100 sticky top-0 z-20">
 <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
 <div><h1 class="text-sm font-bold text-gray-900">Amicus Next Church</h1><p class="text-xs text-gray-400" id="todayDate"></p></div>
-<div class="flex items-center gap-2">
-<button id="deptToggleBtn" onclick="toggleDeptPanel()" class="text-xs text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg font-semibold transition-all">부서 정보 ▼</button>
 <a href="/staff.html" class="text-xs text-gray-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50">간사/사역자 포털 →</a>
-</div></div></header>
-<div id="deptInfo" class="hidden bg-white border-b border-gray-100 shadow-sm">
+</div></header>
+<div id="deptInfo" class="bg-white border-b border-gray-100 shadow-sm">
 <div class="max-w-lg mx-auto px-4 py-3"><div class="grid grid-cols-5 gap-1 text-center text-xs">
 <button onclick="selectDept('유아부 (Infant)')" class="dept-btn p-2 rounded-xl border transition-all border-gray-200 bg-gray-50 hover:bg-indigo-50 hover:border-indigo-300" data-dept="유아부 (Infant)"><div class="text-blue-500 font-bold text-sm">👶</div><div class="font-semibold text-gray-700">유아부</div><div class="text-gray-400 text-xs">만2~3세</div></button>
 <button onclick="selectDept('유치부 (Preschool)')" class="dept-btn p-2 rounded-xl border transition-all border-gray-200 bg-gray-50 hover:bg-indigo-50 hover:border-indigo-300" data-dept="유치부 (Preschool)"><div class="text-emerald-500 font-bold text-sm">🌱</div><div class="font-semibold text-gray-700">유치부</div><div class="text-gray-400 text-xs">만4~5세</div></button>
@@ -46,12 +44,14 @@
 <button onclick="openVisitorModal()" class="w-full mb-5 py-3 rounded-2xl border-2 border-dashed border-indigo-300 text-indigo-600 font-semibold text-sm hover:bg-indigo-50 hover:border-indigo-400 transition-all">🆕 방문자 체크인 (처음 오신 분)</button>
 <div id="results"></div>
 </main>
+
 <div id="modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
 <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 fade-in max-h-[90vh] overflow-y-auto">
 <div id="modalHeader" class="text-center mb-4 p-4 rounded-2xl"></div>
 <div id="modalInfo" class="space-y-1 mb-3"></div>
 <div id="allergyAlert" class="hidden mb-3 p-3 bg-red-50 border border-red-300 rounded-xl text-red-700 text-sm font-semibold"></div>
 <div id="liabilityAlert" class="hidden mb-3 p-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-700 text-sm"></div>
+    <div id="absenceAlert" class="hidden mb-3 p-3 bg-orange-50 border border-orange-300 rounded-xl text-orange-700 text-sm font-semibold"></div>
 <div id="pickupMsg" class="hidden mb-3 p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-sm"><p class="font-semibold">📣 픽업 안내</p><p class="mt-1">예배 종료 후 <strong>즉시 픽업</strong>을 부탁드립니다. 감사합니다! 🙏</p><p class="text-xs mt-1 text-blue-600">Please pick up your child <strong>immediately after service</strong>. Thank you!</p></div>
 <div id="guardianRow" class="hidden mb-3"><label class="flex items-center gap-3 cursor-pointer p-3 bg-indigo-50 rounded-xl"><input type="checkbox" id="guardianCheck" class="w-5 h-5 rounded accent-indigo-600"/><span class="text-sm font-semibold text-indigo-700">보호자 인계 확인</span></label></div>
 <div class="flex gap-3"><button onclick="closeModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">취소</button><button id="confirmBtn" onclick="doAction()" class="flex-1 py-3 rounded-xl font-bold text-white">확인 / Confirm</button></div>
@@ -95,6 +95,7 @@
 <div class="flex gap-3 mt-5"><button onclick="closeVisitorModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100">취소</button><button onclick="submitVisitor()" id="visitorBtn" class="flex-1 py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700">체크인 등록</button></div>
 </div></div>
 <div id="printArea"><div id="printContent" style="font-family:sans-serif;padding:8px"></div></div>
+
 <script>
 var DEPT_INFO = {
   "유아부 (Infant)": { color: { bg: "bg-blue-600", bar: "bg-blue-500", left: "border-l-blue-400", badge: "bg-blue-100 text-blue-800 border-blue-200", card: "bg-blue-600" }, staff: "이지혜 간사", location: "유아부 방 (Preschool Room)", ageRange: "만 24개월 ~ 만 3세" },
@@ -113,12 +114,6 @@ function deptBadge(d) {
 function isBirthdayThisMonth(dobStr) { if (!dobStr) return false; return new Date(dobStr).getMonth() === new Date().getMonth(); }
 function getDeptFromAge(ageMonths) { var y = ageMonths / 12; if (ageMonths < 48) return "유아부 (Infant)"; if (y < 6) return "유치부 (Preschool)"; if (y < 9) return "유년부 (Elementary Jr)"; if (y < 12) return "초등부 (Elementary)"; return "중고등부 (Middle/High)"; }
 document.getElementById("todayDate").textContent = new Date().toLocaleDateString("ko-KR", {year:"numeric",month:"long",day:"numeric",weekday:"long"});
-var _deptPanelOpen = false;
-function toggleDeptPanel() {
-  _deptPanelOpen = !_deptPanelOpen;
-  document.getElementById("deptInfo").classList.toggle("hidden", !_deptPanelOpen);
-  document.getElementById("deptToggleBtn").textContent = "부서 정보 " + (_deptPanelOpen ? "▲" : "▼");
-}
 var selectedDept = null;
 function selectDept(dept) {
   selectedDept = dept;
@@ -133,9 +128,6 @@ function selectDept(dept) {
   document.getElementById("selectedDeptName").textContent = dept;
   document.getElementById("selectedDeptLocation").textContent = "📍 " + info.location;
   document.getElementById("selectedDeptStaff").textContent = "👤 " + info.staff;
-  _deptPanelOpen = false;
-  document.getElementById("deptInfo").classList.add("hidden");
-  document.getElementById("deptToggleBtn").textContent = "부서 정보 ▼";
 }
 function clearDept() { selectedDept = null; document.getElementById("selectedDeptCard").classList.add("hidden"); document.querySelectorAll(".dept-btn").forEach(function(b){ b.className = b.className.replace("border-indigo-400 bg-indigo-50", "border-gray-200 bg-gray-50"); }); }
 var searchTimer;
@@ -169,7 +161,6 @@ async function searchStudents(q) {
     }
     html += "<\/div>";
     results.innerHTML = html;
-    // Attach event listeners to action divs after rendering
     data.students.forEach(function(s) { loadStatus(s); });
   } catch(e) {
     results.innerHTML = "<div class=\"bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center\">⚠️ " + e.message + "<\/div>";
@@ -186,12 +177,7 @@ function studentCard(s) {
   var dc = (DEPT_INFO[s.department] && DEPT_INFO[s.department].color) || {};
   var leftColor = dc.left || "border-l-gray-300";
   var allergy = hasAllergy(s.allergy);
-  var noLiability = s.liabilityForm && s.liabilityForm !== "제출 완료";
   var isBday = isBirthdayThisMonth(s.dob);
-  var absenceWarn = false;
-  if (s.lastAttended) { var diff = Math.floor((new Date() - new Date(s.lastAttended)) / 86400000); absenceWarn = diff >= 14; }
-  else if (!s.isVisitor) { absenceWarn = true; }
-  var gd = guardianStr(s);
   var h = "<div id=\"card-" + s.id + "\" class=\"bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 " + leftColor + " p-4 fade-in\">";
   h += "<div class=\"mb-1\">";
   h += "<div class=\"flex flex-wrap items-center gap-2\">";
@@ -204,10 +190,6 @@ function studentCard(s) {
   if (s.nameEN) h += "<div class=\"text-sm text-gray-400 mt-0.5\">" + s.nameEN + "<\/div>";
   h += "<\/div>";
   h += "<div class=\"flex flex-wrap gap-2 mb-2\">" + deptBadge(s.department) + (s.grade ? "<span class=\"text-xs text-gray-400\">" + s.grade + "<\/span>" : "") + "<\/div>";
-  if (allergy) h += "<p class=\"text-sm text-red-600 bg-red-50 rounded-lg px-3 py-1.5 border border-red-200 mb-1.5\"><strong>알러지:<\/strong> " + s.allergy + "<\/p>";
-  if (noLiability) h += "<p class=\"text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-1.5 border border-amber-200 mb-1.5\">📋 Liability Form 미제출<\/p>";
-  if (absenceWarn && !s.isVisitor) h += "<p class=\"text-xs text-orange-600 bg-orange-50 rounded-lg px-3 py-1.5 border border-orange-200 mb-1.5\">📞 2주 이상 결석 — 연락 필요<\/p>";
-  if (gd) h += "<p class=\"text-xs text-gray-400 mb-2\">보호자: " + gd + "<\/p>";
   h += "<div id=\"action-" + s.id + "\" class=\"mt-2\"><div class=\"text-center py-2 text-gray-400 text-sm\"><span class=\"inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full spin align-middle mr-1\"><\/span>상태 확인 중...<\/div><\/div>";
   h += "<\/div>";
   return h;
@@ -223,10 +205,10 @@ function loadStatus(s) {
       } else if (data.status === "checked_in") {
         _recordMap[s.id] = data.record;
         el.innerHTML = "<div class=\"bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 mb-2 text-sm text-emerald-700\">✅ 체크인됨 · " + data.record.checkIn + " 입실<\/div>" +
-          "<button data-sid=\"" + s.id + "\" data-action=\"checkout\" class=\"w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700\">체크아웃 / Check Out<\/button>";
+          "<button data-sid=\"" + s.id + "\" class=\"w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700\">체크아웃 / Check Out<\/button>";
         el.querySelector("button").addEventListener("click", function(){ openModalById("checkout", this.dataset.sid); });
       } else {
-        el.innerHTML = "<button data-sid=\"" + s.id + "\" data-action=\"checkin\" class=\"w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700\">체크인 / Check In<\/button>";
+        el.innerHTML = "<button data-sid=\"" + s.id + "\" class=\"w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700\">체크인 / Check In<\/button>";
         el.querySelector("button").addEventListener("click", function(){ openModalById("checkin", this.dataset.sid); });
       }
     })
@@ -246,20 +228,26 @@ function openModal(action, student, record) {
   var isIn = action === "checkin";
   var allergy = hasAllergy(student.allergy);
   var noLiability = student.liabilityForm && student.liabilityForm !== "제출 완료";
+  var today = new Date();
+  var absenceWarn = false;
+  if (student.lastAttended) { var diff = Math.floor((today - new Date(student.lastAttended)) / 86400000); absenceWarn = diff >= 14; }
+  else if (!student.isVisitor) { absenceWarn = true; }
   var hdr = document.getElementById("modalHeader");
   hdr.className = "text-center mb-4 p-4 rounded-2xl " + (isIn ? "bg-emerald-50" : "bg-indigo-50");
   hdr.innerHTML = "<div class=\"text-4xl mb-2\">" + (isIn ? "👋" : "🙏") + "<\/div><h2 class=\"text-xl font-bold text-gray-900\">" + (isIn ? "체크인 확인" : "체크아웃 확인") + "<\/h2>";
   var infoRows = [];
   infoRows.push(["이름", "<strong>" + student.name + "<\/strong>" + (student.nameEN ? " <span class=\"text-sm text-gray-400\">" + student.nameEN + "<\/span>" : "") + (student.studentId ? " <span class=\"text-xs font-mono text-gray-400\">" + student.studentId + "<\/span>" : "")]);
-  infoRows.push(["부서", deptBadge(student.department)]);
+  infoRows.push(["부서", deptBadge(student.department) + (student.grade ? " <span class=\"text-xs text-gray-500 ml-1\">" + student.grade + "<\/span>" : "")]);
   var gd = guardianStr(student);
   if (gd) infoRows.push(["보호자", gd]);
   if (!isIn && record && record.checkIn) infoRows.push(["체크인", record.checkIn]);
   document.getElementById("modalInfo").innerHTML = infoRows.map(function(r){ return "<div class=\"flex justify-between items-center py-2 border-b border-gray-100\"><span class=\"text-xs text-gray-400\">" + r[0] + "<\/span><span class=\"text-sm text-gray-800\">" + r[1] + "<\/span><\/div>"; }).join("");
   var aa = document.getElementById("allergyAlert");
-  if (allergy) { aa.classList.remove("hidden"); aa.innerHTML = "⚠️ 알러지 주의: " + student.allergy; } else aa.classList.add("hidden");
+  if (allergy) { aa.classList.remove("hidden"); aa.innerHTML = "⚠️ 알러지 주의: <strong>" + student.allergy + "<\/strong>"; } else aa.classList.add("hidden");
   var la = document.getElementById("liabilityAlert");
-  if (noLiability) { la.classList.remove("hidden"); la.innerHTML = "📋 Liability Form 미제출!"; } else la.classList.add("hidden");
+  if (noLiability) { la.classList.remove("hidden"); la.innerHTML = "📋 Liability Form 미제출"; } else la.classList.add("hidden");
+  var aw = document.getElementById("absenceAlert");
+  if (aw) { if (absenceWarn && !student.isVisitor) { aw.classList.remove("hidden"); aw.innerHTML = "📞 2주 이상 결석 — 연락 필요"; } else aw.classList.add("hidden"); }
   var pm = document.getElementById("pickupMsg");
   if (isIn) pm.classList.remove("hidden"); else pm.classList.add("hidden");
   document.getElementById("guardianRow").classList.toggle("hidden", isIn);
@@ -276,7 +264,7 @@ async function doAction() {
   try {
     var time;
     if (isIn) {
-      var res = await fetch("/api/checkin", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ name: _student.name, department: _student.department, isNew: _student.isVisitor, hasAllergy: hasAllergy(_student.allergy), notes: _student.notes, staff: sessionStorage.getItem("sName") || "", studentId: _student.id }) });
+      var res = await fetch("/api/checkin", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ name: _student.name, department: _student.department, isNew: _student.isVisitor === true, hasAllergy: hasAllergy(_student.allergy), notes: _student.notes, staff: sessionStorage.getItem("sName") || "", studentId: _student.id }) });
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || "체크인 실패");
       if (data.alreadyCheckedIn) { closeModal(); loadStatus(_student); return; }
