@@ -190,45 +190,6 @@ const STAFF_MAP = {
   "박명철 전도사님": "중고등부 (Middle/High)",
 };
 const DEPT_COLORS={"유아부 (Infant)":"bg-blue-500","유치부 (Preschool)":"bg-emerald-500","유년부 (Elementary Jr)":"bg-yellow-500","초등부 (Elementary)":"bg-orange-500","중고등부 (Middle/High)":"bg-purple-500"};
-function doLogin(){
-  const sel=document.getElementById("nameSelect");
-  const dept=sel.value;
-  const nameText=(sel.options[sel.selectedIndex]||{}).text||"";
-  const staffName=nameText.split(" —")[0].trim();
-  const pw=document.getElementById("pwInput").value;
-  if(!dept){showLoginError("이름을 선택해주세요");return;}
-  if(pw!=="3"){showLoginError("비밀번호가 틀렸습니다");return;}
-  document.getElementById("loginScreen").classList.add("hidden");
-  document.getElementById("dashboard").classList.remove("hidden");
-  const deptShort=dept.split(" ")[0];
-  document.getElementById("userNameDisplay").textContent=staffName+" 간사님";
-  document.getElementById("userDeptDisplay").textContent=deptShort;
-  const dot=document.getElementById("userDot");
-  if(dot)dot.className="w-2 h-2 rounded-full "+(DEPT_COLORS[dept]||"bg-gray-400");
-  loadRoster();
-  loadAttendance();
-}
-function showLoginError(m){
-  const e=document.getElementById("loginError");
-  if(e){e.textContent=m;e.classList.remove("hidden");}
-}
-function doLogout(){
-  document.getElementById("loginScreen").classList.remove("hidden");
-  document.getElementById("dashboard").classList.add("hidden");
-  document.getElementById("pwInput").value="";
-  document.getElementById("dashName").textContent="";
-  document.getElementById("dashDept").textContent="";
-}
-function switchTab(tab){
-  ["attendance","roster"].forEach(t=>{
-    const p=document.getElementById(t+"Panel");
-    const b=document.getElementById(t+"Tab");
-    if(p)p.classList.toggle("hidden",t!==tab);
-    if(b){b.classList.toggle("bg-indigo-600",t===tab);b.classList.toggle("text-white",t===tab);b.classList.toggle("text-gray-500",t!==tab);}
-  });
-  if(tab==="roster")loadRoster();
-  else loadAttendance();
-}
 
 async function loadRoster() {
   document.getElementById('rosterTable').innerHTML = '<tr><td colspan="4" class="text-center py-10 text-gray-400"><div class="w-5 h-5 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-xs">로딩 중...</p></td></tr>';
