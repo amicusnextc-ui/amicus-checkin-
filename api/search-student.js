@@ -4,7 +4,7 @@ module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   if (req.method !== "GET") return res.status(405).end();
   const { name } = req.query;
-  if (!name || !name.trim()) return res.status(400).json({ error: "ì´ë¦ì ìë ¥í´ì£¼ì¸ì" });
+  if (!name || !name.trim()) return res.status(400).json({ error: "name required" });
   try {
     const response = await fetch(`https://api.notion.com/v1/databases/${STUDENT_DB}/query`, {
       method: "POST",
@@ -15,29 +15,29 @@ module.exports = async (req, res) => {
       },
       body: JSON.stringify({
         filter: { or: [
-          { property: "ì´ë¦ (Name)",       title:     { contains: name.trim() } },
-          { property: "ìë¬¸ì´ë¦ (Name EN)", rich_text: { contains: name.trim() } },
+          { property: "\uC774\uB984 (Name)", title: { contains: name.trim() } },
+          { property: "\uC601\uBB38\uC774\uB984 (Name EN)", rich_text: { contains: name.trim() } },
         ]},
         page_size: 20,
       }),
     });
     const data = await response.json();
-    if (!response.ok) return res.status(500).json({ error: data.message || "Notion API ì¤ë¥" });
+    if (!response.ok) return res.status(500).json({ error: data.message || "Notion error" });
     const students = (data.results || []).map(p => ({
-      id:         p.id,
-      name:       p.properties["ì´ë¦ (Name)"]?.title?.[0]?.plain_text || "",
-      nameEN:     p.properties["ìë¬¸ì´ë¦ (Name EN)"]?.rich_text?.[0]?.plain_text || "",
-      department: p.properties["ë¶ì (Department)"]?.select?.name || "",
-      guardian:   p.properties["ë³´í¸ì (Guardian)"]?.rich_text?.[0]?.plain_text || "",
-      phone:      p.properties["ì°ë½ì² (Phone)"]?.phone_number || "",
-      allergy:    p.properties["ìë¬ì§ (Allergy)"]?.rich_text?.[0]?.plain_text || "",
-      isNew:      p.properties["ìì ì (New Student)"]?.checkbox || false,
-      grade:      p.properties["íë (Grade)"]?.rich_text?.[0]?.plain_text || "",
-      notes:      p.properties["í¹ì´ì¬í­ (Notes)"]?.rich_text?.[0]?.plain_text || "",
-      status:     p.properties["ìí (Status)"]?.select?.name || "",
-    })).filter(s => !s.status || s.status === "íì± (Active)");
+      id: p.id,
+      name: p.properties["\uC774\uB984 (Name)"]?.title?.[0]?.plain_text || "",
+      nameEN: p.properties["\uC601\uBB38\uC774\uB984 (Name EN)"]?.rich_text?.[0]?.plain_text || "",
+      department: p.properties["\uBD80\uC11C (Department)"]?.select?.name || "",
+      guardian: p.properties["\uBCF4\uD638\uC790 (Guardian)"]?.rich_text?.[0]?.plain_text || "",
+      phone: p.properties["\uC5F0\uB77D\uCC98 (Phone)"]?.phone_number || "",
+      allergy: p.properties["\uC54C\uB7EC\uC9C0 (Allergy)"]?.rich_text?.[0]?.plain_text || "",
+      isNew: p.properties["\uC0C8\uC2E0\uC790 (New Student)"]?.checkbox || false,
+      grade: p.properties["\uD559\uB144 (Grade)"]?.rich_text?.[0]?.plain_text || "",
+      notes: p.properties["\uD2B9\uC774\uC0AC\uD56D (Notes)"]?.rich_text?.[0]?.plain_text || "",
+      status: p.properties["\uC0C1\uD0DC (Status)"]?.select?.name || "",
+    })).filter(s => !s.status || s.status === "\uD65C\uC131 (Active)");
     return res.status(200).json({ students });
   } catch (e) {
-    return res.status(500).json({ error: "ê²ì ì¤ ì¤ë¥: " + e.message });
+    return res.status(500).json({ error: e.message });
   }
 };
