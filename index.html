@@ -29,12 +29,460 @@
 <div id="deptInfo" class="hidden bg-white border-b border-gray-100 shadow-sm">
   <div class="max-w-lg mx-auto px-4 py-3">
     <div class="grid grid-cols-5 gap-1 text-center text-xs">
-      <button onclick="selectDept('유아부 (Infant)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유아부 (Infant)"><div class="text-blue-500 font-bold text-sm">👶</div><div class="font-semibold text-gray-700">유아부</div><div class="text-gray-400 text-xs">만2~3세</div></button>
-      <button onclick="selectDept('유치부 (Preschool)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유치부 (Preschool)"><div class="text-emerald-500 font-bold text-sm">🌱hing</div><div class="font-semibold text-gray-700">유치부</div><div class="text-gray-400 text-xs">만4~5세</div></button>
-      <button onclick="selectDept('유년부 (Elementary Jr)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유년부 (Elementary Jr)"><div class="text-yellow-500 font-bold text-sm">📚</div><div class="font-semibold text-gray-700">유년부</div><div class="text-gray-400 text-xs">K~2학년</div></button>
-      <button onclick="selectDept('초등부 (Elementary)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="�Y�등부 (Elementary)"><div class="text-orange-500 font-bold text-sm">⭐</div><div class="font-semibold text-gray-700">초등부</div><div class="text-gray-400 text-xs">3~5앙년</div></button>
-      <button onclick="selectDept('중고등부 (Middle/High)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="중고등부 (Middle/High)"><div class="text-purple-500 font-bold text-sm">🎓</div><div class="font-semibold text-gray-700">중고등부</div><div class="text-gray-400 text-xs">6~12학년</div></button>
+      <button onclick="selectDept('유아부 (Infant)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유아부 (Infant)">
+        <div class="text-blue-500 font-bold text-sm">👶</div>
+        <div class="font-semibold text-gray-700">유아부</div>
+        <div class="text-gray-400 text-xs">만2~3세</div>
+      </button>
+      <button onclick="selectDept('유치부 (Preschool)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유치부 (Preschool)">
+        <div class="text-emerald-500 font-bold text-sm">🌱</div>
+        <div class="font-semibold text-gray-700">유치부</div>
+        <div class="text-gray-400 text-xs">만4~5세</div>
+      </button>
+      <button onclick="selectDept('유년부 (Elementary Jr)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="유년부 (Elementary Jr)">
+        <div class="text-yellow-500 font-bold text-sm">📚</div>
+        <div class="font-semibold text-gray-700">유년부</div>
+        <div class="text-gray-400 text-xs">K~2학년</div>
+      </button>
+      <button onclick="selectDept('초등부 (Elementary)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="초등부 (Elementary)">
+        <div class="text-orange-500 font-bold text-sm">⭐</div>
+        <div class="font-semibold text-gray-700">초등부</div>
+        <div class="text-gray-400 text-xs">3~5학년</div>
+      </button>
+      <button onclick="selectDept('중고등부 (Middle/High)')" class="dept-btn p-2 rounded-xl border transition-all" data-dept="중고등부 (Middle/High)">
+        <div class="text-purple-500 font-bold text-sm">🎓</div>
+        <div class="font-semibold text-gray-700">중고등부</div>
+        <div class="text-gray-400 text-xs">6~12학년</div>
+      </button>
     </div>
   </div>
 </div>
-<main class="max-w-lg mx-auto px-4 py-6"><script>alert("test")</script></main></body></html>
+
+<main class="max-w-lg mx-auto px-4 py-6">
+  <!-- 선택된 부서 카드 -->
+  <div id="selectedDeptCard" class="hidden mb-5 rounded-2xl p-4 fade-in">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs text-white/70 font-semibold uppercase">선택된 부서</p>
+        <p id="selectedDeptName" class="text-xl font-black text-white mt-0.5"></p>
+        <p id="selectedDeptLocation" class="text-sm text-white/80 mt-0.5">📍</p>
+        <p id="selectedDeptStaff" class="text-xs text-white/70 mt-0.5">👤</p>
+      </div>
+      <button onclick="clearDept()" class="text-white/60 hover:text-white text-xs border border-white/30 px-2 py-1 rounded-lg">변경</button>
+    </div>
+  </div>
+
+  <div class="text-center mb-6">
+    <div class="text-4xl mb-2">⛪</div>
+    <h2 class="text-2xl font-bold text-gray-900">출석 체크</h2>
+    <p class="text-gray-400 text-sm mt-1">Check-In / Check-Out</p>
+    <button onclick="document.getElementById('deptInfo').classList.toggle('hidden')" class="mt-2 text-xs text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full hover:bg-indigo-100">
+      부서 정보 보기 ▾
+    </button>
+  </div>
+
+  <div class="relative mb-4">
+    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </svg>
+    <input id="searchInput" type="text" autocomplete="off" autocorrect="off" spellcheck="false"
+      placeholder="이름 검색 / Search name..."
+      class="w-full pl-12 pr-12 py-4 text-lg rounded-2xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-gray-300"/>
+    <button id="clearBtn" onclick="clearSearch()" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <!-- 방문자 체크인 버튼 -->
+  <button onclick="openVisitorModal()" class="w-full mb-5 py-3 rounded-2xl border-2 border-dashed border-indigo-300 text-indigo-600 font-semibold text-sm hover:bg-indigo-50 hover:border-indigo-400 transition-all">
+    🆕 방문자 체크인 (처음 오신 분)
+  </button>
+
+  <div id="results"></div>
+</main>
+ont-bold text-gray-900">🆕 방문자 체크인</h2>
+      <p class="text-xs text-gray-400">처음 방문하시는 분들을 위한 등록</p>
+    </div>
+    <button onclick="closeVisitorModal()" class="text-gray-400 hover:text-gray-600">
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="space-y-3">
+    <div>
+      <label class="text-xs font-bold text-gray-500 uppercase">아이 이름 *</label>
+      <input id="v-name" type="text" placeholder="한글 이름" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+    </div>
+    <div>
+      <label class="text-xs font-bold text-gray-500 uppercase">English Name</label>
+      <input id="v-nameEN" type="text" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+    </div>
+    <div>
+      <label class="text-xs font-bold text-gray-500 uppercase">생년월일 (Date of Birth) *</label>
+      <input id="v-dob" type="date" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+      <p id="v-deptPreview" class="text-xs text-indigo-600 mt-1 hidden">→ 자동 배정 부서: <strong id="v-deptPreviewName"></strong></p>
+    </div>
+    <div>
+      <label class="text-xs font-bold text-gray-500 uppercase">학년 / Grade</label>
+      <input id="v-grade" type="text" placeholder="예: 3rd grade, 유치원" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+    </div>
+    <div>
+      <label class="text-xs font-bold text-gray-500 uppercase">보호자 이름 *</label>
+      <input id="v-guardian" type="text" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+    </div>
+    <div>
+      <label class="text-xs font-bold text-gray-500 uppercase">연락처 (Phone)</label>
+      <input id="v-phone" type="tel" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+    </div>
+    <div>
+      <label class="text-xs font-bold text-gray-500 uppercase">알러지 (Allergy)</label>
+      <input id="v-allergy" type="text" placeholder="없음" class="w-full mt-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/>
+    </div>
+    <!-- 픽업 안내 -->
+    <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-xs">
+      <p class="font-semibold">📣 픽업 안내 / Pickup Notice</p>
+      <p class="mt-1">예배 종료 후 좉시 픽업을 부탁드립니다. Please pick up your child immediately after service.</p>
+    </div>
+    <label class="flex items-center gap-3 cursor-pointer p-2.5 bg-blue-50 rounded-xl">
+      <input type="checkbox" id="v-pickupAck" class="w-4 h-4 accent-blue-600"/>
+      <span class="text-sm font-semibold text-blue-700">픽업 안내 확인했습니다 / I acknowledge the pickup notice</span>
+    </label>
+  </div>
+  <div id="visitorError" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm"></div>
+  <div class="flex gap-3 mt-5">
+    <button onclick="closeVisitorModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100">취소</button>
+    <button onclick="submitVisitor()" id="visitorBtn" class="flex-1 py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700">체크인 등록</button>
+  </div>
+</div>
+</div>
+
+<div id="printArea"><div id="printContent" style="font-family:sans-serif;padding:8px"></div></div>
+
+<script>
+const DEPT_INFO = {
+  "유아부 (Infant)": {
+    color: { bg: "bg-blue-600", bar: "bg-blue-500", left: "border-l-blue-400", badge: "bg-blue-100 text-blue-800 border-blue-200", card: "bg-blue-600" },
+    staff: "이지혜 간사",
+    location: "유치부 방 (Preschool Room)",
+    ageRange: "만 24개월 ~ 만 3세",
+  },
+  "유치부 (Preschool)": {
+    color: { bg: "bg-emerald-600", bar: "bg-emerald-500", left: "border-l-emerald-400", badge: "bg-emerald-100 text-emerald-800 border-emerald-200", card: "bg-emerald-600" },
+    staff: "김향숙 간사",
+    location: "유치부 방 (Preschool Room)",
+    ageRange: "만 4세 ~ Pre-K",
+  },
+  "유년부 (Elementary Jr)": {
+    color: { bg: "bg-yellow-500", bar: "bg-yellow-400", left: "border-l-yellow-400", badge: "bg-yellow-100 text-yellow-800 border-yellow-200", card: "bg-yellow-500" },
+    staff: "박은혜 간사",
+    location: "유년부 방 (Jr. Room)",
+    ageRange: "Kindergarten ~ 2학년",
+  },
+  "초등부 (Elementary)": {
+    color: { bg: "bg-orange-500", bar: "bg-orange-400", left: "border-l-orange-400", badge: "bg-orange-100 text-orange-800 border-orange-200", card: "bg-orange-500" },
+    staff: "백진주 간사",
+    location: "초등부 방 (Elementary Room)",
+    ageRange: "3학년 ~ 5학년",
+  },
+  "중고등부 (Middle/High)": {
+    color: { bg: "bg-purple-600", bar: "bg-purple-500", left: "border-l-purple-400", badge: "bg-purple-100 text-purple-800 border-purple-200", card: "bg-purple-600" },
+    staff: "박명철 전도사님",
+    location: "중고등부 방 (Youth Room)",
+    ageRange: "6학년 ~ 12학년",
+  },
+};
+
+function hasAllergy(a){ return a && a.trim() && a.toLowerCase() !== '없음' && a.toLowerCase() !== 'none'; }
+function deptBadge(d) {
+  const c = (DEPT_INFO[d]?.color || {}).badge || 'bg-gray-100 text-gray-600 border-gray-200';
+  return `<span class="text-xs font-semibold px-2 py-0.5 rounded-full border ${c}">${d || '미지정'}</span>`;
+}
+function isBirthdayThisMonth(dobStr) {
+  if (!dobStr) return false;
+  const dob = new Date(dobStr);
+  return dob.getMonth() === new Date().getMonth();
+}
+function getDeptFromAge(ageMonths) {
+  const ageYears = ageMonths / 12;
+  if (ageMonths < 48) return "유아부 (Infant)";
+  if (ageYears < 6) return "유치부 (Preschool)";
+  if (ageYears < 9) return "유년부 (Elementary Jr)";
+  if (ageYears < 12) return "초등부 (Elementary)";
+  return "중고등부 (Middle/High)";
+}
+
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+// Dept selector buttons styling
+document.querySelectorAll('.dept-btn').forEach(btn => {
+  btn.className = btn.className + ' border-gray-200 bg-gray-50 hover:bg-indigo-50 hover:border-indigo-300';
+});
+
+let selectedDept = null;
+function selectDept(dept) {
+  selectedDept = dept;
+  const info = DEPT_INFO[dept];
+  document.querySelectorAll('.dept-btn').forEach(b => {
+    if (b.dataset.dept === dept) b.className = b.className.replace('border-gray-200 bg-gray-50', 'border-indigo-400 bg-indigo-50');
+    else b.className = b.className.replace('border-indigo-400 bg-indigo-50', 'border-gray-200 bg-gray-50');
+  });
+  const card = document.getElementById('selectedDeptCard');
+  card.className = `mb-5 rounded-2xl p-4 fade-in ${info.color.card}`;
+  card.classList.remove('hidden');
+  document.getElementById('selectedDeptName').textContent = dept;
+  document.getElementById('selectedDeptLocation').textContent = '📍 ' + info.location;
+  document.getElementById('selectedDeptStaff').textContent = '👤 ' + info.staff;
+  document.getElementById('deptInfo').classList.add('hidden');
+}
+function clearDept() { selectedDept = null; document.getElementById('selectedDeptCard').classList.add('hidden'); }
+
+let searchTimer;
+const input = document.getElementById('searchInput');
+const clearBtn = document.getElementById('clearBtn');
+const results = document.getElementById('results');
+
+input.addEventListener('input', () => {
+  const q = input.value.trim();
+  clearBtn.classList.toggle('hidden', !q);
+  clearTimeout(searchTimer);
+  if (!q) { results.innerHTML = placeholder(); return; }
+  searchTimer = setTimeout(() => searchStudents(q), 380);
+});
+
+function clearSearch() { input.value = ''; clearBtn.classList.add('hidden'); results.innerHTML = placeholder(); input.focus(); }
+function placeholder() {
+  return `<div class="text-center py-12 text-gray-300"><div class="text-4xl mb-3">👆</div><p class="text-sm">이름을 입력하세요</p><p class="text-xs mt-1">Type a name to search</p></div>`;
+}
+results.innerHTML = placeholder();
+
+async function searchStudents(q) {
+  results.innerHTML = `<div class="text-center py-10 text-gray-400"><div class="w-8 h-8 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-3"></div><p class="text-sm">검색 중...</p></div>`;
+  try {
+    const res = await fetch(`/api/search-student?name=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    if (!data.students?.length) {
+      results.innerHTML = `<div class="text-center py-10"><div class="text-3xl mb-2">🔍</div><p class="text-gray-500 font-medium">검색 결과 없음</p><p class="text-gray-400 text-sm mt-1 mb-4">No results for "${q}"</p><button onclick="openVisitorModal()" class="text-xs text-indigo-600 bg-indigo-50 px-4 py-2 rounded-full hover:bg-indigo-100">처음 방문자이신가요? 여기 클릭</button></div>`;
+      return;
+    }
+    results.innerHTML = `<div class="space-y-3">${data.students.map(s => studentCard(s)).join('')}</div>`;
+    data.students.forEach(s => loadStatus(s));
+  } catch(e) {
+    results.innerHTML = `<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠️ ${e.message}</div>`;
+  }
+}
+
+function studentCard(s) {
+  const dc = DEPT_INFO[s.department]?.color || {};
+  const leftColor = dc.left || 'border-l-gray-300';
+  const allergy = hasAllergy(s.allergy);
+  const noLiability = s.liabilityForm && s.liabilityForm !== '제출 완료';
+  const isBday = isBirthdayThisMonth(s.dob);
+  const today = new Date();
+  let absenceWarn = false;
+  if (s.lastAttended) {
+    const lastDate = new Date(s.lastAttended);
+    const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+    absenceWarn = diffDays >= 14;
+  } else if (!s.isVisitor) {
+    absenceWarn = true;
+  }
+  return `<div id="card-${s.id}" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 ${leftColor} p-4 fade-in">
+    <div class="flex flex-wrap items-center gap-2 mb-1">
+      <span class="text-xl font-bold text-gray-900">${s.name}</span>
+      ${s.nameEN ? `<span class="text-sm text-gray-400">${s.nameEN}</span>` : ''}
+      ${s.studentId ? `<span class="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">${s.studentId}</span>` : ''}
+      ${s.isVisitor ? `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200">🆕 방문자</span>` : ''}
+      ${isBday ? `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200">🎂 이번달 생일!</span>` : ''}
+      ${allergy ? `<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200">⚠️ 알러지</span>` : ''}
+    </div>
+    <div class="flex flex-wrap gap-2 mb-2">${deptBadge(s.department)}${s.grade ? `<span class="text-xs text-gray-400">${s.grade}</span>` : ''}</div>
+    ${allergy ? `<p class="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-1.5 border border-red-200 mb-1.5"><strong>알러지:</strong> ${s.allergy}</p>` : ''}
+    ${noLiability ? `<p class="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-1.5 border border-amber-200 mb-1.5">📋 Liability Form 미제출</p>` : ''}
+    ${absenceWarn ? `<p class="text-xs text-orange-600 bg-orange-50 rounded-lg px-3 py-1.5 border border-orange-200 mb-1.5">📞 2주 이상 결석 — 연락 필요</p>` : ''}
+    ${s.guardian ? `<p class="text-xs text-gray-400 mb-2">보호자: ${s.guardian}${s.phone ? ' · ' + s.phone : ''}</p>` : ''}
+    <div id="action-${s.id}" class="mt-2"><div class="text-center py-2 text-gray-400 text-sm"><span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full spin align-middle mr-1"></span>상태 확인 중...</div></div>
+  </div>`;
+}
+
+async function loadStatus(s) {
+  try {
+    const res = await fetch(`/api/check-status?name=${encodeURIComponent(s.name)}`);
+    const data = await res.json();
+    const el = document.getElementById(`action-${s.id}`);
+    if (!el) return;
+    if (data.status === 'checked_out') {
+      el.innerHTML = `<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center">✅ 체크아웃 완료 · ${data.record.checkIn} → ${data.record.checkOut}</div>`;
+    } else if (data.status === 'checked_in') {
+      el.innerHTML = `<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 mb-2 text-sm text-emerald-700">✅ 체크인됨 · ${data.record.checkIn} 입실</div>
+        <button onclick='openModal("checkout",${JSON.stringify(s)},${JSON.stringify(data.record)})' class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700">체크아웃 / Check Out</button>`;
+    } else {
+      el.innerHTML = `<button onclick='openModal("checkin",${JSON.stringify(s)},null)' class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700">체크인 / Check In</button>`;
+    }
+  } catch(e) {
+    const el = document.getElementById(`action-${s.id}`);
+    if (el) el.innerHTML = `<div class="text-xs text-gray-400 text-center py-2">상태 확인 실패</div>`;
+  }
+}
+
+let _action, _student, _record;
+function openModal(action, student, record) {
+  _action = action; _student = student; _record = record;
+  const isIn = action === 'checkin';
+  const allergy = hasAllergy(student.allergy);
+  const noLiability = student.liabilityForm && student.liabilityForm !== '제출 완료';
+  document.getElementById('modalHeader').className = `text-center mb-4 p-4 rounded-2xl ${isIn ? 'bg-emerald-50' : 'bg-indigo-50'}`;
+  document.getElementById('modalHeader').innerHTML = `<div class="text-4xl mb-2">${isIn ? '👋' : '🙏'}|/div><h2 class="text-xl font-bold text-gray-900">${isIn ? '체크인 확인' : '체크아웃 확인'}</h2>`;
+  const rows = [
+    ['이름', `<strong>${student.name}</strong>${student.studentId ? ` <span class="text-xs font-mono text-gray-400">${student.studentId}</span>` : ''}`],
+    ['부서', deptBadge(student.department)],
+    student.guardian ? ['보호자', student.guardian] : null,
+    !isIn && record?.checkIn ? ['체크인', record.checkIn] : null,
+  ].filter(Boolean);
+  document.getElementById('modalInfo').innerHTML = rows.map(([k,v]) =>
+    `<div class="flex justify-between items-center py-2 border-b border-gray-100"><span class="text-xs text-gray-400">${k}</span><span class="text-sm text-gray-800">${v}</span></div>`
+  ).join('');
+  const aa = document.getElementById('allergyAlert');
+  if (allergy) { aa.classList.remove('hidden'); aa.innerHTML = `⚠️ 알러지 주의: ${student.allergy}`; } else aa.classList.add('hidden');
+  const la = document.getElementById('liabilityAlert');
+  if (noLiability) { la.classList.remove('hidden'); la.innerHTML = '📋 Liability Form 미제출!'; } else la.classList.add('hidden');
+  const pm = document.getElementById('pickupMsg');
+  if (isIn) pm.classList.remove('hidden'); else pm.classList.add('hidden');
+  document.getElementById('guardianRow').classList.toggle('hidden', isIn);
+  document.getElementById('guardianCheck').checked = false;
+  const btn = document.getElementById('confirmBtn');
+  btn.className = `flex-1 py-3 rounded-xl font-bold text-white ${isIn ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700'}`;
+  document.getElementById('modal').classList.remove('hidden');
+}
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+async function doAction() {
+  const btn = document.getElementById('confirmBtn');
+  btn.textContent = '처리 중...'; btn.disabled = true;
+  const isIn = _action === 'checkin';
+  try {
+    let time;
+    if (isIn) {
+      const res = await fetch('/api/checkin', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name: _student.name, department: _student.department, isNew: _student.isVisitor, hasAllergy: hasAllergy(_student.allergy), notes: _student.notes, staff: sessionStorage.getItem('sName') || '', studentId: _student.id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '체크인 실패');
+      if (data.alreadyCheckedIn) { closeModal(); loadStatus(_student); return; }
+      time = data.checkInTime;
+    } else {
+      const res = await fetch('/api/checkout', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ pageId: _record.id, guardianConfirmed: document.getElementById('guardianCheck').checked })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '체크아웃 실패');
+      time = data.checkOutTime;
+    }
+    closeModal();
+    showSuccess(isIn, _student, time);
+    loadStatus(_student);
+  } catch(e) { alert(e.message || '오류가 발생했습니다'); }
+  btn.textContent = '확인 / Confirm'; btn.disabled = false;
+}
+
+let _successTimer;
+function showSuccess(isIn, student, time) {
+  document.getElementById('successIcon').textContent = isIn ? '🎉' : '👋';
+  document.getElementById('successTitle').textContent = isIn ? `${student.name} 체크인 완료!` : `${student.name} 체크아웃 완료!`;
+  document.getElementById('successTime').textContent = time || '';
+  document.getElementById('success').classList.remove('hidden');
+  const sp = document.getElementById('successPickup');
+  if (isIn) sp.classList.remove('hidden'); else sp.classList.add('hidden');
+  const tagContainer = document.getElementById('tagContainer');
+  const printBtn = document.getElementById('printBtn');
+  if (isIn) { tagContainer.classList.remove('hidden'); printBtn.classList.remove('hidden'); buildTag(student, time); }
+  else { tagContainer.classList.add('hidden'); printBtn.classList.add('hidden'); }
+  clearTimeout(_successTimer);
+  _successTimer = setTimeout(closeSuccess, 8000);
+}
+
+function buildTag(s, time) {
+  const dc = DEPT_INFO[s.department]?.color || {};
+  document.getElementById('tagDeptBar').className = 'absolute top-0 left-0 right-0 h-2 rounded-t-xl ' + (dc.bar || 'bg-gray-400');
+  document.getElementById('tagName').textContent = s.name;
+  document.getElementById('tagNameEN').textContent = s.nameEN || '';
+  document.getElementById('tagDept').textContent = s.department || '';
+  document.getElementById('tagGrade').textContent = s.grade || '';
+  document.getElementById('tagId').textContent = s.studentId || '';
+  document.getElementById('tagGuardian').textContent = s.guardian || '';
+  document.getElementById('tagDate').textContent = new Date().toLocaleDateString('ko-KR', {month:'short',day:'numeric'}) + ' ' + time;
+  const ab = document.getElementById('tagAllergyBadge');
+  if (hasAllergy(s.allergy)) { ab.classList.remove('hidden'); ab.textContent = `⚠️ 알러지: ${s.allergy}`; } else ab.classList.add('hidden');
+  document.getElementById('guardianTagName').textContent = s.name;
+  document.getElementById('guardianTagId').textContent = s.studentId || '';
+  const qrData = JSON.stringify({id:s.id,name:s.name,sid:s.studentId,dept:s.department,date:new Date().toLocaleDateString('sv-SE')});
+  try {
+    QRCode.toCanvas(document.getElementById('tagQR'), qrData, {width:56,margin:0,color:{dark:'#1f2937',light:'#ffffff'}});
+    QRCode.toCanvas(document.getElementById('guardianQR'), qrData, {width:48,margin:0,color:{dark:'#4f46e5',light:'#eef2ff'}});
+  } catch(e) {}
+}
+function printTag() {
+  const childTag = document.getElementById('childTag').cloneNode(true);
+  document.getElementById('printContent').innerHTML = '';
+  document.getElementById('printContent').appendChild(childTag);
+  window.print();
+}
+function closeSuccess() { document.getElementById('success').classList.add('hidden'); clearTimeout(_successTimer); }
+
+// Visitor modal
+function openVisitorModal() {
+  ['v-name','v-nameEN','v-grade','v-guardian','v-phone'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('v-dob').value = '';
+  document.getElementById('v-allergy').value = '없음';
+  document.getElementById('v-pickupAck').checked = false;
+  document.getElementById('v-deptPreview').classList.add('hidden');
+  document.getElementById('visitorError').classList.add('hidden');
+  document.getElementById('visitorModal').classList.remove('hidden');
+}
+function closeVisitorModal() { document.getElementById('visitorModal').classList.add('hidden'); }
+
+document.getElementById('v-dob').addEventListener('change', () => {
+  const dob = document.getElementById('v-dob').value;
+  if (!dob) return;
+  const dDate = new Date(dob);
+  const now = new Date();
+  let ageMonths = (now.getFullYear() - dDate.getFullYear()) * 12 + (now.getMonth() - dDate.getMonth());
+  if (now.getDate() < dDate.getDate()) ageMonths--;
+  const dept = getDeptFromAge(ageMonths);
+  document.getElementById('v-deptPreviewName').textContent = dept;
+  document.getElementById('v-deptPreview').classList.remove('hidden');
+});
+
+async function submitVisitor() {
+  const name = document.getElementById('v-name').value.trim();
+  const dob = document.getElementById('v-dob').value;
+  const guardian = document.getElementById('v-guardian').value.trim();
+  const err = document.getElementById('visitorError');
+  err.classList.add('hidden');
+  if (!name) { err.textContent = '이름을 입력해주세요'; err.classList.remove('hidden'); return; }
+  if (!dob) { err.textContent = '생년월일을 입력해주세요'; err.classList.remove('hidden'); return; }
+  if (!guardian) { err.textContent = '보호자 이름을 입력해주세요'; err.classList.remove('hidden'); return; }
+  if (!document.getElementById('v-pickupAck').checked) { err.textContent = '픽업 안내 확인 체크가 필요합니다'; err.classList.remove('hidden'); return; }
+  const btn = document.getElementById('visitorBtn'); btn.textContent = '등록 중...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/visitor-checkin', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name, nameEN: document.getElementById('v-nameEN').value, dob,
+        grade: document.getElementById('v-grade').value,
+        guardian, phone: document.getElementById('v-phone').value,
+        allergy: document.getElementById('v-allergy').value || '없음',
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '등록 실패');
+    closeVisitorModal();
+    const fakeStudent = { id: data.studentId, name, nameEN: document.getElementById('v-nameEN').value, department: data.department, guardian, studentId: '', isVisitor: true, allergy: document.getElementById('v-allergy').value };
+    showSuccess(true, fakeStudent, data.checkInTime);
+  } catch(e) { err.textContent = e.message; err.classList.remove('hidden'); }
+  btn.textContent = '체크인 등록'; btn.disabled = false;
+}
+</script>
+</body>
+</html>
