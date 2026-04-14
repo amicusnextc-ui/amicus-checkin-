@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-<title>아미쿠스 교육부 | 출석 체크</title>
+<title>ìë¯¸ì¿ ì¤ êµì¡ë¶ | ì¶ì ì²´í¬</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
@@ -25,21 +25,21 @@
       <h1 class="text-sm font-bold text-gray-900">Amicus Next Church</h1>
       <p class="text-xs text-gray-400" id="todayDate"></p>
     </div>
-    <a href="/staff.html" class="text-xs text-gray-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50">간사 포털털 →</a>
+    <a href="/staff.html" class="text-xs text-gray-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50">ê°ì¬ í¬í¸í¸ â</a>
   </div>
 </header>
 
 <!-- MAIN -->
 <main class="max-w-lg mx-auto px-4 py-8">
   <div class="text-center mb-8">
-    <div class="text-5xl mb-3">⛪</div>
-    <h2 class="text-2xl font-bold text-gray-900">출석 체크</h2>
+    <div class="text-5xl mb-3">âª</div>
+    <h2 class="text-2xl font-bold text-gray-900">ì¶ì ì²´í¬</h2>
     <p class="text-gray-400 text-sm mt-1">Check-In / Check-Out</p>
   </div>
   <div class="relative mb-6">
     <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
     <input id="searchInput" type="text" autocomplete="off" autocorrect="off" spellcheck="false"
-      placeholder="이름 검색 / Search name..."
+      placeholder="ì´ë¦ ê²ì / Search name..."
       class="w-full pl-12 pr-12 py-4 text-lg rounded-2xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-gray-300"/>
     <button id="clearBtn" onclick="clearSearch()" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -58,12 +58,12 @@
   <div id="guardianRow" class="hidden mb-4">
     <label class="flex items-center gap-3 cursor-pointer p-3 bg-indigo-50 rounded-xl">
       <input type="checkbox" id="guardianCheck" class="w-5 h-5 rounded accent-indigo-600"/>
-      <span class="text-sm font-semibold text-indigo-700">보호자 인계 확인</span>
+      <span class="text-sm font-semibold text-indigo-700">ë³´í¸ì ì¸ê³ íì¸</span>
     </label>
   </div>
   <div class="flex gap-3">
-    <button onclick="closeModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">취소</button>
-    <button id="confirmBtn" onclick="doAction()" class="flex-1 py-3 rounded-xl font-bold text-white">확인 / Confirm</button>
+    <button onclick="closeModal()" class="flex-1 py-3 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">ì·¨ì</button>
+    <button id="confirmBtn" onclick="doAction()" class="flex-1 py-3 rounded-xl font-bold text-white">íì¸ / Confirm</button>
   </div>
 </div>
 </div>
@@ -78,7 +78,7 @@
   </div>
   <!-- TAG PREVIEW -->
   <div id="tagContainer" class="hidden mb-4">
-    <p class="text-xs font-bold text-gray-500 uppercase mb-2">태그 미리보기</p>
+    <p class="text-xs font-bold text-gray-500 uppercase mb-2">íê·¸ ë¯¸ë¦¬ë³´ê¸°</p>
     <!-- Child tag -->
     <div id="childTag" class="bg-white border-2 border-gray-200 rounded-xl p-3 mb-2 relative overflow-hidden">
       <div id="tagDeptBar" class="absolute top-0 left-0 right-0 h-2 rounded-t-xl"></div>
@@ -88,7 +88,7 @@
           <p id="tagNameEN" class="text-xs text-gray-500"></p>
           <p id="tagDept" class="text-xs font-semibold mt-1"></p>
           <p id="tagGrade" class="text-xs text-gray-500"></p>
-          <div id="tagAllergyBadge" class="hidden mt-1.5 inline-block text-xs font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full border border-red-300">⚠️ 알러지 주의</div>
+          <div id="tagAllergyBadge" class="hidden mt-1.5 inline-block text-xs font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full border border-red-300">â ï¸ ìë¬ì§ ì£¼ì</div>
         </div>
         <div class="text-right ml-2">
           <canvas id="tagQR" width="56" height="56"></canvas>
@@ -96,7 +96,7 @@
         </div>
       </div>
       <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500">
-        <span>보호자: <span id="tagGuardian" class="font-semibold text-gray-700"></span></span>
+        <span>ë³´í¸ì: <span id="tagGuardian" class="font-semibold text-gray-700"></span></span>
         <span id="tagDate" class="text-gray-400"></span>
       </div>
     </div>
@@ -104,7 +104,7 @@
     <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
       <div class="flex justify-between items-center">
         <div>
-          <p class="text-xs font-bold text-indigo-600 uppercase">보호자 픽업 태그</p>
+          <p class="text-xs font-bold text-indigo-600 uppercase">ë³´í¸ì í½ì íê·¸</p>
           <p id="guardianTagName" class="text-base font-black text-gray-900 mt-0.5"></p>
           <p id="guardianTagId" class="text-xs font-mono text-indigo-500"></p>
         </div>
@@ -113,8 +113,8 @@
     </div>
   </div>
   <div class="flex gap-2">
-    <button onclick="closeSuccess()" class="flex-1 py-3 rounded-xl text-gray-600 bg-gray-100 font-semibold text-sm">닫기</button>
-    <button onclick="printTag()" id="printBtn" class="hidden flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold text-sm">태그 인쇄 프린트</button>
+    <button onclick="closeSuccess()" class="flex-1 py-3 rounded-xl text-gray-600 bg-gray-100 font-semibold text-sm">ë«ê¸°</button>
+    <button onclick="printTag()" id="printBtn" class="hidden flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold text-sm">íê·¸ ì¸ì íë¦°í¸</button>
   </div>
 </div>
 </div>
@@ -126,14 +126,14 @@
 
 <script>
 const DEPT_COLORS = {
-  "유아부 (Infant)": { left:"border-l-blue-400", badge:"bg-blue-100 text-blue-800 border-blue-200", bar:"bg-blue-500" },
-  "유치부 (Preschool)": { left:"border-l-emerald-400", badge:"bg-emerald-100 text-emerald-800 border-emerald-200", bar:"bg-emerald-500" },
-  "유년부 (Elementary Jr)": { left:"border-l-yellow-400", badge:"bg-yellow-100 text-yellow-800 border-yellow-200", bar:"bg-yellow-400" },
-  "초등부 (Elementary)": { left:"border-l-orange-400", badge:"bg-orange-100 text-orange-800 border-orange-200", bar:"bg-orange-500" },
-  "중고등부 (Middle/High)": { left:"border-l-purple-400", badge:"bg-purple-100 text-purple-800 border-purple-200", bar:"bg-purple-500" },
+  "ì ìë¶ (Infant)": { left:"border-l-blue-400", badge:"bg-blue-100 text-blue-800 border-blue-200", bar:"bg-blue-500" },
+  "ì ì¹ë¶ (Preschool)": { left:"border-l-emerald-400", badge:"bg-emerald-100 text-emerald-800 border-emerald-200", bar:"bg-emerald-500" },
+  "ì ëë¶ (Elementary Jr)": { left:"border-l-yellow-400", badge:"bg-yellow-100 text-yellow-800 border-yellow-200", bar:"bg-yellow-400" },
+  "ì´ë±ë¶ (Elementary)": { left:"border-l-orange-400", badge:"bg-orange-100 text-orange-800 border-orange-200", bar:"bg-orange-500" },
+  "ì¤ê³ ë±ë¶ (Middle/High)": { left:"border-l-purple-400", badge:"bg-purple-100 text-purple-800 border-purple-200", bar:"bg-purple-500" },
 };
-function hasAllergy(a){return a&&a.trim()&&a.toLowerCase()!=="없음"&&a.toLowerCase()!=="none";}
-function deptBadge(d){const c=(DEPT_COLORS[d]||{}).badge||"bg-gray-100 text-gray-600 border-gray-200";return `<span class="text-xs font-semibold px-2 py-0.5 rounded-full border ${c}">${d||"미지정"}</span>`;}
+function hasAllergy(a){return a&&a.trim()&&a.toLowerCase()!=="ìì"&&a.toLowerCase()!=="none";}
+function deptBadge(d){const c=(DEPT_COLORS[d]||{}).badge||"bg-gray-100 text-gray-600 border-gray-200";return `<span class="text-xs font-semibold px-2 py-0.5 rounded-full border ${c}">${d||"ë¯¸ì§ì "}</span>`;}
 
 document.getElementById("todayDate").textContent=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
 
@@ -151,42 +151,42 @@ input.addEventListener("input",()=>{
 });
 
 function clearSearch(){input.value="";clearBtn.classList.add("hidden");results.innerHTML=placeholder();input.focus();}
-function placeholder(){return `<div class="text-center py-16 text-gray-300"><div class="text-5xl mb-3">👆</div><p class="text-sm">이름을 입력하세요</p><p class="text-xs mt-1">Type a name to search</p></div>`;}
+function placeholder(){return `<div class="text-center py-16 text-gray-300"><div class="text-5xl mb-3">ð</div><p class="text-sm">ì´ë¦ì ìë ¥íì¸ì</p><p class="text-xs mt-1">Type a name to search</p></div>`;}
 results.innerHTML=placeholder();
 
 async function searchStudents(q){
-  results.innerHTML=`<div class="text-center py-12 text-gray-400"><div class="w-8 h-8 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-3"></div><p class="text-sm">검색 중...</p></div>`;
+  results.innerHTML=`<div class="text-center py-12 text-gray-400"><div class="w-8 h-8 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-3"></div><p class="text-sm">ê²ì ì¤...</p></div>`;
   try{
     const res=await fetch(`/api/search-student?name=${encodeURIComponent(q)}`);
     const data=await res.json();
     if(!res.ok)throw new Error(data.error);
     if(!data.students||!data.students.length){
-      results.innerHTML=`<div class="text-center py-12"><div class="text-4xl mb-3">🔍</div><p class="text-gray-500 font-medium">검색 결과 없음</p></div>`;
+      results.innerHTML=`<div class="text-center py-12"><div class="text-4xl mb-3">ð</div><p class="text-gray-500 font-medium">ê²ì ê²°ê³¼ ìì</p></div>`;
       return;
     }
     results.innerHTML=`<div class="space-y-3">${data.students.map(s=>studentCard(s)).join("")}</div>`;
     data.students.forEach(s=>loadStatus(s));
-  }catch(e){results.innerHTML=`<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠️ ${e.message}</div>`;}
+  }catch(e){results.innerHTML=`<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">â ï¸ ${e.message}</div>`;}
 }
 
 function studentCard(s){
   const dc=DEPT_COLORS[s.department]||{};
   const leftColor=dc.left||"border-l-gray-300";
   const allergy=hasAllergy(s.allergy);
-  const noLiability=s.liabilityForm&&s.liabilityForm!=="제출 완료";
+  const noLiability=s.liabilityForm&&s.liabilityForm!=="ì ì¶ ìë£";
   return `<div id="card-${s.id}" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 ${leftColor} p-4 fade-in">
     <div class="flex flex-wrap items-center gap-2 mb-1">
       <span class="text-xl font-bold text-gray-900">${s.name}</span>
       ${s.nameEN?'<span class="text-sm text-gray-400">'+s.nameEN+'</span>':''}
       ${s.studentId?'<span class="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">'+s.studentId+'</span>':''}
-      ${s.isNew?'<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200">🎉 새신자</span>':''}
-      ${allergy?'<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200">⚠️ 알러지</span>':''}
+      ${s.isNew?'<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200">ð ìì ì</span>':''}
+      ${allergy?'<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200">â ï¸ ìë¬ì§</span>':''}
     </div>
     <div class="flex flex-wrap gap-2 mb-2">${deptBadge(s.department)}${s.grade?'<span class="text-xs text-gray-400">'+s.grade+'</span>':''}</div>
-    ${allergy?'<p class="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-1.5 border border-red-200 mb-1.5"><strong>알러지:</strong> '+s.allergy+'</p>':''}
-    ${noLiability?'<p class="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-1.5 border border-amber-200 mb-1.5">📋 Liability Form 미제출</p>':''}
-    ${s.guardian?'<p class="text-xs text-gray-400 mb-2">보호자: ${s.guardian}${s.phone?" · "+s.phone:""}</p>':''}
-    <div id="action-${s.id}" class="mt-2"><div class="text-center py-2 text-gray-400 text-sm"><span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full spin align-middle mr-1"></span>상태 확인 중...</div></div>
+    ${allergy?'<p class="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-1.5 border border-red-200 mb-1.5"><strong>ìë¬ì§:</strong> '+s.allergy+'</p>':''}
+    ${noLiability?'<p class="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-1.5 border border-amber-200 mb-1.5">ð Liability Form ë¯¸ì ì¶</p>':''}
+    ${s.guardian?'<p class="text-xs text-gray-400 mb-2">ë³´í¸ì: ${s.guardian}${s.phone?" Â· "+s.phone:""}</p>':''}
+    <div id="action-${s.id}" class="mt-2"><div class="text-center py-2 text-gray-400 text-sm"><span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full spin align-middle mr-1"></span>ìí íì¸ ì¤...</div></div>
   </div>`;
 }
 
@@ -197,16 +197,16 @@ async function loadStatus(s){
     const el=document.getElementById(`action-${s.id}`);
     if(!el)return;
     if(data.status==="checked_out"){
-      el.innerHTML=`<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center">✅ 체크아웃 완료 · ${data.record.checkIn} → ${data.record.checkOut}</div>`;
+      el.innerHTML=`<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center">â ì²´í¬ìì ìë£ Â· ${data.record.checkIn} â ${data.record.checkOut}</div>`;
     }else if(data.status==="checked_in"){
-      el.innerHTML=`<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 mb-2 text-sm text-emerald-700">✅ 체크인됨 · ${data.record.checkIn} 입실</div>
-        <button onclick='openModal("checkout",${JSON.stringify(s)},${JSON.stringify(data.record)})' class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700">체크아웃 / Check Out</button>`;
+      el.innerHTML=`<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 mb-2 text-sm text-emerald-700">â ì²´í¬ì¸ë¨ Â· ${data.record.checkIn} ìì¤</div>
+        <button onclick='openModal("checkout",${JSON.stringify(s)},${JSON.stringify(data.record)})' class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700">ì²´í¬ìì / Check Out</button>`;
     }else{
-      el.innerHTML=`<button onclick='openModal("checkin",${JSON.stringify(s)},null)' class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700">체크인 / Check In</button>`;
+      el.innerHTML=`<button onclick='openModal("checkin",${JSON.stringify(s)},null)' class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700">ì²´í¬ì¸ / Check In</button>`;
     }
   }catch(e){
     const el=document.getElementById(`action-${s.id}`);
-    if(el)el.innerHTML=`<div class="text-xs text-gray-400 text-center py-2">상태 확인 실패</div>`;
+    if(el)el.innerHTML=`<div class="text-xs text-gray-400 text-center py-2">ìí íì¸ ì¤í¨</div>`;
   }
 }
 
@@ -215,15 +215,15 @@ function openModal(action,student,record){
   _action=action;_student=student;_record=record;
   const isIn=action==="checkin";
   const allergy=hasAllergy(student.allergy);
-  const noLiability=student.liabilityForm&&student.liabilityForm!=="제출 완료";
+  const noLiability=student.liabilityForm&&student.liabilityForm!=="ì ì¶ ìë£";
   document.getElementById("modalHeader").className=`text-center mb-5 p-4 rounded-2xl ${isIn?"bg-emerald-50":"bg-indigo-50"}`;
-  document.getElementById("modalHeader").innerHTML=`<div class="text-4xl mb-2">${isIn?"👋":"🙏"}</div><h2 class="text-xl font-bold text-gray-900">${isIn?"체크인 확인":"체크아웃 확인"}</h2><p class="text-gray-500 text-sm">${isIn?"Check In":"Check Out"}</p>`;
-  const rows=[["이름",`<strong>${student.name}</strong>${student.studentId?' <span class="text-xs font-mono text-gray-400">'+student.studentId+'</span>':''}`],["부서",deptBadge(student.department)],student.guardian?["보호자",student.guardian]:null,!isIn&&record?.checkIn?["체크인",record.checkIn]:null].filter(Boolean);
+  document.getElementById("modalHeader").innerHTML=`<div class="text-4xl mb-2">${isIn?"ð":"ð"}</div><h2 class="text-xl font-bold text-gray-900">${isIn?"ì²´í¬ì¸ íì¸":"ì²´í¬ìì íì¸"}</h2><p class="text-gray-500 text-sm">${isIn?"Check In":"Check Out"}</p>`;
+  const rows=[["ì´ë¦",`<strong>${student.name}</strong>${student.studentId?' <span class="text-xs font-mono text-gray-400">'+student.studentId+'</span>':''}`],["ë¶ì",deptBadge(student.department)],student.guardian?["ë³´í¸ì",student.guardian]:null,!isIn&&record?.checkIn?["ì²´í¬ì¸",record.checkIn]:null].filter(Boolean);
   document.getElementById("modalInfo").innerHTML=rows.map(([k,v])=>`<div class="flex justify-between items-center py-2 border-b border-gray-100"><span class="text-xs text-gray-400">${k}</span><span class="text-sm text-gray-800">${v}</span></div>`).join("");
   const aa=document.getElementById("allergyAlert");
-  if(allergy){aa.classList.remove("hidden");aa.innerHTML="⚠️ 알러지 주의: "+student.allergy;}else aa.classList.add("hidden");
+  if(allergy){aa.classList.remove("hidden");aa.innerHTML="â ï¸ ìë¬ì§ ì£¼ì: "+student.allergy;}else aa.classList.add("hidden");
   const la=document.getElementById("liabilityAlert");
-  if(noLiability){la.classList.remove("hidden");la.innerHTML="📋 Liability Form 미제출 상태입니다. 확인 필요!";}else la.classList.add("hidden");
+  if(noLiability){la.classList.remove("hidden");la.innerHTML="ð Liability Form ë¯¸ì ì¶ ìíìëë¤. íì¸ íì!";}else la.classList.add("hidden");
   document.getElementById("guardianRow").classList.toggle("hidden",isIn);
   document.getElementById("guardianCheck").checked=false;
   const btn=document.getElementById("confirmBtn");
@@ -233,7 +233,7 @@ function openModal(action,student,record){
 function closeModal(){document.getElementById("modal").classList.add("hidden");}
 
 async function doAction(){
-  const btn=document.getElementById("confirmBtn");btn.textContent="처리 중...";btn.disabled=true;
+  const btn=document.getElementById("confirmBtn");btn.textContent="ì²ë¦¬ ì¤...";btn.disabled=true;
   const isIn=_action==="checkin";
   try{
     let time,pageId;
@@ -241,27 +241,27 @@ async function doAction(){
       const res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({name:_student.name,department:_student.department,isNew:_student.isNew,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||""})});
       const data=await res.json();
-      if(!res.ok)throw new Error(data.error||"체크인 실패");
+      if(!res.ok)throw new Error(data.error||"ì²´í¬ì¸ ì¤í¨");
       if(data.alreadyCheckedIn){closeModal();loadStatus(_student);return;}
       time=data.checkInTime;pageId=data.pageId;
     }else{
       const res=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked})});
       const data=await res.json();
-      if(!res.ok)throw new Error(data.error||"체크아웃 실패");
+      if(!res.ok)throw new Error(data.error||"ì²´í¬ìì ì¤í¨");
       time=data.checkOutTime;
     }
     closeModal();
     showSuccess(isIn,_student,time);
     loadStatus(_student);
-  }catch(e){alert(e.message||"오류가 발생했습니다");}
-  btn.textContent="확인 / Confirm";btn.disabled=false;
+  }catch(e){alert(e.message||"ì¤ë¥ê° ë°ìíìµëë¤");}
+  btn.textContent="íì¸ / Confirm";btn.disabled=false;
 }
 
 let _successTimer;
 function showSuccess(isIn,student,time){
-  document.getElementById("successIcon").textContent=isIn?"🎉":"👋";
-  document.getElementById("successTitle").textContent=isIn?student.name+" 체크인 완료!":student.name+" 체크아웃 완료!";
+  document.getElementById("successIcon").textContent=isIn?"ð":"ð";
+  document.getElementById("successTitle").textContent=isIn?student.name+" ì²´í¬ì¸ ìë£!":student.name+" ì²´í¬ìì ìë£!";
   document.getElementById("successTime").textContent=time||"";
   document.getElementById("success").classList.remove("hidden");
 
@@ -290,7 +290,7 @@ function buildTag(s,time){
   document.getElementById("tagGuardian").textContent=s.guardian||"";
   document.getElementById("tagDate").textContent=new Date().toLocaleDateString("ko-KR",{month:"short",day:"numeric"})+" "+time;
   const allergyBadge=document.getElementById("tagAllergyBadge");
-  if(hasAllergy(s.allergy)){allergyBadge.classList.remove("hidden");allergyBadge.textContent="⚠️ 알러지: "+s.allergy;}
+  if(hasAllergy(s.allergy)){allergyBadge.classList.remove("hidden");allergyBadge.textContent="â ï¸ ìë¬ì§: "+s.allergy;}
   else allergyBadge.classList.add("hidden");
   // Guardian tag
   document.getElementById("guardianTagName").textContent=s.name;
