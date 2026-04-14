@@ -3,6 +3,7 @@ const STUDENT_DB = process.env.NOTION_STUDENT_DB_ID || "107828732f784c39bcb0136a
 const NOTION_VERSION = "2022-06-28";
 const TIMEZONE = "America/Los_Angeles";
 const DEPT_ORDER = ["유아부 (Infant)","유치부 (Preschool)","유년부 (Elementary Jr)","초등부 (Elementary)","중고등부 (Middle/High)"];
+const STAFF_MAP = {"유아부 (Infant)":"이지혜","유치부 (Preschool)":"김향숙","유년부 (Elementary Jr)":"박은혜","초등부 (Elementary)":"백진주","중고등부 (Middle/High)":"박명철 전도사님"};
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -17,6 +18,9 @@ module.exports = async (req, res) => {
   const sunday = new Date(nowLA);
   sunday.setDate(nowLA.getDate() - (dow === 0 ? 0 : dow));
   const sundayStr = String(sunday.getMonth()+1).padStart(2,"0") + "/" + String(sunday.getDate()).padStart(2,"0") + "/" + String(sunday.getFullYear()).slice(2);
+  const twoWeeksAgo = new Date(sunday);
+  twoWeeksAgo.setDate(sunday.getDate() - 13);
+  const twoWeeksAgoStr = twoWeeksAgo.toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
 
   const authHeaders = {
     "Authorization": "Bearer " + process.env.NOTION_TOKEN,
@@ -42,51 +46,85 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // 1. All attendance today (all depts)
     const attFilter = { property: "주일 날짜 (Date)", date: { equals: today } };
     const allAtt = await queryAll(ATTENDANCE_DB, attFilter);
 
-    // 2. All active non-visitor students
     const stuFilter = { and: [
       { property: "상태 (Status)", select: { equals: "활성 (Active)" } },
       { property: "방문자 (Visitor)", checkbox: { equals: false } }
     ]};
     const allStu = await queryAll(STUDENT_DB, stuFilter);
 
-    // 3. Build stats
+    // Recent attendance (last 14 days) for 2+ week absence detection
+    const recentFilter = { property: "주일 날짜 (Date)", date: { on_or_after: twoWeeksAgoStr } };
+    const recentAtt = await queryAll(ATTENDANCE_DB, recentFilter);
+    const recentAttIds = new Set();
+    recentAtt.forEach(function(p){
+      const rel = p.properties["학생 (Student)"]?.relation || [];
+      rel.forEach(function(r){ recentAttIds.add(r.id); });
+    });
+
+    // Today checkin student IDs
+    const todayIds = new Set();
+    allAtt.forEach(function(p){
+      const rel = p.properties["학생 (Student)"]?.relation || [];
+      rel.forEach(function(r){ todayIds.add(r.id); });
+    });
+
     const ds = {};
-    DEPT_ORDER.forEach(function(d) { ds[d] = { checkin: 0, visitor: 0, total: 0 }; });
+    DEPT_ORDER.forEach(function(d) { ds[d] = { attended: 0, visitors: 0, total: 0, newThisMonth: 0 }; });
 
     allStu.forEach(function(p) {
       const dept = p.properties["부서 (Department)"]?.select?.name || "";
-      if (!ds[dept]) ds[dept] = { checkin: 0, visitor: 0, total: 0 };
+      if (!ds[dept]) ds[dept] = { attended: 0, visitors: 0, total: 0, newThisMonth: 0 };
       ds[dept].total++;
     });
 
     allAtt.forEach(function(p) {
       const dept = p.properties["부서 (Department)"]?.select?.name || "";
       const isNew = p.properties["방문자 (Visitor)"]?.checkbox || false;
-      if (!ds[dept]) ds[dept] = { checkin: 0, visitor: 0, total: 0 };
-      if (isNew) ds[dept].visitor++; else ds[dept].checkin++;
+      if (!ds[dept]) ds[dept] = { attended: 0, visitors: 0, total: 0, newThisMonth: 0 };
+      if (isNew) ds[dept].visitors++; else ds[dept].attended++;
     });
 
-    const rows = DEPT_ORDER.filter(function(d){ return ds[d] && (ds[d].total>0||ds[d].checkin>0); }).map(function(d) {
+    // Build absentList: active students with no attendance in last 14 days
+    const absentList = [];
+    allStu.forEach(function(p) {
+      if (!recentAttIds.has(p.id)) {
+        const dept = p.properties["부서 (Department)"]?.select?.name || "";
+        const nameArr = p.properties["이름 (Name)"]?.title || [];
+        const nameEN = p.properties["English Name"]?.rich_text?.[0]?.text?.content || "";
+        const lastDateArr = p.properties["마지막 출석일 (Last Attended)"]?.date;
+        absentList.push({
+          id: p.id,
+          name: nameArr[0]?.text?.content || "(이름없음)",
+          nameEN: nameEN,
+          dept: dept,
+          staff: STAFF_MAP[dept] || dept.split(" ")[0],
+          lastAttended: lastDateArr?.start || null
+        });
+      }
+    });
+    absentList.sort(function(a,b){ return (a.dept||"").localeCompare(b.dept||""); });
+
+    const depts = DEPT_ORDER.filter(function(d){ return ds[d] && (ds[d].total>0||ds[d].attended>0); }).map(function(d) {
       const st = ds[d];
-      return { dept: d, short: d.split(" ")[0], checkin: st.checkin, visitor: st.visitor, absent: Math.max(0,st.total-st.checkin), total: st.total };
+      return { dept: d, short: d.split(" ")[0], attended: st.attended, visitors: st.visitors, absent: Math.max(0,st.total-st.attended), total: st.total, newThisMonth: st.newThisMonth };
     });
 
-    const grand = rows.reduce(function(a,r){ a.checkin+=r.checkin;a.visitor+=r.visitor;a.absent+=r.absent;a.total+=r.total;return a;},{checkin:0,visitor:0,absent:0,total:0});
+    const total = depts.reduce(function(a,r){ a.attended+=r.attended;a.visitors+=r.visitors;a.absent+=r.absent;a.total+=r.total;a.newThisMonth+=r.newThisMonth;return a;},{attended:0,visitors:0,absent:0,total:0,newThisMonth:0});
 
-    // 4. If POST: save summary to Notion Attendance DB
+    // Keep backward compat: also include rows/grand
+    const rows = depts.map(function(d){ return {dept:d.dept,short:d.short,checkin:d.attended,visitor:d.visitors,absent:d.absent,total:d.total}; });
+    const grand = {checkin:total.attended,visitor:total.visitors,absent:total.absent,total:total.total};
+
     let saved = false;
     if (req.method === "POST") {
       const titleText = "교육부 전체 출석 요약 — " + sundayStr;
-      const lines2 = rows.map(function(r){ return r.short+": 출석 "+r.checkin+" / 결석 "+r.absent+" / 방문 "+r.visitor+" / 등록 "+r.total; });
+      const lines2 = depts.map(function(r){ return r.short+": 출석 "+r.attended+" / 결석 "+r.absent+" / 방문 "+r.visitors+" / 등록 "+r.total; });
       lines2.push("");
-      lines2.push("전체 교육부: 출석 "+grand.checkin+" / 결석 "+grand.absent+" / 방문 "+grand.visitor+" / 총 등록 "+grand.total);
+      lines2.push("전체 교육부: 출석 "+total.attended+" / 결석 "+total.absent+" / 방문 "+total.visitors+" / 완등록 "+total.total);
       const summaryText = lines2.join("\n");
-
-      // Check if a summary entry for this Sunday already exists
       let existingId = null;
       try {
         const checkResp = await fetch("https://api.notion.com/v1/databases/" + ATTENDANCE_DB + "/query", {
@@ -96,21 +134,17 @@ module.exports = async (req, res) => {
         const checkData = await checkResp.json();
         if (checkData.results && checkData.results.length > 0) existingId = checkData.results[0].id;
       } catch(e2) {}
-
       const notionProps = {
         "이름 (Name)": { title: [{ text: { content: titleText } }] },
         "주일 날짜 (Date)": { date: { start: today } },
         "체크인 시간 (Check-in)": { rich_text: [{ text: { content: "요약" } }] },
         "특이사항 (Notes)": { rich_text: [{ text: { content: summaryText } }] }
       };
-
       if (existingId) {
-        // Update existing
         await fetch("https://api.notion.com/v1/pages/" + existingId, {
           method: "PATCH", headers: authHeaders, body: JSON.stringify({ properties: notionProps })
         });
       } else {
-        // Create new
         await fetch("https://api.notion.com/v1/pages", {
           method: "POST", headers: authHeaders,
           body: JSON.stringify({ parent: { database_id: ATTENDANCE_DB }, properties: notionProps })
@@ -119,7 +153,7 @@ module.exports = async (req, res) => {
       saved = true;
     }
 
-    return res.status(200).json({ rows, grand, sundayStr, date: today, saved });
+    return res.status(200).json({ depts, total, rows, grand, sundayStr, date: today, saved, absentList });
   } catch(e) {
     return res.status(500).json({ error: e.message });
   }
