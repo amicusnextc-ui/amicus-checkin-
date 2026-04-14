@@ -122,7 +122,7 @@ function doLogin() {
   const nameText = sel.options[sel.selectedIndex]?.text || "";
   const staffName = nameText.split(" —")[0].trim();
   if (!dept) { showLoginError("이름을 선택해주세요"); return; }
-  if (pw !== ADMIN_PW) { showLoginError("비밀번호가 틀렸습니다"); return; }
+  if (pw !== "3") { showLoginError("비밀번호가 틀렸습니다"); return; }
   currentUser = staffName;
   currentDept = dept;
   // Show dashboard
