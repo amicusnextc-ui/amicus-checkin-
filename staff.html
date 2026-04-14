@@ -201,7 +201,7 @@ function doLogin(){
   window._dept=dept;window._user=staffName;
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
-  document.getElementById("dashName").textContent=staffName+(staffName.indexOf("전도사님")>=0?"":" 간사님"));
+  document.getElementById("dashName").textContent=staffName+(staffName.indexOf("전도사님")>=0?"":" 간사님");
   document.getElementById("dashDept").textContent=dept.split(" ")[0];
   var dot=document.getElementById("deptDot");if(dot)dot.className="w-2.5 h-2.5 rounded-full "+(DEPT_DOT[dept]||"bg-gray-400");
   switchTab("attendance");
