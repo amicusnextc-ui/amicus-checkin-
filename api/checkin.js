@@ -51,7 +51,6 @@ module.exports = async (req, res) => {
     "\uC774\uB984 (Name)": { title: [{ text: { content: name } }] },
     "\uC8FC\uC77C \uB0A0\uC9DC (Date)": { date: { start: today } },
     "\uCCB4\uD06C\uC778 \uC2DC\uAC04 (Check-in)": { rich_text: [{ text: { content: checkInTime } }] },
-    "\uC0C8\uC2E0\uC790 (New)": { checkbox: Boolean(isNew) },
     "\uC54C\uB7EC\uC9C0 \uC54C\uB9BC (Allergy Alert)": { checkbox: Boolean(hasAllergy) },
     "\uBCF4\uD638\uC790 \uC778\uACC4 \uD655\uC778 (Guardian)": { checkbox: false },
   };
