@@ -9,6 +9,32 @@ module.exports = async (req, res) => {
   const now = new Date();
   const today = now.toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
   const checkInTime = now.toLocaleTimeString("ko-KR", { timeZone: TIMEZONE, hour: "2-digit", minute: "2-digit", hour12: false });
+
+  // \uC911\uBCF5 \uCCB4\uD06C\uC778 \uBC29\uC9C0 - \uC624\uB298 \uC774\uBBF8 \uCCB4\uD06C\uC778\uD55C \uD559\uC0DD \uD655\uC778
+  try {
+    const checkRes = await fetch(`https://api.notion.com/v1/databases/${ATTENDANCE_DB}/query`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${process.env.NOTION_TOKEN}`, "Notion-Version": NOTION_VERSION, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filter: { and: [
+          { property: "\uC774\uB984 (Name)", title: { equals: name.trim() } },
+          { property: "\uC8FC\uC77C \uB0A0\uC9DC (Date)", date: { equals: today } },
+        ]}, page_size: 1
+      }),
+    });
+    const checkData = await checkRes.json();
+    if (checkData.results?.length > 0) {
+      const existing = checkData.results[0];
+      const checkInProp = existing.properties["\uCCB4\uD06C\uC778 \uC2DC\uAC04 (Check-in)"]?.rich_text?.[0]?.plain_text || "";
+      const checkOutProp = existing.properties["\uCCB4\uD06C\uC544\uC6C3 \uC2DC\uAC04 (Check-out)"]?.rich_text?.[0]?.plain_text || "";
+      if (!checkOutProp) {
+        // \uC774\uBBF8 \uCCB4\uD06C\uC778 \uC911 - \uAE30\uC874 \uB808\uCF54\uB4DC \uBC18\uD658
+        return res.status(200).json({ success: true, alreadyCheckedIn: true, pageId: existing.id, checkInTime: checkInProp });
+      }
+    }
+  } catch(e) {}
+
+  // \uC0C8 \uCCB4\uD06C\uC778 \uC0DD\uC131
   const properties = {
     "\uC774\uB984 (Name)": { title: [{ text: { content: name } }] },
     "\uC8FC\uC77C \uB0A0\uC9DC (Date)": { date: { start: today } },
@@ -20,20 +46,13 @@ module.exports = async (req, res) => {
   if (department) properties["\uBD80\uC11C (Department)"] = { select: { name: department } };
   if (notes) properties["\uD2B9\uC774\uC0AC\uD56D (Notes)"] = { rich_text: [{ text: { content: notes } }] };
   if (staff) properties["\uAC04\uC0AC (Staff)"] = { rich_text: [{ text: { content: staff } }] };
-  try {
-    const response = await fetch("https://api.notion.com/v1/pages", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.NOTION_TOKEN}`,
-        "Notion-Version": NOTION_VERSION,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ parent: { database_id: ATTENDANCE_DB }, properties }),
-    });
-    const data = await response.json();
-    if (!response.ok) return res.status(500).json({ error: data.message || "checkin failed" });
-    return res.status(200).json({ success: true, pageId: data.id, checkInTime });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
+
+  const response = await fetch("https://api.notion.com/v1/pages", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${process.env.NOTION_TOKEN}`, "Notion-Version": NOTION_VERSION, "Content-Type": "application/json" },
+    body: JSON.stringify({ parent: { database_id: ATTENDANCE_DB }, properties }),
+  });
+  const data = await response.json();
+  if (!response.ok) return res.status(500).json({ error: data.message || "checkin failed" });
+  return res.status(200).json({ success: true, alreadyCheckedIn: false, pageId: data.id, checkInTime });
 };
