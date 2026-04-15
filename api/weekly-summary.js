@@ -15,9 +15,18 @@ module.exports = async (req, res) => {
   const today = now.toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
   const nowLA = new Date(now.toLocaleString("en-US", { timeZone: TIMEZONE }));
   const dow = nowLA.getDay();
+
+  // Always use most recent Sunday (including today if Sunday)
   const sunday = new Date(nowLA);
   sunday.setDate(nowLA.getDate() - (dow === 0 ? 0 : dow));
+  sunday.setHours(0, 0, 0, 0);
+
+  // ISO date string for the most recent Sunday (YYYY-MM-DD) — used for Notion query
+  const sundayISO = sunday.toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
+
+  // Display format MM/DD/YY for titles/labels
   const sundayStr = String(sunday.getMonth()+1).padStart(2,"0") + "/" + String(sunday.getDate()).padStart(2,"0") + "/" + String(sunday.getFullYear()).slice(2);
+
   const twoWeeksAgo = new Date(sunday);
   twoWeeksAgo.setDate(sunday.getDate() - 13);
   const twoWeeksAgoStr = twoWeeksAgo.toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
@@ -46,7 +55,11 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const attFilter = { property: "주일 날짜 (Date)", date: { equals: today } };
+    // Query attendance for the most recent Sunday (not just today)
+    const attFilter = {
+      property: "주일 날짜 (Date)",
+      date: { equals: sundayISO }
+    };
     const allAtt = await queryAll(ATTENDANCE_DB, attFilter);
 
     const stuFilter = { and: [
@@ -56,23 +69,28 @@ module.exports = async (req, res) => {
     const allStu = await queryAll(STUDENT_DB, stuFilter);
 
     // Recent attendance (last 14 days) for 2+ week absence detection
-    const recentFilter = { property: "주일 날짜 (Date)", date: { on_or_after: twoWeeksAgoStr } };
+    const recentFilter = {
+      property: "주일 날짜 (Date)",
+      date: { on_or_after: twoWeeksAgoStr }
+    };
     const recentAtt = await queryAll(ATTENDANCE_DB, recentFilter);
+
     const recentAttIds = new Set();
-    recentAtt.forEach(function(p){
+    recentAtt.forEach(function(p) {
       const rel = p.properties["학생 (Student)"]?.relation || [];
-      rel.forEach(function(r){ recentAttIds.add(r.id); });
+      rel.forEach(function(r) { recentAttIds.add(r.id); });
     });
 
-    // Today checkin student IDs
     const todayIds = new Set();
-    allAtt.forEach(function(p){
+    allAtt.forEach(function(p) {
       const rel = p.properties["학생 (Student)"]?.relation || [];
-      rel.forEach(function(r){ todayIds.add(r.id); });
+      rel.forEach(function(r) { todayIds.add(r.id); });
     });
 
     const ds = {};
-    DEPT_ORDER.forEach(function(d) { ds[d] = { attended: 0, visitors: 0, total: 0, newThisMonth: 0 }; });
+    DEPT_ORDER.forEach(function(d) {
+      ds[d] = { attended: 0, visitors: 0, total: 0, newThisMonth: 0 };
+    });
 
     allStu.forEach(function(p) {
       const dept = p.properties["부서 (Department)"]?.select?.name || "";
@@ -84,87 +102,101 @@ module.exports = async (req, res) => {
       const dept = p.properties["부서 (Department)"]?.select?.name || "";
       const isNew = p.properties["방문자 (Visitor)"]?.checkbox || false;
       if (!ds[dept]) ds[dept] = { attended: 0, visitors: 0, total: 0, newThisMonth: 0 };
-      if (isNew) ds[dept].visitors++; else ds[dept].attended++;
+      if (isNew) ds[dept].visitors++;
+      else ds[dept].attended++;
     });
 
-    // Build absentList: active students with no attendance in last 14 days
+    // Absent list: active students not in last 14 days
     const absentList = [];
     allStu.forEach(function(p) {
       if (!recentAttIds.has(p.id)) {
         const dept = p.properties["부서 (Department)"]?.select?.name || "";
         const nameArr = p.properties["이름 (Name)"]?.title || [];
-        const nameEN = p.properties["English Name"]?.rich_text?.[0]?.text?.content || "";
         const lastDateArr = p.properties["마지막 출석일 (Last Attended)"]?.date;
         absentList.push({
           id: p.id,
           name: nameArr[0]?.text?.content || "(이름없음)",
-          nameEN: nameEN,
           dept: dept,
           staff: STAFF_MAP[dept] || dept.split(" ")[0],
           lastAttended: lastDateArr?.start || null
         });
       }
     });
-    absentList.sort(function(a,b){ return (a.dept||"").localeCompare(b.dept||""); });
+    absentList.sort(function(a,b) { return (a.dept||"").localeCompare(b.dept||""); });
 
-    // Build liabilityList: active non-visitor students without "제출 완료"
+    // Liability list
     const liabilityList = [];
     allStu.forEach(function(p) {
       const liab = p.properties["Liability Form"]?.select?.name || "";
       if (liab !== "제출 완료") {
         const dept = p.properties["부서 (Department)"]?.select?.name || "";
         const nameArr = p.properties["이름 (Name)"]?.title || [];
-        const nameEN = p.properties["English Name"]?.rich_text?.[0]?.text?.content || "";
         liabilityList.push({
           id: p.id,
           name: nameArr[0]?.text?.content || "(이름없음)",
-          nameEN: nameEN,
           dept: dept,
           staff: STAFF_MAP[dept] || dept.split(" ")[0],
           liabilityStatus: liab || "미제출"
         });
       }
     });
-    liabilityList.sort(function(a,b){ return (a.dept||"").localeCompare(b.dept||""); });
+    liabilityList.sort(function(a,b) { return (a.dept||"").localeCompare(b.dept||""); });
 
-    // Build photoList: active non-visitor students without "촬영 완료"
+    // Photo list
     const photoList = [];
     allStu.forEach(function(p) {
       const photo = p.properties["사진 촬영 (Photo)"]?.select?.name || "";
       if (photo !== "촬영 완료") {
         const dept = p.properties["부서 (Department)"]?.select?.name || "";
         const nameArr = p.properties["이름 (Name)"]?.title || [];
-        const nameEN = p.properties["English Name"]?.rich_text?.[0]?.text?.content || "";
         photoList.push({
           id: p.id,
           name: nameArr[0]?.text?.content || "(이름없음)",
-          nameEN: nameEN,
           dept: dept,
           staff: STAFF_MAP[dept] || dept.split(" ")[0],
           photoStatus: photo || "미촬영"
         });
       }
     });
-    photoList.sort(function(a,b){ return (a.dept||"").localeCompare(b.dept||""); });
+    photoList.sort(function(a,b) { return (a.dept||"").localeCompare(b.dept||""); });
 
-    const depts = DEPT_ORDER.filter(function(d){ return ds[d] && (ds[d].total>0||ds[d].attended>0); }).map(function(d) {
+    const depts = DEPT_ORDER.filter(function(d) {
+      return ds[d] && (ds[d].total > 0 || ds[d].attended > 0);
+    }).map(function(d) {
       const st = ds[d];
-      return { dept: d, short: d.split(" ")[0], attended: st.attended, visitors: st.visitors, absent: Math.max(0,st.total-st.attended), total: st.total, newThisMonth: st.newThisMonth };
+      return {
+        dept: d,
+        short: d.split(" ")[0],
+        attended: st.attended,
+        visitors: st.visitors,
+        absent: Math.max(0, st.total - st.attended),
+        total: st.total,
+        newThisMonth: st.newThisMonth
+      };
     });
 
-    const total = depts.reduce(function(a,r){ a.attended+=r.attended;a.visitors+=r.visitors;a.absent+=r.absent;a.total+=r.total;a.newThisMonth+=r.newThisMonth;return a;},{attended:0,visitors:0,absent:0,total:0,newThisMonth:0});
+    const total = depts.reduce(function(a, r) {
+      a.attended += r.attended; a.visitors += r.visitors;
+      a.absent += r.absent; a.total += r.total;
+      a.newThisMonth += r.newThisMonth;
+      return a;
+    }, { attended:0, visitors:0, absent:0, total:0, newThisMonth:0 });
 
-    // Keep backward compat: also include rows/grand
-    const rows = depts.map(function(d){ return {dept:d.dept,short:d.short,checkin:d.attended,visitor:d.visitors,absent:d.absent,total:d.total}; });
-    const grand = {checkin:total.attended,visitor:total.visitors,absent:total.absent,total:total.total};
+    const rows = depts.map(function(d) {
+      return { dept:d.dept, short:d.short, checkin:d.attended, visitor:d.visitors, absent:d.absent, total:d.total };
+    });
+    const grand = { checkin:total.attended, visitor:total.visitors, absent:total.absent, total:total.total };
 
     let saved = false;
     if (req.method === "POST") {
       const titleText = "교육부 전체 출석 요약 — " + sundayStr;
-      const lines2 = depts.map(function(r){ return r.short+": 출석 "+r.attended+" / 결석 "+r.absent+" / 방문 "+r.visitors+" / 등록 "+r.total; });
+      const lines2 = depts.map(function(r) {
+        return r.short + ": 출석 " + r.attended + " / 결석 " + r.absent + " / 방문 " + r.visitors + " / 등록 " + r.total;
+      });
       lines2.push("");
-      lines2.push("전체 교육부: 출석 "+total.attended+" / 결석 "+total.absent+" / 방문 "+total.visitors+" / 완등록 "+total.total);
+      lines2.push("전체 교육부: 출석 " + total.attended + " / 결석 " + total.absent + " / 방문 " + total.visitors + " / 완등록 " + total.total);
       const summaryText = lines2.join("\n");
+
       let existingId = null;
       try {
         const checkResp = await fetch("https://api.notion.com/v1/databases/" + ATTENDANCE_DB + "/query", {
@@ -174,12 +206,14 @@ module.exports = async (req, res) => {
         const checkData = await checkResp.json();
         if (checkData.results && checkData.results.length > 0) existingId = checkData.results[0].id;
       } catch(e2) {}
+
       const notionProps = {
         "이름 (Name)": { title: [{ text: { content: titleText } }] },
-        "주일 날짜 (Date)": { date: { start: today } },
+        "주일 날짜 (Date)": { date: { start: sundayISO } },
         "체크인 시간 (Check-in)": { rich_text: [{ text: { content: "요약" } }] },
         "특이사항 (Notes)": { rich_text: [{ text: { content: summaryText } }] }
       };
+
       if (existingId) {
         await fetch("https://api.notion.com/v1/pages/" + existingId, {
           method: "PATCH", headers: authHeaders, body: JSON.stringify({ properties: notionProps })
@@ -193,7 +227,14 @@ module.exports = async (req, res) => {
       saved = true;
     }
 
-    return res.status(200).json({ depts, total, rows, grand, sundayStr, date: today, saved, absentList, liabilityList, photoList });
+    return res.status(200).json({
+      depts, total, rows, grand,
+      sundayStr, sundayISO,
+      date: today,
+      isToday: today === sundayISO,
+      saved, absentList, liabilityList, photoList
+    });
+
   } catch(e) {
     return res.status(500).json({ error: e.message });
   }
