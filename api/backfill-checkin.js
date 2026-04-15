@@ -8,8 +8,7 @@ module.exports = async (req, res) => {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).end();
 
-  const { records, password } = req.body;
-  if (!password || password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: "auth failed" });
+  const { records } = req.body;
   if (!records || !Array.isArray(records)) return res.status(400).json({ error: "records array required" });
 
   const headers = {
@@ -21,7 +20,6 @@ module.exports = async (req, res) => {
   const results = [];
   for (const rec of records) {
     const { name, department, date, checkInTime, studentId } = rec;
-    // Check for duplicate
     const dupCheck = await fetch("https://api.notion.com/v1/databases/" + ATTENDANCE_DB + "/query", {
       method: "POST", headers,
       body: JSON.stringify({ filter: { and: [
@@ -49,7 +47,6 @@ module.exports = async (req, res) => {
     });
     const d = await r.json();
     if (!r.ok) { results.push({ name, date, status: "error", error: d.message }); continue; }
-    // Update last attended
     if (studentId) {
       fetch("https://api.notion.com/v1/pages/" + studentId, {
         method: "PATCH", headers,
@@ -58,5 +55,5 @@ module.exports = async (req, res) => {
     }
     results.push({ name, date, status: "created", id: d.id });
   }
-  return res.status(200).json({ results, total: results.length, created: results.filter(r => r.status === "created").length });
+  return res.status(200).json({ results, created: results.filter(r => r.status === "created").length, existing: results.filter(r => r.status === "already_exists").length });
 };
