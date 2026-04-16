@@ -30,11 +30,10 @@
     margin: 0; padding: 0;
     width: 60mm;
   }
-  /* ── whole card ── */
+
+  /* ── whole card wrapper ── */
   .lbl-card {
     width: 60mm;
-    height: 86mm;
-    max-height: 86mm;
     box-sizing: border-box;
     font-family: Arial, 'Noto Sans KR', sans-serif;
     font-size: 8pt;
@@ -42,21 +41,62 @@
     color: #000;
     display: flex;
     flex-direction: column;
-    page-break-after: always;
-    break-after: page;
-    page-break-inside: avoid;
-    break-inside: avoid;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    overflow: hidden;
   }
-  .lbl-card:last-child { page-break-after: avoid; break-after: avoid; }
+
+  /* ── child label: top ~68mm ── */
+  .child-label {
+    height: 68mm;
+    max-height: 68mm;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+    page-break-after: avoid;
+    break-after: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* ── cut line: ~2mm ── */
+  .cut-line {
+    border-top: 1.5px dashed #999;
+    text-align: right;
+    padding-right: 4px;
+    font-size: 9px;
+    color: #999;
+    margin: 0;
+    line-height: 2mm;
+    height: 2mm;
+    flex-shrink: 0;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* ── pickup tag: ~28mm ── */
+  .pickup-tag {
+    height: 28mm;
+    max-height: 28mm;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+    page-break-before: avoid;
+    break-before: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 
   /* variant borders */
-  .lbl-default   { border: 1.5px solid #888; }
-  .lbl-birthday  { border: 2px solid #1a1a1a; }
-  .lbl-allergy   { border: 1.5px solid #888; }
-  .lbl-both      { border: 2px solid #1a1a1a; }
+  .lbl-default   .child-label,
+  .lbl-default   .pickup-tag  { border: 1.5px solid #888; }
+  .lbl-birthday  .child-label,
+  .lbl-birthday  .pickup-tag  { border: 2px solid #1a1a1a; }
+  .lbl-allergy   .child-label,
+  .lbl-allergy   .pickup-tag  { border: 1.5px solid #888; }
+  .lbl-both      .child-label,
+  .lbl-both      .pickup-tag  { border: 2px solid #1a1a1a; }
 
   /* ── birthday banner ── */
   .lbl-bday-banner {
@@ -94,14 +134,23 @@
     gap: 4px;
     overflow: hidden;
   }
-  .lbl-left { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-  .lbl-right { width: 54px; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; }
-
+  .lbl-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .lbl-right {
+    width: 54px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
   .lbl-name-row { display: flex; align-items: baseline; gap: 4px; }
-  .lbl-name { font-size: 22px; font-weight: 900; line-height: 1.1; margin: 0; }
+  .lbl-name     { font-size: 22px; font-weight: 900; line-height: 1.1; margin: 0; }
   .lbl-bday-emoji { font-size: 20px; filter: grayscale(1); }
-  .lbl-name-en { font-size: 12px; color: #444; margin: 1px 0 4px 0; }
-
+  .lbl-name-en  { font-size: 12px; color: #444; margin: 1px 0 4px 0; }
   .lbl-amc {
     display: inline-block;
     border: 1.5px dashed #555;
@@ -112,31 +161,18 @@
     white-space: nowrap;
     margin-bottom: 4px;
   }
-
-  /* allergy box */
   .lbl-allergy-box {
     border: 2px solid #1a1a1a;
     border-radius: 4px;
     padding: 2px 5px;
     margin-bottom: 4px;
   }
-  .lbl-allergy-label {
-    font-size: 7px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    margin-bottom: 1px;
-  }
+  .lbl-allergy-label  { font-size: 7px; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 1px; }
   .lbl-allergy-content { font-size: 10px; font-weight: 700; }
-
   .lbl-divider { border: none; border-top: 1px solid #ccc; margin: 3px 0 2px 0; }
-
   .lbl-guardian { font-size: 8px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .lbl-checkin  { font-size: 8px; font-weight: 500; margin: 2px 0 0 0; white-space: nowrap; }
-
   .lbl-qr-wrap canvas { display: block; }
-
-  /* ── footer ── */
   .lbl-footer {
     text-align: right;
     font-size: 7px;
@@ -145,20 +181,12 @@
     flex-shrink: 0;
   }
 
-  /* ── dashed separator ── */
-  .lbl-separator {
-    border: none;
-    border-top: 2px dashed #888;
-    margin: 0;
-    flex-shrink: 0;
-  }
-
   /* ── parent pickup section ── */
   .lbl-pickup {
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    flex-shrink: 0;
+    flex: 1;
   }
   .lbl-pickup-left {
     flex: 1;
@@ -194,7 +222,6 @@
 /* ── SCREEN PREVIEW: .lbl-card preview in modal ── */
 #previewCard .lbl-card {
   width: 226px; /* 60mm at 96dpi */
-  min-height: 323px; /* 86mm at 96dpi */
   box-sizing: border-box;
   font-family: Arial, 'Noto Sans KR', sans-serif;
   font-size: 8pt;
@@ -202,12 +229,42 @@
   color: #000;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
-#previewCard .lbl-default { border: 1.5px solid #888; }
-#previewCard .lbl-birthday { border: 2px solid #1a1a1a; }
-#previewCard .lbl-allergy { border: 1.5px solid #888; }
-#previewCard .lbl-both { border: 2px solid #1a1a1a; }
+#previewCard .child-label {
+  height: 257px; /* 68mm at 96dpi */
+  max-height: 257px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+#previewCard .cut-line {
+  border-top: 1.5px dashed #999;
+  text-align: right;
+  padding-right: 4px;
+  font-size: 9px;
+  color: #999;
+  margin: 0;
+  height: 14px; /* ~2mm at 96dpi, enough to show scissors */
+  line-height: 14px;
+  flex-shrink: 0;
+}
+#previewCard .pickup-tag {
+  height: 106px; /* 28mm at 96dpi */
+  max-height: 106px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+#previewCard .lbl-default   .child-label,
+#previewCard .lbl-default   .pickup-tag  { border: 1.5px solid #888; }
+#previewCard .lbl-birthday  .child-label,
+#previewCard .lbl-birthday  .pickup-tag  { border: 2px solid #1a1a1a; }
+#previewCard .lbl-allergy   .child-label,
+#previewCard .lbl-allergy   .pickup-tag  { border: 1.5px solid #888; }
+#previewCard .lbl-both      .child-label,
+#previewCard .lbl-both      .pickup-tag  { border: 2px solid #1a1a1a; }
 #previewCard .lbl-bday-banner { background: #000; color: #fff; text-align: center; font-size: 9px; font-weight: 900; letter-spacing: 1.5px; padding: 2px 0; text-transform: uppercase; flex-shrink: 0; }
 #previewCard .lbl-header { background: #000; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 3px 6px; flex-shrink: 0; }
 #previewCard .lbl-header.bday-header { background: #e8e8e8; color: #000; }
@@ -229,8 +286,7 @@
 #previewCard .lbl-checkin { font-size: 8px; font-weight: 500; margin: 2px 0 0 0; white-space: nowrap; }
 #previewCard .lbl-qr-wrap canvas { display: block; }
 #previewCard .lbl-footer { text-align: right; font-size: 7px; color: #555; padding: 0 6px 3px 6px; flex-shrink: 0; }
-#previewCard .lbl-separator { border: none; border-top: 2px dashed #888; margin: 0; flex-shrink: 0; }
-#previewCard .lbl-pickup { display: flex; flex-direction: row; align-items: stretch; flex-shrink: 0; }
+#previewCard .lbl-pickup { display: flex; flex-direction: row; align-items: stretch; flex: 1; }
 #previewCard .lbl-pickup-left { flex: 1; padding: 5px 8px 5px 6px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 #previewCard .lbl-pickup-label { font-size: 7.5px; font-weight: 800; color: #555; margin-bottom: 1px; }
 #previewCard .lbl-pickup-sub { font-size: 7px; color: #666; margin-bottom: 4px; }
@@ -238,7 +294,6 @@
 #previewCard .lbl-pickup-amc { display: inline-block; border: 2px solid #000; border-radius: 3px; padding: 2px 6px; font-size: 13px; font-weight: 900; white-space: nowrap; }
 #previewCard .lbl-pickup-right { background: #fff; border-left: 1.5px solid #888; padding: 3px; display: flex; align-items: stretch; flex-shrink: 0; }
 #previewCard .lbl-pickup-right canvas { display: block; }
-
 
 #printArea{display:none}
 .dept-btn{transition:all .2s ease;position:relative}
@@ -408,53 +463,62 @@
 
 <!-- PRINT AREA: Two labels for Brother QL-810W DK-1234 (60mm x 86mm) -->
 <div id="printArea">
-  <!-- Single unified card: child label (top) + dashed separator + parent pickup (bottom) -->
+  <!-- Continuous label: child label + cut line + pickup tag — Brother QL-810W 62mm roll -->
   <div id="printCard" class="lbl-card lbl-default">
-    <!-- BIRTHDAY BANNER (hidden by default) -->
-    <div id="lbl-bday-banner" class="lbl-bday-banner" style="display:none">HAPPY BIRTHDAY! 🎂</div>
-    <!-- HEADER BAR -->
-    <div id="lbl-header" class="lbl-header">
-      <span id="lbl-dept" class="lbl-header-dept"></span>
-      <span id="lbl-grade" class="lbl-header-grade"></span>
-    </div>
-    <!-- CHILD BODY -->
-    <div class="lbl-child-body">
-      <div class="lbl-left">
-        <div class="lbl-name-row">
-          <p id="lbl-name" class="lbl-name"></p>
-          <span id="lbl-bday-emoji" class="lbl-bday-emoji" style="display:none">🎂</span>
+
+    <!-- ═══ CHILD LABEL (top ~68mm) ═══ -->
+    <div class="child-label">
+      <!-- BIRTHDAY BANNER (hidden by default) -->
+      <div id="lbl-bday-banner" class="lbl-bday-banner" style="display:none">HAPPY BIRTHDAY! 🎂</div>
+      <!-- HEADER BAR -->
+      <div id="lbl-header" class="lbl-header">
+        <span id="lbl-dept" class="lbl-header-dept"></span>
+        <span id="lbl-grade" class="lbl-header-grade"></span>
+      </div>
+      <!-- CHILD BODY -->
+      <div class="lbl-child-body">
+        <div class="lbl-left">
+          <div class="lbl-name-row">
+            <p id="lbl-name" class="lbl-name"></p>
+            <span id="lbl-bday-emoji" class="lbl-bday-emoji" style="display:none">🎂</span>
+          </div>
+          <p id="lbl-name-en" class="lbl-name-en"></p>
+          <span id="lbl-amc" class="lbl-amc"></span>
+          <!-- ALLERGY BOX (hidden by default) -->
+          <div id="lbl-allergy-box" class="lbl-allergy-box" style="display:none">
+            <div class="lbl-allergy-label">! 알러지 / ALLERGY</div>
+            <div id="lbl-allergy-content" class="lbl-allergy-content"></div>
+          </div>
+          <hr class="lbl-divider"/>
+          <p id="lbl-guardian" class="lbl-guardian"></p>
+          <p id="lbl-checkin" class="lbl-checkin"></p>
         </div>
-        <p id="lbl-name-en" class="lbl-name-en"></p>
-        <span id="lbl-amc" class="lbl-amc"></span>
-        <!-- ALLERGY BOX (hidden by default) -->
-        <div id="lbl-allergy-box" class="lbl-allergy-box" style="display:none">
-          <div class="lbl-allergy-label">! 알러지 / ALLERGY</div>
-          <div id="lbl-allergy-content" class="lbl-allergy-content"></div>
+        <div class="lbl-right">
+          <div class="lbl-qr-wrap"><canvas id="lbl-qr1"></canvas></div>
         </div>
-        <hr class="lbl-divider"/>
-        <p id="lbl-guardian" class="lbl-guardian"></p>
-        <p id="lbl-checkin" class="lbl-checkin"></p>
       </div>
-      <div class="lbl-right">
-        <div class="lbl-qr-wrap"><canvas id="lbl-qr1"></canvas></div>
+      <!-- FOOTER -->
+      <div class="lbl-footer">Amicus Next Church</div>
+    </div>
+
+    <!-- ═══ CUT LINE ═══ -->
+    <div class="cut-line">&#9988;</div>
+
+    <!-- ═══ PICKUP TAG (bottom ~28mm) ═══ -->
+    <div class="pickup-tag">
+      <div class="lbl-pickup">
+        <div class="lbl-pickup-left">
+          <div class="lbl-pickup-label">픽업 태그 / Pickup Tag</div>
+          <div class="lbl-pickup-sub">보호자 지참 필수 / Please keep this tag</div>
+          <div id="lbl-pickup-name" class="lbl-pickup-name"></div>
+          <span id="lbl-pickup-amc" class="lbl-pickup-amc"></span>
+        </div>
+        <div class="lbl-pickup-right">
+          <canvas id="lbl-qr2"></canvas>
+        </div>
       </div>
     </div>
-    <!-- FOOTER -->
-    <div class="lbl-footer">Amicus Next Church</div>
-    <!-- DASHED SEPARATOR -->
-    <hr class="lbl-separator"/>
-    <!-- PARENT PICKUP SECTION -->
-    <div class="lbl-pickup">
-      <div class="lbl-pickup-left">
-        <div class="lbl-pickup-label">픽업 태그 / Pickup Tag</div>
-        <div class="lbl-pickup-sub">보호자 지참 필수 / Please keep this tag</div>
-        <div id="lbl-pickup-name" class="lbl-pickup-name"></div>
-        <span id="lbl-pickup-amc" class="lbl-pickup-amc"></span>
-      </div>
-      <div class="lbl-pickup-right">
-        <canvas id="lbl-qr2"></canvas>
-      </div>
-    </div>
+
   </div>
 </div>
 <script>
