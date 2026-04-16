@@ -23,277 +23,11 @@
 
   /* — PRINT STYLES: Brother QL-810W · DK-1234 · 60mm×86mm — */
 @media print {
-  @page { size: 62mm 100mm; margin: 0; }
   body > * { display: none !important; }
-  #printArea {
-    display: block !important;
-    margin: 0; padding: 0;
-    width: 60mm;
-  }
-
-  /* ── whole card wrapper ── */
-  .lbl-card {
-    width: 60mm;
-    box-sizing: border-box;
-    font-family: Arial, 'Noto Sans KR', sans-serif;
-    font-size: 8pt;
-    background: #fff;
-    color: #000;
-    display: flex;
-    flex-direction: column;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* ── child label: top ~68mm ── */
-  .child-label {
-    height: 68mm;
-    max-height: 68mm;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-sizing: border-box;
-    page-break-after: avoid;
-    break-after: avoid;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-  /* ── cut line: ~2mm ── */
-  .cut-line {
-    border-top: 1.5px dashed #999;
-    text-align: right;
-    padding-right: 4px;
-    font-size: 9px;
-    color: #999;
-    margin: 0;
-    line-height: 2mm;
-    height: 2mm;
-    flex-shrink: 0;
-    page-break-after: avoid;
-    break-after: avoid;
-  }
-
-  /* ── pickup tag: ~28mm ── */
-  .pickup-tag {
-    height: 28mm;
-    max-height: 28mm;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-sizing: border-box;
-    page-break-before: avoid;
-    break-before: avoid;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-  /* variant borders */
-  .lbl-default   .child-label,
-  .lbl-default   .pickup-tag  { border: 1.5px solid #888; }
-  .lbl-birthday  .child-label,
-  .lbl-birthday  .pickup-tag  { border: 2px solid #1a1a1a; }
-  .lbl-allergy   .child-label,
-  .lbl-allergy   .pickup-tag  { border: 1.5px solid #888; }
-  .lbl-both      .child-label,
-  .lbl-both      .pickup-tag  { border: 2px solid #1a1a1a; }
-
-  /* ── birthday banner ── */
-  .lbl-bday-banner {
-    background: #000;
-    color: #fff;
-    text-align: center;
-    font-size: 9px;
-    font-weight: 900;
-    letter-spacing: 1.5px;
-    padding: 2px 0;
-    text-transform: uppercase;
-    flex-shrink: 0;
-  }
-
-  /* ── header bar ── */
-  .lbl-header {
-    background: #000;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 3px 6px;
-    flex-shrink: 0;
-  }
-  .lbl-header.bday-header { background: #e8e8e8; color: #000; }
-  .lbl-header-dept { font-size: 8px; font-weight: 900; }
-  .lbl-header-grade { font-size: 8px; font-weight: 700; }
-
-  /* ── child body ── */
-  .lbl-child-body {
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    padding: 5px 6px 3px 6px;
-    gap: 4px;
-    overflow: hidden;
-  }
-  .lbl-left {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-  .lbl-right {
-    width: 54px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-  }
-  .lbl-name-row { display: flex; align-items: baseline; gap: 4px; }
-  .lbl-name     { font-size: 22px; font-weight: 900; line-height: 1.1; margin: 0; }
-  .lbl-bday-emoji { font-size: 20px; filter: grayscale(1); }
-  .lbl-name-en  { font-size: 12px; color: #444; margin: 1px 0 4px 0; }
-  .lbl-amc {
-    display: inline-block;
-    border: 1.5px dashed #555;
-    border-radius: 3px;
-    padding: 2px 5px;
-    font-size: 13px;
-    font-weight: 800;
-    white-space: nowrap;
-    margin-bottom: 4px;
-  }
-  .lbl-allergy-box {
-    border: 2px solid #1a1a1a;
-    border-radius: 4px;
-    padding: 2px 5px;
-    margin-bottom: 4px;
-  }
-  .lbl-allergy-label  { font-size: 7px; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 1px; }
-  .lbl-allergy-content { font-size: 10px; font-weight: 700; }
-  .lbl-divider { border: none; border-top: 1px solid #ccc; margin: 3px 0 2px 0; }
-  .lbl-guardian { font-size: 8px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .lbl-checkin  { font-size: 8px; font-weight: 500; margin: 2px 0 0 0; white-space: nowrap; }
-  .lbl-qr-wrap canvas { display: block; }
-  .lbl-footer {
-    text-align: right;
-    font-size: 7px;
-    color: #555;
-    padding: 0 6px 3px 6px;
-    flex-shrink: 0;
-  }
-
-  /* ── parent pickup section ── */
-  .lbl-pickup {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    flex: 1;
-  }
-  .lbl-pickup-left {
-    flex: 1;
-    padding: 5px 8px 5px 6px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
-  }
-  .lbl-pickup-label { font-size: 7.5px; font-weight: 800; color: #555; margin-bottom: 1px; }
-  .lbl-pickup-sub   { font-size: 7px; color: #666; margin-bottom: 4px; }
-  .lbl-pickup-name  { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
-  .lbl-pickup-amc   {
-    display: inline-block;
-    border: 2px solid #000;
-    border-radius: 3px;
-    padding: 2px 6px;
-    font-size: 13px;
-    font-weight: 900;
-    white-space: nowrap;
-  }
-  .lbl-pickup-right {
-    background: #fff;
-    border-left: 1.5px solid #888;
-    padding: 3px;
-    display: flex;
-    align-items: stretch;
-    flex-shrink: 0;
-  }
-  .lbl-pickup-right canvas { display: block; }
 }
 
-/* ── SCREEN PREVIEW: .lbl-card preview in modal ── */
-#previewCard .lbl-card {
-  width: 226px; /* 60mm at 96dpi */
-  box-sizing: border-box;
-  font-family: Arial, 'Noto Sans KR', sans-serif;
-  font-size: 8pt;
-  background: #fff;
-  color: #000;
-  display: flex;
-  flex-direction: column;
-}
-#previewCard .child-label {
-  height: 257px; /* 68mm at 96dpi */
-  max-height: 257px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-#previewCard .cut-line {
-  border-top: 1.5px dashed #999;
-  text-align: right;
-  padding-right: 4px;
-  font-size: 9px;
-  color: #999;
-  margin: 0;
-  height: 14px; /* ~2mm at 96dpi, enough to show scissors */
-  line-height: 14px;
-  flex-shrink: 0;
-}
-#previewCard .pickup-tag {
-  height: 106px; /* 28mm at 96dpi */
-  max-height: 106px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-#previewCard .lbl-default   .child-label,
-#previewCard .lbl-default   .pickup-tag  { border: 1.5px solid #888; }
-#previewCard .lbl-birthday  .child-label,
-#previewCard .lbl-birthday  .pickup-tag  { border: 2px solid #1a1a1a; }
-#previewCard .lbl-allergy   .child-label,
-#previewCard .lbl-allergy   .pickup-tag  { border: 1.5px solid #888; }
-#previewCard .lbl-both      .child-label,
-#previewCard .lbl-both      .pickup-tag  { border: 2px solid #1a1a1a; }
-#previewCard .lbl-bday-banner { background: #000; color: #fff; text-align: center; font-size: 9px; font-weight: 900; letter-spacing: 1.5px; padding: 2px 0; text-transform: uppercase; flex-shrink: 0; }
-#previewCard .lbl-header { background: #000; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 3px 6px; flex-shrink: 0; }
-#previewCard .lbl-header.bday-header { background: #e8e8e8; color: #000; }
-#previewCard .lbl-header-dept { font-size: 8px; font-weight: 900; }
-#previewCard .lbl-header-grade { font-size: 8px; font-weight: 700; }
-#previewCard .lbl-child-body { flex: 1; display: flex; flex-direction: row; padding: 5px 6px 3px 6px; gap: 4px; overflow: hidden; }
-#previewCard .lbl-left { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-#previewCard .lbl-right { width: 54px; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; }
-#previewCard .lbl-name-row { display: flex; align-items: baseline; gap: 4px; }
-#previewCard .lbl-name { font-size: 22px; font-weight: 900; line-height: 1.1; margin: 0; }
-#previewCard .lbl-bday-emoji { font-size: 20px; filter: grayscale(1); }
-#previewCard .lbl-name-en { font-size: 12px; color: #444; margin: 1px 0 4px 0; }
-#previewCard .lbl-amc { display: inline-block; border: 1.5px dashed #555; border-radius: 3px; padding: 2px 5px; font-size: 13px; font-weight: 800; white-space: nowrap; margin-bottom: 4px; }
-#previewCard .lbl-allergy-box { border: 2px solid #1a1a1a; border-radius: 4px; padding: 2px 5px; margin-bottom: 4px; }
-#previewCard .lbl-allergy-label { font-size: 7px; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 1px; }
-#previewCard .lbl-allergy-content { font-size: 10px; font-weight: 700; }
-#previewCard .lbl-divider { border: none; border-top: 1px solid #ccc; margin: 3px 0 2px 0; }
-#previewCard .lbl-guardian { font-size: 8px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#previewCard .lbl-checkin { font-size: 8px; font-weight: 500; margin: 2px 0 0 0; white-space: nowrap; }
-#previewCard .lbl-qr-wrap canvas { display: block; }
-#previewCard .lbl-footer { text-align: right; font-size: 7px; color: #555; padding: 0 6px 3px 6px; flex-shrink: 0; }
-#previewCard .lbl-pickup { display: flex; flex-direction: row; align-items: stretch; flex: 1; }
-#previewCard .lbl-pickup-left { flex: 1; padding: 5px 8px 5px 6px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-#previewCard .lbl-pickup-label { font-size: 7.5px; font-weight: 800; color: #555; margin-bottom: 1px; }
-#previewCard .lbl-pickup-sub { font-size: 7px; color: #666; margin-bottom: 4px; }
-#previewCard .lbl-pickup-name { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
-#previewCard .lbl-pickup-amc { display: inline-block; border: 2px solid #000; border-radius: 3px; padding: 2px 6px; font-size: 13px; font-weight: 900; white-space: nowrap; }
-#previewCard .lbl-pickup-right { background: #fff; border-left: 1.5px solid #888; padding: 3px; display: flex; align-items: stretch; flex-shrink: 0; }
-#previewCard .lbl-pickup-right canvas { display: block; }
+/* ── SCREEN PREVIEW: inline HTML built by buildPreview() ── */
+#previewCard { display: inline-block; }
 
 #printArea{display:none}
 .dept-btn{transition:all .2s ease;position:relative}
@@ -462,65 +196,7 @@
 </div>
 
 <!-- PRINT AREA: Two labels for Brother QL-810W DK-1234 (60mm x 86mm) -->
-<div id="printArea">
-  <!-- Continuous label: child label + cut line + pickup tag — Brother QL-810W 62mm roll -->
-  <div id="printCard" class="lbl-card lbl-default">
-
-    <!-- ═══ CHILD LABEL (top ~68mm) ═══ -->
-    <div class="child-label">
-      <!-- BIRTHDAY BANNER (hidden by default) -->
-      <div id="lbl-bday-banner" class="lbl-bday-banner" style="display:none">HAPPY BIRTHDAY! 🎂</div>
-      <!-- HEADER BAR -->
-      <div id="lbl-header" class="lbl-header">
-        <span id="lbl-dept" class="lbl-header-dept"></span>
-        <span id="lbl-grade" class="lbl-header-grade"></span>
-      </div>
-      <!-- CHILD BODY -->
-      <div class="lbl-child-body">
-        <div class="lbl-left">
-          <div class="lbl-name-row">
-            <p id="lbl-name" class="lbl-name"></p>
-            <span id="lbl-bday-emoji" class="lbl-bday-emoji" style="display:none">🎂</span>
-          </div>
-          <p id="lbl-name-en" class="lbl-name-en"></p>
-          <span id="lbl-amc" class="lbl-amc"></span>
-          <!-- ALLERGY BOX (hidden by default) -->
-          <div id="lbl-allergy-box" class="lbl-allergy-box" style="display:none">
-            <div class="lbl-allergy-label">! 알러지 / ALLERGY</div>
-            <div id="lbl-allergy-content" class="lbl-allergy-content"></div>
-          </div>
-          <hr class="lbl-divider"/>
-          <p id="lbl-guardian" class="lbl-guardian"></p>
-          <p id="lbl-checkin" class="lbl-checkin"></p>
-        </div>
-        <div class="lbl-right">
-          <div class="lbl-qr-wrap"><canvas id="lbl-qr1"></canvas></div>
-        </div>
-      </div>
-      <!-- FOOTER -->
-      <div class="lbl-footer">Amicus Next Church</div>
-    </div>
-
-    <!-- ═══ CUT LINE ═══ -->
-    <div class="cut-line">&#9988;</div>
-
-    <!-- ═══ PICKUP TAG (bottom ~28mm) ═══ -->
-    <div class="pickup-tag">
-      <div class="lbl-pickup">
-        <div class="lbl-pickup-left">
-          <div class="lbl-pickup-label">픽업 태그 / Pickup Tag</div>
-          <div class="lbl-pickup-sub">보호자 지참 필수 / Please keep this tag</div>
-          <div id="lbl-pickup-name" class="lbl-pickup-name"></div>
-          <span id="lbl-pickup-amc" class="lbl-pickup-amc"></span>
-        </div>
-        <div class="lbl-pickup-right">
-          <canvas id="lbl-qr2"></canvas>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
+<div id="printArea" style="display:none"></div>
 <script>
 var DEPT_INFO = {
   "유아부 (Infant)": { emoji:"👶", color:{ bg:"bg-blue-600", bar:"bg-blue-600", barHex:"#2563eb", left:"border-l-blue-400", badge:"bg-blue-100 text-blue-800 border-blue-200", card:"bg-blue-600", tab:"border-blue-400 bg-blue-50 text-blue-700" }, staff:"이지혜 간사", location:"유아부 방 (Infant Room)", ageRange:"만 24개월 ~ 만 3세" },
@@ -558,104 +234,205 @@ var _successTimer;
 function showSuccess(isIn,student,time){document.getElementById("successIcon").textContent=isIn?"🎉":"👋";document.getElementById("successTitle").textContent=student.name+(isIn?" 체크인 완료!":" 체크아웃 완료!");document.getElementById("successTime").textContent=time||"";document.getElementById("success").classList.remove("hidden");document.getElementById("successPickup").classList.toggle("hidden",!isIn);if(isIn){document.getElementById("tagContainer").classList.remove("hidden");document.getElementById("printBtn").classList.remove("hidden");buildTag(student,time);}else{document.getElementById("tagContainer").classList.add("hidden");document.getElementById("printBtn").classList.add("hidden");}clearTimeout(_successTimer);_successTimer=setTimeout(closeSuccess,5000);}
 function buildTag(s, time) {
   var QR_URL = 'https://amicus-checkin.vercel.app/';
-  var card = document.getElementById('printCard');
-  if (!card) return;
 
-  // BUG 1: use studentId field, not UUID
+  // Resolve AMC code
   var amcCode = s.studentId || s.amcCode || '';
   if (!amcCode || (amcCode.length > 20 && amcCode.split('-').length > 3)) amcCode = 'AMC-???';
 
-  // BUG 2: name field may be "Korean (English)" combined — split it
+  // Split Korean / English name
   var rawName = s.name || '';
   var koreanName = rawName;
   var englishName = s.nameEN || '';
-  var parenMatch = rawName.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+  var parenMatch = rawName.match(new RegExp('^(.+?)' + String.fromCharCode(92,115) + '*' + String.fromCharCode(92,40) + '([^)]+)' + String.fromCharCode(92,41) + String.fromCharCode(92,115) + '*$'));
   if (parenMatch) {
     koreanName = parenMatch[1].trim();
-    if (!englishName || englishName.trim() === parenMatch[2].trim()) {
-      englishName = parenMatch[2].trim();
-    }
+    if (!englishName || englishName.trim() === parenMatch[2].trim()) englishName = parenMatch[2].trim();
   }
 
-  // birthday & allergy
+  // Flags
   var isBday = (function() {
     if (!s.dob) return false;
     var parts = s.dob.split('-');
     var n = new Date();
     return parseInt(parts[1],10)-1 === n.getMonth() && parseInt(parts[2],10) === n.getDate();
   })();
-  var hasAllergy = !!(s.allergy && s.allergy.trim() && s.allergy.trim() !== '없음');
+  var allergyFlag = !!(s.allergy && s.allergy.trim() && s.allergy.trim() !== String.fromCharCode(50630,51020));
 
-  // variant class
-  card.className = 'lbl-card';
-  if (isBday && hasAllergy)      card.classList.add('lbl-both');
-  else if (isBday)               card.classList.add('lbl-birthday');
-  else if (hasAllergy)           card.classList.add('lbl-allergy');
-  else                           card.classList.add('lbl-default');
-
-  // birthday banner
-  document.getElementById('lbl-bday-banner').style.display = isBday ? 'block' : 'none';
-
-  // header
-  document.getElementById('lbl-header').className = 'lbl-header' + (isBday ? ' bday-header' : '');
-  document.getElementById('lbl-dept').textContent = s.department || '';
-  document.getElementById('lbl-grade').textContent = s.grade || '';
-
-  // name — Korean only on line 1, English only on line 2
-  document.getElementById('lbl-name').textContent = koreanName;
-  document.getElementById('lbl-name-en').textContent = englishName ? '(' + englishName + ')' : '';
-  document.getElementById('lbl-bday-emoji').style.display = isBday ? 'inline' : 'none';
-
-  // AMC code
-  document.getElementById('lbl-amc').textContent = amcCode;
-
-  // allergy
-  var allergyBox = document.getElementById('lbl-allergy-box');
-  if (hasAllergy) {
-    allergyBox.style.display = 'block';
-    document.getElementById('lbl-allergy-content').textContent = s.allergy;
-  } else {
-    allergyBox.style.display = 'none';
-  }
-
-  // guardian
+  // Guardian string
   var gd = [];
   if (s.fatherName && s.fatherName.trim()) gd.push(s.fatherName.trim());
   if (s.motherName && s.motherName.trim()) gd.push(s.motherName.trim());
   if (!gd.length && s.guardian) gd.push(s.guardian);
-  document.getElementById('lbl-guardian').textContent = 'Guardian : ' + (gd.join(' / ') || '-');
+  var guardianText = 'Guardian ' + String.fromCharCode(58) + ' ' + (gd.join(' / ') || '-');
 
-  // check-in time
+  // Check-in time label
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var nd = new Date();
   var dateLabel = months[nd.getMonth()] + ' ' + nd.getDate() + ', ' + nd.getFullYear() + (time ? ' ' + time : '');
-  document.getElementById('lbl-checkin').textContent = 'Checked in : ' + dateLabel;
+  var checkinText = 'Checked in ' + String.fromCharCode(58) + ' ' + dateLabel;
 
-  // pickup tag — combine once: Korean (English)
   var pickupName = koreanName + (englishName ? ' (' + englishName + ')' : '');
-  document.getElementById('lbl-pickup-name').textContent = pickupName;
-  document.getElementById('lbl-pickup-amc').textContent = amcCode;
 
-  // QR codes
-  try { new QRious({ element: document.getElementById('lbl-qr1'), value: QR_URL, size: 54, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
-  try { new QRious({ element: document.getElementById('lbl-qr2'), value: QR_URL, size: 72, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
+  // Store on window for printTag()
+  window._printData = { amcCode, koreanName, englishName, pickupName, isBday, allergyFlag, allergy: s.allergy, dept: s.department || '', grade: s.grade || '', guardianText, checkinText, QR_URL };
 
-  // Update preview card in modal
-  try {
-    var pc = document.getElementById('previewCard');
-    var src = document.getElementById('printCard');
-    if (pc && src) {
-      var clone = src.cloneNode(true);
-      // Give cloned canvases the same QR images
-      var srcCanvases = src.querySelectorAll('canvas');
-      var cloneCanvases = clone.querySelectorAll('canvas');
-      srcCanvases.forEach(function(sc,i){ if(cloneCanvases[i]){ var ctx=cloneCanvases[i].getContext('2d'); cloneCanvases[i].width=sc.width; cloneCanvases[i].height=sc.height; ctx.drawImage(sc,0,0); } });
-      pc.innerHTML = '';
-      pc.appendChild(clone);
-    }
-  } catch(e2) {}
+  // Build preview card
+  buildPreview(window._printData);
 }
-function printTag(){window.print();}
+
+function buildPreview(d) {
+  var pc = document.getElementById('previewCard');
+  if (!pc) return;
+
+  var variantBorder = (d.isBday) ? '2px solid #1a1a1a' : '1.5px solid #888';
+
+  var bdayBannerHTML = d.isBday ? '<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:2px 0;text-transform:uppercase;flex-shrink:0;">HAPPY BIRTHDAY! &#127874;</div>' : '';
+  var headerBg = d.isBday ? '#e8e8e8' : '#000';
+  var headerColor = d.isBday ? '#000' : '#fff';
+  var bdayEmoji = d.isBday ? ' <span style="font-size:18px;filter:grayscale(100%);">&#127874;</span>' : '';
+
+  var allergyHTML = '';
+  if (d.allergyFlag) {
+    allergyHTML = '<div style="border:2px solid #1a1a1a;border-radius:4px;padding:2px 5px;margin-bottom:4px;">'
+      + '<div style="font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px;">! &#50508;&#47084;&#51648; / ALLERGY</div>'
+      + '<div style="font-size:10px;font-weight:700;">' + (d.allergy || '') + '</div></div>';
+  }
+
+  // Child label preview (scaled)
+  var childHTML = '<div style="width:226px;height:257px;box-sizing:border-box;border:' + variantBorder + ';font-family:Arial,sans-serif;font-size:8pt;background:#fff;color:#000;display:flex;flex-direction:column;overflow:hidden;">'
+    + bdayBannerHTML
+    + '<div style="background:' + headerBg + ';color:' + headerColor + ';display:flex;align-items:center;justify-content:space-between;padding:3px 6px;flex-shrink:0;">'
+    + '<span style="font-size:8px;font-weight:900;">' + d.dept + '</span>'
+    + '<span style="font-size:8px;font-weight:700;">' + d.grade + '</span></div>'
+    + '<div style="flex:1;display:flex;flex-direction:row;padding:5px 6px 3px 6px;gap:4px;overflow:hidden;">'
+    + '<div style="flex:1;display:flex;flex-direction:column;min-width:0;">'
+    + '<div style="display:flex;align-items:baseline;gap:4px;">'
+    + '<p style="font-size:22px;font-weight:500;line-height:1.1;margin:0;">' + d.koreanName + '</p>' + bdayEmoji + '</div>'
+    + '<p style="font-size:12px;color:#444;margin:1px 0 4px 0;">' + (d.englishName ? '(' + d.englishName + ')' : '') + '</p>'
+    + '<span style="display:inline-block;border:1.5px dashed #555;border-radius:3px;padding:2px 5px;font-size:13px;font-weight:800;white-space:nowrap;margin-bottom:4px;letter-spacing:2px;">' + d.amcCode + '</span>'
+    + allergyHTML
+    + '<hr style="border:none;border-top:1px solid #ccc;margin:3px 0 2px 0;"/>'
+    + '<p style="font-size:8px;font-weight:600;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.guardianText + '</p>'
+    + '<p style="font-size:8px;font-weight:500;margin:2px 0 0 0;white-space:nowrap;">' + d.checkinText + '</p>'
+    + '</div>'
+    + '<div style="width:54px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;">'
+    + '<canvas id="prev-qr1" width="54" height="54"></canvas>'
+    + '</div></div>'
+    + '<div style="text-align:right;font-size:7px;color:#555;padding:0 6px 3px 6px;flex-shrink:0;">Amicus Next Church</div>'
+    + '</div>';
+
+  // Pickup tag preview
+  var pickupHTML = '<div style="margin-top:8px;width:226px;height:79px;box-sizing:border-box;border:' + variantBorder + ';font-family:Arial,sans-serif;font-size:8pt;background:#fff;color:#000;display:flex;flex-direction:row;align-items:stretch;overflow:hidden;">'
+    + '<div style="flex:1;padding:5px 8px 5px 6px;display:flex;flex-direction:column;justify-content:center;min-width:0;">'
+    + '<div style="font-size:7.5px;font-weight:800;color:#555;margin-bottom:1px;">&#54588;&#50629; &#53468;&#44536; / Pickup Tag</div>'
+    + '<div style="font-size:7px;color:#666;margin-bottom:4px;">&#48372;&#54840;&#51088; &#51648;&#52632; &#54596;&#49688; / Please keep this tag</div>'
+    + '<div style="font-size:12px;font-weight:700;margin-bottom:3px;">' + d.pickupName + '</div>'
+    + '<span style="display:inline-block;border:2px solid #000;border-radius:3px;padding:2px 6px;font-size:13px;font-weight:900;white-space:nowrap;">' + d.amcCode + '</span>'
+    + '</div>'
+    + '<div style="background:#fff;border-left:1px solid #ddd;padding:4px;display:flex;align-items:stretch;flex-shrink:0;">'
+    + '<canvas id="prev-qr2" width="54" height="54"></canvas>'
+    + '</div></div>';
+
+  pc.innerHTML = childHTML + pickupHTML;
+
+  // Draw QR codes in preview
+  try { new QRious({ element: document.getElementById('prev-qr1'), value: d.QR_URL, size: 54, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
+  try { new QRious({ element: document.getElementById('prev-qr2'), value: d.QR_URL, size: 54, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
+}
+
+function printTag() {
+  var d = window._printData;
+  if (!d) return;
+  printChildLabel(d);
+  setTimeout(function() { printParentTag(d); }, 1500);
+}
+
+function printChildLabel(d) {
+  var variantBorder = (d.isBday) ? '2px solid #1a1a1a' : '1.5px solid #888';
+  var bdayBanner = d.isBday ? '<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:2px 0;text-transform:uppercase;">HAPPY BIRTHDAY! &#127874;</div>' : '';
+  var headerBg = d.isBday ? '#e8e8e8' : '#000';
+  var headerColor = d.isBday ? '#000' : '#fff';
+  var bdayEmoji = d.isBday ? '<span style="font-size:18px;filter:grayscale(100%);">&#127874;</span>' : '';
+  var allergyBlock = '';
+  if (d.allergyFlag) {
+    allergyBlock = '<div style="border:2px solid #1a1a1a;border-radius:4px;padding:2px 5px;margin-bottom:4px;">'
+      + '<div style="font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px;">! &#50508;&#47084;&#51648; / ALLERGY</div>'
+      + '<div style="font-size:10px;font-weight:700;">' + (d.allergy || '') + '</div></div>';
+  }
+
+  var qrCanvas = document.createElement('canvas');
+  try { new QRious({ element: qrCanvas, value: d.QR_URL, size: 162, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
+  var qrDataURL = qrCanvas.toDataURL();
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    + '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">'
+    + '<style>'
+    + '* { margin:0; padding:0; box-sizing:border-box; font-family: "Noto Sans KR", Arial, sans-serif; }'
+    + '@page { size: 62mm 86mm; margin: 0; }'
+    + 'html, body { width:62mm; height:86mm; overflow:hidden; background:#fff; }'
+    + '-webkit-print-color-adjust: exact; print-color-adjust: exact;'
+    + '@media print { html, body { width:62mm; height:86mm; } }'
+    + '</style></head><body>'
+    + '<div style="width:60mm;height:86mm;box-sizing:border-box;border:' + variantBorder + ';font-family:\"Noto Sans KR\",Arial,sans-serif;font-size:8pt;background:#fff;color:#000;display:flex;flex-direction:column;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'
+    + bdayBanner
+    + '<div style="background:' + headerBg + ';color:' + headerColor + ';display:flex;align-items:center;justify-content:space-between;padding:3px 6px;flex-shrink:0;">'
+    + '<span style="font-size:8px;font-weight:900;">' + d.dept + '</span>'
+    + '<span style="font-size:8px;font-weight:700;">' + d.grade + '</span></div>'
+    + '<div style="flex:1;display:flex;flex-direction:row;padding:5px 6px 3px 6px;gap:4px;overflow:hidden;">'
+    + '<div style="flex:1;display:flex;flex-direction:column;min-width:0;">'
+    + '<div style="display:flex;align-items:baseline;gap:4px;">'
+    + '<p style="font-size:22px;font-weight:500;line-height:1.1;margin:0;">' + d.koreanName + '</p>' + bdayEmoji + '</div>'
+    + '<p style="font-size:12px;color:#444;margin:1px 0 4px 0;">' + (d.englishName ? '(' + d.englishName + ')' : '') + '</p>'
+    + '<span style="display:inline-block;border:1.5px dashed #555;border-radius:3px;padding:2px 5px;font-size:13px;font-weight:800;white-space:nowrap;margin-bottom:4px;letter-spacing:2px;">' + d.amcCode + '</span>'
+    + allergyBlock
+    + '<hr style="border:none;border-top:1px solid #ccc;margin:3px 0 2px 0;"/>'
+    + '<p style="font-size:8px;font-weight:600;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.guardianText + '</p>'
+    + '<p style="font-size:8px;font-weight:500;margin:2px 0 0 0;white-space:nowrap;">' + d.checkinText + '</p>'
+    + '</div>'
+    + '<div style="width:54px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;">'
+    + '<img src="' + qrDataURL + '" width="54" height="54" style="display:block;image-rendering:pixelated;"/>'
+    + '</div></div>'
+    + '<div style="text-align:right;font-size:7px;color:#555;padding:0 6px 3px 6px;flex-shrink:0;">Amicus Next Church</div>'
+    + '</div>'
+    + '<script>window.onload=function(){window.print();setTimeout(function(){window.close();},500);};</script>'
+    + '</body></html>';
+
+  var w = window.open('', '_blank', 'width=240,height=330,toolbar=0,menubar=0,location=0,status=0');
+  if (w) { w.document.open(); w.document.write(html); w.document.close(); }
+}
+
+function printParentTag(d) {
+  var variantBorder = (d.isBday) ? '2px solid #1a1a1a' : '1.5px solid #888';
+
+  var qrCanvas = document.createElement('canvas');
+  try { new QRious({ element: qrCanvas, value: d.QR_URL, size: 243, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
+  var qrDataURL = qrCanvas.toDataURL();
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    + '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">'
+    + '<style>'
+    + '* { margin:0; padding:0; box-sizing:border-box; font-family: "Noto Sans KR", Arial, sans-serif; }'
+    + '@page { size: 62mm 32mm; margin: 0; }'
+    + 'html, body { width:62mm; height:32mm; overflow:hidden; background:#fff; }'
+    + '@media print { html, body { width:62mm; height:32mm; } }'
+    + '</style></head><body>'
+    + '<div style="width:60mm;height:32mm;box-sizing:border-box;border:' + variantBorder + ';font-family:\"Noto Sans KR\",Arial,sans-serif;font-size:8pt;background:#fff;color:#000;display:flex;flex-direction:row;align-items:stretch;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'
+    + '<div style="flex:1;padding:5px 8px 5px 6px;display:flex;flex-direction:column;justify-content:center;min-width:0;">'
+    + '<div style="font-size:7.5px;font-weight:800;color:#555;margin-bottom:1px;">&#54588;&#50629; &#53468;&#44536; / Pickup Tag</div>'
+    + '<div style="font-size:7px;color:#666;margin-bottom:4px;">&#48372;&#54840;&#51088; &#51648;&#52632; &#54596;&#49688; / Please keep this tag</div>'
+    + '<div style="font-size:12px;font-weight:700;margin-bottom:3px;">' + d.pickupName + '</div>'
+    + '<span style="display:inline-block;border:2px solid #1a1a1a;border-radius:3px;padding:2px 6px;font-size:13px;font-weight:900;white-space:nowrap;">' + d.amcCode + '</span>'
+    + '</div>'
+    + '<div style="background:#fff;border-left:1px solid #ddd;padding:4px;display:flex;align-items:stretch;flex-shrink:0;">'
+    + '<img src="' + qrDataURL + '" style="display:block;width:72px;height:100%;object-fit:contain;image-rendering:pixelated;"/>'
+    + '</div></div>'
+    + '<script>window.onload=function(){window.print();setTimeout(function(){window.close();},500);};</script>'
+    + '</body></html>';
+
+  var w = window.open('', '_blank', 'width=240,height=130,toolbar=0,menubar=0,location=0,status=0');
+  if (w) { w.document.open(); w.document.write(html); w.document.close(); }
+}
+
 function closeSuccess(){document.getElementById("success").classList.add("hidden");clearTimeout(_successTimer);goHome();}
 function openVisitorModal(){["v-name","v-nameEN","v-grade","v-guardian","v-phone"].forEach(function(id){document.getElementById(id).value="";});document.getElementById("v-dob").value="";document.getElementById("v-allergy").value="없음";document.getElementById("v-pickupAck").checked=false;document.getElementById("v-deptPreview").classList.add("hidden");document.getElementById("visitorError").classList.add("hidden");document.getElementById("visitorModal").classList.remove("hidden");setTimeout(function(){document.getElementById("v-name").focus();},300);}
 function closeVisitorModal(){document.getElementById("visitorModal").classList.add("hidden");}
