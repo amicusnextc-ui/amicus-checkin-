@@ -479,8 +479,9 @@ function buildTag(s, time) {
   // ── helpers ──────────────────────────────────────────────────
   var isBday = (function() {
     if (!s.dob) return false;
-    var d = new Date(s.dob), n = new Date();
-    return d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
+    var parts = s.dob.split('-');
+    var n = new Date();
+    return parseInt(parts[1],10)-1 === n.getMonth() && parseInt(parts[2],10) === n.getDate();
   })();
   var hasAllergy = s.allergy && s.allergy.trim() !== '' && s.allergy.trim() !== '없음';
 
