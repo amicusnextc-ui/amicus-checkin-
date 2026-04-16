@@ -318,39 +318,9 @@
     </div>
     <div id="tagContainer" class="hidden mb-4">
       <p class="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">태그 미리보기</p>
-      <!-- Child label preview -->
-      <div id="childTag" class="bg-white border-2 border-gray-200 rounded-xl overflow-hidden mb-2 relative" style="font-family:'Arial',sans-serif">
-        <div id="tagDeptBar" class="absolute top-0 left-0 right-0 h-2 rounded-t-xl"></div>
-        <div class="px-3 pt-4 pb-2">
-          <div class="flex justify-between items-start">
-            <div class="flex-1 min-w-0">
-              <p id="tagName" class="text-xl font-black text-gray-900 leading-tight"></p>
-              <p id="tagNameEN" class="text-sm text-gray-500 font-medium"></p>
-              <p id="tagDept" class="text-xs font-bold text-gray-700 mt-0.5"></p>
-              <p id="tagGrade" class="text-xs text-gray-500"></p>
-              <div id="tagAllergyBadge" class="hidden mt-1 inline-block text-xs font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded border border-red-300">⚠️ 알러지 주의</div>
-              <div id="tagBirthdayBadge" class="hidden mt-1 inline-block text-xs font-bold bg-pink-100 text-pink-700 px-2 py-0.5 rounded border border-pink-300">🎂 생일 축하해요!</div>
-            </div>
-            <div class="ml-3 text-center flex-shrink-0">
-              <canvas id="tagQR" width="64" height="64"></canvas>
-              <p id="tagId" class="text-xs font-mono text-gray-400 mt-0.5 text-center"></p>
-            </div>
-          </div>
-          <div class="mt-2 pt-1.5 border-t border-gray-200 flex justify-between items-center">
-            <span class="text-xs text-gray-500">보호자: <span id="tagGuardian" class="font-bold text-gray-700"></span></span>
-            <span id="tagDate" class="text-xs text-gray-400 font-mono"></span>
-          </div>
-        </div>
-      </div>
-      <!-- Pickup tag preview -->
-      <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
-        <div class="flex justify-between items-center">
-          <div>
-            <p class="text-xs font-bold text-indigo-600 uppercase tracking-wide">보호자 픽업 태그</p>
-            <p id="guardianTagName" class="text-base font-black text-gray-900 mt-0.5"></p>
-            <p id="guardianTagId" class="text-xs font-mono text-indigo-500"></p>
-          </div>
-          <canvas id="guardianQR" width="48" height="48"></canvas>
+      <div style="overflow:auto;background:#f3f4f6;border-radius:12px;padding:10px;display:flex;justify-content:center;">
+        <div style="transform:scale(0.75);transform-origin:top center;display:inline-block;">
+          <div id="previewCard"></div>
         </div>
       </div>
     </div>
@@ -556,6 +526,21 @@ function buildTag(s, time) {
   // QR codes
   try { new QRious({ element: document.getElementById('lbl-qr1'), value: QR_URL, size: 54, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
   try { new QRious({ element: document.getElementById('lbl-qr2'), value: QR_URL, size: 72, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
+
+  // Update preview card in modal
+  try {
+    var pc = document.getElementById('previewCard');
+    var src = document.getElementById('printCard');
+    if (pc && src) {
+      var clone = src.cloneNode(true);
+      // Give cloned canvases the same QR images
+      var srcCanvases = src.querySelectorAll('canvas');
+      var cloneCanvases = clone.querySelectorAll('canvas');
+      srcCanvases.forEach(function(sc,i){ if(cloneCanvases[i]){ var ctx=cloneCanvases[i].getContext('2d'); cloneCanvases[i].width=sc.width; cloneCanvases[i].height=sc.height; ctx.drawImage(sc,0,0); } });
+      pc.innerHTML = '';
+      pc.appendChild(clone);
+    }
+  } catch(e2) {}
 }
 function printTag(){window.print();}
 function closeSuccess(){document.getElementById("success").classList.add("hidden");clearTimeout(_successTimer);goHome();}
