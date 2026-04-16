@@ -32,8 +32,8 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         filter: {
           or: [
-            { property: "\uC774\uB984 (Name)", title: { contains: name.trim() } },
-            { property: "\uC601\uBB38\uC774\uB984 (Name EN)", rich_text: { contains: name.trim() } },
+            { property: "이름 (Name)", title: { contains: name.trim() } },
+            { property: "영문이름 (Name EN)", rich_text: { contains: name.trim() } },
           ]
         },
         page_size: 20,
@@ -49,25 +49,23 @@ module.exports = async (req, res) => {
       const props = p.properties;
       const rt = (field) => props[field]?.rich_text?.[0]?.plain_text || "";
       const ph = (field) => props[field]?.phone_number || "";
-      const dob = props["\uC0DD\uB144\uC6D4\uC77C (DOB)"]?.date?.start || "";
-      const lastAttended = props["\uB9C8\uC9C0\uB9C9 \uCD9C\uC11D (Last Attended)"]?.date?.start || "";
-      const dept = props["\uBD80\uC11C (Department)"]?.select?.name || "";
-      const status = props["\uC0C1\uD0DC (Status)"]?.select?.name || "";
-      const isVisitor = props["\uBC29\uBB38\uC790 (Visitor)"]?.checkbox || false;
-      const fatherName = rt("\uC544\uBC84\uC9C0 \uC774\uB984 (Father Name)");
-      const motherName = rt("\uC5B4\uBA38\uB2C8 \uC774\uB984 (Mother Name)");
-      const fatherPhone = ph("\uC544\uBC84\uC9C0 \uC5F0\uB77D\uCC98 (Father Phone)");
-      const motherPhone = ph("\uC5B4\uBA38\uB2C8 \uC5F0\uB77D\uCC98 (Mother Phone)");
+      const dob = props["생년월일 (DOB)"]?.date?.start || "";
+      const lastAttended = props["마지막 출석 (Last Attended)"]?.date?.start || "";
+      const dept = props["부서 (Department)"]?.select?.name || "";
+      const status = props["상태 (Status)"]?.select?.name || "";
+      const isVisitor = props["방문자 (Visitor)"]?.checkbox || false;
+      const fatherName = rt("아버지 이름 (Father Name)");
+      const motherName = rt("어머니 이름 (Mother Name)");
+      const fatherPhone = ph("아버지 연락처 (Father Phone)");
+      const motherPhone = ph("어머니 연락처 (Mother Phone)");
 
-      // Build guardian display string from father/mother
       let guardian = "";
       if (fatherName && motherName) guardian = fatherName + " / " + motherName;
       else if (fatherName) guardian = fatherName;
       else if (motherName) guardian = motherName;
-      // Fallback to legacy guardian field
-      if (!guardian) guardian = rt("\uBCF4\uD638\uC790 (Guardian)");
+      if (!guardian) guardian = rt("보호자 (Guardian)");
 
-      let phone = fatherPhone || motherPhone || ph("\uC5F0\uB77D\uCC98 (Phone)");
+      let phone = fatherPhone || motherPhone || ph("연락처 (Phone)");
 
       const needsContact = lastAttended ? lastAttended < twoWeeksAgo : !isVisitor;
       const birthdayThisMonth = isBirthdayThisMonth(dob);
@@ -75,18 +73,18 @@ module.exports = async (req, res) => {
 
       return {
         id: p.id,
-        studentId: props["\uACE0\uC720\uBC88\uD638 (ID)"]?.unique_id
-          ? "AMC-" + String(props["\uACE0\uC720\uBC88\uD638 (ID)"].unique_id.number).padStart(3, "0")
+        studentId: props["고유번호 (ID)"]?.unique_id
+          ? "AMC-" + String(props["고유번호 (ID)"].unique_id.number).padStart(3, "0")
           : "",
-        name: props["\uC774\uB984 (Name)"]?.title?.[0]?.plain_text || "",
-        nameEN: rt("\uC601\uBB38\uC774\uB984 (Name EN)"),
+        name: props["이름 (Name)"]?.title?.[0]?.plain_text || "",
+        nameEN: rt("영문이름 (Name EN)"),
         department: dept,
-        grade: rt("\uD559\uB144 (Grade)"),
-        allergy: rt("\uC54C\uB7EC\uC9C0 (Allergy)"),
-        notes: rt("\uD2B9\uC774\uC0AC\uD56D (Notes)"),
+        grade: rt("학년 (Grade)"),
+        allergy: rt("알러지 (Allergy)"),
+        notes: rt("특이사항 (Notes)"),
         status,
         isVisitor,
-        liabilityForm: props["Liability Form"]?.select?.name || "\uBBF8\uC81C\uCD9C",
+        liabilityForm: props["Liability Form"]?.select?.name || "미제출",
         dob,
         lastAttended,
         needsContact,
@@ -98,8 +96,10 @@ module.exports = async (req, res) => {
         motherName,
         fatherPhone,
         motherPhone,
+        baptized: props["세례 여부 (Baptized)"]?.select?.name || "",
+        photo: props["사진 촬영 (Photo)"]?.select?.name || "",
       };
-    }).filter(s => !s.status || s.status === "\uD65C\uC131 (Active)");
+    }).filter(s => !s.status || s.status === "활성 (Active)");
 
     return res.status(200).json({ students });
   } catch(e) {
