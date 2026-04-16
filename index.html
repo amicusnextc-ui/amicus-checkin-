@@ -14,7 +14,269 @@
 @keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(99,102,241,0.4)}70%{box-shadow:0 0 0 10px rgba(99,102,241,0)}100%{box-shadow:0 0 0 0 rgba(99,102,241,0)}}.pulse-ring{animation:pulse-ring 1.5s infinite}
 @keyframes welcomePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}.welcome-pulse{animation:welcomePulse 3s ease-in-out infinite}
 @keyframes badgeShine{0%{background-position:200%}100%{background-position:-200%}}.badge-shine{background:linear-gradient(90deg,#f59e0b,#fbbf24,#f59e0b);background-size:200%;animation:badgeShine 2s linear infinite}
-@media print{body>*{display:none!important}#printArea{display:block!important;position:fixed;top:0;left:0;width:100%;margin:0;padding:0}#printContent{margin:0;padding:4px 6px;width:100%;box-sizing:border-box}#printContent *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}#printContent #childTag{border:1.5px solid #333!important;border-radius:4px!important;box-shadow:none!important;font-family:Arial,sans-serif!important;overflow:hidden!important;max-width:100%;page-break-inside:avoid}#printContent #tagDeptBar{height:10px!important}#printContent #tagName{font-size:17pt!important;font-weight:900!important;line-height:1.1!important}#printContent #tagNameEN{font-size:9pt!important;color:#555!important}#printContent #tagDept{font-size:8pt!important;font-weight:700!important}#printContent #tagGrade{font-size:8pt!important;color:#666!important}#printContent #tagId{font-size:7pt!important;color:#888!important}#printContent #tagGuardian{font-size:8pt!important;font-weight:700!important}#printContent #tagDate{font-size:7pt!important}@page{size:auto;margin:4mm}}
+@keyframes bdayPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.04);opacity:.95}}.bday-pulse{animation:bdayPulse 1.2s ease-in-out infinite}
+
+/* ── PRINT STYLES: Brother QL-810W · DK-1234 · 60mm × 86mm ── */
+@media print {
+  @page {
+    size: 60mm 86mm;
+    margin: 0;
+  }
+  body > * { display: none !important; }
+  #printArea {
+    display: block !important;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    margin: 0; padding: 0;
+  }
+  .print-label {
+    width: 60mm;
+    height: 86mm;
+    box-sizing: border-box;
+    overflow: hidden;
+    page-break-after: always;
+    page-break-inside: avoid;
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-label:last-child { page-break-after: avoid; }
+
+  /* ── CHILD LABEL ── */
+  .child-label {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border: 1.5px solid #333;
+  }
+  .cl-deptbar {
+    height: 8mm;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 3mm;
+    flex-shrink: 0;
+  }
+  .cl-deptbar-text {
+    font-size: 7.5pt;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .cl-deptbar-grade {
+    font-size: 7pt;
+    font-weight: 700;
+    color: rgba(255,255,255,.9);
+    background: rgba(0,0,0,.2);
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  .cl-body {
+    flex: 1;
+    padding: 2mm 3mm 1mm 3mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .cl-name-kor {
+    font-size: 24pt;
+    font-weight: 900;
+    color: #111;
+    line-height: 1.0;
+    margin: 0 0 0.5mm 0;
+  }
+  .cl-name-en {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #555;
+    margin: 0 0 2mm 0;
+  }
+  .cl-id-row {
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+    margin-bottom: 2mm;
+  }
+  .cl-id {
+    font-size: 10pt;
+    font-weight: 900;
+    font-family: monospace;
+    color: #1e3a8a;
+    background: #dbeafe;
+    padding: 1mm 2.5mm;
+    border-radius: 3mm;
+    border: 1pt solid #93c5fd;
+    letter-spacing: 1px;
+  }
+  .cl-middle {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex: 1;
+    gap: 2mm;
+  }
+  .cl-info { flex: 1; }
+  .cl-guardian-label {
+    font-size: 6.5pt;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin-bottom: .5mm;
+  }
+  .cl-guardian-val {
+    font-size: 8.5pt;
+    font-weight: 800;
+    color: #111;
+    line-height: 1.3;
+  }
+  .cl-qr-wrap { flex-shrink: 0; text-align: center; }
+  .cl-footer {
+    border-top: 1pt solid #e5e7eb;
+    padding: 1mm 0 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cl-date { font-size: 6.5pt; color: #9ca3af; font-family: monospace; }
+  .cl-allergy-bar {
+    display: flex;
+    align-items: center;
+    gap: 1mm;
+    background: #fef2f2;
+    border: 1pt solid #fca5a5;
+    border-radius: 2mm;
+    padding: 1mm 2mm;
+    margin-bottom: 1.5mm;
+  }
+  .cl-allergy-icon { font-size: 9pt; }
+  .cl-allergy-text {
+    font-size: 7.5pt;
+    font-weight: 800;
+    color: #b91c1c;
+    text-transform: uppercase;
+  }
+  .cl-bday-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2mm;
+    background: linear-gradient(135deg, #ec4899, #f43f5e);
+    border-radius: 2mm;
+    padding: 1.5mm 2mm;
+    margin-bottom: 1.5mm;
+  }
+  .cl-bday-icon { font-size: 11pt; }
+  .cl-bday-text {
+    font-size: 9pt;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+
+  /* ── PARENT PICKUP LABEL ── */
+  .pickup-label {
+    background: #1e3a8a;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border: 2pt solid #1e3a8a;
+    position: relative;
+    overflow: hidden;
+  }
+  .pl-header {
+    background: rgba(0,0,0,.25);
+    padding: 3mm 4mm 2mm 4mm;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .pl-header-title {
+    font-size: 8pt;
+    font-weight: 900;
+    color: #93c5fd;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .pl-header-sub {
+    font-size: 7pt;
+    color: rgba(255,255,255,.7);
+    margin-top: .5mm;
+    font-weight: 600;
+  }
+  .pl-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3mm 4mm;
+    text-align: center;
+    gap: 2mm;
+  }
+  .pl-child-name {
+    font-size: 22pt;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.0;
+  }
+  .pl-child-name-en {
+    font-size: 9pt;
+    font-weight: 600;
+    color: rgba(255,255,255,.7);
+  }
+  .pl-id-box {
+    background: #fff;
+    color: #1e3a8a;
+    font-size: 18pt;
+    font-weight: 900;
+    font-family: monospace;
+    padding: 2mm 5mm;
+    border-radius: 3mm;
+    letter-spacing: 2px;
+    margin: 1mm 0;
+    border: 2pt solid #bfdbfe;
+  }
+  .pl-dept {
+    font-size: 8pt;
+    font-weight: 700;
+    color: rgba(255,255,255,.8);
+    background: rgba(255,255,255,.15);
+    padding: 1mm 3mm;
+    border-radius: 99mm;
+    border: 1pt solid rgba(255,255,255,.3);
+  }
+  .pl-qr-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 1mm;
+  }
+  .pl-footer {
+    background: rgba(0,0,0,.2);
+    padding: 1.5mm 4mm;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .pl-footer-text {
+    font-size: 6.5pt;
+    color: rgba(255,255,255,.6);
+    font-style: italic;
+  }
+  /* diagonal stripe watermark */
+  .pickup-label::before {
+    content: '';
+    position: absolute;
+    top: -10mm; right: -10mm;
+    width: 35mm; height: 35mm;
+    background: rgba(255,255,255,.06);
+    border-radius: 50%;
+  }
+}
+
 #printArea{display:none}
 .dept-btn{transition:all .2s ease;position:relative}
 .student-card{transition:transform .15s ease,box-shadow .15s ease}
@@ -34,9 +296,7 @@
 <!-- WELCOME SCREEN -->
 <div id="welcomeScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-indigo-600 via-indigo-700 to-purple-800 px-6">
   <div class="text-center mb-10 welcome-pulse">
-    <div class="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl">
-      <span class="text-5xl">⛪</span>
-    </div>
+    <div class="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl"><span class="text-5xl">⛪</span></div>
     <h1 class="text-3xl font-black text-white mb-1">Amicus Next Church</h1>
     <p class="text-indigo-200 text-sm font-medium">아미쿠스 교육부 출석 체크</p>
     <p id="welcomeDate" class="text-indigo-300 text-xs mt-2"></p>
@@ -45,31 +305,22 @@
     <p class="text-center text-indigo-200 text-sm font-semibold mb-4">Welcome! Please sign in here 👋</p>
     <button onclick="startCheckin()" class="w-full py-4 rounded-2xl bg-white text-indigo-700 font-black text-lg shadow-xl hover:bg-indigo-50 active:scale-95 transition-all flex items-center justify-center gap-3">
       <span class="text-2xl">✅</span>
-      <div class="text-left">
-        <div>Start Here — Check In</div>
-        <div class="text-xs font-medium text-indigo-400">출석 체크인</div>
-      </div>
+      <div class="text-left"><div>Start Here — Check In</div><div class="text-xs font-medium text-indigo-400">출석 체크인</div></div>
     </button>
     <button onclick="startCheckout()" class="w-full py-4 rounded-2xl bg-white/15 text-white font-bold text-base border border-white/30 hover:bg-white/25 active:scale-95 transition-all flex items-center justify-center gap-3 backdrop-blur-sm">
       <span class="text-xl">🙏</span>
-      <div class="text-left">
-        <div>Check Out</div>
-        <div class="text-xs font-medium text-indigo-200">체크아웃</div>
-      </div>
+      <div class="text-left"><div>Check Out</div><div class="text-xs font-medium text-indigo-200">체크아웃</div></div>
     </button>
   </div>
   <a href="/staff.html" class="mt-8 text-indigo-300 text-xs hover:text-white transition-colors">간사/사역자 포털 →</a>
 </div>
 
-<!-- HEADER (hidden on welcome) -->
+<!-- HEADER -->
 <header id="mainHeader" class="hidden bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-20 shadow-sm">
   <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
     <button onclick="goHome()" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
       <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-sm">⛪</div>
-      <div>
-        <h1 class="text-sm font-bold text-gray-900 leading-tight">Amicus Next Church</h1>
-        <p class="text-xs text-gray-400 leading-tight" id="todayDate"></p>
-      </div>
+      <div><h1 class="text-sm font-bold text-gray-900 leading-tight">Amicus Next Church</h1><p class="text-xs text-gray-400 leading-tight" id="todayDate"></p></div>
     </button>
     <div class="flex items-center gap-2">
       <div id="modeTag" class="hidden text-xs font-bold px-2.5 py-1 rounded-full"></div>
@@ -82,9 +333,7 @@
   <!-- CHECK-IN SECTION -->
   <div id="checkinSection" class="hidden">
     <div class="text-center mb-6">
-      <div class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2 mb-3">
-        <span class="text-emerald-600 font-bold text-sm">✅ Check In — 체크인</span>
-      </div>
+      <div class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2 mb-3"><span class="text-emerald-600 font-bold text-sm">✅ Check In — 체크인</span></div>
       <h2 class="text-xl font-black text-gray-900">전화번호 끝 4자리</h2>
       <p class="text-gray-400 text-sm mt-1">Last 4 digits of registered phone number</p>
     </div>
@@ -95,7 +344,6 @@
       <input class="pin-digit" id="d3" maxlength="1" inputmode="numeric" pattern="[0-9]" type="text"/>
     </div>
     <div id="checkinResults"></div>
-    <!-- Visitor button -->
     <button onclick="openVisitorModal()" class="w-full mt-4 py-3 rounded-2xl border-2 border-dashed border-indigo-300 text-indigo-600 font-semibold text-sm hover:bg-indigo-50 hover:border-indigo-400 transition-all flex items-center justify-center gap-2">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
       First time here? — 방문자 체크인
@@ -105,9 +353,7 @@
   <!-- CHECK-OUT SECTION -->
   <div id="checkoutSection" class="hidden">
     <div class="text-center mb-6">
-      <div class="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-2xl px-4 py-2 mb-3">
-        <span class="text-indigo-600 font-bold text-sm">🙏 Check Out — 체크아웃</span>
-      </div>
+      <div class="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-2xl px-4 py-2 mb-3"><span class="text-indigo-600 font-bold text-sm">🙏 Check Out — 체크아웃</span></div>
       <h2 class="text-xl font-black text-gray-900">고유번호 끝 3자리</h2>
       <p class="text-gray-400 text-sm mt-1">Last 3 digits of student ID (AMC-XXX)</p>
     </div>
@@ -119,7 +365,8 @@
     <div id="checkoutResults"></div>
   </div>
 </main>
-<!-- CHECK-IN/OUT CONFIRMATION MODAL -->
+
+<!-- CONFIRMATION MODAL -->
 <div id="modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
   <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-sm p-6 slide-up sm:fade-in max-h-[90vh] overflow-y-auto">
     <div id="modalHeader" class="text-center mb-4 p-4 rounded-2xl"></div>
@@ -157,6 +404,7 @@
     </div>
     <div id="tagContainer" class="hidden mb-4">
       <p class="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">태그 미리보기</p>
+      <!-- Child label preview -->
       <div id="childTag" class="bg-white border-2 border-gray-200 rounded-xl overflow-hidden mb-2 relative" style="font-family:'Arial',sans-serif">
         <div id="tagDeptBar" class="absolute top-0 left-0 right-0 h-2 rounded-t-xl"></div>
         <div class="px-3 pt-4 pb-2">
@@ -180,6 +428,7 @@
           </div>
         </div>
       </div>
+      <!-- Pickup tag preview -->
       <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
         <div class="flex justify-between items-center">
           <div>
@@ -197,6 +446,7 @@
     </div>
   </div>
 </div>
+
 <!-- VISITOR MODAL -->
 <div id="visitorModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center">
   <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 slide-up sm:fade-in max-h-[95vh] overflow-y-auto">
@@ -223,373 +473,166 @@
   </div>
 </div>
 
-<div id="printArea"><div id="printContent" style="font-family:sans-serif;padding:8px"></div></div>
+<!-- PRINT AREA: Two labels for Brother QL-810W DK-1234 (60mm x 86mm) -->
+<div id="printArea">
+  <!-- Label 1: Child Tag (아이용) -->
+  <div id="printLabel1" class="print-label child-label">
+    <div id="pl1-deptbar" class="cl-deptbar">
+      <span id="pl1-dept" class="cl-deptbar-text"></span>
+      <span id="pl1-grade" class="cl-deptbar-grade"></span>
+    </div>
+    <div class="cl-body">
+      <div>
+        <div id="pl1-bday" class="cl-bday-bar" style="display:none">
+          <span class="cl-bday-icon">🎂</span>
+          <span class="cl-bday-text">HAPPY BIRTHDAY!</span>
+        </div>
+        <div id="pl1-allergy" class="cl-allergy-bar" style="display:none">
+          <span class="cl-allergy-icon">⚠️</span>
+          <span id="pl1-allergy-text" class="cl-allergy-text">ALLERGY</span>
+        </div>
+        <div id="pl1-name" class="cl-name-kor"></div>
+        <div id="pl1-nameen" class="cl-name-en"></div>
+        <div class="cl-id-row">
+          <span id="pl1-id" class="cl-id"></span>
+        </div>
+      </div>
+      <div class="cl-middle">
+        <div class="cl-info">
+          <div class="cl-guardian-label">보호자 / Guardian</div>
+          <div id="pl1-guardian" class="cl-guardian-val"></div>
+        </div>
+        <div class="cl-qr-wrap">
+          <canvas id="pl1-qr" width="56" height="56"></canvas>
+        </div>
+      </div>
+      <div class="cl-footer">
+        <span id="pl1-date" class="cl-date"></span>
+        <span style="font-size:6pt;color:#d1d5db">Amicus Next Church</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Label 2: Parent Pickup Tag (보호자용) -->
+  <div id="printLabel2" class="print-label pickup-label">
+    <div class="pl-header">
+      <div class="pl-header-title">픽업 태그 / Pickup Tag</div>
+      <div class="pl-header-sub">보호자 지참 필수 · Please keep this tag</div>
+    </div>
+    <div class="pl-body">
+      <div id="pl2-name" class="pl-child-name"></div>
+      <div id="pl2-nameen" class="pl-child-name-en"></div>
+      <div id="pl2-id" class="pl-id-box"></div>
+      <div id="pl2-dept" class="pl-dept"></div>
+      <div class="pl-qr-row">
+        <canvas id="pl2-qr" width="52" height="52"></canvas>
+      </div>
+    </div>
+    <div class="pl-footer">
+      <div id="pl2-date" class="pl-footer-text"></div>
+    </div>
+  </div>
+</div>
 <script>
 var DEPT_INFO = {
-  "유아부 (Infant)": { emoji:"👶", color: { bg:"bg-blue-600", bar:"bg-blue-500", left:"border-l-blue-400", badge:"bg-blue-100 text-blue-800 border-blue-200", card:"bg-blue-600", tab:"border-blue-400 bg-blue-50 text-blue-700" }, staff:"이지혜 간사", location:"유아부 방 (Infant Room)", ageRange:"만 24개월 ~ 만 3세" },
-  "유치부 (Preschool)": { emoji:"🌱", color: { bg:"bg-emerald-600", bar:"bg-emerald-500", left:"border-l-emerald-400", badge:"bg-emerald-100 text-emerald-800 border-emerald-200", card:"bg-emerald-600", tab:"border-emerald-400 bg-emerald-50 text-emerald-700" }, staff:"김향숙 간사", location:"유치부 방 (Preschool Room)", ageRange:"만 4세 ~ Pre-K" },
-  "유년부 (Elementary Jr)": { emoji:"📚", color: { bg:"bg-yellow-500", bar:"bg-yellow-400", left:"border-l-yellow-400", badge:"bg-yellow-100 text-yellow-800 border-yellow-200", card:"bg-yellow-500", tab:"border-yellow-400 bg-yellow-50 text-yellow-700" }, staff:"박은혜 간사", location:"유년부 방 (Jr. Room)", ageRange:"Kindergarten ~ 2학년" },
-  "초등부 (Elementary)": { emoji:"⭐", color: { bg:"bg-orange-500", bar:"bg-orange-400", left:"border-l-orange-400", badge:"bg-orange-100 text-orange-800 border-orange-200", card:"bg-orange-500", tab:"border-orange-400 bg-orange-50 text-orange-700" }, staff:"백진주 간사", location:"초등부 방 (Elementary Room)", ageRange:"3학년 ~ 5학년" },
-  "중고등부 (Middle/High)": { emoji:"🎓", color: { bg:"bg-purple-600", bar:"bg-purple-500", left:"border-l-purple-400", badge:"bg-purple-100 text-purple-800 border-purple-200", card:"bg-purple-600", tab:"border-purple-400 bg-purple-50 text-purple-700" }, staff:"박명철 전도사님", location:"중고등부 방 (Youth Room)", ageRange:"6학년 ~ 12학년" }
+  "유아부 (Infant)": { emoji:"👶", color:{ bg:"bg-blue-600", bar:"bg-blue-600", barHex:"#2563eb", left:"border-l-blue-400", badge:"bg-blue-100 text-blue-800 border-blue-200", card:"bg-blue-600", tab:"border-blue-400 bg-blue-50 text-blue-700" }, staff:"이지혜 간사", location:"유아부 방 (Infant Room)", ageRange:"만 24개월 ~ 만 3세" },
+  "유치부 (Preschool)": { emoji:"🌱", color:{ bg:"bg-emerald-600", bar:"bg-emerald-500", barHex:"#10b981", left:"border-l-emerald-400", badge:"bg-emerald-100 text-emerald-800 border-emerald-200", card:"bg-emerald-600", tab:"border-emerald-400 bg-emerald-50 text-emerald-700" }, staff:"김향숙 간사", location:"유치부 방 (Preschool Room)", ageRange:"만 4세 ~ Pre-K" },
+  "유년부 (Elementary Jr)": { emoji:"📚", color:{ bg:"bg-yellow-500", bar:"bg-yellow-500", barHex:"#eab308", left:"border-l-yellow-400", badge:"bg-yellow-100 text-yellow-800 border-yellow-200", card:"bg-yellow-500", tab:"border-yellow-400 bg-yellow-50 text-yellow-700" }, staff:"박은혜 간사", location:"유년부 방 (Jr. Room)", ageRange:"Kindergarten ~ 2학년" },
+  "초등부 (Elementary)": { emoji:"⭐", color:{ bg:"bg-orange-500", bar:"bg-orange-500", barHex:"#f97316", left:"border-l-orange-400", badge:"bg-orange-100 text-orange-800 border-orange-200", card:"bg-orange-500", tab:"border-orange-400 bg-orange-50 text-orange-700" }, staff:"백진주 간사", location:"초등부 방 (Elementary Room)", ageRange:"3학년 ~ 5학년" },
+  "중고등부 (Middle/High)": { emoji:"🎓", color:{ bg:"bg-purple-600", bar:"bg-purple-500", barHex:"#9333ea", left:"border-l-purple-400", badge:"bg-purple-100 text-purple-800 border-purple-200", card:"bg-purple-600", tab:"border-purple-400 bg-purple-50 text-purple-700" }, staff:"박명철 전도사님", location:"중고등부 방 (Youth Room)", ageRange:"6학년 ~ 12학년" }
 };
-
-var _studentMap = {};
-var _recordMap = {};
-var _currentMode = null;
-
-function hasAllergy(a){ return a && a.trim() && a.toLowerCase() !== "없음" && a.toLowerCase() !== "none"; }
-function isBirthdayThisMonth(d){ if(!d)return false; return new Date(d).getMonth()===new Date().getMonth(); }
-function isBirthdayToday(d){ if(!d)return false; var dob=new Date(d),now=new Date(); return dob.getMonth()===now.getMonth()&&dob.getDate()===now.getDate(); }
-function getDeptFromAge(m){ var y=m/12; if(m<48)return"유아부 (Infant)"; if(y<6)return"유치부 (Preschool)"; if(y<9)return"유년부 (Elementary Jr)"; if(y<12)return"초등부 (Elementary)"; return"중고등부 (Middle/High)"; }
-
-var dateStr = new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
-document.getElementById("welcomeDate").textContent = dateStr;
-
-function goHome(){
-  document.getElementById("welcomeScreen").classList.remove("hidden");
-  document.getElementById("mainHeader").classList.add("hidden");
-  document.getElementById("mainApp").classList.add("hidden");
-  _currentMode = null;
-  clearPins();
-}
-
-function startCheckin(){
-  _currentMode = "checkin";
-  document.getElementById("welcomeScreen").classList.add("hidden");
-  document.getElementById("mainHeader").classList.remove("hidden");
-  document.getElementById("mainApp").classList.remove("hidden");
-  document.getElementById("todayDate").textContent = dateStr;
-  document.getElementById("checkinSection").classList.remove("hidden");
-  document.getElementById("checkoutSection").classList.add("hidden");
-  var mt = document.getElementById("modeTag");
-  mt.textContent = "✅ Check In";
-  mt.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700";
-  mt.classList.remove("hidden");
-  clearPins();
-  setTimeout(function(){ document.getElementById("d0").focus(); }, 300);
-}
-
-function startCheckout(){
-  _currentMode = "checkout";
-  document.getElementById("welcomeScreen").classList.add("hidden");
-  document.getElementById("mainHeader").classList.remove("hidden");
-  document.getElementById("mainApp").classList.remove("hidden");
-  document.getElementById("todayDate").textContent = dateStr;
-  document.getElementById("checkinSection").classList.add("hidden");
-  document.getElementById("checkoutSection").classList.remove("hidden");
-  var mt = document.getElementById("modeTag");
-  mt.textContent = "🙏 Check Out";
-  mt.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700";
-  mt.classList.remove("hidden");
-  clearPins();
-  setTimeout(function(){ document.getElementById("co0").focus(); }, 300);
-}
-
-function clearPins(){
-  ["d0","d1","d2","d3","co0","co1","co2"].forEach(function(id){
-    var el = document.getElementById(id);
-    if(el){ el.value=""; el.classList.remove("filled"); }
-  });
-  document.getElementById("checkinResults").innerHTML = "";
-  document.getElementById("checkoutResults").innerHTML = "";
-}
-// PIN INPUT LOGIC — check-in (4 digits phone)
-(function(){
-  var digits = ["d0","d1","d2","d3"];
-  digits.forEach(function(id, i){
-    var el = document.getElementById(id);
-    el.addEventListener("input", function(){
-      var v = this.value.replace(/[^0-9]/g,"");
-      this.value = v.slice(-1);
-      this.classList.toggle("filled", !!this.value);
-      if(this.value && i < digits.length-1) document.getElementById(digits[i+1]).focus();
-      if(i === digits.length-1 && this.value) {
-        var pin = digits.map(function(d){ return document.getElementById(d).value; }).join("");
-        if(pin.length===4) searchByPhone(pin);
-      }
-    });
-    el.addEventListener("keydown", function(e){
-      if(e.key==="Backspace"&&!this.value&&i>0){ document.getElementById(digits[i-1]).focus(); }
-    });
-  });
-})();
-
-// PIN INPUT LOGIC — check-out (3 digits ID)
-(function(){
-  var digits = ["co0","co1","co2"];
-  digits.forEach(function(id, i){
-    var el = document.getElementById(id);
-    el.addEventListener("input", function(){
-      var v = this.value.replace(/[^0-9]/g,"");
-      this.value = v.slice(-1);
-      this.classList.toggle("filled", !!this.value);
-      if(this.value && i < digits.length-1) document.getElementById(digits[i+1]).focus();
-      if(i === digits.length-1 && this.value) {
-        var pin = digits.map(function(d){ return document.getElementById(d).value; }).join("");
-        if(pin.length===3) searchById(pin);
-      }
-    });
-    el.addEventListener("keydown", function(e){
-      if(e.key==="Backspace"&&!this.value&&i>0){ document.getElementById(digits[i-1]).focus(); }
-    });
-  });
-})();
-
-async function searchByPhone(phone4){
-  var resEl = document.getElementById("checkinResults");
-  resEl.innerHTML = '<div class="text-center py-8 text-gray-400"><div class="w-7 h-7 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-sm">검색 중...</p></div>';
-  try {
-    var res = await fetch("/api/search-student?phone4=" + encodeURIComponent(phone4));
-    var data = await res.json();
-    if(!res.ok) throw new Error(data.error);
-    var students = data.students || [];
-    if(!students.length){
-      resEl.innerHTML = '<div class="text-center py-8 bg-white rounded-2xl border border-gray-100 shadow-sm"><div class="text-3xl mb-2">🔍</div><p class="text-gray-500 font-semibold">No results found</p><p class="text-gray-400 text-sm mt-1 mb-4">No student found with phone ending in ' + phone4 + '</p><button onclick="clearPinsAndReset()" class="text-sm text-gray-500 underline">Try again</button></div>';
-      return;
-    }
-    students.forEach(function(s){ _studentMap[s.id]=s; });
-    var html = '';
-    if(students.length > 1){
-      html += '<div class="household-header"><span class="text-2xl">👨‍👩‍👧‍👦</span><div><p class="text-sm font-bold text-sky-800">가족 체크인 — Household Check-in</p><p class="text-xs text-sky-600">Phone: •••-•••-' + phone4 + ' · ' + students.length + '명</p></div></div>';
-    }
-    html += '<div class="space-y-3">';
-    for(var i=0;i<students.length;i++){ html+=studentCard(students[i]); }
-    html += '</div>';
-    resEl.innerHTML = html;
-    students.forEach(function(s){ loadStatus(s); });
-  } catch(e){
-    resEl.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠️ ' + (e.message||"오류") + '</div>';
-  }
-}
-
-async function searchById(id3){
-  var resEl = document.getElementById("checkoutResults");
-  resEl.innerHTML = '<div class="text-center py-8 text-gray-400"><div class="w-7 h-7 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-sm">검색 중...</p></div>';
-  try {
-    var res = await fetch("/api/search-student?id3=" + encodeURIComponent(id3));
-    var data = await res.json();
-    if(!res.ok) throw new Error(data.error);
-    var students = data.students || [];
-    if(!students.length){
-      resEl.innerHTML = '<div class="text-center py-8 bg-white rounded-2xl border border-gray-100 shadow-sm"><div class="text-3xl mb-2">🔍</div><p class="text-gray-500 font-semibold">No results found</p><p class="text-gray-400 text-sm mt-1 mb-4">No student with ID ending in ' + id3 + '</p><button onclick="clearPinsAndReset()" class="text-sm text-gray-500 underline">Try again</button></div>';
-      return;
-    }
-    // For checkout, also search household via phone
-    var primary = students[0];
-    _studentMap[primary.id] = primary;
-    var html = '<div class="space-y-3">' + studentCard(primary) + '</div>';
-    resEl.innerHTML = html;
-    loadStatus(primary);
-    // Also load siblings if phone available
-    if(primary.fatherPhone || primary.motherPhone || primary.phone){
-      var phone = primary.fatherPhone || primary.motherPhone || primary.phone;
-      var last4 = phone.replace(/\D/g,"").slice(-4);
-      if(last4 && last4 !== id3){
-        var r2 = await fetch("/api/search-student?phone4=" + encodeURIComponent(last4));
-        var d2 = await r2.json();
-        if(d2.students && d2.students.length > 1){
-          var siblings = d2.students.filter(function(s){ return s.id !== primary.id; });
-          if(siblings.length > 0){
-            var sibHtml = '<div class="mt-3"><div class="household-header"><span class="text-xl">👨‍👩‍👧‍👦</span><div><p class="text-xs font-bold text-sky-800">가족 구성원 / Household members</p></div></div><div class="space-y-3">';
-            siblings.forEach(function(s){ _studentMap[s.id]=s; sibHtml+=studentCard(s); });
-            sibHtml += '</div></div>';
-            resEl.innerHTML += sibHtml;
-            siblings.forEach(function(s){ loadStatus(s); });
-          }
-        }
-      }
-    }
-  } catch(e){
-    resEl.innerHTML = '<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠️ ' + (e.message||"오류") + '</div>';
-  }
-}
-
-function clearPinsAndReset(){
-  clearPins();
-  if(_currentMode==="checkin") setTimeout(function(){ document.getElementById("d0").focus(); },100);
-  else setTimeout(function(){ document.getElementById("co0").focus(); },100);
-}
-
-function deptBadge(d){
-  var c=(DEPT_INFO[d]&&DEPT_INFO[d].color&&DEPT_INFO[d].color.badge)||"bg-gray-100 text-gray-600 border-gray-200";
-  return '<span class="text-xs font-semibold px-2 py-0.5 rounded-full border '+c+'">'+((DEPT_INFO[d]&&DEPT_INFO[d].emoji)||"")+" "+(d||"미지정")+'</span>';
-}
-
-function guardianStr(s){
-  if(s.fatherName&&s.motherName) return "👨 "+s.fatherName+" / 👩 "+s.motherName;
-  if(s.fatherName) return "👨 "+s.fatherName+(s.fatherPhone?" · "+s.fatherPhone:"");
-  if(s.motherName) return "👩 "+s.motherName+(s.motherPhone?" · "+s.motherPhone:"");
-  if(s.guardian) return s.guardian+(s.phone?" · "+s.phone:"");
-  return "";
-}
-
-function studentCard(s){
-  var dc=(DEPT_INFO[s.department]&&DEPT_INFO[s.department].color)||{};
-  var leftColor=dc.left||"border-l-gray-300";
-  var allergy=hasAllergy(s.allergy);
-  var isBdayToday=isBirthdayToday(s.dob);
-  var isBday=isBdayToday||isBirthdayThisMonth(s.dob);
-  var h='<div id="card-'+s.id+'" class="student-card bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 '+leftColor+' p-4 fade-in">';
-  h+='<div class="mb-2"><div class="flex flex-wrap items-center gap-2 mb-1">';
-  h+='<span class="text-xl font-bold text-gray-900">'+s.name+'</span>';
-  if(s.studentId) h+='<span class="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">'+s.studentId+'</span>';
-  if(s.isVisitor) h+='<span class="badge-newcomer">🆕 NEW</span>';
-  if(isBdayToday) h+='<span class="badge-birthday-today">🎂 Happy Birthday!</span>';
-  else if(isBday) h+='<span class="badge-birthday">🎂 이달 생일</span>';
-  if(allergy) h+='<span class="badge-allergy">⚠️ 알러지</span>';
-  h+='</div>';
-  if(s.nameEN) h+='<div class="text-sm text-gray-400 mb-1">'+s.nameEN+'</div>';
-  h+='</div>';
-  h+='<div class="flex flex-wrap gap-2 mb-3">'+deptBadge(s.department)+(s.grade?'<span class="text-xs text-gray-500 flex items-center">'+s.grade+'</span>':'')+'</div>';
-  h+='<div id="action-'+s.id+'" class="mt-1"><div class="text-center py-2 text-gray-400 text-sm"><span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full spin align-middle mr-1"></span>상태 확인 중...</div></div>';
-  h+='</div>';
-  return h;
-}
-function loadStatus(s){
-  fetch("/api/check-status?name="+encodeURIComponent(s.name))
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var el=document.getElementById("action-"+s.id);
-      if(!el)return;
-      if(data.status==="checked_out"){
-        el.innerHTML='<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center flex items-center justify-center gap-2"><span class="text-green-500 font-bold">✓</span> 체크아웃 완료 · '+data.record.checkIn+' → '+data.record.checkOut+'</div>';
-      } else if(data.status==="checked_in"){
-        _recordMap[s.id]=data.record;
-        el.innerHTML='<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 mb-2 text-sm text-emerald-700 flex items-center gap-2"><span class="text-emerald-500 font-bold text-base">✓</span><span>체크인됨 · '+data.record.checkIn+' 입실</span></div>'
-          +'<button data-sid="'+s.id+'" class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700 transition-colors active:scale-95">체크아웃 / Check Out</button>';
-        el.querySelector("button").addEventListener("click",function(){ openModalById("checkout",this.dataset.sid); });
-      } else {
-        el.innerHTML='<button data-sid="'+s.id+'" class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700 transition-colors active:scale-95 pulse-ring">체크인 / Check In</button>';
-        el.querySelector("button").addEventListener("click",function(){ openModalById("checkin",this.dataset.sid); });
-      }
-    })
-    .catch(function(){
-      var el2=document.getElementById("action-"+s.id);
-      if(el2)el2.innerHTML='<div class="text-xs text-gray-400 text-center py-2">상태 확인 실패</div>';
-    });
-}
-
-function openModalById(action,sid){ var s=_studentMap[sid]; var rec=(action==="checkout")?(_recordMap[sid]||null):null; if(s)openModal(action,s,rec); }
+var _studentMap={},_recordMap={},_currentMode=null;
+function hasAllergy(a){return a&&a.trim()&&a.toLowerCase()!=="없음"&&a.toLowerCase()!=="none";}
+function isBirthdayThisMonth(d){if(!d)return false;return new Date(d).getMonth()===new Date().getMonth();}
+function isBirthdayToday(d){if(!d)return false;var dob=new Date(d),now=new Date();return dob.getMonth()===now.getMonth()&&dob.getDate()===now.getDate();}
+function getDeptFromAge(m){var y=m/12;if(m<48)return"유아부 (Infant)";if(y<6)return"유치부 (Preschool)";if(y<9)return"유년부 (Elementary Jr)";if(y<12)return"초등부 (Elementary)";return"중고등부 (Middle/High)";}
+var dateStr=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
+document.getElementById("welcomeDate").textContent=dateStr;
+function goHome(){document.getElementById("welcomeScreen").classList.remove("hidden");document.getElementById("mainHeader").classList.add("hidden");document.getElementById("mainApp").classList.add("hidden");_currentMode=null;clearPins();}
+function startCheckin(){_currentMode="checkin";document.getElementById("welcomeScreen").classList.add("hidden");document.getElementById("mainHeader").classList.remove("hidden");document.getElementById("mainApp").classList.remove("hidden");document.getElementById("todayDate").textContent=dateStr;document.getElementById("checkinSection").classList.remove("hidden");document.getElementById("checkoutSection").classList.add("hidden");var mt=document.getElementById("modeTag");mt.textContent="✅ Check In";mt.className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700";mt.classList.remove("hidden");clearPins();setTimeout(function(){document.getElementById("d0").focus();},300);}
+function startCheckout(){_currentMode="checkout";document.getElementById("welcomeScreen").classList.add("hidden");document.getElementById("mainHeader").classList.remove("hidden");document.getElementById("mainApp").classList.remove("hidden");document.getElementById("todayDate").textContent=dateStr;document.getElementById("checkinSection").classList.add("hidden");document.getElementById("checkoutSection").classList.remove("hidden");var mt=document.getElementById("modeTag");mt.textContent="🙏 Check Out";mt.className="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700";mt.classList.remove("hidden");clearPins();setTimeout(function(){document.getElementById("co0").focus();},300);}
+function clearPins(){["d0","d1","d2","d3","co0","co1","co2"].forEach(function(id){var el=document.getElementById(id);if(el){el.value="";el.classList.remove("filled");}});document.getElementById("checkinResults").innerHTML="";document.getElementById("checkoutResults").innerHTML="";}
+(function(){var digits=["d0","d1","d2","d3"];digits.forEach(function(id,i){var el=document.getElementById(id);el.addEventListener("input",function(){var v=this.value.replace(/[^0-9]/g,"");this.value=v.slice(-1);this.classList.toggle("filled",!!this.value);if(this.value&&i<digits.length-1)document.getElementById(digits[i+1]).focus();if(i===digits.length-1&&this.value){var pin=digits.map(function(d){return document.getElementById(d).value;}).join("");if(pin.length===4)searchByPhone(pin);}});el.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!this.value&&i>0)document.getElementById(digits[i-1]).focus();});});})();
+(function(){var digits=["co0","co1","co2"];digits.forEach(function(id,i){var el=document.getElementById(id);el.addEventListener("input",function(){var v=this.value.replace(/[^0-9]/g,"");this.value=v.slice(-1);this.classList.toggle("filled",!!this.value);if(this.value&&i<digits.length-1)document.getElementById(digits[i+1]).focus();if(i===digits.length-1&&this.value){var pin=digits.map(function(d){return document.getElementById(d).value;}).join("");if(pin.length===3)searchById(pin);}});el.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!this.value&&i>0)document.getElementById(digits[i-1]).focus();});});})();
+async function searchByPhone(phone4){var resEl=document.getElementById("checkinResults");resEl.innerHTML='<div class="text-center py-8 text-gray-400"><div class="w-7 h-7 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-sm">검색 중...</p></div>';try{var res=await fetch("/api/search-student?phone4="+encodeURIComponent(phone4));var data=await res.json();if(!res.ok)throw new Error(data.error);var students=data.students||[];if(!students.length){resEl.innerHTML='<div class="text-center py-8 bg-white rounded-2xl border border-gray-100 shadow-sm"><div class="text-3xl mb-2">🔍</div><p class="text-gray-500 font-semibold">No results found</p><p class="text-gray-400 text-sm mt-1 mb-4">No student found with phone ending in '+phone4+'</p><button onclick="clearPinsAndReset()" class="text-sm text-gray-500 underline">Try again</button></div>';return;}students.forEach(function(s){_studentMap[s.id]=s;});var html='';if(students.length>1){html+='<div class="household-header"><span class="text-2xl">👨‍👩‍👧‍👦</span><div><p class="text-sm font-bold text-sky-800">가족 체크인 — Household Check-in</p><p class="text-xs text-sky-600">Phone: •••-•••-'+phone4+' · '+students.length+'명</p></div></div>';}html+='<div class="space-y-3">';for(var i=0;i<students.length;i++){html+=studentCard(students[i]);}html+='</div>';resEl.innerHTML=html;students.forEach(function(s){loadStatus(s);});}catch(e){resEl.innerHTML='<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠️ '+(e.message||"오류")+'</div>';}}
+async function searchById(id3){var resEl=document.getElementById("checkoutResults");resEl.innerHTML='<div class="text-center py-8 text-gray-400"><div class="w-7 h-7 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-sm">검색 중...</p></div>';try{var res=await fetch("/api/search-student?id3="+encodeURIComponent(id3));var data=await res.json();if(!res.ok)throw new Error(data.error);var students=data.students||[];if(!students.length){resEl.innerHTML='<div class="text-center py-8 bg-white rounded-2xl border border-gray-100 shadow-sm"><div class="text-3xl mb-2">🔍</div><p class="text-gray-500 font-semibold">No results found</p><p class="text-gray-400 text-sm mt-1 mb-4">No student with ID ending in '+id3+'</p><button onclick="clearPinsAndReset()" class="text-sm text-gray-500 underline">Try again</button></div>';return;}var primary=students[0];_studentMap[primary.id]=primary;var html='<div class="space-y-3">'+studentCard(primary)+'</div>';resEl.innerHTML=html;loadStatus(primary);if(primary.fatherPhone||primary.motherPhone||primary.phone){var phone=primary.fatherPhone||primary.motherPhone||primary.phone;var last4=phone.replace(/\D/g,"").slice(-4);if(last4&&last4!==id3){var r2=await fetch("/api/search-student?phone4="+encodeURIComponent(last4));var d2=await r2.json();if(d2.students&&d2.students.length>1){var siblings=d2.students.filter(function(s){return s.id!==primary.id;});if(siblings.length>0){var sibHtml='<div class="mt-3"><div class="household-header"><span class="text-xl">👨‍👩‍👧‍👦</span><div><p class="text-xs font-bold text-sky-800">가족 구성원 / Household members</p></div></div><div class="space-y-3">';siblings.forEach(function(s){_studentMap[s.id]=s;sibHtml+=studentCard(s);});sibHtml+='</div></div>';resEl.innerHTML+=sibHtml;siblings.forEach(function(s){loadStatus(s);});}}}}}catch(e){resEl.innerHTML='<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠️ '+(e.message||"오류")+'</div>';}}
+function clearPinsAndReset(){clearPins();if(_currentMode==="checkin")setTimeout(function(){document.getElementById("d0").focus();},100);else setTimeout(function(){document.getElementById("co0").focus();},100);}
+function deptBadge(d){var c=(DEPT_INFO[d]&&DEPT_INFO[d].color&&DEPT_INFO[d].color.badge)||"bg-gray-100 text-gray-600 border-gray-200";return'<span class="text-xs font-semibold px-2 py-0.5 rounded-full border '+c+'">'+((DEPT_INFO[d]&&DEPT_INFO[d].emoji)||"")+" "+(d||"미지정")+'</span>';}
+function guardianStr(s){if(s.fatherName&&s.motherName)return"👨 "+s.fatherName+" / 👩 "+s.motherName;if(s.fatherName)return"👨 "+s.fatherName+(s.fatherPhone?" · "+s.fatherPhone:"");if(s.motherName)return"👩 "+s.motherName+(s.motherPhone?" · "+s.motherPhone:"");if(s.guardian)return s.guardian+(s.phone?" · "+s.phone:"");return"";}
+function studentCard(s){var dc=(DEPT_INFO[s.department]&&DEPT_INFO[s.department].color)||{};var leftColor=dc.left||"border-l-gray-300";var allergy=hasAllergy(s.allergy);var isBdayToday=isBirthdayToday(s.dob);var isBday=isBdayToday||isBirthdayThisMonth(s.dob);var h='<div id="card-'+s.id+'" class="student-card bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 '+leftColor+' p-4 fade-in">';h+='<div class="mb-2"><div class="flex flex-wrap items-center gap-2 mb-1">';h+='<span class="text-xl font-bold text-gray-900">'+s.name+'</span>';if(s.studentId)h+='<span class="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">'+s.studentId+'</span>';if(s.isVisitor)h+='<span class="badge-newcomer">🆕 NEW</span>';if(isBdayToday)h+='<span class="badge-birthday-today">🎂 Happy Birthday!</span>';else if(isBday)h+='<span class="badge-birthday">🎂 이달 생일</span>';if(allergy)h+='<span class="badge-allergy">⚠️ 알러지</span>';h+='</div>';if(s.nameEN)h+='<div class="text-sm text-gray-400 mb-1">'+s.nameEN+'</div>';h+='</div>';h+='<div class="flex flex-wrap gap-2 mb-3">'+deptBadge(s.department)+(s.grade?'<span class="text-xs text-gray-500 flex items-center">'+s.grade+'</span>':'')+'</div>';h+='<div id="action-'+s.id+'" class="mt-1"><div class="text-center py-2 text-gray-400 text-sm"><span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full spin align-middle mr-1"></span>상태 확인 중...</div></div>';h+='</div>';return h;}
+function loadStatus(s){fetch("/api/check-status?name="+encodeURIComponent(s.name)).then(function(r){return r.json();}).then(function(data){var el=document.getElementById("action-"+s.id);if(!el)return;if(data.status==="checked_out"){el.innerHTML='<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center flex items-center justify-center gap-2"><span class="text-green-500 font-bold">✓</span> 체크아웃 완료 · '+data.record.checkIn+' → '+data.record.checkOut+'</div>';}else if(data.status==="checked_in"){_recordMap[s.id]=data.record;el.innerHTML='<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 mb-2 text-sm text-emerald-700 flex items-center gap-2"><span class="text-emerald-500 font-bold text-base">✓</span><span>체크인됨 · '+data.record.checkIn+' 입실</span></div>'+'<button data-sid="'+s.id+'" class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700 transition-colors active:scale-95">체크아웃 / Check Out</button>';el.querySelector("button").addEventListener("click",function(){openModalById("checkout",this.dataset.sid);});}else{el.innerHTML='<button data-sid="'+s.id+'" class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700 transition-colors active:scale-95 pulse-ring">체크인 / Check In</button>';el.querySelector("button").addEventListener("click",function(){openModalById("checkin",this.dataset.sid);});}}).catch(function(){var el2=document.getElementById("action-"+s.id);if(el2)el2.innerHTML='<div class="text-xs text-gray-400 text-center py-2">상태 확인 실패</div>';});}
+function openModalById(action,sid){var s=_studentMap[sid];var rec=(action==="checkout")?(_recordMap[sid]||null):null;if(s)openModal(action,s,rec);}
 var _action,_student,_record;
-function openModal(action,student,record){
-  _action=action;_student=student;_record=record;
-  var isIn=action==="checkin";
-  var hdr=document.getElementById("modalHeader");
-  hdr.className="text-center mb-4 p-4 rounded-2xl "+(isIn?"bg-emerald-50":"bg-indigo-50");
-  hdr.innerHTML='<div class="text-5xl mb-2 check-pop inline-block">'+(isIn?"👋":"🙏")+'</div><h2 class="text-xl font-bold text-gray-900">'+(isIn?"체크인 확인":"체크아웃 확인")+'</h2>';
-  var rows=[];
-  rows.push(["이름","<strong>"+student.name+"</strong>"+(student.nameEN?' <span class="text-sm text-gray-400">'+student.nameEN+'</span>':'')+(student.studentId?' <span class="text-xs font-mono text-gray-400">'+student.studentId+'</span>':"")]);
-  rows.push(["부서",deptBadge(student.department)+(student.grade?' <span class="text-xs text-gray-500 ml-1">'+student.grade+'</span>':"")]);
-  var gd=guardianStr(student); if(gd)rows.push(["보호자",gd]);
-  if(!isIn&&record&&record.checkIn)rows.push(["체크인",record.checkIn]);
-  document.getElementById("modalInfo").innerHTML=rows.map(function(r){return'<div class="flex justify-between items-center px-4 py-3 border-b border-gray-100 last:border-0"><span class="text-xs text-gray-400 font-medium">'+r[0]+'</span><span class="text-sm text-gray-800 font-medium">'+r[1]+'</span></div>';}).join("");
-  document.getElementById("pickupMsg").classList.toggle("hidden",!isIn);
-  document.getElementById("guardianRow").classList.toggle("hidden",isIn);
-  document.getElementById("guardianCheck").checked=false;
-  var btn=document.getElementById("confirmBtn");
-  btn.className="flex-1 py-3.5 rounded-2xl font-bold text-white transition-colors "+(isIn?"bg-emerald-600 hover:bg-emerald-700":"bg-indigo-600 hover:bg-indigo-700");
-  document.getElementById("modal").classList.remove("hidden");
-}
-function closeModal(){ document.getElementById("modal").classList.add("hidden"); }
-
-async function doAction(){
-  var btn=document.getElementById("confirmBtn");
-  btn.textContent="처리 중..."; btn.disabled=true;
-  var isIn=_action==="checkin";
-  try {
-    var time;
-    if(isIn){
-      var res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:_student.name,department:_student.department,isNew:_student.isVisitor===true,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||"",studentId:_student.id})});
-      var data=await res.json(); if(!res.ok)throw new Error(data.error||"체크인 실패");
-      if(data.alreadyCheckedIn){closeModal();loadStatus(_student);return;}
-      time=data.checkInTime;
-    } else {
-      var res2=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked})});
-      var data2=await res2.json(); if(!res2.ok)throw new Error(data2.error||"체크아웃 실패");
-      time=data2.checkOutTime;
-    }
-    closeModal(); showSuccess(isIn,_student,time); loadStatus(_student);
-  } catch(e){ alert(e.message||"오류가 발생했습니다"); }
-  btn.textContent="확인 / Confirm"; btn.disabled=false;
-}
-
+function openModal(action,student,record){_action=action;_student=student;_record=record;var isIn=action==="checkin";var hdr=document.getElementById("modalHeader");hdr.className="text-center mb-4 p-4 rounded-2xl "+(isIn?"bg-emerald-50":"bg-indigo-50");hdr.innerHTML='<div class="text-5xl mb-2 check-pop inline-block">'+(isIn?"👋":"🙏")+'</div><h2 class="text-xl font-bold text-gray-900">'+(isIn?"체크인 확인":"체크아웃 확인")+'</h2>';var rows=[];rows.push(["이름","<strong>"+student.name+"</strong>"+(student.nameEN?' <span class="text-sm text-gray-400">'+student.nameEN+'</span>':'')+(student.studentId?' <span class="text-xs font-mono text-gray-400">'+student.studentId+'</span>':"")]);rows.push(["부서",deptBadge(student.department)+(student.grade?' <span class="text-xs text-gray-500 ml-1">'+student.grade+'</span>':"")]);var gd=guardianStr(student);if(gd)rows.push(["보호자",gd]);if(!isIn&&record&&record.checkIn)rows.push(["체크인",record.checkIn]);document.getElementById("modalInfo").innerHTML=rows.map(function(r){return'<div class="flex justify-between items-center px-4 py-3 border-b border-gray-100 last:border-0"><span class="text-xs text-gray-400 font-medium">'+r[0]+'</span><span class="text-sm text-gray-800 font-medium">'+r[1]+'</span></div>';}).join("");document.getElementById("pickupMsg").classList.toggle("hidden",!isIn);document.getElementById("guardianRow").classList.toggle("hidden",isIn);document.getElementById("guardianCheck").checked=false;var btn=document.getElementById("confirmBtn");btn.className="flex-1 py-3.5 rounded-2xl font-bold text-white transition-colors "+(isIn?"bg-emerald-600 hover:bg-emerald-700":"bg-indigo-600 hover:bg-indigo-700");document.getElementById("modal").classList.remove("hidden");}
+function closeModal(){document.getElementById("modal").classList.add("hidden");}
+async function doAction(){var btn=document.getElementById("confirmBtn");btn.textContent="처리 중...";btn.disabled=true;var isIn=_action==="checkin";try{var time;if(isIn){var res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:_student.name,department:_student.department,isNew:_student.isVisitor===true,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||"",studentId:_student.id})});var data=await res.json();if(!res.ok)throw new Error(data.error||"체크인 실패");if(data.alreadyCheckedIn){closeModal();loadStatus(_student);return;}time=data.checkInTime;}else{var res2=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked})});var data2=await res2.json();if(!res2.ok)throw new Error(data2.error||"체크아웃 실패");time=data2.checkOutTime;}closeModal();showSuccess(isIn,_student,time);loadStatus(_student);}catch(e){alert(e.message||"오류가 발생했습니다");}btn.textContent="확인 / Confirm";btn.disabled=false;}
 var _successTimer;
-function showSuccess(isIn,student,time){
-  document.getElementById("successIcon").textContent=isIn?"🎉":"👋";
-  document.getElementById("successTitle").textContent=student.name+(isIn?" 체크인 완료!":" 체크아웃 완료!");
-  document.getElementById("successTime").textContent=time||"";
-  document.getElementById("success").classList.remove("hidden");
-  document.getElementById("successPickup").classList.toggle("hidden",!isIn);
-  if(isIn){document.getElementById("tagContainer").classList.remove("hidden");document.getElementById("printBtn").classList.remove("hidden");buildTag(student,time);}
-  else{document.getElementById("tagContainer").classList.add("hidden");document.getElementById("printBtn").classList.add("hidden");}
-  clearTimeout(_successTimer); _successTimer=setTimeout(closeSuccess,8000);
-}
-
+function showSuccess(isIn,student,time){document.getElementById("successIcon").textContent=isIn?"🎉":"👋";document.getElementById("successTitle").textContent=student.name+(isIn?" 체크인 완료!":" 체크아웃 완료!");document.getElementById("successTime").textContent=time||"";document.getElementById("success").classList.remove("hidden");document.getElementById("successPickup").classList.toggle("hidden",!isIn);if(isIn){document.getElementById("tagContainer").classList.remove("hidden");document.getElementById("printBtn").classList.remove("hidden");buildTag(student,time);}else{document.getElementById("tagContainer").classList.add("hidden");document.getElementById("printBtn").classList.add("hidden");}clearTimeout(_successTimer);_successTimer=setTimeout(closeSuccess,8000);}
 function buildTag(s,time){
   var dc=(DEPT_INFO[s.department]&&DEPT_INFO[s.department].color)||{};
+  var barHex=(DEPT_INFO[s.department]&&DEPT_INFO[s.department].color&&DEPT_INFO[s.department].color.barHex)||"#6366f1";
+  // --- Screen preview (unchanged) ---
   document.getElementById("tagDeptBar").className="absolute top-0 left-0 right-0 h-2 rounded-t-xl "+(dc.bar||"bg-gray-400");
   document.getElementById("tagName").textContent=s.name;
   document.getElementById("tagNameEN").textContent=s.nameEN||"";
   document.getElementById("tagDept").textContent=s.department||"";
   document.getElementById("tagGrade").textContent=s.grade||"";
   document.getElementById("tagId").textContent=s.studentId||"";
-  var gd=""; if(s.fatherName&&s.motherName)gd=s.fatherName+" / "+s.motherName; else if(s.fatherName)gd=s.fatherName; else if(s.motherName)gd=s.motherName; else gd=s.guardian||"";
+  var gd="";
+  if(s.fatherName&&s.motherName)gd=s.fatherName+" / "+s.motherName;
+  else if(s.fatherName)gd=s.fatherName;
+  else if(s.motherName)gd=s.motherName;
+  else gd=s.guardian||"";
   document.getElementById("tagGuardian").textContent=gd;
   document.getElementById("tagDate").textContent=new Date().toLocaleDateString("ko-KR",{month:"short",day:"numeric"})+" "+(time||"");
-  var ab=document.getElementById("tagAllergyBadge"); if(hasAllergy(s.allergy)){ab.classList.remove("hidden");ab.textContent="⚠️ 알러지: "+s.allergy;}else ab.classList.add("hidden");
-  var bb=document.getElementById("tagBirthdayBadge"); if(bb){if(isBirthdayToday(s.dob))bb.classList.remove("hidden");else bb.classList.add("hidden");}
+  var ab=document.getElementById("tagAllergyBadge");
+  if(hasAllergy(s.allergy)){ab.classList.remove("hidden");ab.textContent="⚠️ 알러지: "+s.allergy;}else ab.classList.add("hidden");
+  var bb=document.getElementById("tagBirthdayBadge");
+  if(bb){if(isBirthdayToday(s.dob))bb.classList.remove("hidden");else bb.classList.add("hidden");}
   document.getElementById("guardianTagName").textContent=s.name;
   document.getElementById("guardianTagId").textContent=s.studentId||"";
   var qrData=JSON.stringify({id:s.id,name:s.name,sid:s.studentId,dept:s.department,date:new Date().toLocaleDateString("sv-SE")});
   try{QRCode.toCanvas(document.getElementById("tagQR"),qrData,{width:56,margin:0,color:{dark:"#1f2937",light:"#ffffff"}});QRCode.toCanvas(document.getElementById("guardianQR"),qrData,{width:48,margin:0,color:{dark:"#4f46e5",light:"#eef2ff"}});}catch(e){}
+  // --- Print labels ---
+  var dateLabel=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})+" "+(time||"");
+  var dept=s.department||"";
+  var deptShort=dept.replace(/\s*\(.*\)/,"").trim();
+  var grade=s.grade||"";
+  var isBday=isBirthdayToday(s.dob);
+  var allergyVal=hasAllergy(s.allergy)?s.allergy:"";
+  // Dept bar color
+  document.getElementById("pl1-deptbar").style.background=barHex;
+  document.getElementById("pl1-dept").textContent=deptShort;
+  document.getElementById("pl1-grade").textContent=grade;
+  document.getElementById("pl1-name").textContent=s.name;
+  document.getElementById("pl1-nameen").textContent=s.nameEN||"";
+  document.getElementById("pl1-id").textContent=s.studentId||"";
+  document.getElementById("pl1-guardian").textContent=gd;
+  document.getElementById("pl1-date").textContent=dateLabel;
+  // Birthday bar
+  var bdayBar=document.getElementById("pl1-bday");
+  bdayBar.style.display=isBday?"flex":"none";
+  // Allergy bar
+  var allergyBar=document.getElementById("pl1-allergy");
+  if(allergyVal){allergyBar.style.display="flex";document.getElementById("pl1-allergy-text").textContent="ALLERGY: "+allergyVal.toUpperCase();}
+  else allergyBar.style.display="none";
+  // QR for label 1
+  try{QRCode.toCanvas(document.getElementById("pl1-qr"),qrData,{width:56,margin:0,color:{dark:"#1f2937",light:"#ffffff"}});}catch(e){}
+  // Pickup label
+  document.getElementById("pl2-name").textContent=s.name;
+  document.getElementById("pl2-nameen").textContent=s.nameEN||"";
+  document.getElementById("pl2-id").textContent=s.studentId||"";
+  document.getElementById("pl2-dept").textContent=dept;
+  document.getElementById("pl2-date").textContent=dateLabel;
+  // QR for label 2
+  try{QRCode.toCanvas(document.getElementById("pl2-qr"),qrData,{width:52,margin:0,color:{dark:"#ffffff",light:"#1e3a8a"}});}catch(e){}
 }
-
-function printTag(){ var ct=document.getElementById("childTag").cloneNode(true); document.getElementById("printContent").innerHTML=""; document.getElementById("printContent").appendChild(ct); window.print(); }
-function closeSuccess(){ document.getElementById("success").classList.add("hidden"); clearTimeout(_successTimer); }
-
-function openVisitorModal(){
-  ["v-name","v-nameEN","v-grade","v-guardian","v-phone"].forEach(function(id){document.getElementById(id).value="";});
-  document.getElementById("v-dob").value=""; document.getElementById("v-allergy").value="없음";
-  document.getElementById("v-pickupAck").checked=false;
-  document.getElementById("v-deptPreview").classList.add("hidden");
-  document.getElementById("visitorError").classList.add("hidden");
-  document.getElementById("visitorModal").classList.remove("hidden");
-  setTimeout(function(){document.getElementById("v-name").focus();},300);
-}
-function closeVisitorModal(){ document.getElementById("visitorModal").classList.add("hidden"); }
-
-document.getElementById("v-dob").addEventListener("change",function(){
-  var dob=this.value; if(!dob)return;
-  var d=new Date(dob),now=new Date();
-  var m=(now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());
-  if(now.getDate()<d.getDate())m--;
-  document.getElementById("v-deptPreviewName").textContent=getDeptFromAge(m);
-  document.getElementById("v-deptPreview").classList.remove("hidden");
-});
-
-async function submitVisitor(){
-  var name=document.getElementById("v-name").value.trim();
-  var nameEN=document.getElementById("v-nameEN").value.trim();
-  var dob=document.getElementById("v-dob").value;
-  var grade=document.getElementById("v-grade").value.trim();
-  var guardian=document.getElementById("v-guardian").value.trim();
-  var phone=document.getElementById("v-phone").value.trim();
-  var allergy=document.getElementById("v-allergy").value.trim()||"없음";
-  var pickupAck=document.getElementById("v-pickupAck").checked;
-  var err=document.getElementById("visitorError"); err.classList.add("hidden");
-  if(!name){err.textContent="이름을 입력해주세요";err.classList.remove("hidden");return;}
-  if(!dob){err.textContent="생년월일을 입력해주세요";err.classList.remove("hidden");return;}
-  if(!guardian){err.textContent="보호자 이름을 입력해주세요";err.classList.remove("hidden");return;}
-  if(!pickupAck){err.textContent="픽업 안내 확인 체크가 필요합니다";err.classList.remove("hidden");return;}
-  var btn=document.getElementById("visitorBtn"); btn.textContent="등록 중..."; btn.disabled=true;
-  try {
-    var res=await fetch("/api/visitor-checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,nameEN,dob,grade,guardian,phone,allergy})});
-    var data=await res.json(); if(!res.ok)throw new Error(data.error||"등록 실패");
-    closeVisitorModal(); showSuccess(true,{id:data.studentId,name,nameEN,department:data.department,guardian,fatherName:"",motherName:"",studentId:"",isVisitor:true,allergy},data.checkInTime);
-  } catch(e){err.textContent=e.message;err.classList.remove("hidden");}
-  btn.textContent="체크인 등록"; btn.disabled=false;
-}
-
+function printTag(){window.print();}
+function closeSuccess(){document.getElementById("success").classList.add("hidden");clearTimeout(_successTimer);}
+function openVisitorModal(){["v-name","v-nameEN","v-grade","v-guardian","v-phone"].forEach(function(id){document.getElementById(id).value="";});document.getElementById("v-dob").value="";document.getElementById("v-allergy").value="없음";document.getElementById("v-pickupAck").checked=false;document.getElementById("v-deptPreview").classList.add("hidden");document.getElementById("visitorError").classList.add("hidden");document.getElementById("visitorModal").classList.remove("hidden");setTimeout(function(){document.getElementById("v-name").focus();},300);}
+function closeVisitorModal(){document.getElementById("visitorModal").classList.add("hidden");}
+document.getElementById("v-dob").addEventListener("change",function(){var dob=this.value;if(!dob)return;var d=new Date(dob),now=new Date();var m=(now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());if(now.getDate()<d.getDate())m--;document.getElementById("v-deptPreviewName").textContent=getDeptFromAge(m);document.getElementById("v-deptPreview").classList.remove("hidden");});
+async function submitVisitor(){var name=document.getElementById("v-name").value.trim();var nameEN=document.getElementById("v-nameEN").value.trim();var dob=document.getElementById("v-dob").value;var grade=document.getElementById("v-grade").value.trim();var guardian=document.getElementById("v-guardian").value.trim();var phone=document.getElementById("v-phone").value.trim();var allergy=document.getElementById("v-allergy").value.trim()||"없음";var pickupAck=document.getElementById("v-pickupAck").checked;var err=document.getElementById("visitorError");err.classList.add("hidden");if(!name){err.textContent="이름을 입력해주세요";err.classList.remove("hidden");return;}if(!dob){err.textContent="생년월일을 입력해주세요";err.classList.remove("hidden");return;}if(!guardian){err.textContent="보호자 이름을 입력해주세요";err.classList.remove("hidden");return;}if(!pickupAck){err.textContent="픽업 안내 확인 체크가 필요합니다";err.classList.remove("hidden");return;}var btn=document.getElementById("visitorBtn");btn.textContent="등록 중...";btn.disabled=true;try{var res=await fetch("/api/visitor-checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,nameEN,dob,grade,guardian,phone,allergy})});var data=await res.json();if(!res.ok)throw new Error(data.error||"등록 실패");closeVisitorModal();showSuccess(true,{id:data.studentId,name,nameEN,department:data.department,guardian,fatherName:"",motherName:"",studentId:"",isVisitor:true,allergy},data.checkInTime);}catch(e){err.textContent=e.message;err.classList.remove("hidden");}btn.textContent="체크인 등록";btn.disabled=false;}
 document.getElementById("modal").addEventListener("click",function(e){if(e.target===this)closeModal();});
 document.getElementById("success").addEventListener("click",function(e){if(e.target===this)closeSuccess();});
 document.getElementById("visitorModal").addEventListener("click",function(e){if(e.target===this)closeVisitorModal();});
