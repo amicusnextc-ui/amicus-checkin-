@@ -716,7 +716,7 @@ function loadLeaderAbsent(){
         var borderColor=st.step==="contacted"?"#86efac":(st.step==="pending"?"#fdba74":"#e5e7eb");
         html+="<div style='border:1.5px solid "+borderColor+";border-radius:14px;padding:14px 16px;background:"+bgColor+";margin-bottom:10px;'>";
         html+="<div style='display:flex;align-items:center;gap:12px;'>";
-        html+="<input type='checkbox' onchange='setAbsentPending(""+s.id+"",this.checked)' "+(st.step!=="none"?"checked":"")+" style='width:18px;height:18px;accent-color:#6366f1;flex-shrink:0;'/>";
+        html+="<input type='checkbox' onchange='setAbsentPending('+s.id+',this.checked)' "+(st.step!=="none"?"checked":"")+" style='width:18px;height:18px;accent-color:#6366f1;flex-shrink:0;'/>";
         html+="<div style='flex:1;'>";
         html+="<div style='font-weight:700;font-size:15px;color:#1e293b;'>"+s.name+"</div>";
         html+="<div style='font-size:12px;color:#64748b;margin-top:2px;'>"+s.dept.split(" (")[0]+" • 담당: "+s.staff+"</div>";
@@ -730,7 +730,7 @@ function loadLeaderAbsent(){
         html+="</div>";
         if(st.step==="pending"){
           html+="<div style='margin-top:10px;border-top:1px solid #fed7aa;padding-top:10px;'>";
-          html+="<button onclick='setAbsentContacted(""+s.id+"")' style='background:#6366f1;color:#fff;border:none;border-radius:10px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;'>연락 완료 확인</button>";
+          html+="<button onclick='setAbsentContacted('+s.id+')' style='background:#6366f1;color:#fff;border:none;border-radius:10px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;'>연락 완료 확인</button>";
           html+="</div>";
         }
         if(st.step==="contacted"){
@@ -738,7 +738,7 @@ function loadLeaderAbsent(){
           html+="<div style='margin-top:10px;border-top:1px solid #86efac;padding-top:10px;'>";
           html+="<label style='font-size:12px;font-weight:600;color:#15803d;'>결석 사유 입력:</label>";
           html+="<textarea id='reason_"+s.id+"' placeholder='간사에게 연락한 내용을 입력하세요' style='width:100%;margin-top:6px;padding:8px;border:1.5px solid #86efac;border-radius:8px;font-size:13px;resize:none;height:60px;box-sizing:border-box;'>"+savedReason+"</textarea>";
-          html+="<button onclick='resolveAbsent(""+s.id+"")' style='background:#16a34a;color:#fff;border:none;border-radius:10px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;'>저장 및 리스트에서 제거</button>";
+          html+="<button onclick='resolveAbsent('+s.id+')' style='background:#16a34a;color:#fff;border:none;border-radius:10px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;'>저장 및 리스트에서 제거</button>";
           html+="</div>";
         }
         html+="</div>";
