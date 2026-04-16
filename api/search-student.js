@@ -111,7 +111,7 @@ module.exports = async (req, res) => {
           if (!response.ok) return res.status(500).json({ error: data.message });
           let students = (data.results || [])
             .map(p => mapStudent(p, twoWeeksAgo))
-            .filter(s => !s.status || s.status === "활성 (Active)");
+            .filter(s => s.status === "활성 (Active)");
           if (id3) {
                   const suffix = String(id3);
                   students = students.filter(s => {
