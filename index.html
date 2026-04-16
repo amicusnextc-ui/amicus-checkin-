@@ -478,61 +478,55 @@ function buildTag(s, time) {
   var card = document.getElementById('printCard');
   if (!card) return;
 
-  // ── BUG 1 FIX: use studentId field, fallback to amcCode, never use UUID ──
+  // BUG 1: use studentId field, not UUID
   var amcCode = s.studentId || s.amcCode || '';
-  // If it looks like a UUID (contains dashes and is long), don't use it
-  if (!amcCode || (amcCode.length > 20 && amcCode.indexOf('-') > 5)) amcCode = 'AMC-???';
+  if (!amcCode || (amcCode.length > 20 && amcCode.split('-').length > 3)) amcCode = 'AMC-???';
 
-  // ── BUG 2 FIX: name field may be "한국이름 (English Name)" combined ──
-  // Extract Korean name and English name separately
+  // BUG 2: name field may be "Korean (English)" combined — split it
   var rawName = s.name || '';
   var koreanName = rawName;
   var englishName = s.nameEN || '';
-  // If rawName contains "(English)" pattern, split it
   var parenMatch = rawName.match(/^(.+?)s*(([^)]+))s*$/);
   if (parenMatch) {
     koreanName = parenMatch[1].trim();
-    // Only use extracted english if nameEN is empty or same
     if (!englishName || englishName.trim() === parenMatch[2].trim()) {
       englishName = parenMatch[2].trim();
     }
   }
 
-  // ── birthday & allergy detection ─────────────────────────────
+  // birthday & allergy
   var isBday = (function() {
     if (!s.dob) return false;
     var parts = s.dob.split('-');
     var n = new Date();
     return parseInt(parts[1],10)-1 === n.getMonth() && parseInt(parts[2],10) === n.getDate();
   })();
-  var hasAllergy = s.allergy && s.allergy.trim() !== '' && s.allergy.trim() !== '없음';
+  var hasAllergy = !!(s.allergy && s.allergy.trim() && s.allergy.trim() !== '없음');
 
-  // ── variant class ──────────────────────────────────────────────
+  // variant class
   card.className = 'lbl-card';
   if (isBday && hasAllergy)      card.classList.add('lbl-both');
   else if (isBday)               card.classList.add('lbl-birthday');
   else if (hasAllergy)           card.classList.add('lbl-allergy');
   else                           card.classList.add('lbl-default');
 
-  // ── birthday banner ────────────────────────────────────────────
-  var banner = document.getElementById('lbl-bday-banner');
-  banner.style.display = isBday ? 'block' : 'none';
+  // birthday banner
+  document.getElementById('lbl-bday-banner').style.display = isBday ? 'block' : 'none';
 
-  // ── header bar ─────────────────────────────────────────────────
-  var hdr = document.getElementById('lbl-header');
-  hdr.className = 'lbl-header' + (isBday ? ' bday-header' : '');
+  // header
+  document.getElementById('lbl-header').className = 'lbl-header' + (isBday ? ' bday-header' : '');
   document.getElementById('lbl-dept').textContent = s.department || '';
   document.getElementById('lbl-grade').textContent = s.grade || '';
 
-  // ── name — BUG 2 FIX ───────────────────────────────────────────
+  // name — Korean only on line 1, English only on line 2
   document.getElementById('lbl-name').textContent = koreanName;
   document.getElementById('lbl-name-en').textContent = englishName ? '(' + englishName + ')' : '';
   document.getElementById('lbl-bday-emoji').style.display = isBday ? 'inline' : 'none';
 
-  // ── AMC code — BUG 1 FIX ─────────────────────────────────────
+  // AMC code
   document.getElementById('lbl-amc').textContent = amcCode;
 
-  // ── allergy ────────────────────────────────────────────────────
+  // allergy
   var allergyBox = document.getElementById('lbl-allergy-box');
   if (hasAllergy) {
     allergyBox.style.display = 'block';
@@ -541,25 +535,25 @@ function buildTag(s, time) {
     allergyBox.style.display = 'none';
   }
 
-  // ── guardian ───────────────────────────────────────────────────
+  // guardian
   var gd = [];
   if (s.fatherName && s.fatherName.trim()) gd.push(s.fatherName.trim());
   if (s.motherName && s.motherName.trim()) gd.push(s.motherName.trim());
   if (!gd.length && s.guardian) gd.push(s.guardian);
   document.getElementById('lbl-guardian').textContent = 'Guardian : ' + (gd.join(' / ') || '-');
 
-  // ── check-in time ──────────────────────────────────────────────
+  // check-in time
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var n = new Date();
-  var dateLabel = months[n.getMonth()] + ' ' + n.getDate() + ', ' + n.getFullYear() + (time ? ' ' + time : '');
+  var nd = new Date();
+  var dateLabel = months[nd.getMonth()] + ' ' + nd.getDate() + ', ' + nd.getFullYear() + (time ? ' ' + time : '');
   document.getElementById('lbl-checkin').textContent = 'Checked in : ' + dateLabel;
 
-  // ── pickup — BUG 2 FIX: combine once ──────────────────────────
+  // pickup tag — combine once: Korean (English)
   var pickupName = koreanName + (englishName ? ' (' + englishName + ')' : '');
   document.getElementById('lbl-pickup-name').textContent = pickupName;
   document.getElementById('lbl-pickup-amc').textContent = amcCode;
 
-  // ── QR codes ────────────────────────────────────────────────────
+  // QR codes
   try { new QRious({ element: document.getElementById('lbl-qr1'), value: QR_URL, size: 54, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
   try { new QRious({ element: document.getElementById('lbl-qr2'), value: QR_URL, size: 72, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
 }
