@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
     "\uAE40\uD5A5\uC219": "\uC720\uCE58\uBD80 (Preschool)",
     "\uBC15\uC740\uD61C": "\uC720\uB144\uBD80 (Elementary Jr)",
     "\uBC31\uC9C4\uC8FC": "\uCD08\uB4F1\uBD80 (Elementary)",
-    "\uBC15\uBA85\uCCA0": "\uC911\uACE0\uB4F1\uBD80 (Middle/High)",
+    "\uBC15\uBA85\uCCA0": "\uC911\uACE0\uB4F1\uBD80 (Youth)",
   };
   const sharedPw = process.env.STAFF_PASSWORD || process.env.ADMIN_PASSWORD;
   if (password !== sharedPw) return res.status(401).json({ ok: false, error: "\uBE44\uBC00\uBC88\uD638\uAC00 \uD2C0\uB838\uC2B5\uB2C8\uB2E4" });
