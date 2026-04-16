@@ -2,7 +2,7 @@ const STUDENT_DB = process.env.NOTION_STUDENT_DB_ID || "107828732f784c39bcb0136a
 const ATTENDANCE_DB = process.env.NOTION_ATTENDANCE_DB_ID || "89b6c47f85a842968493ce28ad93f8de";
 const NOTION_VERSION = "2022-06-28";
 const TIMEZONE = "America/Los_Angeles";
-function getDept(m){const y=m/12;if(m<48)return "\uC720\uC544\uBD80 (Infant)";if(y<6)return "\uC720\uCE58\uBD80 (Preschool)";if(y<9)return "\uC720\uB144\uBD80 (Elementary Jr)";if(y<12)return "\uCD08\uB4F1\uBD80 (Elementary)";return "\uC911\uACE0\uB4F1\uBD80 (Middle/High)";}
+function getDept(m){const y=m/12;if(m<48)return "\uC720\uC544\uBD80 (Infant)";if(y<6)return "\uC720\uCE58\uBD80 (Preschool)";if(y<9)return "\uC720\uB144\uBD80 (Elementary Jr)";if(y<12)return "\uCD08\uB4F1\uBD80 (Elementary)";return "\uC911\uACE0\uB4F1\uBD80 (Youth)";}
 function calcAge(dob){if(!dob)return 0;const d=new Date(dob),n=new Date();let m=(n.getFullYear()-d.getFullYear())*12+(n.getMonth()-d.getMonth());if(n.getDate()<d.getDate())m--;return m;}
 module.exports = async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin","*");
