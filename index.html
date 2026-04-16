@@ -501,7 +501,7 @@ function buildTag(s, time) {
   var dept = s.department || '';
   var deptShort = dept.split(' (')[0];
   var deptEn = dept.match(/(([^)]+))/);
-  document.getElementById('lbl-dept').textContent = deptShort + (deptEn ? ' (' + deptEn[1] + ')' : '');
+  document.getElementById('lbl-dept').textContent = dept;
   var grade = s.grade || '';
   document.getElementById('lbl-grade').textContent = grade;
 
