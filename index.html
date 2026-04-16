@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <style>
 * { font-family: 'Noto Sans KR', Arial, sans-serif; }
 
@@ -547,10 +547,8 @@ function buildTag(s, time) {
   document.getElementById('lbl-pickup-amc').textContent = amcCode;
 
   // ── QR codes ─────────────────────────────────────────────────
-  var qrOpts1 = { width: 54, margin: 0, color: { dark: '#000000', light: '#ffffff' } };
-  var qrOpts2 = { width: 72, margin: 0, color: { dark: '#000000', light: '#ffffff' } };
-  try { QRCode.toCanvas(document.getElementById('lbl-qr1'), QR_URL, qrOpts1); } catch(e) {}
-  try { QRCode.toCanvas(document.getElementById('lbl-qr2'), QR_URL, qrOpts2); } catch(e) {}
+  try { new QRious({ element: document.getElementById('lbl-qr1'), value: QR_URL, size: 54, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
+  try { new QRious({ element: document.getElementById('lbl-qr2'), value: QR_URL, size: 72, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
 }
 function printTag(){window.print();}
 function closeSuccess(){document.getElementById("success").classList.add("hidden");clearTimeout(_successTimer);goHome();}
