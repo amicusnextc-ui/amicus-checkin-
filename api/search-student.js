@@ -63,7 +63,7 @@ function mapStudent(p, twoWeeksAgo) {
           fatherPhone,
           motherPhone,
           baptized: props["세례 여부 (Baptized)"]?.select?.name || "",
-          photo: props["사진 추영 (Photo)"]?.select?.name || "",
+          photo: props["사진 촬영 (Photo)"]?.select?.name || "",
           householdMatch: true,
     };
 }
