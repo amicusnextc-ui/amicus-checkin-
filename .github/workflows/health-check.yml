@@ -2,34 +2,21 @@ name: Server Health Check
 
 on:
   schedule:
-      - cron: '0 6 * * *'
-          - cron: '0 7 * * 0'
-            workflow_dispatch:
+    - cron: '0 6 * * *'
+    - cron: '0 7 * * 0'
+  workflow_dispatch:
 
-            jobs:
-              health-check:
-                  name: Check Amicus APIs
-                      runs-on: ubuntu-latest
-                          steps:
-                                - name: Check Main Page
-                                        run: |
-                                                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://amicus-checkin.vercel.app/)
-                                                            [ "$STATUS" = "200" ] && echo "OK: Main page" || (echo "FAIL: $STATUS" && exit 1)
-
-                                                                  - name: Check Staff Portal
-                                                                          run: |
-                                                                                    STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://amicus-checkin.vercel.app/staff.html)
-                                                                                              [ "$STATUS" = "200" ] && echo "OK: Staff portal" || (echo "FAIL: $STATUS" && exit 1)
-
-                                                                                                    - name: Check Roster API
-                                                                                                            run: |
-                                                                                                                      STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://amicus-checkin.vercel.app/api/roster" --max-time 10)
-                                                                                                                                [ "$STATUS" = "200" ] && echo "OK: Roster API" || (echo "FAIL: $STATUS" && exit 1)
-                                                                                                                                
-                                                                                                                                      - name: Check Attendance API
-                                                                                                                                              run: |
-                                                                                                                                                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://amicus-checkin.vercel.app/api/attendance" --max-time 10)
-                                                                                                                                                                  [ "$STATUS" = "200" ] && echo "OK: Attendance API" || (echo "FAIL: $STATUS" && exit 1)
-                                                                                                                                                                  
-                                                                                                                                                                        - name: All Checks Passed
-                                                                                                                                                                                run: echo "All systems OK - $(date -u)"
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Main Page
+        run: curl -f https://amicus-checkin.vercel.app/
+      - name: Check Staff Portal
+        run: curl -f https://amicus-checkin.vercel.app/staff.html
+      - name: Check Roster API
+        run: curl -f "https://amicus-checkin.vercel.app/api/roster" --max-time 10
+      - name: Check Attendance API
+        run: curl -f "https://amicus-checkin.vercel.app/api/attendance" --max-time 10
+      - name: Done
+        run: echo 'All OK'
