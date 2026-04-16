@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>간사/사역자 포털 | 아미쿠스</title>
+<title>간사/사역자 포털 | 아쿠스</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -53,7 +53,7 @@ tbody tr:hover { background:#fafafa; }
           <option value="유치부 (Preschool)">김향숙 — 유치부</option>
           <option value="유년부 (Elementary Jr)">박은혜 — 유년부</option>
           <option value="초등부 (Elementary)">백진주 — 초등부</option>
-          <option value="중고등부 (Middle/High)">박명철 전도사님 — 중고등부</option>
+          <option value="중고등부 (Youth)">박명철 전도사님 — 중고등부</option>
         </select>
       </div>
       <div>
@@ -266,7 +266,7 @@ tbody tr:hover { background:#fafafa; }
           <option value="유치부 (Preschool)">유치부 (Preschool)</option>
           <option value="유년부 (Elementary Jr)">유년부 (Elementary Jr)</option>
           <option value="초등부 (Elementary)">초등부 (Elementary)</option>
-          <option value="중고등부 (Middle/High)">중고등부 (Middle/High)</option>
+          <option value="중고등부 (Youth)">중고등부 (Youth)</option>
         </select>
       </div>
     </div>
@@ -316,7 +316,7 @@ tbody tr:hover { background:#fafafa; }
 </div>
 </div><script>
 
-var DEPT_DOT={"유아부 (Infant)":"bg-blue-500","유치부 (Preschool)":"bg-emerald-500","유년부 (Elementary Jr)":"bg-yellow-400","초등부 (Elementary)":"bg-orange-400","중고등부 (Middle/High)":"bg-purple-500"};
+var DEPT_DOT={"유아부 (Infant)":"bg-blue-500","유치부 (Preschool)":"bg-emerald-500","유년부 (Elementary Jr)":"bg-yellow-400","초등부 (Elementary)":"bg-orange-400","중고등부 (Youth)":"bg-purple-500"};
 function switchRole(role){
   var sf=document.getElementById("staffLoginForm"),lf=document.getElementById("leaderLoginForm");
   var stBtn=document.getElementById("roleTabStaff"),ldBtn=document.getElementById("roleTabLeader");
@@ -424,7 +424,7 @@ async function loadAttendance(){
       var yy=String(sunday.getFullYear()).slice(2);
       var titleEl=document.getElementById("weeklySummaryTitle");
       if(titleEl)titleEl.textContent="이번 주 출석 요약 — "+mm+"/"+dd+"/"+yy+" (주일)";
-      var depts=["유아부 (Infant)","유치부 (Preschool)","유년부 (Elementary Jr)","초등부 (Elementary)","중고등부 (Middle/High)"];
+      var depts=["유아부 (Infant)","유치부 (Preschool)","유년부 (Elementary Jr)","초등부 (Elementary)","중고등부 (Youth)"];
       // Count from attendance records
       var deptStats={};
       depts.forEach(function(d){deptStats[d]={checkin:0,checkout:0,visitor:0,total:0};});
