@@ -191,6 +191,55 @@
   .lbl-pickup-right canvas { display: block; }
 }
 
+/* ── SCREEN PREVIEW: .lbl-card preview in modal ── */
+#previewCard .lbl-card {
+  width: 226px; /* 60mm at 96dpi */
+  min-height: 323px; /* 86mm at 96dpi */
+  box-sizing: border-box;
+  font-family: Arial, 'Noto Sans KR', sans-serif;
+  font-size: 8pt;
+  background: #fff;
+  color: #000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#previewCard .lbl-default { border: 1.5px solid #888; }
+#previewCard .lbl-birthday { border: 2px solid #1a1a1a; }
+#previewCard .lbl-allergy { border: 1.5px solid #888; }
+#previewCard .lbl-both { border: 2px solid #1a1a1a; }
+#previewCard .lbl-bday-banner { background: #000; color: #fff; text-align: center; font-size: 9px; font-weight: 900; letter-spacing: 1.5px; padding: 2px 0; text-transform: uppercase; flex-shrink: 0; }
+#previewCard .lbl-header { background: #000; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 3px 6px; flex-shrink: 0; }
+#previewCard .lbl-header.bday-header { background: #e8e8e8; color: #000; }
+#previewCard .lbl-header-dept { font-size: 8px; font-weight: 900; }
+#previewCard .lbl-header-grade { font-size: 8px; font-weight: 700; }
+#previewCard .lbl-child-body { flex: 1; display: flex; flex-direction: row; padding: 5px 6px 3px 6px; gap: 4px; overflow: hidden; }
+#previewCard .lbl-left { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+#previewCard .lbl-right { width: 54px; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; }
+#previewCard .lbl-name-row { display: flex; align-items: baseline; gap: 4px; }
+#previewCard .lbl-name { font-size: 22px; font-weight: 900; line-height: 1.1; margin: 0; }
+#previewCard .lbl-bday-emoji { font-size: 20px; filter: grayscale(1); }
+#previewCard .lbl-name-en { font-size: 12px; color: #444; margin: 1px 0 4px 0; }
+#previewCard .lbl-amc { display: inline-block; border: 1.5px dashed #555; border-radius: 3px; padding: 2px 5px; font-size: 13px; font-weight: 800; white-space: nowrap; margin-bottom: 4px; }
+#previewCard .lbl-allergy-box { border: 2px solid #1a1a1a; border-radius: 4px; padding: 2px 5px; margin-bottom: 4px; }
+#previewCard .lbl-allergy-label { font-size: 7px; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 1px; }
+#previewCard .lbl-allergy-content { font-size: 10px; font-weight: 700; }
+#previewCard .lbl-divider { border: none; border-top: 1px solid #ccc; margin: 3px 0 2px 0; }
+#previewCard .lbl-guardian { font-size: 8px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#previewCard .lbl-checkin { font-size: 8px; font-weight: 500; margin: 2px 0 0 0; white-space: nowrap; }
+#previewCard .lbl-qr-wrap canvas { display: block; }
+#previewCard .lbl-footer { text-align: right; font-size: 7px; color: #555; padding: 0 6px 3px 6px; flex-shrink: 0; }
+#previewCard .lbl-separator { border: none; border-top: 2px dashed #888; margin: 0; flex-shrink: 0; }
+#previewCard .lbl-pickup { display: flex; flex-direction: row; align-items: stretch; flex-shrink: 0; }
+#previewCard .lbl-pickup-left { flex: 1; padding: 5px 8px 5px 6px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+#previewCard .lbl-pickup-label { font-size: 7.5px; font-weight: 800; color: #555; margin-bottom: 1px; }
+#previewCard .lbl-pickup-sub { font-size: 7px; color: #666; margin-bottom: 4px; }
+#previewCard .lbl-pickup-name { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+#previewCard .lbl-pickup-amc { display: inline-block; border: 2px solid #000; border-radius: 3px; padding: 2px 6px; font-size: 13px; font-weight: 900; white-space: nowrap; }
+#previewCard .lbl-pickup-right { background: #fff; border-left: 1.5px solid #888; padding: 3px; display: flex; align-items: stretch; flex-shrink: 0; }
+#previewCard .lbl-pickup-right canvas { display: block; }
+
+
 #printArea{display:none}
 .dept-btn{transition:all .2s ease;position:relative}
 .student-card{transition:transform .15s ease,box-shadow .15s ease}
