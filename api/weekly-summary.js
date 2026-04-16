@@ -25,7 +25,13 @@ module.exports = async (req, res) => {
     String(sundayDate.getDate()).padStart(2, "0");
 
   const today = laDateStr;
-  const isToday = today === sundayISO;
+  // Show this week's summary from Sunday through Saturday
+  const saturdayDate = new Date(sundayDate);
+  saturdayDate.setDate(sundayDate.getDate() + 6);
+  const saturdayISO = saturdayDate.getFullYear() + "-" +
+    String(saturdayDate.getMonth() + 1).padStart(2, "0") + "-" +
+    String(saturdayDate.getDate()).padStart(2, "0");
+  const isToday = today >= sundayISO && today <= saturdayISO;
 
   // Display label MM/DD/YY
   const sundayStr = String(sundayDate.getMonth()+1).padStart(2,"0") + "/" +
