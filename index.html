@@ -24,7 +24,7 @@
 /* ── PRINT STYLES: Brother QL-810W · DK-1234 · 60mm × 86mm ── */
 @media print {
   @page {
-    size: 60mm 86mm;
+    size: 62mm auto;
     margin: 0;
   }
   body > * { display: none !important; }
@@ -33,12 +33,13 @@
     margin: 0; padding: 0;
   }
   .print-label {
-    width: 60mm;
-    height: 86mm;
+    width: 62mm;
     box-sizing: border-box;
     overflow: hidden;
     page-break-after: always;
     page-break-inside: avoid;
+    break-after: page;
+    break-inside: avoid;
     font-family: 'Noto Sans KR', Arial, sans-serif;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
