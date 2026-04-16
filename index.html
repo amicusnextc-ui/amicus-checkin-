@@ -486,7 +486,7 @@ function buildTag(s, time) {
   var rawName = s.name || '';
   var koreanName = rawName;
   var englishName = s.nameEN || '';
-  var parenMatch = rawName.match(/^(.+?)s*(([^)]+))s*$/);
+  var parenMatch = rawName.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
   if (parenMatch) {
     koreanName = parenMatch[1].trim();
     if (!englishName || englishName.trim() === parenMatch[2].trim()) {
