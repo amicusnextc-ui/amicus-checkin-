@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Label Test Page</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Noto Sans KR",Arial,sans-serif; }
+body { background:#f0f0f0; padding:24px; }
+h1 { font-size:20px; font-weight:700; margin-bottom:4px; }
+p.sub { font-size:12px; color:#666; margin-bottom:24px; }
+.row { display:flex; flex-wrap:wrap; gap:24px; margin-bottom:40px; }
+.col { display:flex; flex-direction:column; gap:8px; align-items:center; }
+.label-title { font-size:11px; font-weight:700; color:#444; text-align:center; }
+.child-wrap { width:62mm; height:100mm; background:white; position:relative; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+.child-label { width:100mm; height:60mm; position:absolute; top:60mm; left:0; transform:rotate(-90deg); transform-origin:top left; overflow:hidden; display:flex; flex-direction:column; background:white; color:#1a1a1a; }
+.lbl-hdr { display:flex; justify-content:space-between; align-items:center; padding:3px 8px; flex-shrink:0; font-size:9px; font-weight:700; letter-spacing:0.5px; }
+.lbl-body { display:flex; flex-direction:row; flex:1; padding:5px 8px 3px; gap:6px; overflow:hidden; }
+.lbl-left { flex:1; display:flex; flex-direction:column; gap:2px; overflow:hidden; min-width:0; }
+.lbl-right { width:62px; display:flex; align-items:flex-start; justify-content:center; flex-shrink:0; padding-top:2px; }
+.lbl-foot { text-align:right; font-size:6px; color:#999; padding:1px 8px 2px; border-top:0.5px solid #ccc; flex-shrink:0; }
+.amc-box { border:1.5px dashed #888; padding:2px 6px; font-size:12px; letter-spacing:2px; font-weight:600; white-space:nowrap; display:inline-block; }
+.allergy-box { margin:3px 0 2px; border:2px solid #1a1a1a; background:#f8f8f8; padding:3px 6px; font-size:9px; font-weight:700; flex-shrink:0; }
+.pickup-wrap { width:62mm; height:38mm; background:white; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.15); display:flex; flex-direction:row; border:1.5px solid #888; }
+.pt-left { flex:1; padding:5px 8px; display:flex; flex-direction:column; justify-content:center; gap:3px; min-width:0; overflow:hidden; }
+.pt-right { width:36mm; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-left:1px solid #ddd; padding:4px; }
+.pt-amc { border:2px solid #1a1a1a; padding:2px 6px; font-size:13px; font-weight:700; letter-spacing:2px; white-space:nowrap; display:inline-block; }
+</style>
+</head>
+<body>
+<h1>&#127991; Label Test Page</h1>
+<p class="sub">All 4 variants &mdash; 62&times;100mm child label + 62&times;38mm pickup tag (actual print size)</p>
+<div id="container"></div>
+<script>
+var QR_URL='https://amicus-checkin.vercel.app/';
+function makeQR(){var c=document.createElement('canvas');try{new QRious({element:c,value:QR_URL,size:168,background:'#ffffff',foreground:'#000000',level:'M'});}catch(e){}return c.toDataURL();}
+var qrImg=makeQR();
+var variants=[
+  {title:'① 기본 (Basic)',isBday:false,allergyFlag:false,allergy:null,korName:'이예슬',engName:'Sally Lee',amc:'AMC-025',dept:'중고등부 (Youth)',grade:'9th grade',guardianText:'Guardian : 이강희 / 이지혜',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'이예슬 (Sally Lee)'},
+  {title:'② 생일 (Birthday)',isBday:true,allergyFlag:false,allergy:null,korName:'이예슬',engName:'Sally Lee',amc:'AMC-025b',dept:'중고등부 (Youth)',grade:'9th grade',guardianText:'Guardian : 이강희 / 이지혜',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'이예슬 (Sally Lee)'},
+  {title:'③ 생일+알러지',isBday:true,allergyFlag:true,allergy:'땅콩, 유제품',korName:'김지호',engName:'Jiho Kim',amc:'AMC-012b',dept:'유아부 (Infant)',grade:'만 3세',guardianText:'Guardian : 김철수 / 박영희',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'김지호 (Jiho Kim)'},
+  {title:'④ 알러지 (Allergy)',isBday:false,allergyFlag:true,allergy:'땅콩, 유제품',korName:'김지호',engName:'Jiho Kim',amc:'AMC-012',dept:'유아부 (Infant)',grade:'만 3세',guardianText:'Guardian : 김철수 / 박영희',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'김지호 (Jiho Kim)'},
+];
+var container=document.getElementById('container');
+variants.forEach(function(v,vi){
+  var border=v.isBday?'2px solid #1a1a1a':'1.5px solid #888';
+  var hBg=v.isBday?'#e8e8e8':'#1a1a1a';
+  var hCol=v.isBday?'#1a1a1a':'#fff';
+  var bday=v.isBday?'<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:2px 0;text-transform:uppercase;flex-shrink:0;">HAPPY BIRTHDAY!</div>':'';
+  var emoji=v.isBday?'<span style="filter:grayscale(100%);font-size:13px;margin-left:3px;">🎂</span>':'';
+  var alrg=(v.allergyFlag&&v.allergy)?'<div class="allergy-box">! '+String.fromCharCode(50508,47084,51648)+' / ALLERGY<br><span style="font-weight:400;font-size:9px;">'+v.allergy+'</span></div>':'';
+  var id='v'+vi;
+  var row=document.createElement('div');
+  row.className='row';
+  row.innerHTML='<div class="col"><div class="label-title">'+v.title+'<br>아이 라벨 62×100mm</div>'
+    +'<div class="child-wrap"><div class="child-label" style="border:'+border+';">'
+    +bday+'<div class="lbl-hdr" style="background:'+hBg+';color:'+hCol+';"><span>'+v.dept+'</span><span>'+v.grade+'</span></div>'
+    +'<div class="lbl-body"><div class="lbl-left">'
+    +'<div style="font-size:20px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+v.korName+emoji+'</div>'
+    +'<div style="font-size:10px;color:#555;margin-bottom:2px;white-space:nowrap;">('+v.engName+')</div>'
+    +'<div class="amc-box">'+v.amc+'</div>'
+    +alrg
+    +'<div style="font-size:8px;color:#333;margin-top:2px;white-space:nowrap;">'+v.guardianText+'</div>'
+    +'<div style="font-size:8px;color:#333;white-space:nowrap;">'+v.checkinText+'</div>'
+    +'</div><div class="lbl-right"><img id="qrc'+id+'" width="58" height="58" style="display:block;image-rendering:pixelated;"></div>'
+    +'</div><div class="lbl-foot">Amicus Next Church</div></div></div></div>'
+    +'<div class="col"><div class="label-title">픽업 태그 62×38mm</div>'
+    +'<div class="pickup-wrap"><div class="pt-left">'
+    +'<div style="font-size:8px;font-weight:700;white-space:nowrap;">'+String.fromCharCode(54589,50629,32,53468,44536)+' / Pickup Tag</div>'
+    +'<div style="font-size:7px;color:#777;white-space:nowrap;">'+String.fromCharCode(48372,54840,51088,32,51648,52280,32,54596,49688)+' / Please keep this tag</div>'
+    +'<div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+v.pickupName+'</div>'
+    +'<div class="pt-amc">'+v.amc+'</div>'
+    +'</div><div class="pt-right"><img id="qrp'+id+'" style="width:100%;height:100%;object-fit:contain;image-rendering:pixelated;"></div>'
+    +'</div></div></div>';
+  container.appendChild(row);
+  document.getElementById('qrc'+id).src=qrImg;
+  document.getElementById('qrp'+id).src=qrImg;
+});
+</script>
+</body>
+</html>
