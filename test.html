@@ -218,8 +218,10 @@ variants.forEach(function(v,vi){
   row.innerHTML=
     '<div class="col"><div class="label-title">'+v.title+'<br>아이 라벨 62×100mm</div>'
     +'<div class="child-wrap"><div class="child-label" style="border:'+border+';">'
-    /* footer (leftmost in row-reverse = portrait BOTTOM) */
-    +'<div class="lbl-foot">Amicus Next Church</div>'
+    /* header (rightmost in row-reverse = portrait TOP) */
+    +'<div class="lbl-hdr" style="background:'+hBg+';color:'+hCol+';width:10mm;justify-content:space-between;padding:4px 6px;">'
+    +'<span style="font-size:8px;font-weight:700;">'+v.dept+'</span><span style="font-size:8px;font-weight:600;">'+v.grade+'</span>'
+    +'</div>'
     /* mid section */
     +'<div class="lbl-mid">'
     +bday
@@ -235,10 +237,8 @@ variants.forEach(function(v,vi){
     +'<div class="lbl-right"><img id="qrc'+id+'" style="width:15mm;height:15mm;display:block;image-rendering:pixelated;"></div>'
     +'</div>'
     +'</div>'
-    /* header (rightmost in row-reverse = portrait TOP) */
-    +'<div class="lbl-hdr" style="background:'+hBg+';color:'+hCol+';width:10mm;justify-content:space-between;padding:4px 6px;">'
-    +'<span style="font-size:8px;font-weight:700;">'+v.dept+'</span><span style="font-size:8px;font-weight:600;">'+v.grade+'</span>'
-    +'</div>'
+    /* footer (leftmost in row-reverse = portrait BOTTOM) */
+    +'<div class="lbl-foot">Amicus Next Church</div>'
     +'</div></div></div>'
     +'<div class="col"><div class="label-title">픽업 태그 62×38mm</div>'
     +'<div class="pickup-wrap"><div class="pt-left">'
