@@ -62,15 +62,15 @@
         var border=isBirthday?'2px solid #000':'1.5px solid #888';
         var qrSrc=makeQR(104);
         var bdayBanner=isBirthday
-          ?'<div style="background:#000;color:#fff;padding:3pt 8pt;text-align:center;flex-shrink:0;"><span style="font-size:9pt;font-weight:700;letter-spacing:1.5px;font-family:Arial;">🎂 HAPPY BIRTHDAY! 🎂</span></div>'
-              :'';
+          ?'<div class="bday-banner"><span>🎂 HAPPY BIRTHDAY! 🎂</span></div>'
+          :'';
         var header=isBirthday
-          ?'<div style="background:#e0e0e0;padding:2pt 8pt;display:flex;justify-content:space-between;flex-shrink:0;border-bottom:0.5pt solid #ccc;"><span style="font-size:9pt;font-family:Arial;font-weight:700;">'+esc(student.department||'')+'</span><span style="font-size:9pt;font-family:Arial;">'+esc(student.grade||'')+'</span></div>'
-              :'<div style="background:#1a1a1a;color:#fff;padding:3pt 8pt;display:flex;justify-content:space-between;flex-shrink:0;"><span style="font-size:9pt;font-family:Arial;font-weight:700;">'+esc(student.department||'')+'</span><span style="font-size:9pt;font-family:Arial;">'+esc(student.grade||'')+'</span></div>';
+          ?'<div class="bday-sub"><span class="dept">'+esc(student.department||'')+'</span><span>'+esc(student.grade||'')+'</span></div>'
+          :'<div class="hdr"><span class="dept">'+esc(student.department||'')+'</span><span>'+esc(student.grade||'')+'</span></div>';
         var emoji=isBirthday?'<span style="font-size:17pt;filter:grayscale(100%);">🎂</span>':'';
         var allergyBox=hasAllergy
-          ?'<div style="border:2pt solid #000;border-radius:3pt;padding:2pt 5pt;display:flex;align-items:center;gap:3pt;margin-top:2pt;"><span style="font-size:10pt;font-weight:700;color:#000;">!</span><div><div style="font-size:7pt;font-weight:700;margin:0;text-transform:uppercase;color:#000;font-family:Arial;">Allergy / 알러지</div><div style="font-size:9pt;font-weight:700;margin:0;color:#000;font-family:Arial;">'+esc(student.allergy)+'</div></div></div>'
-              :'';
+        ?'<div class="alg"><span class="bang">!</span><div><div class="alg-t">Allergy / 알러지</div><div class="alg-v">'+esc(student.allergy)+'</div></div></div>'
+        :'';
         var guardianText=student.guardian?'Guardian : '+esc(student.guardian):'';
         var checkinText=student.checkin_time?'Checked in : '+esc(student.checkin_time):'';
         return '<!DOCTYPE html><html><head><meta charset="UTF-8">'
@@ -80,32 +80,47 @@
           +'@page{size:62mm 86mm;margin:0;}'
           +'body{width:62mm;height:86mm;overflow:hidden;background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
           +'#w{width:86mm;height:60mm;position:absolute;top:60mm;left:0;transform:rotate(-90deg);transform-origin:top left;overflow:hidden;background:white;display:flex;flex-direction:column;border:'+border+';-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
+          +'.hdr{background:#1a1a1a;color:#fff;padding:2.5mm 3mm;display:flex;justify-content:space-between;flex-shrink:0;}'
+          +'.hdr span{font-size:8pt;font-family:Arial;}'
+          +'.hdr .dept{font-weight:700;}'
+          +'.bday-banner{background:#000;color:#fff;padding:2mm 3mm;text-align:center;flex-shrink:0;}'
+          +'.bday-banner span{font-size:8pt;font-weight:700;letter-spacing:1.5px;font-family:Arial;}'
+          +'.bday-sub{background:#e0e0e0;padding:1.5mm 3mm;display:flex;justify-content:space-between;flex-shrink:0;border-bottom:0.5pt solid #ccc;}'
+          +'.bday-sub span{font-size:8pt;font-family:Arial;}'
+          +'.bday-sub .dept{font-weight:700;}'
+          +'.body{display:flex;flex-direction:row;flex:1;min-height:0;padding:2mm 3mm;gap:2mm;}'
+          +'.left{flex:1;min-width:0;display:flex;flex-direction:column;gap:1.5pt;}'
+          +'.nm{font-size:16pt;font-weight:700;color:#000;line-height:1.1;font-family:Arial;display:flex;align-items:center;gap:4pt;}'
+          +'.enm{font-size:8pt;color:#555;font-family:Arial;}'
+          +'.amc{border:1pt dashed #777;border-radius:2pt;padding:1.5pt 4pt;display:inline-block;margin-top:2pt;}'
+          +'.amc span{font-size:9pt;font-weight:700;letter-spacing:1.5pt;color:#000;white-space:nowrap;}'
+          +'.alg{border:1.5pt solid #000;border-radius:2pt;padding:1.5pt 4pt;display:flex;align-items:center;gap:2pt;margin-top:2pt;}'
+          +'.alg .bang{font-size:9pt;font-weight:700;color:#000;}'
+          +'.alg-t{font-size:6pt;font-weight:700;text-transform:uppercase;color:#000;font-family:Arial;}'
+          +'.alg-v{font-size:8pt;font-weight:700;color:#000;font-family:Arial;}'
+          +'.drow{border-top:0.5pt solid #ddd;padding-top:1.5pt;margin-top:1pt;display:flex;gap:2pt;align-items:center;}'
+          +'.dk{font-size:6.5pt;color:#666;white-space:nowrap;font-family:Arial;}'
+          +'.dv{font-size:7.5pt;font-weight:600;color:#000;white-space:nowrap;font-family:Arial;}'
+          +'.right{width:14mm;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;}'
+          +'.ftr{padding:1.5pt 3mm;border-top:0.5pt solid #ccc;text-align:right;flex-shrink:0;}'
+          +'.ftr span{font-size:5.5pt;color:#999;font-family:Arial;}'
           +'</style></head><body>'
           +'<div id="w">'
           +bdayBanner
           +header
-          +'<div style="display:flex;flex:1;padding:5pt 7pt 4pt;gap:5pt;min-height:0;">'
-          +'<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2pt;">'
-          +'<div style="font-size:17pt;font-weight:700;line-height:1.05;color:#000;display:flex;align-items:center;gap:4pt;">'+esc(student.name||'')+emoji+'</div>'
-          +'<div style="font-size:9pt;color:#555;font-family:Arial;">'+esc(student.english_name||'')+'</div>'
-          +'<div style="border:1.5pt dashed #777;border-radius:3pt;padding:2pt 5pt;display:inline-block;margin-top:2pt;"><span style="font-size:10pt;font-weight:700;letter-spacing:2pt;color:#000;white-space:nowrap;font-family:Arial;">'+esc(student.amc_code||'')+'</span></div>'
+          +'<div class="body"><div class="left">'
+          +'<div class="nm">'+esc(student.name||'')+emoji+'</div>'
+          +'<div class="enm">'+esc(student.english_name||'')+'</div>'
+          +'<div class="amc"><span>'+esc(student.amc_code||'')+'</span></div>'
           +allergyBox
-          +'<div style="border-top:0.5pt solid #ddd;padding-top:2pt;margin-top:1pt;display:flex;gap:3pt;align-items:center;">'
-          +'<span style="font-size:7pt;color:#666;font-family:Arial;white-space:nowrap;">Guardian</span>'
-          +'<span style="font-size:8pt;font-weight:600;color:#000;font-family:Arial;white-space:nowrap;">'+esc(student.guardian||'')+'</span>'
+          +'<div class="drow"><span class="dk">Guardian</span><span class="dv">'+esc(student.guardian||'')+'</span></div>'
+          +'<div class="drow"><span class="dk">Checked in</span><span class="dv">'+esc(student.checkin_time||'')+'</span></div>'
           +'</div>'
-          +'<div style="display:flex;gap:3pt;align-items:center;">'
-          +'<span style="font-size:7pt;color:#666;font-family:Arial;white-space:nowrap;">Checked in</span>'
-          +'<span style="font-size:8pt;font-weight:600;color:#000;font-family:Arial;white-space:nowrap;">'+esc(student.checkin_time||'')+'</span>'
+          +'<div class="right"><img src="'+qrSrc+'" width="52" height="52" style="display:block;image-rendering:pixelated;"></div>'
           +'</div>'
+          +'<div class="ftr"><span>Amicus Next Church</span></div>'
           +'</div>'
-          +'<div style="width:54pt;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;">'
-          +'<img src="'+qrSrc+'" width="52" height="52" style="display:block;image-rendering:pixelated;">'
-          +'</div>'
-          +'</div>'
-          +'<div style="padding:2pt 8pt;border-top:0.5pt solid #ccc;text-align:right;flex-shrink:0;"><span style="font-size:6pt;color:#999;font-family:Arial;">Amicus Next Church</span></div>'
-          +'</div>'
-          +'<script>setTimeout(function(){window.print();setTimeout(function(){window.close();},800);},700);<\/script>'
+          +'<script>setTimeout(function(){window.print();setTimeout(function(){window.close();},800);},1200);<\/script>'
           +'</body></html>';
     }
 
@@ -135,7 +150,7 @@
           +'</div>'
           +'<div style="padding:4pt 9pt;border-top:0.5pt solid #ccc;text-align:center;"><span style="font-size:6pt;color:#bbb;font-family:Arial;">Amicus Next Church</span></div>'
           +'</div>'
-          +'<script>setTimeout(function(){window.print();setTimeout(function(){window.close();},800);},700);<\/script>'
+          +'<script>setTimeout(function(){window.print();setTimeout(function(){window.close();},800);},2000);<\/script>'
           +'</body></html>';
     }
 
@@ -144,17 +159,18 @@
     }
 
     function printLabels(student){
+        var QR_URL_LOCAL='https://amicus-checkin.vercel.app/';
         var isBirthday=checkBirthday(student);
         var hasAllergy=!!(student.allergy && student.allergy.trim()!=='');
-        // PRINT 1: Child Label
+        // Open BOTH windows synchronously in same click event to avoid popup block
         var childWin=window.open('','_blank','width=400,height=500');
-        if(childWin){childWin.document.write(buildChildLabel(student,isBirthday,hasAllergy,QR_URL));childWin.document.close();}
-        else{alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도하세요.');}
-        // PRINT 2: Pickup Tag — 1.5s later
-        setTimeout(function(){
-              var pickupWin=window.open('','_blank','width=400,height=500');
-              if(pickupWin){pickupWin.document.write(buildPickupTag(student,QR_URL));pickupWin.document.close();}
-        },1500);
+        if(!childWin){alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해주세요.');return;}
+        childWin.document.write(buildChildLabel(student,isBirthday,hasAllergy,QR_URL_LOCAL));
+        childWin.document.close();
+        var pickupWin=window.open('','_blank','width=400,height=500');
+        if(!pickupWin){alert('픽업 태그 팝업이 차단되었습니다. 팝업을 허용해주세요.');return;}
+        pickupWin.document.write(buildPickupTag(student,QR_URL_LOCAL));
+        pickupWin.document.close();
     }
 
     var variants=[
