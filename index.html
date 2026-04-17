@@ -349,78 +349,108 @@ function printTag() {
 }
 
 function printChildLabel(d) {
-  var variantBorder = d.isBday ? '2px solid #1a1a1a' : '1.5px solid #888';
-  var bdayBanner = d.isBday ? '<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:3px 0;text-transform:uppercase;flex-shrink:0;">HAPPY BIRTHDAY!</div>' : '';
-  var allergyHtml = (d.allergyFlag && d.allergy) ? '<div style="margin:2px 0;border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;">! ' + String.fromCharCode(50508,47084,51648) + ' / ALLERGY<br><span style=\"font-weight:400;font-size:9px;\">' + (d.allergy||'') + '</span></div>' : '';
-  var bdayEmoji = d.isBday ? '<span style=\"filter:grayscale(100%);font-size:13px;margin-left:3px;\">🎂</span>' : '';
-  var headerBg = d.isBday ? '#e8e8e8' : '#1a1a1a';
-  var headerColor = d.isBday ? '#1a1a1a' : '#fff';
-  var qrCanvas = document.createElement('canvas');
-  try { new QRious({ element: qrCanvas, value: d.QR_URL, size: 168, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
-  var qrDataURL = qrCanvas.toDataURL();
-  var html = '<!DOCTYPE html><html><head><meta charset=\"UTF-8\">'
-    + '<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap\" rel=\"stylesheet\">'
-    + '<style>'
-    + '* { margin:0; padding:0; box-sizing:border-box; font-family:\"Noto Sans KR\",Arial,sans-serif; }'
-    + '@page { size: 62mm 100mm; margin: 0; }'
-    + 'html, body { width:62mm; height:100mm; overflow:hidden; background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }'
-    + '#lbl { width:62mm; height:100mm; display:flex; flex-direction:column; border:' + variantBorder + '; overflow:hidden; }'
-    + '.lbl-hdr { display:flex; justify-content:space-between; align-items:center; padding:3px 8px; flex-shrink:0; background:' + headerBg + '; color:' + headerColor + '; font-size:9px; font-weight:700; letter-spacing:0.5px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }'
-    + '.lbl-body { display:flex; flex-direction:row; flex:1; padding:5px 8px 3px; gap:6px; overflow:hidden; min-height:0; }'
-    + '.lbl-left { flex:1; display:flex; flex-direction:column; gap:2px; overflow:hidden; min-width:0; }'
-    + '.lbl-right { width:16mm; display:flex; align-items:flex-start; justify-content:center; flex-shrink:0; padding-top:2px; }'
-    + '.lbl-foot { text-align:right; font-size:6px; color:#999; padding:1px 8px 2px; border-top:0.5px solid #ccc; flex-shrink:0; }'
-    + '</style></head><body>'
-    + '<div id=\"lbl\">'
-    + bdayBanner
-    + '<div class=\"lbl-hdr\"><span>' + d.dept + '</span><span>' + d.grade + '</span></div>'
-    + '<div class=\"lbl-body\">'
-    + '<div class=\"lbl-left\">'
-    + '<div style=\"font-size:22px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\">' + d.koreanName + bdayEmoji + '</div>'
-    + '<div style=\"font-size:10px;color:#555;margin-bottom:3px;white-space:nowrap;\">(' + d.englishName + ')</div>'
-    + '<div style=\"border:1.5px dashed #888;padding:2px 6px;font-size:12px;letter-spacing:2px;font-weight:600;white-space:nowrap;display:inline-block;\">' + d.amcCode + '</div>'
-    + allergyHtml
-    + '<div style=\"font-size:8px;color:#333;margin-top:3px;white-space:nowrap;\">' + d.guardianText + '</div>'
-    + '<div style=\"font-size:8px;color:#333;white-space:nowrap;\">' + d.checkinText + '</div>'
-    + '</div>'
-    + '<div class=\"lbl-right\"><img src=\"' + qrDataURL + '\" width=\"56\" height=\"56\" style=\"display:block;image-rendering:pixelated;\"></div>'
-    + '</div>'
-    + '<div class=\"lbl-foot\">Amicus Next Church</div>'
-    + '</div>'
-    + '<' + 'scr' + 'ipt>window.onload=function(){window.print();setTimeout(function(){window.close();},5000);}</' + 'scr' + 'ipt>'
-    + '</body></html>';
-  var w = window.open('', '_blank', 'width=240,height=390,toolbar=0,menubar=0,location=0,status=0');
+  var isBday = d.isBday;
+  var allergyFlag = d.allergyFlag;
+  var allergy = d.allergy || '';
+  var bdayBannerHTML = isBday ? '<div class="bbar"><span>HAPPY BIRTHDAY!</span></div><div class="bsub"><span class="d">' + d.dept + '</span><span>' + d.grade + '</span></div>' : '<div class="hdr"><span class="d">' + d.dept + '</span><span>' + d.grade + '</span></div>';
+  var cakeHTML = isBday ? ' <span class="cake">🎂</span>' : '';
+  var amcHTML = d.amcCode;
+  var algHTML = allergyFlag ? '<div class="alg"><span class="bang">!</span><div><p class="alg-t">알러지 / ALLERGY</p><p class="alg-v">' + allergy + '</p></div></div>' : '';
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+    '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>' +
+    '<style>' +
+    '*{box-sizing:border-box;margin:0;padding:0;}' +
+    '@page{size:86mm 62mm;margin:0;}' +
+    'html,body{width:86mm;height:62mm;overflow:hidden;background:white;}' +
+    '#w{width:86mm;height:62mm;display:flex;flex-direction:column;background:white;}' +
+    '.hdr{background:#1a1a1a;color:#fff;padding:2mm 3mm;display:flex;justify-content:space-between;flex-shrink:0;}' +
+    '.hdr span{font-size:8pt;font-family:Arial;}' +
+    '.hdr .d{font-weight:700;}' +
+    '.bbar{background:#000;color:#fff;padding:2mm 3mm;text-align:center;flex-shrink:0;}' +
+    '.bbar span{font-size:8pt;font-weight:700;letter-spacing:1.5px;font-family:Arial;}' +
+    '.bsub{background:#e0e0e0;padding:1.5mm 3mm;display:flex;justify-content:space-between;flex-shrink:0;border-bottom:0.5pt solid #ccc;}' +
+    '.bsub span{font-size:8pt;font-family:Arial;}' +
+    '.bsub .d{font-weight:700;color:#000;}' +
+    '.body{display:flex;flex-direction:row;flex:1;min-height:0;padding:2mm 3mm;gap:2mm;}' +
+    '.left{flex:1;min-width:0;display:flex;flex-direction:column;gap:1mm;}' +
+    '.nm{font-size:16pt;font-weight:700;color:#000;line-height:1.1;font-family:Arial;display:flex;align-items:center;gap:2mm;}' +
+    '.cake{font-size:14pt;filter:grayscale(100%);}' +
+    '.enm{font-size:8pt;color:#555;font-family:Arial;}' +
+    '.amc{border:1pt dashed #777;border-radius:2pt;padding:1mm 2mm;display:inline-block;margin-top:1mm;}' +
+    '.amc span{font-size:9pt;font-weight:700;letter-spacing:1.5pt;color:#000;white-space:nowrap;font-family:Arial;}' +
+    '.alg{border:1.5pt solid #000;border-radius:2pt;padding:1mm 2mm;display:flex;align-items:center;gap:2mm;margin-top:1mm;}' +
+    '.alg .bang{font-size:9pt;font-weight:700;color:#000;font-family:Arial;}' +
+    '.alg-t{font-size:6.5pt;font-weight:700;margin:0;text-transform:uppercase;color:#000;font-family:Arial;}' +
+    '.alg-v{font-size:8pt;font-weight:700;margin:0;color:#000;font-family:Arial;}' +
+    '.drow{border-top:0.5pt solid #ddd;padding-top:1mm;margin-top:1mm;display:flex;gap:2mm;align-items:center;}' +
+    '.dk{font-size:6.5pt;color:#666;white-space:nowrap;font-family:Arial;}' +
+    '.dv{font-size:7.5pt;font-weight:600;color:#000;white-space:nowrap;font-family:Arial;}' +
+    '.right{width:15mm;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;}' +
+    '.ftr{padding:1mm 3mm;border-top:0.5pt solid #ccc;text-align:right;flex-shrink:0;}' +
+    '.ftr span{font-size:5.5pt;color:#999;font-family:Arial;}' +
+    '</style></head><body>' +
+    '<div id="w">' +
+    bdayBannerHTML +
+    '<div class="body">' +
+    '<div class="left">' +
+    '<div class="nm">' + d.koreanName + cakeHTML + '</div>' +
+    '<div class="enm">(' + d.englishName + ')</div>' +
+    '<div class="amc"><span>' + amcHTML + '</span></div>' +
+    algHTML +
+    '<div class="drow"><span class="dk">Guardian</span><span class="dv">' + (d.guardianText || '') + '</span></div>' +
+    '<div class="drow"><span class="dk">Checked in :</span><span class="dv">' + (d.checkinText || '') + '</span></div>' +
+    '</div>' +
+    '<div class="right"><div id="qr"></div></div>' +
+    '</div>' +
+    '<div class="ftr"><span>Amicus Next Church</span></div>' +
+    '</div>' +
+    '<script>' +
+    'new QRCode(document.getElementById("qr"),{text:"' + d.QR_URL + '",width:52,height:52,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.M});' +
+    'setTimeout(function(){window.print();setTimeout(function(){window.close();},800);},800);' +
+    '<\/script></body></html>';
+
+  var w = window.open('', '_blank', 'width=330,height=240,toolbar=0,menubar=0,location=0,status=0');
   if (w) { w.document.open(); w.document.write(html); w.document.close(); }
 }
 
 function printParentTag(d) {
-  var qrCanvas = document.createElement('canvas');
-  try { new QRious({ element: qrCanvas, value: d.QR_URL, size: 168, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
-  var qrDataURL = qrCanvas.toDataURL();
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+    '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>' +
+    '<style>' +
+    '*{box-sizing:border-box;margin:0;padding:0;}' +
+    '@page{size:62mm 100mm;margin:0;}' +
+    'html,body{width:62mm;height:100mm;overflow:hidden;background:#f0f0f0;font-family:Arial;}' +
+    '#w{width:62mm;height:100mm;display:flex;flex-direction:column;}' +
+    '.main{display:flex;flex:1;align-items:stretch;}' +
+    '.left{flex:1;padding:8mm 8mm;}' +
+    '.t{font-size:8pt;font-weight:700;color:#444;}' +
+    '.s{font-size:7pt;color:#888;margin-bottom:5mm;}' +
+    '.n{font-size:13pt;font-weight:700;color:#000;margin-bottom:5mm;}' +
+    '.a{border:2pt solid #000;border-radius:2pt;padding:2mm 4mm;display:inline-block;}' +
+    '.a span{font-size:13pt;font-weight:700;letter-spacing:1pt;color:#000;white-space:nowrap;}' +
+    '.right{background:#fff;border-left:0.5pt solid #ddd;padding:3mm;display:flex;align-items:center;justify-content:center;}' +
+    '.ftr{padding:2mm 8mm;border-top:0.5pt solid #ccc;text-align:center;}' +
+    '.ftr span{font-size:5.5pt;color:#bbb;}' +
+    '</style></head><body>' +
+    '<div id="w">' +
+    '<div class="main">' +
+    '<div class="left">' +
+    '<div class="t">픽업 태그 / Pickup Tag</div>' +
+    '<div class="s">보호자 지참 필수 / Please keep this tag</div>' +
+    '<div class="n">' + d.pickupName + '</div>' +
+    '<div class="a"><span>' + d.amcCode + '</span></div>' +
+    '</div>' +
+    '<div class="right"><div id="qr"></div></div>' +
+    '</div>' +
+    '<div class="ftr"><span>Amicus Next Church</span></div>' +
+    '</div>' +
+    '<script>' +
+    'new QRCode(document.getElementById("qr"),{text:"' + d.QR_URL + '",width:76,height:76,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.M});' +
+    'setTimeout(function(){window.print();setTimeout(function(){window.close();},800);},2000);' +
+    '<\/script></body></html>';
 
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
-    + '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">'
-    + '<style>'
-    + '* { margin:0; padding:0; box-sizing:border-box; font-family:"Noto Sans KR",Arial,sans-serif; }'
-    + '@page { size: 62mm 38mm; margin: 0; }'
-    + 'html, body { width:62mm; height:38mm; overflow:hidden; background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }'
-    + '#ptag { width:62mm; height:38mm; display:flex; flex-direction:row; border:1.5px solid #888; overflow:hidden; }'
-    + '.pt-left { flex:1; padding:5px 8px; display:flex; flex-direction:column; justify-content:center; gap:3px; min-width:0; overflow:hidden; }'
-    + '.pt-right { width:36mm; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-left:1px solid #ddd; padding:4px; }'
-    + '</style></head><body>'
-    + '<div id="ptag">'
-    + '<div class="pt-left">'
-    + '<div style="font-size:8px;font-weight:700;white-space:nowrap;">' + String.fromCharCode(54589,50629,32,53468,44536) + ' / Pickup Tag</div>'
-    + '<div style="font-size:7px;color:#777;white-space:nowrap;">' + String.fromCharCode(48372,54840,51088,32,51648,52280,32,54596,49688) + ' / Please keep this tag</div>'
-    + '<div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.pickupName + '</div>'
-    + '<div style="border:2px solid #1a1a1a;padding:2px 6px;font-size:13px;font-weight:700;letter-spacing:2px;white-space:nowrap;display:inline-block;">' + d.amcCode + '</div>'
-    + '</div>'
-    + '<div class="pt-right"><img src="' + qrDataURL + '" style="width:100%;height:100%;object-fit:contain;image-rendering:pixelated;"></div>'
-    + '</div>'
-    + '<' + 'scr' + 'ipt>window.onload=function(){window.print();setTimeout(function(){window.close();},5000);}</' + 'scr' + 'ipt>'
-    + '</body></html>';
-
-  var w = window.open('', '_blank', 'width=240,height=150,toolbar=0,menubar=0,location=0,status=0');
+  var w = window.open('', '_blank', 'width=240,height=390,toolbar=0,menubar=0,location=0,status=0');
   if (w) { w.document.open(); w.document.write(html); w.document.close(); }
 }
 
