@@ -210,7 +210,7 @@ variants.forEach(function(v,vi){
     +'</div>'
     +'<div class="lbl-foot">Amicus Next Church</div>'
     +'</div>'
-    +'<button class="print-btn" onclick="printLabel('child','+vi+')">프린트 아이 라벨 ▶</button>'
+    +'<button class="print-btn" data-type="child" data-idx="'+vi+'">프린트 아이 라벨 ▶</button>'
     +'</div>'
     +'<div class="col">'
     +'<div class="label-title">픽업 태그 62×38mm</div>'
@@ -222,7 +222,7 @@ variants.forEach(function(v,vi){
     +'<div class="pt-amc">'+v.amc+'</div>'
     +'</div><div class="pt-right"><img id="qrp'+id+'" style="width:100%;height:100%;object-fit:contain;image-rendering:pixelated;"></div>'
     +'</div>'
-    +'<button class="print-btn" onclick="printLabel('pickup','+vi+')">프린트 픽업 태그 ▶</button>'
+    +'<button class="print-btn" data-type="pickup" data-idx="'+vi+'">프린트 픽업 태그 ▶</button>'
     +'</div>';
   container.appendChild(row);
   document.getElementById('qrc'+id).src=qrImg;
