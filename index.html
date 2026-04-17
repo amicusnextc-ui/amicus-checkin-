@@ -342,10 +342,27 @@ function buildPreview(d) {
 }
 
 function printTag() {
-  var d = window._printData;
-  if (!d) return;
-  printChildLabel(d);
-  setTimeout(function() { printParentTag(d); }, 1500);
+  if (!window._printData || !window._printData.amcCode) return;
+  const d = window._printData;
+  const QR_URL = d.QR_URL || 'https://amicus-checkin.vercel.app/';
+  const isBday = d.isBday;
+  const hasAllergy = d.allergyFlag;
+  const nameDisplay = isBday ? d.koreanName + ' 🎂' : d.koreanName;
+  const headerHTML = isBday
+    ? '<div style="background:#000;color:#fff;padding:2mm 3mm;text-align:center;flex-shrink:0;font-family:Arial;font-size:8pt;font-weight:700;letter-spacing:1.5px;">HAPPY BIRTHDAY!</div><div style="background:#e0e0e0;padding:1.5mm 3mm;display:flex;justify-content:space-between;flex-shrink:0;border-bottom:.5pt solid #ccc;font-family:Arial;font-size:8pt;"><span style="font-weight:700;">' + (d.dept||d.department||'') + '</span><span style="color:#555;">' + (d.grade||'') + '</span></div>'
+    : '<div style="background:#1a1a1a;color:#fff;padding:2mm 3mm;display:flex;justify-content:space-between;flex-shrink:0;font-family:Arial;font-size:8pt;"><span style="font-weight:700;">' + (d.dept||d.department||'') + '</span><span>' + (d.grade||'') + '</span></div>';
+  const allergyHTML = hasAllergy
+    ? '<div style="border:1.5pt solid #000;border-radius:2pt;padding:1mm 2mm;display:flex;align-items:center;gap:2mm;margin-top:1mm;"><span style="font-size:9pt;font-weight:700;font-family:Arial;">!</span><div><p style="font-size:6.5pt;font-weight:700;margin:0;text-transform:uppercase;font-family:Arial;">알러지 / ALLERGY</p><p style="font-size:8pt;font-weight:700;margin:0;font-family:Arial;">' + d.allergy + '</p></div></div>' : '';
+  const mkTrigger = (delay, size) => '<scr'+'ipt>new QRCode(document.getElementById(\'qr\'),{text:\'' + QR_URL + '\',width:'+size+',height:'+size+',colorDark:\'#000\',colorLight:\'#fff\',correctLevel:QRCode.CorrectLevel.M});function doPrint(){window.print();setTimeout(function(){window.close();},800);}if(document.readyState===\'complete\'){setTimeout(doPrint,'+delay+');}else{window.onload=function(){setTimeout(doPrint,'+delay+');};}' + '<\/scr'+'ipt>';
+  const childBorder = isBday ? 'outline:2pt solid #000;' : 'outline:1.5pt solid #888;';
+  const childHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"><scr'+'ipt src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/scr'+'ipt><style>*{box-sizing:border-box;margin:0;padding:0;}@page{size:86mm 62mm;margin:0;}html,body{width:86mm;height:62mm;overflow:hidden;background:white;}#w{width:86mm;height:62mm;display:flex;flex-direction:column;background:white;'+childBorder+'}.body{display:flex;flex-direction:row;flex:1;min-height:0;padding:2mm 3mm;gap:2mm;}.left{flex:1;min-width:0;display:flex;flex-direction:column;gap:1mm;}.nm{font-size:16pt;font-weight:700;color:#000;line-height:1.1;font-family:Arial;}.enm{font-size:8pt;color:#555;font-family:Arial;}.amc{border:1pt dashed #777;border-radius:2pt;padding:1mm 2mm;display:inline-block;margin-top:1mm;}.amc span{font-size:9pt;font-weight:700;letter-spacing:1.5pt;color:#000;white-space:nowrap;font-family:Arial;}.drow{border-top:.5pt solid #ddd;padding-top:1mm;margin-top:1mm;display:flex;gap:2mm;align-items:center;}.dk{font-size:6.5pt;color:#666;white-space:nowrap;font-family:Arial;}.dv{font-size:7.5pt;font-weight:600;color:#000;white-space:nowrap;font-family:Arial;}.right{width:15mm;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;}.ftr{padding:1mm 3mm;border-top:.5pt solid #ccc;text-align:right;flex-shrink:0;}.ftr span{font-size:5.5pt;color:#999;font-family:Arial;}</style></head><body><div id="w">'+headerHTML+'<div class="body"><div class="left"><div class="nm">'+nameDisplay+'</div><div class="enm">('+( d.englishName||'')+')</div><div class="amc"><span>'+d.amcCode+'</span></div>'+allergyHTML+'<div class="drow"><span class="dk">Guardian</span><span class="dv">'+(d.guardianText||'')+'</span></div><div class="drow"><span class="dk">Checked in :</span><span class="dv">'+(d.checkinText||'')+'</span></div></div><div class="right"><div id="qr"></div></div></div><div class="ftr"><span>Amicus Next Church</span></div></div>'+mkTrigger(800,52)+'</body></html>';
+  const pickupHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"><scr'+'ipt src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/scr'+'ipt><style>*{box-sizing:border-box;margin:0;padding:0;}@page{size:62mm 100mm;margin:0;}html,body{width:62mm;height:100mm;overflow:hidden;background:#f0f0f0;font-family:Arial;}#w{width:62mm;height:100mm;display:flex;flex-direction:column;}.main{display:flex;flex:1;align-items:stretch;}.left{flex:1;padding:8mm 8mm;}.t{font-size:8pt;font-weight:700;color:#444;margin-bottom:1mm;}.s{font-size:7pt;color:#888;margin-bottom:6mm;}.n{font-size:13pt;font-weight:700;color:#000;margin-bottom:6mm;line-height:1.3;}.a{border:2pt solid #000;border-radius:2pt;padding:2mm 4mm;display:inline-block;}.a span{font-size:13pt;font-weight:700;letter-spacing:1pt;color:#000;white-space:nowrap;}.right{background:#fff;border-left:.5pt solid #ddd;padding:3mm;display:flex;align-items:center;justify-content:center;min-width:22mm;}.ftr{padding:2mm 8mm;border-top:.5pt solid #ccc;text-align:center;}.ftr span{font-size:5.5pt;color:#bbb;}</style></head><body><div id="w"><div class="main"><div class="left"><div class="t">픽업 태그 / Pickup Tag</div><div class="s">보호자 지참 필수 / Please keep this tag</div><div class="n">'+(d.pickupName||d.koreanName)+' ('+(d.englishName||'')+')</div><div class="a"><span>'+d.amcCode+'</span></div></div><div class="right"><div id="qr"></div></div></div><div class="ftr"><span>Amicus Next Church</span></div></div>'+mkTrigger(1800,76)+'</body></html>';
+  const w1 = window.open('','_blank','width=500,height=400,toolbar=0,menubar=0,location=0');
+  if(!w1){alert('팝업을 허용해주세요!');return;}
+  w1.document.write(childHTML); w1.document.close();
+  const w2 = window.open('','_blank','width=400,height=500,toolbar=0,menubar=0,location=0');
+  if(!w2){alert('픽업 태그 팝업을 허용해주세요!');return;}
+  w2.document.write(pickupHTML); w2.document.close();
 }
 
 function printChildLabel(d) {
