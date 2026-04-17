@@ -361,10 +361,9 @@ function printTag() {
     + algHtml + "<div class=\"drow\"><span class=\"dk\">Guardian</span><span class=\"dv\">" + (d.guardianText||"") + "</span></div><div class=\"drow\"><span class=\"dk\">Checked in :</span><span class=\"dv\">" + (d.checkinText||"") + "</span></div></div><div class=\"right\"><canvas id=\"qr1\"></canvas></div></div><div class=\"ftr\"><span>Amicus Next Church</span></div></div>"
     + "<sc"+"ript>new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:66,background:\"white\",foreground:\"#000\",level:\"M\"});function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}"+CLOSE+"</body></html>";
   var pickupCSS = "*{box-sizing:border-box;margin:0;padding:0;}"
-    + "@page{size:62mm 38mm;margin:0;}"
-    + "html{-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
-    + "body{width:62mm;height:38mm;overflow:hidden;background:#fff;font-family:Arial;}"
-    + "#w{position:absolute;top:0;left:0;width:62mm;height:38mm;display:flex;flex-direction:row;border:1.5pt solid #000;}"
+    + "@page{size:38mm 62mm;margin:0;}"
+    + "html,body{width:38mm;height:62mm;overflow:hidden;background:#fff;font-family:Arial;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
+    + "#w{position:absolute;top:0;left:0;width:62mm;height:38mm;display:flex;flex-direction:row;border:1.5pt solid #000;transform:rotate(-90deg) translateX(-38mm);transform-origin:top left;}"
     + ".left{flex:1;padding:3mm 3.5mm;display:flex;flex-direction:column;justify-content:center;}"
     + ".t{font-size:7.5pt;font-weight:700;color:#000;line-height:1.3;}"
     + ".s{font-size:6.5pt;color:#000;margin-bottom:2.5mm;line-height:1.3;}"
