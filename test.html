@@ -15,117 +15,52 @@ p.sub { font-size:12px; color:#666; margin-bottom:24px; }
 .col { display:flex; flex-direction:column; gap:8px; align-items:center; }
 .label-title { font-size:11px; font-weight:700; color:#444; text-align:center; }
 
-/* child label: 62×100mm portrait wrapper */
+/* ===== CHILD LABEL: 62mm × 100mm portrait, NO rotation ===== */
+/* This is the actual print design in portrait orientation */
+/* Printer will receive this as-is in portrait mode */
 .child-wrap {
   width:62mm; height:100mm;
   background:white;
-  position:relative;
   overflow:hidden;
   box-shadow:0 2px 8px rgba(0,0,0,0.15);
-}
-
-/*
-  Landscape content (100mm wide × 62mm tall) rotated -90deg inside portrait wrapper.
-  transform-origin: top left
-  After rotation: top-left of landscape → top-left of portrait
-  landscape x → portrait y (flipped: x=0 → y=100mm, x=100mm → y=0)
-  landscape y → portrait x (y=0 → x=0, y=62mm → x=62mm)
-  
-  So landscape layout:
-    - left (x=0) = portrait BOTTOM
-    - right (x=100mm) = portrait TOP
-    - top (y=0) = portrait LEFT
-    - bottom (y=62mm) = portrait RIGHT
-  
-  Desired portrait: header at top, name on left, QR on right
-  → In landscape: header at RIGHT side (x near 100mm), name at LEFT (x near 0), 
-    info area uses landscape HEIGHT for portrait WIDTH
-  → Use flex-direction:column-reverse to put header content at landscape-right
-  
-  Simpler approach: use flex-direction:row in landscape,
-  left portion = portrait bottom content, right portion = portrait top content
-  So put header on RIGHT in landscape (lbl-right in row), content on LEFT
-  
-  Actually clearest fix: 
-  landscape row-reverse: rightmost = portrait top, leftmost = portrait bottom
-  So: lbl-hdr (portrait top) should be at landscape RIGHT = put it in lbl-right
-  
-  SIMPLEST FIX: just use row-reverse on lbl-body:
-  lbl-right (QR, was landscape right → portrait top) moves to landscape LEFT → portrait bottom
-  lbl-left (name, was landscape left → portrait bottom) moves to landscape RIGHT → portrait top ✅
-  
-  But this mixes header and body. Let's redesign completely.
-  
-  Use flex-direction:column on child-label (landscape vertical = portrait horizontal):
-  - landscape top (y=0) → portrait left (x=0)
-  - landscape bottom (y=62mm) → portrait right (x=62mm)
-  
-  child-label column layout:
-  [header-section: ~8mm landscape height = 8mm portrait width]
-  [body-section: ~46mm]  
-  [footer: 8mm]
-  
-  Inside body: needs to show name (tall in landscape) + QR side by side in landscape
-  But that's flex-direction:row inside column, which in portrait = nested rows
-  
-  Let me just use the working approach: row + row-reverse fix
-*/
-
-.child-label {
-  width:100mm; height:62mm;
-  position:absolute; top:100mm; left:0;
-  transform:rotate(-90deg);
-  transform-origin:top left;
-  overflow:hidden;
   display:flex;
-  flex-direction:row-reverse; /* KEY: reverses landscape x → portrait y mapping */
-  background:white;
-  color:#1a1a1a;
+  flex-direction:column;
+  border:1.5px solid #888; /* overridden per variant */
 }
+.child-wrap.bday { border:2px solid #1a1a1a; }
 
-/* In row-reverse:
-   First child in HTML → rightmost in landscape → portrait TOP
-   Last child in HTML → leftmost in landscape → portrait BOTTOM
-   
-   Order: [lbl-hdr][lbl-mid][lbl-foot]
-   lbl-hdr (rightmost in row-reverse) → portrait TOP ✅
-   lbl-foot (leftmost) → portrait BOTTOM ✅
-   lbl-mid in between → portrait middle ✅
-*/
-
+/* Header strip */
 .lbl-hdr {
-  /* This becomes the rightmost in landscape = portrait top */
   display:flex;
-  flex-direction:column; /* column in landscape = row in portrait (left/right) */
-  justify-content:center;
+  justify-content:space-between;
   align-items:center;
-  padding:3px 6px;
+  padding:3px 8px;
   flex-shrink:0;
-  width:10mm; /* landscape width = portrait height slice */
-  font-size:8px;
+  font-size:9px;
   font-weight:700;
-  letter-spacing:0.3px;
-  writing-mode:horizontal-tb;
 }
-
-.lbl-mid {
-  flex:1;
-  display:flex;
-  flex-direction:row-reverse; /* row-reverse: bday-banner(right→portrait-top) + lbl-body(left→portrait-body) */
-  overflow:hidden;
+/* Birthday banner */
+.bday-banner {
+  background:#000;
+  color:#fff;
+  text-align:center;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:1.5px;
+  padding:3px 0;
+  flex-shrink:0;
 }
-
+/* Main body area */
 .lbl-body {
   flex:1;
   display:flex;
-  flex-direction:column; /* column in landscape = row in portrait: y=0→portrait-left, y=62→portrait-right */
-  padding:4px 6px;
-  gap:4px;
+  flex-direction:row;
+  padding:5px 8px 3px;
+  gap:6px;
   overflow:hidden;
+  min-height:0;
 }
-
 .lbl-left {
-  /* landscape top portion (y=0..~46mm) → portrait LEFT portion */
   flex:1;
   display:flex;
   flex-direction:column;
@@ -133,50 +68,42 @@ p.sub { font-size:12px; color:#666; margin-bottom:24px; }
   overflow:hidden;
   min-width:0;
 }
-
 .lbl-right {
-  /* landscape bottom portion (y=~46..62mm) → portrait RIGHT portion */
-  width:15mm;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  flex-shrink:0;
-  padding-top:2px;
-}
-
-.lbl-foot {
-  text-align:center;
-  font-size:6px;
-  color:#999;
-  padding:2px 4px;
-  border-right:0.5px solid #ccc; /* border-right in landscape = border-bottom in portrait */
-  flex-shrink:0;
-  width:7mm;
+  width:16mm;
   display:flex;
   align-items:center;
   justify-content:center;
-  writing-mode:vertical-rl;
-  transform:rotate(180deg);
+  flex-shrink:0;
 }
-
+/* Footer */
+.lbl-foot {
+  text-align:right;
+  font-size:6px;
+  color:#999;
+  padding:1px 8px 2px;
+  border-top:0.5px solid #ccc;
+  flex-shrink:0;
+}
 .amc-box {
   border:1.5px dashed #888;
-  padding:2px 4px;
-  font-size:11px;
-  letter-spacing:1.5px;
+  padding:2px 6px;
+  font-size:12px;
+  letter-spacing:2px;
   font-weight:600;
   white-space:nowrap;
   display:inline-block;
 }
 .allergy-box {
-  margin:2px 0;
   border:2px solid #1a1a1a;
   background:#f8f8f8;
-  padding:2px 5px;
-  font-size:8px;
+  padding:3px 6px;
+  font-size:9px;
   font-weight:700;
   flex-shrink:0;
+  margin:2px 0;
 }
+
+/* ===== PICKUP TAG: 62mm × 38mm portrait ===== */
 .pickup-wrap {
   width:62mm; height:38mm;
   background:white;
@@ -206,40 +133,36 @@ var variants=[
 ];
 var container=document.getElementById('container');
 variants.forEach(function(v,vi){
-  var border=v.isBday?'2px solid #1a1a1a':'1.5px solid #888';
   var hBg=v.isBday?'#e8e8e8':'#1a1a1a';
   var hCol=v.isBday?'#1a1a1a':'#fff';
-  var bday=v.isBday?'<div style="background:#000;color:#fff;text-align:center;font-size:8px;font-weight:900;letter-spacing:1px;padding:3px 0;text-transform:uppercase;white-space:nowrap;writing-mode:horizontal-tb;">HAPPY BIRTHDAY!</div>':'';
+  var wrapCls='child-wrap'+(v.isBday?' bday':'');
+  var wrapStyle=v.isBday?'border:2px solid #1a1a1a;':'border:1.5px solid #888;';
+  var bday=v.isBday?'<div class="bday-banner">HAPPY BIRTHDAY!</div>':'';
   var emoji=v.isBday?'<span style="filter:grayscale(100%);font-size:13px;margin-left:3px;">🎂</span>':'';
-  var alrg=(v.allergyFlag&&v.allergy)?'<div class="allergy-box">! 알러지 / ALLERGY<br><span style="font-weight:400;font-size:8px;">'+v.allergy+'</span></div>':'';
+  var alrg=(v.allergyFlag&&v.allergy)?'<div class="allergy-box">! 알러지 / ALLERGY<br><span style="font-weight:400;font-size:9px;">'+v.allergy+'</span></div>':'';
   var id='v'+vi;
   var row=document.createElement('div');
   row.className='row';
   row.innerHTML=
     '<div class="col"><div class="label-title">'+v.title+'<br>아이 라벨 62×100mm</div>'
-    +'<div class="child-wrap"><div class="child-label" style="border:'+border+';">'
-    /* header (rightmost in row-reverse = portrait TOP) */
-    +'<div class="lbl-hdr" style="background:'+hBg+';color:'+hCol+';width:10mm;justify-content:space-between;padding:4px 6px;">'
-    +'<span style="font-size:8px;font-weight:700;">'+v.dept+'</span><span style="font-size:8px;font-weight:600;">'+v.grade+'</span>'
+    +'<div class="'+wrapCls+'" style="'+wrapStyle+'">'
+    +'<div class="lbl-hdr" style="background:'+hBg+';color:'+hCol+';">'
+    +'<span>'+v.dept+'</span><span>'+v.grade+'</span>'
     +'</div>'
-    /* mid section */
-    +'<div class="lbl-mid">'
     +bday
     +'<div class="lbl-body">'
     +'<div class="lbl-left">'
-    +'<div style="font-size:20px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+v.korName+emoji+'</div>'
-    +'<div style="font-size:10px;color:#555;margin-bottom:2px;white-space:nowrap;">('+v.engName+')</div>'
+    +'<div style="font-size:22px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+v.korName+emoji+'</div>'
+    +'<div style="font-size:10px;color:#555;margin-bottom:3px;white-space:nowrap;">('+v.engName+')</div>'
     +'<div class="amc-box">'+v.amc+'</div>'
     +alrg
-    +'<div style="font-size:8px;color:#333;margin-top:2px;white-space:nowrap;">'+v.guardianText+'</div>'
+    +'<div style="font-size:8px;color:#333;margin-top:3px;white-space:nowrap;">'+v.guardianText+'</div>'
     +'<div style="font-size:8px;color:#333;white-space:nowrap;">'+v.checkinText+'</div>'
     +'</div>'
     +'<div class="lbl-right"><img id="qrc'+id+'" style="width:15mm;height:15mm;display:block;image-rendering:pixelated;"></div>'
     +'</div>'
-    +'</div>'
-    /* footer (leftmost in row-reverse = portrait BOTTOM) */
     +'<div class="lbl-foot">Amicus Next Church</div>'
-    +'</div></div></div>'
+    +'</div></div>'
     +'<div class="col"><div class="label-title">픽업 태그 62×38mm</div>'
     +'<div class="pickup-wrap"><div class="pt-left">'
     +'<div style="font-size:8px;font-weight:700;white-space:nowrap;">픽업 태그 / Pickup Tag</div>'
