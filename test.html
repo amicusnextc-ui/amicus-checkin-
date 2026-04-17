@@ -1,175 +1,236 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Label Test Page</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Noto Sans KR",Arial,sans-serif;}
-body{background:#f0f0f0;padding:24px;}
-h1{font-size:20px;font-weight:700;margin-bottom:4px;}
-p.sub{font-size:12px;color:#666;margin-bottom:24px;}
-.row{display:flex;flex-wrap:wrap;gap:24px;margin-bottom:40px;align-items:flex-start;}
-.col{display:flex;flex-direction:column;gap:8px;align-items:center;}
-.label-title{font-size:11px;font-weight:700;color:#444;text-align:center;}
-.print-btn{background:#1a1a1a;color:#fff;border:none;border-radius:4px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.5px;}
-.print-btn:hover{background:#444;}
-.child-wrap{width:62mm;height:100mm;background:white;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.15);display:flex;flex-direction:column;}
-.lbl-hdr{display:flex;justify-content:space-between;align-items:center;padding:3px 8px;flex-shrink:0;font-size:9px;font-weight:700;}
-.bday-banner{background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:3px 0;flex-shrink:0;text-transform:uppercase;}
-.lbl-body{flex:1;display:flex;flex-direction:row;padding:5px 8px 3px;gap:6px;overflow:hidden;min-height:0;}
-.lbl-left{flex:1;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-width:0;}
-.lbl-right{width:16mm;display:flex;align-items:flex-start;justify-content:center;flex-shrink:0;padding-top:2px;}
-.lbl-foot{text-align:right;font-size:6px;color:#999;padding:1px 8px 2px;border-top:0.5px solid #ccc;flex-shrink:0;}
-.amc-box{border:1.5px dashed #888;padding:2px 6px;font-size:12px;letter-spacing:2px;font-weight:600;white-space:nowrap;display:inline-block;}
-.allergy-box{border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;margin:2px 0;}
-.pickup-wrap{width:62mm;height:38mm;background:white;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.15);display:flex;flex-direction:row;}
-.pt-left{flex:1;padding:5px 8px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0;overflow:hidden;}
-.pt-right{width:36mm;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-left:1px solid #ddd;padding:4px;}
-.pt-amc{border:2px solid #1a1a1a;padding:2px 6px;font-size:13px;font-weight:700;letter-spacing:2px;white-space:nowrap;display:inline-block;}
-</style>
-</head>
-<body>
-<h1>🏷️ Label Test Page</h1>
-<p class="sub">All 4 variants — 62×100mm child label + 62×38mm pickup tag</p>
-<div id="container"></div>
-<script>
-var QR_URL='https://amicus-checkin.vercel.app/';
-var _v=[];
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Label Test Page</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Noto Sans KR",Arial,sans-serif;}
+    body{background:#f0f0f0;padding:24px;}
+    h1{font-size:20px;font-weight:700;margin-bottom:4px;}
+    p.sub{font-size:12px;color:#666;margin-bottom:24px;}
+    .row{display:flex;flex-wrap:wrap;gap:24px;margin-bottom:40px;align-items:flex-start;}
+    .col{display:flex;flex-direction:column;gap:8px;align-items:center;}
+    .label-title{font-size:11px;font-weight:700;color:#444;text-align:center;}
+    .print-btn{background:#1a1a1a;color:#fff;border:none;border-radius:4px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.5px;}
+    .print-btn:hover{background:#444;}
+    /* Child label preview: 62x86mm rotated landscape in container */
+    .child-outer{width:86mm;height:62mm;background:white;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+    .child-inner{width:86mm;height:60mm;display:flex;flex-direction:column;}
+    .lbl-hdr{display:flex;justify-content:space-between;align-items:center;padding:3px 8px;flex-shrink:0;font-size:9px;font-weight:700;}
+    .bday-banner{background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:3px 0;flex-shrink:0;text-transform:uppercase;}
+    .bday-sub{background:#e0e0e0;display:flex;justify-content:space-between;padding:2px 8px;flex-shrink:0;border-bottom:0.5px solid #ccc;}
+    .lbl-body{flex:1;display:flex;flex-direction:row;padding:5px 7px 4px;gap:5px;overflow:hidden;min-height:0;}
+    .lbl-left{flex:1;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-width:0;}
+    .lbl-right{width:54pt;display:flex;align-items:flex-start;justify-content:center;flex-shrink:0;}
+    .lbl-foot{text-align:right;font-size:6px;color:#999;padding:2px 8px;border-top:0.5px solid #ccc;flex-shrink:0;}
+    .amc-box{border:1.5px dashed #777;border-radius:3px;padding:2px 5px;font-size:10px;letter-spacing:2px;font-weight:700;white-space:nowrap;display:inline-block;}
+    .allergy-box{border:2px solid #000;border-radius:3px;padding:2px 5px;font-size:8px;font-weight:700;flex-shrink:0;margin-top:2px;}
+    /* Pickup tag preview: 62x100mm */
+    .pickup-wrap{width:62mm;height:100mm;background:#f0f0f0;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.15);display:flex;flex-direction:column;}
+    .pt-main{display:flex;flex:1;align-items:stretch;}
+    .pt-left{flex:1;padding:9pt 9pt;}
+    .pt-right{background:#fff;border-left:1px solid #ddd;padding:4px;display:flex;align-items:stretch;}
+    .pt-amc{border:2px solid #000;border-radius:3px;padding:3pt 8pt;display:inline-block;}
+    .pt-foot{padding:4pt 9pt;border-top:0.5px solid #ccc;text-align:center;}
+    </style>
+  </head>
+  <body>
+    <h1>🏷️ Label Test Page</h1>
+  <p class="sub">All 4 variants — Child label 62×86mm (landscape) + Pickup tag 62×100mm (portrait)</p>p>
+  <div id="container"></div>div>
+  <script>
+    var QR_URL='https://amicus-checkin.vercel.app/';
+    var _v=[];
 
-function makeQR(size){
-  var c=document.createElement('canvas');
-  try{new QRious({element:c,value:QR_URL,size:size,background:'#ffffff',foreground:'#000000',level:'M'});}catch(e){}
-  return c.toDataURL();
-}
+    function makeQR(size){
+        var c=document.createElement('canvas');
+        try{new QRious({element:c,value:QR_URL,size:size,background:'#ffffff',foreground:'#000000',level:'M'});}catch(e){}
+        return c.toDataURL();
+    }
 
-function doPrint(idx,isPickup){var type=isPickup?'pickup':'child';
-  var v=_v[idx];
-  var qrSrc=makeQR(168);
-  var border=v.isBday?'2px solid #1a1a1a':'1.5px solid #888';
-  var hBg=v.isBday?'#e8e8e8':'#1a1a1a';
-  var hCol=v.isBday?'#1a1a1a':'#fff';
-  var bday=v.isBday?'<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:3px 0;text-transform:uppercase;flex-shrink:0;">HAPPY BIRTHDAY!</div>':'';
-  var emoji=v.isBday?'<span style="filter:grayscale(100%);font-size:13px;margin-left:3px;">🎂</span>':'';
-  var alrg=v.allergyFlag?'<div style="border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;margin:2px 0;">! 알러지 / ALLERGY<br><span style=\"font-weight:400;font-size:9px;\">'+(v.allergy||'')+'</span></div>':'';
+    function checkBirthday(student){
+        if(!student.birthday) return false;
+        var today=new Date();
+        var bday=new Date(student.birthday);
+        return bday.getMonth()===today.getMonth() && bday.getDate()===today.getDate();
+    }
 
-  var html;
-  if(type==='child'){
-    html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
-      +'<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">'
-      +'<style>*{margin:0;padding:0;box-sizing:border-box;font-family:"Noto Sans KR",Arial,sans-serif;}'
-      +'@page{size:62mm 100mm;margin:0;}'
-      +'html,body{width:62mm;height:100mm;overflow:hidden;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
-      +'#lbl{width:62mm;height:100mm;display:flex;flex-direction:column;border:'+border+';overflow:hidden;}'
-      +'.hdr{display:flex;justify-content:space-between;align-items:center;padding:3px 8px;flex-shrink:0;font-size:9px;font-weight:700;background:'+hBg+';color:'+hCol+';-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
-      +'.body{flex:1;display:flex;flex-direction:row;padding:5px 8px 3px;gap:6px;overflow:hidden;min-height:0;}'
-      +'.left{flex:1;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-width:0;}'
-      +'.right{width:16mm;display:flex;align-items:flex-start;justify-content:center;flex-shrink:0;padding-top:2px;}'
-      +'.foot{text-align:right;font-size:6px;color:#999;padding:1px 8px 2px;border-top:0.5px solid #ccc;flex-shrink:0;}'
-      +'</style></head><body>'
-      +'<div id="lbl">'
-      +bday
-      +'<div class="hdr"><span>'+v.dept+'</span><span>'+v.grade+'</span></div>'
-      +'<div class="body"><div class="left">'
-      +'<div style="font-size:22px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+v.korName+emoji+'</div>'
-      +'<div style="font-size:10px;color:#555;margin-bottom:3px;white-space:nowrap;">('+v.engName+')</div>'
-      +'<div style="border:1.5px dashed #888;padding:2px 6px;font-size:12px;letter-spacing:2px;font-weight:600;white-space:nowrap;display:inline-block;">'+v.amc+'</div>'
-      +alrg
-      +'<div style="font-size:8px;color:#333;margin-top:3px;white-space:nowrap;">'+v.guardianText+'</div>'
-      +'<div style="font-size:8px;color:#333;white-space:nowrap;">'+v.checkinText+'</div>'
-      +'</div>'
-      +'<div class="right"><img src="'+qrSrc+'" width="56" height="56" style="display:block;image-rendering:pixelated;"></div>'
-      +'</div>'
-      +'<div class="foot">Amicus Next Church</div>'
-      +'</div>'
-      +'<script>window.onload=function(){window.print();setTimeout(window.close,4000);};<\/sc'+'ript>'
-      +'</body></html>';
-  } else {
-    html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
-      +'<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">'
-      +'<style>*{margin:0;padding:0;box-sizing:border-box;font-family:"Noto Sans KR",Arial,sans-serif;}'
-      +'@page{size:62mm 38mm;margin:0;}'
-      +'html,body{width:62mm;height:38mm;overflow:hidden;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
-      +'#pt{width:62mm;height:38mm;display:flex;flex-direction:row;border:1.5px solid #888;}'
-      +'.ptl{flex:1;padding:5px 8px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0;overflow:hidden;}'
-      +'.ptr{width:36mm;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-left:1px solid #ddd;padding:4px;}'
-      +'</style></head><body>'
-      +'<div id="pt"><div class="ptl">'
-      +'<div style="font-size:8px;font-weight:700;white-space:nowrap;">픽업 태그 / Pickup Tag</div>'
-      +'<div style="font-size:7px;color:#777;white-space:nowrap;">보호자 지참 바람 / Please keep this tag</div>'
-      +'<div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+v.pickupName+'</div>'
-      +'<div style="border:2px solid #1a1a1a;padding:2px 6px;font-size:13px;font-weight:700;letter-spacing:2px;white-space:nowrap;display:inline-block;">'+v.amc+'</div>'
-      +'</div><div class="ptr"><img src="'+makeQR(120)+'" style="width:100%;height:100%;object-fit:contain;image-rendering:pixelated;"></div>'
-      +'</div>'
-      +'<script>window.onload=function(){window.print();setTimeout(window.close,4000);};<\/sc'+'ript>'
-      +'</body></html>';
-  }
-  var w=window.open('','_blank','width=300,height=460,toolbar=0,menubar=0,location=0,status=0');
-  if(w){w.document.open();w.document.write(html);w.document.close();}
-  else{alert('팝업이 차단되었습니다. 주소창 오른쪽 팝업 허용 버튼을 클릭하세요.');}
-}
+    function buildChildLabel(student,isBirthday,hasAllergy,QR_URL){
+        var border=isBirthday?'2px solid #000':'1.5px solid #888';
+        var qrSrc=makeQR(104);
+        var bdayBanner=isBirthday
+          ?'<div style="background:#000;color:#fff;padding:3pt 8pt;text-align:center;flex-shrink:0;"><span style="font-size:9pt;font-weight:700;letter-spacing:1.5px;font-family:Arial;">🎂 HAPPY BIRTHDAY! 🎂</span></div>'
+              :'';
+        var header=isBirthday
+          ?'<div style="background:#e0e0e0;padding:2pt 8pt;display:flex;justify-content:space-between;flex-shrink:0;border-bottom:0.5pt solid #ccc;"><span style="font-size:9pt;font-family:Arial;font-weight:700;">'+esc(student.department||'')+'</span><span style="font-size:9pt;font-family:Arial;">'+esc(student.grade||'')+'</span></div>'
+              :'<div style="background:#1a1a1a;color:#fff;padding:3pt 8pt;display:flex;justify-content:space-between;flex-shrink:0;"><span style="font-size:9pt;font-family:Arial;font-weight:700;">'+esc(student.department||'')+'</span><span style="font-size:9pt;font-family:Arial;">'+esc(student.grade||'')+'</span></div>';
+        var emoji=isBirthday?'<span style="font-size:17pt;filter:grayscale(100%);">🎂</span>':'';
+        var allergyBox=hasAllergy
+          ?'<div style="border:2pt solid #000;border-radius:3pt;padding:2pt 5pt;display:flex;align-items:center;gap:3pt;margin-top:2pt;"><span style="font-size:10pt;font-weight:700;color:#000;">!</span><div><div style="font-size:7pt;font-weight:700;margin:0;text-transform:uppercase;color:#000;font-family:Arial;">Allergy / 알러지</div><div style="font-size:9pt;font-weight:700;margin:0;color:#000;font-family:Arial;">'+esc(student.allergy)+'</div></div></div>'
+              :'';
+        var guardianText=student.guardian?'Guardian : '+esc(student.guardian):'';
+        var checkinText=student.checkin_time?'Checked in : '+esc(student.checkin_time):'';
+        return '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+          +'<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">'
+          +'<style>'
+          +'*{box-sizing:border-box;margin:0;padding:0;font-family:"Noto Sans KR",Arial,sans-serif;}'
+          +'@page{size:62mm 86mm;margin:0;}'
+          +'body{width:62mm;height:86mm;overflow:hidden;background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
+          +'#w{width:86mm;height:60mm;position:absolute;top:60mm;left:0;transform:rotate(-90deg);transform-origin:top left;overflow:hidden;background:white;display:flex;flex-direction:column;border:'+border+';-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
+          +'</style></head><body>'
+          +'<div id="w">'
+          +bdayBanner
+          +header
+          +'<div style="display:flex;flex:1;padding:5pt 7pt 4pt;gap:5pt;min-height:0;">'
+          +'<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2pt;">'
+          +'<div style="font-size:17pt;font-weight:700;line-height:1.05;color:#000;display:flex;align-items:center;gap:4pt;">'+esc(student.name||'')+emoji+'</div>'
+          +'<div style="font-size:9pt;color:#555;font-family:Arial;">'+esc(student.english_name||'')+'</div>'
+          +'<div style="border:1.5pt dashed #777;border-radius:3pt;padding:2pt 5pt;display:inline-block;margin-top:2pt;"><span style="font-size:10pt;font-weight:700;letter-spacing:2pt;color:#000;white-space:nowrap;font-family:Arial;">'+esc(student.amc_code||'')+'</span></div>'
+          +allergyBox
+          +'<div style="border-top:0.5pt solid #ddd;padding-top:2pt;margin-top:1pt;display:flex;gap:3pt;align-items:center;">'
+          +'<span style="font-size:7pt;color:#666;font-family:Arial;white-space:nowrap;">Guardian</span>'
+          +'<span style="font-size:8pt;font-weight:600;color:#000;font-family:Arial;white-space:nowrap;">'+esc(student.guardian||'')+'</span>'
+          +'</div>'
+          +'<div style="display:flex;gap:3pt;align-items:center;">'
+          +'<span style="font-size:7pt;color:#666;font-family:Arial;white-space:nowrap;">Checked in</span>'
+          +'<span style="font-size:8pt;font-weight:600;color:#000;font-family:Arial;white-space:nowrap;">'+esc(student.checkin_time||'')+'</span>'
+          +'</div>'
+          +'</div>'
+          +'<div style="width:54pt;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;">'
+          +'<img src="'+qrSrc+'" width="52" height="52" style="display:block;image-rendering:pixelated;">'
+          +'</div>'
+          +'</div>'
+          +'<div style="padding:2pt 8pt;border-top:0.5pt solid #ccc;text-align:right;flex-shrink:0;"><span style="font-size:6pt;color:#999;font-family:Arial;">Amicus Next Church</span></div>'
+          +'</div>'
+          +'<script>setTimeout(function(){window.print();setTimeout(function(){window.close();},800);},700);<\/script>'
+          +'</body></html>';
+    }
 
-var variants=[
-  {isBday:false,allergyFlag:false,allergy:null,korName:'이예슬',engName:'Sally Lee',amc:'AMC-025',dept:'중고등부 (Youth)',grade:'9th grade',guardianText:'Guardian : 이강희 / 이지혜',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'이예슬 (Sally Lee)',title:'① 기본 (Basic)'},
-  {isBday:true,allergyFlag:false,allergy:null,korName:'이예슬',engName:'Sally Lee',amc:'AMC-025b',dept:'중고등부 (Youth)',grade:'9th grade',guardianText:'Guardian : 이강희 / 이지혜',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'이예슬 (Sally Lee)',title:'② 생일 (Birthday)'},
-  {isBday:true,allergyFlag:true,allergy:'땅콩, 유제품',korName:'김지호',engName:'Jiho Kim',amc:'AMC-012b',dept:'유아부 (Infant)',grade:'만 3세',guardianText:'Guardian : 김철수 / 박영희',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'김지호 (Jiho Kim)',title:'③ 생일+알러지'},
-  {isBday:false,allergyFlag:true,allergy:'땅콩, 유제품',korName:'김지호',engName:'Jiho Kim',amc:'AMC-012',dept:'유아부 (Infant)',grade:'만 3세',guardianText:'Guardian : 김철수 / 박영희',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'김지호 (Jiho Kim)',title:'④ 알러지 (Allergy)'},
-];
-_v=variants;
+    function buildPickupTag(student,QR_URL){
+        var qrSrc=makeQR(160);
+        return '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+          +'<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">'
+          +'<style>'
+          +'*{box-sizing:border-box;margin:0;padding:0;font-family:"Noto Sans KR",Arial,sans-serif;}'
+          +'@page{size:62mm 100mm;margin:0;}'
+          +'body{width:62mm;height:100mm;overflow:hidden;background:#f0f0f0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
+          +'#w{width:62mm;height:100mm;display:flex;flex-direction:column;}'
+          +'</style></head><body>'
+          +'<div id="w">'
+          +'<div style="display:flex;flex:1;align-items:stretch;">'
+          +'<div style="flex:1;padding:9pt 9pt;">'
+          +'<div style="font-size:8.5pt;font-weight:700;color:#444;font-family:Arial;">픽업 태그 / Pickup Tag</div>'
+          +'<div style="font-size:7pt;color:#888;margin-bottom:6pt;font-family:Arial;">보호자 지참 필수 / Please keep this tag</div>'
+          +'<div style="font-size:14pt;font-weight:700;color:#000;margin-bottom:6pt;">'+esc(student.name||'')+' ('+esc(student.english_name||'')+')</div>'
+          +'<div style="border:2pt solid #000;border-radius:3pt;padding:3pt 8pt;display:inline-block;">'
+          +'<span style="font-size:14pt;font-weight:700;letter-spacing:1pt;color:#000;white-space:nowrap;font-family:Arial;">'+esc(student.amc_code||'')+'</span>'
+          +'</div>'
+          +'</div>'
+          +'<div style="background:#fff;border-left:1pt solid #ddd;padding:4pt;display:flex;align-items:stretch;">'
+          +'<img src="'+qrSrc+'" width="80" height="80" style="display:block;image-rendering:pixelated;align-self:center;">'
+          +'</div>'
+          +'</div>'
+          +'<div style="padding:4pt 9pt;border-top:0.5pt solid #ccc;text-align:center;"><span style="font-size:6pt;color:#bbb;font-family:Arial;">Amicus Next Church</span></div>'
+          +'</div>'
+          +'<script>setTimeout(function(){window.print();setTimeout(function(){window.close();},800);},700);<\/script>'
+          +'</body></html>';
+    }
 
-var container=document.getElementById('container');
-variants.forEach(function(v,vi){
-  var hBg=v.isBday?'#e8e8e8':'#1a1a1a';
-  var hCol=v.isBday?'#1a1a1a':'#fff';
-  var border=v.isBday?'border:2px solid #1a1a1a':'border:1.5px solid #888';
-  var bday=v.isBday?'<div class="bday-banner">HAPPY BIRTHDAY!</div>':'';
-  var emoji=v.isBday?'<span style="filter:grayscale(100%);font-size:13px;margin-left:3px;">🎂</span>':'';
-  var alrg=v.allergyFlag?'<div class="allergy-box">! 알러지 / ALLERGY<br><span style="font-weight:400;font-size:9px;">'+(v.allergy||'')+'</span></div>':'';
-  var qrSrc=makeQR(168);
-  var id='v'+vi;
-  var row=document.createElement('div');
-  row.className='row';
-  row.innerHTML=
-    '<div class="col">'
-    +'<div class="label-title">'+v.title+'<br>아이 라벨 62×100mm</div>'
-    +'<div class="child-wrap" style="'+border+';">'
-    +'<div class="lbl-hdr" style="background:'+hBg+';color:'+hCol+';">'
-    +'<span>'+v.dept+'</span><span>'+v.grade+'</span>'
-    +'</div>'
-    +bday
-    +'<div class="lbl-body">'
-    +'<div class="lbl-left">'
-    +'<div style="font-size:22px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+v.korName+emoji+'</div>'
-    +'<div style="font-size:10px;color:#555;margin-bottom:3px;white-space:nowrap;">('+v.engName+')</div>'
-    +'<div class="amc-box">'+v.amc+'</div>'
-    +alrg
-    +'<div style="font-size:8px;color:#333;margin-top:3px;white-space:nowrap;">'+v.guardianText+'</div>'
-    +'<div style="font-size:8px;color:#333;white-space:nowrap;">'+v.checkinText+'</div>'
-    +'</div>'
-    +'<div class="lbl-right"><img id="qrc'+id+'" width="56" height="56" style="display:block;image-rendering:pixelated;"></div>'
-    +'</div>'
-    +'<div class="lbl-foot">Amicus Next Church</div>'
-    +'</div>'
-    +'<button class="print-btn" onclick="doPrint('+vi+',0)">프린트 아이 라벨 ▶</button>'
-    +'</div>'
-    +'<div class="col">'
-    +'<div class="label-title">픽업 태그 62×38mm</div>'
-    +'<div class="pickup-wrap" style="border:1.5px solid #888;">'
-    +'<div class="pt-left">'
-    +'<div style="font-size:8px;font-weight:700;white-space:nowrap;">픽업 태그 / Pickup Tag</div>'
-    +'<div style="font-size:7px;color:#777;white-space:nowrap;">보호자 지참 바람 / Please keep this tag</div>'
-    +'<div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+v.pickupName+'</div>'
-    +'<div class="pt-amc">'+v.amc+'</div>'
-    +'</div><div class="pt-right"><img id="qrp'+id+'" style="width:100%;height:100%;object-fit:contain;image-rendering:pixelated;"></div>'
-    +'</div>'
-    +'<button class="print-btn" onclick="doPrint('+vi+',1)">프린트 픽업 태그 ▶</button>'
-    +'</div>';
-  container.appendChild(row);
-  document.getElementById('qrc'+id).src=qrSrc;
-  document.getElementById('qrp'+id).src=qrSrc;
-});
-</script>
-</body>
+    function esc(s){
+        return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function printLabels(student){
+        var isBirthday=checkBirthday(student);
+        var hasAllergy=!!(student.allergy && student.allergy.trim()!=='');
+        // PRINT 1: Child Label
+        var childWin=window.open('','_blank','width=400,height=500');
+        if(childWin){childWin.document.write(buildChildLabel(student,isBirthday,hasAllergy,QR_URL));childWin.document.close();}
+        else{alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도하세요.');}
+        // PRINT 2: Pickup Tag — 1.5s later
+        setTimeout(function(){
+              var pickupWin=window.open('','_blank','width=400,height=500');
+              if(pickupWin){pickupWin.document.write(buildPickupTag(student,QR_URL));pickupWin.document.close();}
+        },1500);
+    }
+
+    var variants=[
+      {name:'이예슬',english_name:'Sally Lee',amc_code:'AMC-025',department:'중고등부 (Youth)',grade:'9th grade',guardian:'이강희 / 이지혜',checkin_time:'Apr 16, 2026 14:46',allergy:null,birthday:'2000-04-20',title:'① 기본 (Basic)'},
+      {name:'이예슬',english_name:'Sally Lee',amc_code:'AMC-025',department:'중고등부 (Youth)',grade:'9th grade',guardian:'이강희 / 이지혜',checkin_time:'Apr 16, 2026 14:46',allergy:null,birthday:'2000-04-16',title:'② 생일 (Birthday)'},
+      {name:'김지호',english_name:'Jiho Kim',amc_code:'AMC-012',department:'유아부 (Infant)',grade:'만 3세',guardian:'김철수 / 박영희',checkin_time:'Apr 16, 2026 14:46',allergy:'땅콩, 유제품',birthday:'2023-04-16',title:'③ 생일+알러지'},
+      {name:'김지호',english_name:'Jiho Kim',amc_code:'AMC-012',department:'유아부 (Infant)',grade:'만 3세',guardian:'김철수 / 박영희',checkin_time:'Apr 16, 2026 14:46',allergy:'땅콩, 유제품',birthday:'2023-03-10',title:'④ 알러지 (Allergy)'},
+      ];
+    _v=variants;
+
+    var container=document.getElementById('container');
+    variants.forEach(function(v,vi){
+        var isBday=checkBirthday(v);
+        var hasAllergy=!!(v.allergy && v.allergy.trim()!=='');
+        var border=isBday?'border:2px solid #000':'border:1.5px solid #888';
+        var bdayBanner=isBday?'<div class="bday-banner">🎂 HAPPY BIRTHDAY! 🎂</div>':'';
+        var hdrBg=isBday?'#e0e0e0':'#1a1a1a';
+        var hdrCol=isBday?'#1a1a1a':'#fff';
+        var emoji=isBday?'<span style="filter:grayscale(100%);font-size:16px;margin-left:4px;">🎂</span>':'';
+        var alrg=hasAllergy?'<div class="allergy-box">! Allergy / 알러지<br><span style="font-weight:400;font-size:8px;">'+(v.allergy||'')+'</span></div>':'';
+        var qrSrc=makeQR(104);
+        var id='v'+vi;
+        var row=document.createElement('div');
+        row.className='row';
+        row.innerHTML=
+              '<div class="col">'
+          +'<div class="label-title">'+v.title+'<br>아이 라벨 62×86mm (landscape)</div>'
+          +'<div class="child-outer" style="'+border+';">'
+          +'<div class="child-inner">'
+          +bdayBanner
+          +'<div class="lbl-hdr" style="background:'+hdrBg+';color:'+hdrCol+';">'
+          +'<span style="font-weight:700;">'+v.department+'</span><span>'+v.grade+'</span>'
+          +'</div>'
+          +'<div class="lbl-body">'
+          +'<div class="lbl-left">'
+          +'<div style="font-size:17px;font-weight:700;line-height:1.05;display:flex;align-items:center;gap:4px;">'+v.name+emoji+'</div>'
+          +'<div style="font-size:9px;color:#555;">'+v.english_name+'</div>'
+          +'<div class="amc-box">'+v.amc_code+'</div>'
+          +alrg
+          +'<div style="border-top:0.5px solid #ddd;padding-top:2px;margin-top:1px;font-size:8px;color:#333;">Guardian: '+v.guardian+'</div>'
+          +'<div style="font-size:8px;color:#333;">Checked in: '+v.checkin_time+'</div>'
+          +'</div>'
+          +'<div class="lbl-right"><img id="qrc'+id+'" width="52" height="52" style="display:block;image-rendering:pixelated;"></div>'
+          +'</div>'
+          +'<div class="lbl-foot">Amicus Next Church</div>'
+          +'</div>'
+          +'</div>'
+          +'<button class="print-btn" onclick="_printVariant('+vi+')">태그 인쇄 ▶</button>'
+          +'</div>'
+          +'<div class="col">'
+          +'<div class="label-title">픽업 태그 62×100mm (portrait)</div>'
+          +'<div class="pickup-wrap" style="border:1.5px solid #888;">'
+          +'<div class="pt-main">'
+          +'<div class="pt-left">'
+          +'<div style="font-size:8.5px;font-weight:700;color:#444;">픽업 태그 / Pickup Tag</div>'
+          +'<div style="font-size:7px;color:#888;margin-bottom:6px;">보호자 지참 필수 / Please keep this tag</div>'
+          +'<div style="font-size:14px;font-weight:700;color:#000;margin-bottom:6px;">'+v.name+' ('+v.english_name+')</div>'
+          +'<div class="pt-amc"><span style="font-size:14px;font-weight:700;letter-spacing:1px;color:#000;">'+v.amc_code+'</span></div>'
+          +'</div>'
+          +'<div class="pt-right"><img id="qrp'+id+'" width="80" height="80" style="display:block;image-rendering:pixelated;align-self:center;"></div>'
+          +'</div>'
+          +'<div class="pt-foot"><span style="font-size:6px;color:#bbb;">Amicus Next Church</span></div>'
+          +'</div>'
+          +'</div>';
+        container.appendChild(row);
+        document.getElementById('qrc'+id).src=qrSrc;
+        document.getElementById('qrp'+id).src=qrSrc;
+    });
+
+    function _printVariant(idx){
+        printLabels(_v[idx]);
+    }
+  </script>
+  </body>
 </html>
+  </script></h1>
+  </body>
+  </style></title>
+  </head>
