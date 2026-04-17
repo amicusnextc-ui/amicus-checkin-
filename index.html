@@ -351,7 +351,7 @@ function printTag() {
 function printChildLabel(d) {
   var variantBorder = (d.isBday) ? '2px solid #1a1a1a' : '1.5px solid #888';
   var bdayBanner = d.isBday ? '<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:2px 0;text-transform:uppercase;flex-shrink:0;">HAPPY BIRTHDAY!</div>' : '';
-  var allergyHtml = d.allergy ? `<div style="margin:3px 0 2px;border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;">! ${String.fromCharCode(50508,47084,51648)} / ALLERGY<br><span style="font-weight:400;font-size:9px;">${d.allergy || ''}</span></div>` : '';
+  var allergyHtml = (d.allergyFlag && d.allergy) ? '<div style="margin:3px 0 2px;border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;">! ' + String.fromCharCode(50508,47084,51648) + ' / ALLERGY<br><span style="font-weight:400;font-size:9px;">' + (d.allergy || '') + '</span></div>' : '';
   var birthdayEmoji = d.isBday ? '<span style="filter:grayscale(100%);font-size:14px;margin-left:4px;">\uD83C\uDF82</span>' : '';
   var headerBg = d.isBday ? '#e8e8e8' : '#1a1a1a';
   var headerColor = d.isBday ? '#1a1a1a' : '#fff';
@@ -392,15 +392,15 @@ function printChildLabel(d) {
     + '</style></head><body>'
     + '<div id="childLabel">'
     + bdayBanner
-    + '<div class="lbl-header"><span>' + d.deptFull + '</span><span>' + d.grade + '</span></div>'
+    + '<div class="lbl-header"><span>' + d.dept + '</span><span>' + d.grade + '</span></div>'
     + '<div class="lbl-body">'
     + '<div class="lbl-left">'
-    + '<div style="font-size:20px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.korName + birthdayEmoji + '</div>'
-    + '<div style="font-size:10px;color:#555;margin-bottom:2px;">(' + d.engName + ')</div>'
-    + '<div style="border:1.5px dashed #888;padding:2px 6px;font-size:12px;letter-spacing:2px;font-weight:600;white-space:nowrap;display:inline-block;">' + d.amc + '</div>'
+    + '<div style="font-size:20px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.koreanName + birthdayEmoji + '</div>'
+    + '<div style="font-size:10px;color:#555;margin-bottom:2px;">(' + d.englishName + ')</div>'
+    + '<div style="border:1.5px dashed #888;padding:2px 6px;font-size:12px;letter-spacing:2px;font-weight:600;white-space:nowrap;display:inline-block;">' + d.amcCode + '</div>'
     + allergyHtml
-    + '<div style="font-size:8px;color:#333;margin-top:2px;white-space:nowrap;">' + String.fromCharCode(48372,54840,51088) + ' : ' + d.guardians + '</div>'
-    + '<div style="font-size:8px;color:#333;white-space:nowrap;">Checked in : ' + d.checkinStr + '</div>'
+    + '<div style="font-size:8px;color:#333;margin-top:2px;white-space:nowrap;">' + d.guardianText + '</div>'
+    + '<div style="font-size:8px;color:#333;white-space:nowrap;">' + d.checkinText + '</div>'
     + '</div>'
     + '<div class="lbl-right"><img src="' + qrDataURL + '" width="56" height="56" style="display:block;image-rendering:pixelated;"></div>'
     + '</div>'
