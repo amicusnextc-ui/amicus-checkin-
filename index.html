@@ -357,14 +357,25 @@ function printTag() {
   var QR_SRC = "https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js";
   var childCSS = "*{box-sizing:border-box;margin:0;padding:0;}@page{size:86mm 62mm;margin:0;}html,body{width:86mm;height:62mm;overflow:hidden;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}#w{width:86mm;height:62mm;display:flex;flex-direction:column;border:1pt solid #000;}.body{display:flex;flex-direction:row;flex:1;min-height:0;padding:2mm 3mm;gap:2mm;}.left{flex:1;min-width:0;display:flex;flex-direction:column;}.nm{font-size:18pt;font-weight:700;color:#000;line-height:1.1;font-family:Arial;margin-bottom:0.5mm;}.enm{font-size:9pt;color:#000;font-family:Arial;margin-bottom:2mm;}.amc{border:1pt dashed #000;border-radius:2pt;padding:2pt 6pt;display:inline-block;margin-bottom:2mm;}.amc span{font-size:10pt;font-weight:700;letter-spacing:2pt;color:#000;white-space:nowrap;font-family:Arial;}.drow{border-top:1pt solid #000;padding-top:1.5mm;margin-top:1.5mm;display:flex;gap:2mm;align-items:center;}.dk{font-size:7.5pt;color:#000;white-space:nowrap;font-family:Arial;}.dv{font-size:8.5pt;font-weight:600;color:#000;white-space:nowrap;font-family:Arial;}.right{width:17mm;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;padding-top:1mm;}.ftr{padding:1mm 3mm;border-top:1pt solid #000;text-align:right;flex-shrink:0;}.ftr span{font-size:6pt;color:#000;font-family:Arial;}";
   var childHTML = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE+"<style>"+childCSS+"</style></head><body><div id=\"w\">"
-    + hdr
-    + "<div class=\"body\"><div class=\"left\"><div class=\"nm\">" + nameDisplay + "</div><div class=\"enm\">(" + (d.englishName||"") + ")</div><div class=\"amc\"><span>" + d.amcCode + "</span></div>"
-    + algHtml
-    + "<div class=\"drow\"><span class=\"dk\">Guardian</span><span class=\"dv\">" + (d.guardianText||"") + "</span></div><div class=\"drow\"><span class=\"dk\">Checked in :</span><span class=\"dv\">" + (d.checkinText||"") + "</span></div></div><div class=\"right\"><canvas id=\"qr1\"></canvas></div></div><div class=\"ftr\"><span>Amicus Next Church</span></div></div>"
+    + hdr + "<div class=\"body\"><div class=\"left\"><div class=\"nm\">" + nameDisplay + "</div><div class=\"enm\">(" + (d.englishName||"") + ")</div><div class=\"amc\"><span>" + d.amcCode + "</span></div>"
+    + algHtml + "<div class=\"drow\"><span class=\"dk\">Guardian</span><span class=\"dv\">" + (d.guardianText||"") + "</span></div><div class=\"drow\"><span class=\"dk\">Checked in :</span><span class=\"dv\">" + (d.checkinText||"") + "</span></div></div><div class=\"right\"><canvas id=\"qr1\"></canvas></div></div><div class=\"ftr\"><span>Amicus Next Church</span></div></div>"
     + "<sc"+"ript>new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:66,background:\"white\",foreground:\"#000\",level:\"M\"});function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}"+CLOSE+"</body></html>";
-  var pickupCSS = "*{box-sizing:border-box;margin:0;padding:0;}@page{size:62mm 40mm;margin:0;}html,body{width:62mm;height:40mm;overflow:hidden;background:#fff;font-family:Arial;-webkit-print-color-adjust:exact;print-color-adjust:exact;}#w{width:62mm;height:40mm;display:flex;flex-direction:row;border:1pt solid #000;}.left{flex:1;padding:3mm 4mm;display:flex;flex-direction:column;justify-content:center;}.t{font-size:7pt;font-weight:700;color:#000;}.s{font-size:6pt;color:#000;margin-bottom:2mm;}.n{font-size:10pt;font-weight:700;color:#000;margin-bottom:2mm;line-height:1.2;}.a{border:1pt solid #000;border-radius:2pt;padding:1mm 2mm;display:inline-block;}.a span{font-size:10pt;font-weight:700;color:#000;white-space:nowrap;}.right{width:18mm;flex-shrink:0;border-left:1pt solid #000;display:flex;align-items:center;justify-content:center;}";
-  var pickupHTML = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE+"<style>"+pickupCSS+"</style></head><body><div id=\"w\"><div class=\"left\"><div class=\"t\">픽업 태그 / Pickup Tag</div><div class=\"s\">보호자 지참 필수 / Please keep this tag</div><div class=\"n\">" + (d.pickupName||d.koreanName) + " (" + (d.englishName||"") + ")</div><div class=\"a\"><span>" + d.amcCode + "</span></div></div><div class=\"right\"><canvas id=\"qr2\"></canvas></div></div>"
-    + "<sc"+"ript>new QRious({element:document.getElementById(\"qr2\"),value:\""+QR_URL+"\",size:60,background:\"white\",foreground:\"#000\",level:\"M\"});function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}"+CLOSE+"</body></html>";
+  var pickupCSS = "*{box-sizing:border-box;margin:0;padding:0;}"
+    + "@page{size:62mm 38mm;margin:0;}"
+    + "html{-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
+    + "body{width:62mm;height:38mm;overflow:hidden;background:#fff;font-family:Arial;}"
+    + "#w{position:absolute;top:0;left:0;width:62mm;height:38mm;display:flex;flex-direction:row;border:1.5pt solid #000;}"
+    + ".left{flex:1;padding:3mm 3.5mm;display:flex;flex-direction:column;justify-content:center;}"
+    + ".t{font-size:7.5pt;font-weight:700;color:#000;line-height:1.3;}"
+    + ".s{font-size:6.5pt;color:#000;margin-bottom:2.5mm;line-height:1.3;}"
+    + ".n{font-size:10pt;font-weight:700;color:#000;margin-bottom:2mm;line-height:1.2;}"
+    + ".a{border:1.5pt solid #000;border-radius:2pt;padding:1.5mm 3mm;display:inline-block;}"
+    + ".a span{font-size:10pt;font-weight:700;color:#000;letter-spacing:0.5pt;white-space:nowrap;}"
+    + ".right{width:17mm;flex-shrink:0;border-left:1.5pt solid #000;display:flex;align-items:center;justify-content:center;}";
+  var pickupHTML = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE+"<style>"+pickupCSS+"</style></head><body>"
+    + "<div id=\"w\"><div class=\"left\"><div class=\"t\">픽업 태그 / Pickup Tag</div><div class=\"s\">보호자 지참 필수 / Please keep this tag</div><div class=\"n\">" + (d.pickupName||d.koreanName) + " (" + (d.englishName||"") + ")</div><div class=\"a\"><span>" + d.amcCode + "</span></div></div>"
+    + "<div class=\"right\"><canvas id=\"qr2\"></canvas></div></div>"
+    + "<sc"+"ript>new QRious({element:document.getElementById(\"qr2\"),value:\""+QR_URL+"\",size:62,background:\"white\",foreground:\"#000\",level:\"M\"});function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}"+CLOSE+"</body></html>";
   var f1 = document.createElement("iframe");
   f1.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;";
   document.body.appendChild(f1);
@@ -378,7 +389,7 @@ function printTag() {
       var d2 = f2.contentDocument || f2.contentWindow.document;
       d2.open(); d2.write(pickupHTML); d2.close();
       setTimeout(function(){if(document.body.contains(f2))document.body.removeChild(f2);},15000);
-    }, 500);
+    }, 300);
   });
   setTimeout(function(){if(document.body.contains(f1))document.body.removeChild(f1);},15000);
 }
