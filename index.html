@@ -350,57 +350,63 @@ function printTag() {
 
 function printChildLabel(d) {
   var variantBorder = (d.isBday) ? '2px solid #1a1a1a' : '1.5px solid #888';
-  var bdayBanner = d.isBday ? '<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:2px 0;text-transform:uppercase;flex-shrink:0;">HAPPY BIRTHDAY! &#127874;</div>' : '';
-  var headerBg = d.isBday ? '#e8e8e8' : '#000';
-  var headerColor = d.isBday ? '#000' : '#fff';
-  var bdayEmoji = d.isBday ? '<span style="font-size:16px;filter:grayscale(100%);">&#127874;</span>' : '';
-  var allergyBlock = '';
-  if (d.allergyFlag) {
-    allergyBlock = '<div style="border:2px solid #1a1a1a;border-radius:4px;padding:2px 5px;margin-bottom:3px;">'
-      + '<div style="font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px;">! &#50508;&#47084;&#51648; / ALLERGY</div>'
-      + '<div style="font-size:9px;font-weight:700;">' + (d.allergy || '') + '</div></div>';
-  }
+  var bdayBanner = d.isBday ? '<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:2px 0;text-transform:uppercase;flex-shrink:0;">HAPPY BIRTHDAY!</div>' : '';
+  var allergyHtml = d.allergy ? `<div style="margin:3px 0 2px;border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;">! ${String.fromCharCode(50508,47084,51648)} / ALLERGY<br><span style="font-weight:400;font-size:9px;">${d.allergy || ''}</span></div>` : '';
+  var birthdayEmoji = d.isBday ? '<span style="filter:grayscale(100%);font-size:14px;margin-left:4px;">\uD83C\uDF82</span>' : '';
+  var headerBg = d.isBday ? '#e8e8e8' : '#1a1a1a';
+  var headerColor = d.isBday ? '#1a1a1a' : '#fff';
 
   var qrCanvas = document.createElement('canvas');
   try { new QRious({ element: qrCanvas, value: d.QR_URL, size: 168, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
   var qrDataURL = qrCanvas.toDataURL();
 
-  // Layout: page is 62mm x 86mm (portrait on roll)
-  // Inner div is 86mm x 60mm (landscape) rotated -90deg, anchored top-left
-  // After rotation: the 86mm becomes the height axis and 60mm becomes the width axis
-  // position: absolute; top: 60mm; left: 0; transform: rotate(-90deg); transform-origin: top left
   var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
     + '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">'
     + '<style>'
-    + '* { margin:0; padding:0; box-sizing:border-box; font-family: "Noto Sans KR", Arial, sans-serif; }'
+    + '* { margin:0; padding:0; box-sizing:border-box; font-family: "Noto Sans KR",Arial,sans-serif; }'
     + '@page { size: 62mm 86mm; margin: 0; }'
     + 'html, body { width:62mm; height:86mm; overflow:hidden; background:#fff; position:relative; }'
-    + '-webkit-print-color-adjust: exact; print-color-adjust: exact;'
-    + '@media print { html, body { width:62mm; height:86mm; } }'
-    + '#childLabel { width:86mm; height:60mm; position:absolute; top:60mm; left:0; transform:rotate(-90deg); transform-origin:top left; overflow:hidden; -webkit-print-color-adjust:exact; print-color-adjust:exact; }'
+    + '#childLabel {'
+    + '  width:86mm; height:60mm;'
+    + '  position:absolute; top:60mm; left:0;'
+    + '  transform:rotate(-90deg); transform-origin:top left;'
+    + '  overflow:hidden;'
+    + '  display:flex; flex-direction:column;'
+    + '  border:' + variantBorder + ';'
+    + '  font-size:8pt; background:#fff; color:#1a1a1a;'
+    + '  -webkit-print-color-adjust:exact; print-color-adjust:exact;'
+    + '}'
+    + '.lbl-header {'
+    + '  display:flex; justify-content:space-between; align-items:center;'
+    + '  padding:3px 8px; flex-shrink:0;'
+    + '  background:' + headerBg + '; color:' + headerColor + ';'
+    + '  font-size:9px; font-weight:700; letter-spacing:0.5px;'
+    + '}'
+    + '.lbl-body {'
+    + '  display:flex; flex-direction:row;'
+    + '  flex:1; padding:5px 8px 3px 8px; gap:5px; overflow:hidden;'
+    + '}'
+    + '.lbl-left { flex:1; display:flex; flex-direction:column; gap:2px; overflow:hidden; }'
+    + '.lbl-right { width:60px; display:flex; align-items:flex-start; justify-content:center; flex-shrink:0; padding-top:2px; }'
+    + '.lbl-footer { text-align:right; font-size:6px; color:#999; padding:1px 8px 2px; border-top:0.5px solid #ccc; flex-shrink:0; }'
     + '</style></head><body>'
-    + '<div id="childLabel" style="box-sizing:border-box;border:' + variantBorder + ';font-family:\"Noto Sans KR\",Arial,sans-serif;font-size:8pt;background:#fff;color:#000;display:flex;flex-direction:column;">'
+    + '<div id="childLabel">'
     + bdayBanner
-    + '<div style="background:' + headerBg + ';color:' + headerColor + ';display:flex;align-items:center;justify-content:space-between;padding:3px 8px;flex-shrink:0;">'
-    + '<span style="font-size:9px;font-weight:900;">' + d.dept + '</span>'
-    + '<span style="font-size:9px;font-weight:700;">' + d.grade + '</span></div>'
-    + '<div style="flex:1;display:flex;flex-direction:row;padding:5px 8px 3px 8px;gap:5px;overflow:hidden;">'
-    + '<div style="flex:1;display:flex;flex-direction:column;min-width:0;">'
-    + '<div style="display:flex;align-items:baseline;gap:4px;">'
-    + '<p style="font-size:20px;font-weight:700;line-height:1.1;margin:0;">' + d.koreanName + '</p>' + bdayEmoji + '</div>'
-    + '<p style="font-size:10px;color:#444;margin:1px 0 3px 0;">' + (d.englishName ? '(' + d.englishName + ')' : '') + '</p>'
-    + '<span style="display:inline-block;border:1.5px dashed #555;border-radius:3px;padding:2px 5px;font-size:12px;font-weight:800;white-space:nowrap;margin-bottom:3px;letter-spacing:2px;">' + d.amcCode + '</span>'
-    + allergyBlock
-    + '<hr style="border:none;border-top:1px solid #ccc;margin:3px 0 2px 0;"/>'
-    + '<p style="font-size:8px;font-weight:600;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.guardianText + '</p>'
-    + '<p style="font-size:8px;font-weight:500;margin:2px 0 0 0;white-space:nowrap;">' + d.checkinText + '</p>'
+    + '<div class="lbl-header"><span>' + d.deptFull + '</span><span>' + d.grade + '</span></div>'
+    + '<div class="lbl-body">'
+    + '<div class="lbl-left">'
+    + '<div style="font-size:20px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.korName + birthdayEmoji + '</div>'
+    + '<div style="font-size:10px;color:#555;margin-bottom:2px;">(' + d.engName + ')</div>'
+    + '<div style="border:1.5px dashed #888;padding:2px 6px;font-size:12px;letter-spacing:2px;font-weight:600;white-space:nowrap;display:inline-block;">' + d.amc + '</div>'
+    + allergyHtml
+    + '<div style="font-size:8px;color:#333;margin-top:2px;white-space:nowrap;">' + String.fromCharCode(48372,54840,51088) + ' : ' + d.guardians + '</div>'
+    + '<div style="font-size:8px;color:#333;white-space:nowrap;">Checked in : ' + d.checkinStr + '</div>'
     + '</div>'
-    + '<div style="width:58px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;padding-top:2px;">'
-    + '<img src="' + qrDataURL + '" width="56" height="56" style="display:block;image-rendering:pixelated;"/>'
-    + '</div></div>'
-    + '<div style="text-align:right;font-size:7px;color:#555;padding:0 8px 3px 8px;flex-shrink:0;">Amicus Next Church</div>'
+    + '<div class="lbl-right"><img src="' + qrDataURL + '" width="56" height="56" style="display:block;image-rendering:pixelated;"></div>'
     + '</div>'
-    + '<scr'+'ipt>window.onload=function(){window.print();setTimeout(function(){window.close();},500);};</scr'+'ipt>'
+    + '<div class="lbl-footer">Amicus Next Church</div>'
+    + '</div>'
+    + '<' + 'scr' + 'ipt>window.onload=function(){window.print();setTimeout(function(){window.close();},5000);}</' + 'scr' + 'ipt>'
     + '</body></html>';
 
   var w = window.open('', '_blank', 'width=240,height=330,toolbar=0,menubar=0,location=0,status=0');
