@@ -39,8 +39,8 @@
   </head>
   <body>
     <h1>🏷️ Label Test Page</h1>
-  <p class="sub">All 4 variants — Child label 62×86mm (landscape) + Pickup tag 62×100mm (portrait)</p>p>
-  <div id="container"></div>div>
+  <p class="sub">All 4 variants — Child label 62×86mm (landscape) + Pickup tag 62×100mm (portrait)</p>
+  <div id="container"></div>
   <script>
     var QR_URL='https://amicus-checkin.vercel.app/';
     var _v=[];
@@ -54,8 +54,8 @@
     function checkBirthday(student){
         if(!student.birthday) return false;
         var today=new Date();
-        var bday=new Date(student.birthday);
-        return bday.getMonth()===today.getMonth() && bday.getDate()===today.getDate();
+        var parts=student.birthday.split('-');
+        return parseInt(parts[1],10)-1===today.getMonth() && parseInt(parts[2],10)===today.getDate();
     }
 
     function buildChildLabel(student,isBirthday,hasAllergy,QR_URL){
