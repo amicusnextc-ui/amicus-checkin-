@@ -391,15 +391,6 @@ function printTag() {
   var doc = iframe.contentDocument || iframe.contentWindow.document;
   doc.open(); doc.write(html); doc.close();
   setTimeout(function(){if(document.body.contains(iframe))document.body.removeChild(iframe);},15000);
-}t;
-  doc.open(); doc.write(html); doc.close();
-  setTimeout(function(){if(document.body.contains(iframe))document.body.removeChild(iframe);}, 15000);
-}-9999px;left:-9999px;width:1px;height:1px;border:none;';
-  document.body.appendChild(iframe);
-  const doc = iframe.contentDocument || iframe.contentWindow.document;
-  doc.open(); doc.write(combinedHTML); doc.close();
-  // Remove iframe after print dialog closes
-  setTimeout(() => { if(document.body.contains(iframe)) document.body.removeChild(iframe); }, 10000);
 }
 
 function printChildLabel(d) {
