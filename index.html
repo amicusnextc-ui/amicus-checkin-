@@ -349,10 +349,10 @@ function printTag() {
 }
 
 function printChildLabel(d) {
-  var variantBorder = (d.isBday) ? '2px solid #1a1a1a' : '1.5px solid #888';
+  var variantBorder = d.isBday ? '2px solid #1a1a1a' : '1.5px solid #888';
   var bdayBanner = d.isBday ? '<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:2px 0;text-transform:uppercase;flex-shrink:0;">HAPPY BIRTHDAY!</div>' : '';
-  var allergyHtml = (d.allergyFlag && d.allergy) ? '<div style="margin:3px 0 2px;border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;">! ' + String.fromCharCode(50508,47084,51648) + ' / ALLERGY<br><span style="font-weight:400;font-size:9px;">' + (d.allergy || '') + '</span></div>' : '';
-  var birthdayEmoji = d.isBday ? '<span style="filter:grayscale(100%);font-size:14px;margin-left:4px;">\uD83C\uDF82</span>' : '';
+  var allergyHtml = (d.allergyFlag && d.allergy) ? '<div style="margin:3px 0 2px;border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;">! ' + String.fromCharCode(50508,47084,51648) + ' / ALLERGY<br><span style="font-weight:400;font-size:9px;">' + (d.allergy||'') + '</span></div>' : '';
+  var bdayEmoji = d.isBday ? '<span style="filter:grayscale(100%);font-size:13px;margin-left:3px;">\uD83C\uDF82</span>' : '';
   var headerBg = d.isBday ? '#e8e8e8' : '#1a1a1a';
   var headerColor = d.isBday ? '#1a1a1a' : '#fff';
 
@@ -363,85 +363,75 @@ function printChildLabel(d) {
   var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
     + '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">'
     + '<style>'
-    + '* { margin:0; padding:0; box-sizing:border-box; font-family: "Noto Sans KR",Arial,sans-serif; }'
-    + '@page { size: 62mm 86mm; margin: 0; }'
-    + 'html, body { width:62mm; height:86mm; overflow:hidden; background:#fff; position:relative; }'
+    + '* { margin:0; padding:0; box-sizing:border-box; font-family:"Noto Sans KR",Arial,sans-serif; }'
+    + '@page { size: 62mm 100mm; margin: 0; }'
+    + 'html, body { width:62mm; height:100mm; overflow:hidden; background:#fff; position:relative; }'
     + '#childLabel {'
-    + '  width:86mm; height:60mm;'
+    + '  width:100mm; height:60mm;'
     + '  position:absolute; top:60mm; left:0;'
     + '  transform:rotate(-90deg); transform-origin:top left;'
-    + '  overflow:hidden;'
-    + '  display:flex; flex-direction:column;'
+    + '  overflow:hidden; display:flex; flex-direction:column;'
     + '  border:' + variantBorder + ';'
-    + '  font-size:8pt; background:#fff; color:#1a1a1a;'
+    + '  background:#fff; color:#1a1a1a;'
     + '  -webkit-print-color-adjust:exact; print-color-adjust:exact;'
     + '}'
-    + '.lbl-header {'
-    + '  display:flex; justify-content:space-between; align-items:center;'
-    + '  padding:3px 8px; flex-shrink:0;'
-    + '  background:' + headerBg + '; color:' + headerColor + ';'
-    + '  font-size:9px; font-weight:700; letter-spacing:0.5px;'
-    + '}'
-    + '.lbl-body {'
-    + '  display:flex; flex-direction:row;'
-    + '  flex:1; padding:5px 8px 3px 8px; gap:5px; overflow:hidden;'
-    + '}'
-    + '.lbl-left { flex:1; display:flex; flex-direction:column; gap:2px; overflow:hidden; }'
-    + '.lbl-right { width:60px; display:flex; align-items:flex-start; justify-content:center; flex-shrink:0; padding-top:2px; }'
-    + '.lbl-footer { text-align:right; font-size:6px; color:#999; padding:1px 8px 2px; border-top:0.5px solid #ccc; flex-shrink:0; }'
+    + '.lbl-hdr { display:flex; justify-content:space-between; align-items:center; padding:3px 8px; flex-shrink:0; background:' + headerBg + '; color:' + headerColor + '; font-size:9px; font-weight:700; letter-spacing:0.5px; }'
+    + '.lbl-body { display:flex; flex-direction:row; flex:1; padding:5px 8px 3px; gap:6px; overflow:hidden; }'
+    + '.lbl-left { flex:1; display:flex; flex-direction:column; gap:2px; overflow:hidden; min-width:0; }'
+    + '.lbl-right { width:62px; display:flex; align-items:flex-start; justify-content:center; flex-shrink:0; padding-top:2px; }'
+    + '.lbl-foot { text-align:right; font-size:6px; color:#999; padding:1px 8px 2px; border-top:0.5px solid #ccc; flex-shrink:0; }'
     + '</style></head><body>'
     + '<div id="childLabel">'
     + bdayBanner
-    + '<div class="lbl-header"><span>' + d.dept + '</span><span>' + d.grade + '</span></div>'
+    + '<div class="lbl-hdr"><span>' + d.dept + '</span><span>' + d.grade + '</span></div>'
     + '<div class="lbl-body">'
     + '<div class="lbl-left">'
-    + '<div style="font-size:20px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.koreanName + birthdayEmoji + '</div>'
-    + '<div style="font-size:10px;color:#555;margin-bottom:2px;">(' + d.englishName + ')</div>'
+    + '<div style="font-size:20px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.koreanName + bdayEmoji + '</div>'
+    + '<div style="font-size:10px;color:#555;margin-bottom:2px;white-space:nowrap;">(' + d.englishName + ')</div>'
     + '<div style="border:1.5px dashed #888;padding:2px 6px;font-size:12px;letter-spacing:2px;font-weight:600;white-space:nowrap;display:inline-block;">' + d.amcCode + '</div>'
     + allergyHtml
     + '<div style="font-size:8px;color:#333;margin-top:2px;white-space:nowrap;">' + d.guardianText + '</div>'
     + '<div style="font-size:8px;color:#333;white-space:nowrap;">' + d.checkinText + '</div>'
     + '</div>'
-    + '<div class="lbl-right"><img src="' + qrDataURL + '" width="56" height="56" style="display:block;image-rendering:pixelated;"></div>'
+    + '<div class="lbl-right"><img src="' + qrDataURL + '" width="58" height="58" style="display:block;image-rendering:pixelated;"></div>'
     + '</div>'
-    + '<div class="lbl-footer">Amicus Next Church</div>'
+    + '<div class="lbl-foot">Amicus Next Church</div>'
     + '</div>'
     + '<' + 'scr' + 'ipt>window.onload=function(){window.print();setTimeout(function(){window.close();},5000);}</' + 'scr' + 'ipt>'
     + '</body></html>';
 
-  var w = window.open('', '_blank', 'width=240,height=330,toolbar=0,menubar=0,location=0,status=0');
+  var w = window.open('', '_blank', 'width=240,height=390,toolbar=0,menubar=0,location=0,status=0');
   if (w) { w.document.open(); w.document.write(html); w.document.close(); }
 }
 
 function printParentTag(d) {
-  var variantBorder = (d.isBday) ? '2px solid #1a1a1a' : '1.5px solid #888';
-
   var qrCanvas = document.createElement('canvas');
-  try { new QRious({ element: qrCanvas, value: d.QR_URL, size: 243, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
+  try { new QRious({ element: qrCanvas, value: d.QR_URL, size: 168, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
   var qrDataURL = qrCanvas.toDataURL();
 
   var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
     + '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">'
     + '<style>'
-    + '* { margin:0; padding:0; box-sizing:border-box; font-family: "Noto Sans KR", Arial, sans-serif; }'
-    + '@page { size: 62mm 32mm; margin: 0; }'
-    + 'html, body { width:62mm; height:32mm; overflow:hidden; background:#fff; }'
-    + '@media print { html, body { width:62mm; height:32mm; } }'
+    + '* { margin:0; padding:0; box-sizing:border-box; font-family:"Noto Sans KR",Arial,sans-serif; }'
+    + '@page { size: 62mm 38mm; margin: 0; }'
+    + 'html, body { width:62mm; height:38mm; overflow:hidden; background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }'
+    + '#ptag { width:62mm; height:38mm; display:flex; flex-direction:row; border:1.5px solid #888; overflow:hidden; }'
+    + '.pt-left { flex:1; padding:5px 8px; display:flex; flex-direction:column; justify-content:center; gap:3px; min-width:0; overflow:hidden; }'
+    + '.pt-right { width:36mm; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-left:1px solid #ddd; padding:4px; }'
     + '</style></head><body>'
-    + '<div style="width:60mm;height:32mm;box-sizing:border-box;border:' + variantBorder + ';font-family:\"Noto Sans KR\",Arial,sans-serif;font-size:8pt;background:#fff;color:#000;display:flex;flex-direction:row;align-items:stretch;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'
-    + '<div style="flex:1;padding:5px 8px 5px 6px;display:flex;flex-direction:column;justify-content:center;min-width:0;">'
-    + '<div style="font-size:7.5px;font-weight:800;color:#555;margin-bottom:1px;">&#54588;&#50629; &#53468;&#44536; / Pickup Tag</div>'
-    + '<div style="font-size:7px;color:#666;margin-bottom:4px;">&#48372;&#54840;&#51088; &#51648;&#52632; &#54596;&#49688; / Please keep this tag</div>'
-    + '<div style="font-size:12px;font-weight:700;margin-bottom:3px;">' + d.pickupName + '</div>'
-    + '<span style="display:inline-block;border:2px solid #1a1a1a;border-radius:3px;padding:2px 6px;font-size:13px;font-weight:900;white-space:nowrap;">' + d.amcCode + '</span>'
+    + '<div id="ptag">'
+    + '<div class="pt-left">'
+    + '<div style="font-size:8px;font-weight:700;white-space:nowrap;">' + String.fromCharCode(54589,50629,32,53468,44536) + ' / Pickup Tag</div>'
+    + '<div style="font-size:7px;color:#777;white-space:nowrap;">' + String.fromCharCode(48372,54840,51088,32,51648,52280,32,54596,49688) + ' / Please keep this tag</div>'
+    + '<div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.pickupName + '</div>'
+    + '<div style="border:2px solid #1a1a1a;padding:2px 6px;font-size:13px;font-weight:700;letter-spacing:2px;white-space:nowrap;display:inline-block;">' + d.amcCode + '</div>'
     + '</div>'
-    + '<div style="background:#fff;border-left:1px solid #ddd;padding:4px;display:flex;align-items:stretch;flex-shrink:0;">'
-    + '<img src="' + qrDataURL + '" style="display:block;width:72px;height:100%;object-fit:contain;image-rendering:pixelated;"/>'
-    + '</div></div>'
-    + '<scr'+'ipt>window.onload=function(){window.print();setTimeout(function(){window.close();},500);};</scr'+'ipt>'
+    + '<div class="pt-right"><img src="' + qrDataURL + '" style="width:100%;height:100%;object-fit:contain;image-rendering:pixelated;"></div>'
+    + '</div>'
+    + '<' + 'scr' + 'ipt>window.onload=function(){window.print();setTimeout(function(){window.close();},5000);}</' + 'scr' + 'ipt>'
     + '</body></html>';
 
-  var w = window.open('', '_blank', 'width=240,height=130,toolbar=0,menubar=0,location=0,status=0');
+  var w = window.open('', '_blank', 'width=240,height=150,toolbar=0,menubar=0,location=0,status=0');
   if (w) { w.document.open(); w.document.write(html); w.document.close(); }
 }
 
