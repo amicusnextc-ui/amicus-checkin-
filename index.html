@@ -361,21 +361,30 @@ function printTag() {
     + algHtml + "<div class=\"drow\"><span class=\"dk\">Guardian</span><span class=\"dv\">" + (d.guardianText||"") + "</span></div><div class=\"drow\"><span class=\"dk\">Checked in :</span><span class=\"dv\">" + (d.checkinText||"") + "</span></div></div><div class=\"right\"><canvas id=\"qr1\"></canvas></div></div><div class=\"ftr\"><span>Amicus Next Church</span></div></div>"
     + "<sc"+"ript>new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:66,background:\"white\",foreground:\"#000\",level:\"M\"});function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}"+CLOSE+"</body></html>";
   var pickupCSS = "*{box-sizing:border-box;margin:0;padding:0;}"
-    + "@page{size:62mm 38mm;margin:0;}"
-    + "html,body{width:62mm;height:38mm;overflow:hidden;background:#fff;font-family:Arial;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
-    + "#w{width:62mm;height:38mm;display:flex;flex-direction:row;border:1.5pt solid #000;}"
-    + ".left{flex:1;padding:3mm 3.5mm;display:flex;flex-direction:column;justify-content:center;}"
-    + ".t{font-size:7.5pt;font-weight:700;color:#000;line-height:1.3;}"
-    + ".s{font-size:6.5pt;color:#000;margin-bottom:2.5mm;line-height:1.3;}"
-    + ".n{font-size:10pt;font-weight:700;color:#000;margin-bottom:2mm;line-height:1.2;}"
-    + ".a{border:1.5pt solid #000;border-radius:2pt;padding:1.5mm 3mm;display:inline-block;}"
-    + ".a span{font-size:10pt;font-weight:700;color:#000;letter-spacing:0.5pt;white-space:nowrap;}"
-    + ".right{width:17mm;flex-shrink:0;border-left:1.5pt solid #000;display:flex;align-items:center;justify-content:center;}";
-  var pickupHTML = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE+"<style>"+pickupCSS+"</style></head><body>"
-    + "<div id=\"w\"><div class=\"left\"><div class=\"t\">픽업 태그 / Pickup Tag</div><div class=\"s\">보호자 지참 필수 / Please keep this tag</div><div class=\"n\">" + (d.pickupName||d.koreanName) + " (" + (d.englishName||"") + ")</div><div class=\"a\"><span>" + d.amcCode + "</span></div></div>"
-    + "<div class=\"right\"><canvas id=\"qr2\"></canvas></div></div>"
-    + "<sc"+"ript>new QRious({element:document.getElementById(\"qr2\"),value:\""+QR_URL+"\",size:62,background:\"white\",foreground:\"#000\",level:\"M\"});function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}"+CLOSE+"</body></html>";
-  var f1 = document.createElement("iframe");
+    + "@page{size:38mm 62mm;margin:0;}"
+    + "html,body{width:38mm;height:62mm;overflow:hidden;background:#fff;font-family:Arial;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
+    + "#w{width:38mm;height:62mm;display:flex;flex-direction:column;border:1.5pt solid #000;}"
+    + ".top{flex:1;padding:3mm;display:flex;flex-direction:column;justify-content:center;}"
+    + ".t{font-size:7pt;font-weight:700;color:#000;margin-bottom:0.5mm;line-height:1.2;}"
+    + ".s{font-size:6pt;color:#000;margin-bottom:3mm;line-height:1.2;}"
+    + ".n{font-size:9pt;font-weight:700;color:#000;margin-bottom:3mm;line-height:1.2;}"
+    + ".a{border:1.5pt solid #000;border-radius:2pt;padding:1mm 2mm;display:inline-block;}"
+    + ".a span{font-size:9pt;font-weight:700;color:#000;letter-spacing:0.5pt;white-space:nowrap;}"
+    + ".bot{border-top:1.5pt solid #000;display:flex;align-items:center;justify-content:center;padding:2mm;flex-shrink:0;}";
+  var pickupHTML = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE
+    + "<style>"+pickupCSS+"</style></head><body>"
+    + "<div id=\"w\">"
+    + "<div class=\"top\">"
+    + "<div class=\"t\">픽업 태그 / Pickup Tag</div>"
+    + "<div class=\"s\">보호자 지참 필수 / Please keep this tag</div>"
+    + "<div class=\"n\">" + (d.pickupName||d.koreanName) + " (" + (d.englishName||"") + ")</div>"
+    + "<div class=\"a\"><span>" + d.amcCode + "</span></div>"
+    + "</div>"
+    + "<div class=\"bot\"><canvas id=\"qr2\"></canvas></div>"
+    + "</div>"
+    + "<sc"+"ript>new QRious({element:document.getElementById(\"qr2\"),value:\""+QR_URL+"\",size:62,background:\"white\",foreground:\"#000\",level:\"M\"});function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}"+CLOSE
+    + "</body></html>";
+    var f1 = document.createElement("iframe");
   f1.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;";
   document.body.appendChild(f1);
   var d1 = f1.contentDocument || f1.contentWindow.document;
