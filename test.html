@@ -7,90 +7,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:"Noto Sans KR",Arial,sans-serif; }
-body { background:#f0f0f0; padding:24px; }
-h1 { font-size:20px; font-weight:700; margin-bottom:4px; }
-p.sub { font-size:12px; color:#666; margin-bottom:24px; }
-.row { display:flex; flex-wrap:wrap; gap:24px; margin-bottom:40px; align-items:flex-start; }
-.col { display:flex; flex-direction:column; gap:8px; align-items:center; }
-.label-title { font-size:11px; font-weight:700; color:#444; text-align:center; }
-.print-btn {
-  background:#1a1a1a; color:#fff; border:none; border-radius:4px;
-  padding:6px 16px; font-size:12px; font-weight:700; cursor:pointer;
-  font-family:inherit; letter-spacing:0.5px;
-}
-.print-btn:hover { background:#444; }
-
-/* ===== CHILD LABEL: 62mm x 100mm portrait ===== */
-.child-wrap {
-  width:62mm; height:100mm;
-  background:white;
-  overflow:hidden;
-  box-shadow:0 2px 8px rgba(0,0,0,0.15);
-  display:flex;
-  flex-direction:column;
-}
-.lbl-hdr {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:3px 8px; flex-shrink:0;
-  font-size:9px; font-weight:700;
-}
-.bday-banner {
-  background:#000; color:#fff; text-align:center;
-  font-size:9px; font-weight:900; letter-spacing:1.5px;
-  padding:3px 0; flex-shrink:0; text-transform:uppercase;
-}
-.lbl-body {
-  flex:1; display:flex; flex-direction:row;
-  padding:5px 8px 3px; gap:6px; overflow:hidden; min-height:0;
-}
-.lbl-left {
-  flex:1; display:flex; flex-direction:column;
-  gap:2px; overflow:hidden; min-width:0;
-}
-.lbl-right {
-  width:16mm; display:flex; align-items:flex-start;
-  justify-content:center; flex-shrink:0; padding-top:2px;
-}
-.lbl-foot {
-  text-align:right; font-size:6px; color:#999;
-  padding:1px 8px 2px; border-top:0.5px solid #ccc; flex-shrink:0;
-}
-.amc-box {
-  border:1.5px dashed #888; padding:2px 6px;
-  font-size:12px; letter-spacing:2px; font-weight:600;
-  white-space:nowrap; display:inline-block;
-}
-.allergy-box {
-  border:2px solid #1a1a1a; background:#f8f8f8;
-  padding:3px 6px; font-size:9px; font-weight:700;
-  flex-shrink:0; margin:2px 0;
-}
-
-/* ===== PICKUP TAG: 62mm x 38mm ===== */
-.pickup-wrap {
-  width:62mm; height:38mm; background:white; overflow:hidden;
-  box-shadow:0 2px 8px rgba(0,0,0,0.15); display:flex; flex-direction:row;
-}
-.pt-left { flex:1; padding:5px 8px; display:flex; flex-direction:column; justify-content:center; gap:3px; min-width:0; overflow:hidden; }
-.pt-right { width:36mm; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-left:1px solid #ddd; padding:4px; }
-.pt-amc { border:2px solid #1a1a1a; padding:2px 6px; font-size:13px; font-weight:700; letter-spacing:2px; white-space:nowrap; display:inline-block; }
-
-/* ===== PRINT STYLES ===== */
-@media print {
-  body { background:white; padding:0; margin:0; }
-  .row, .col, .label-title, .print-btn, h1, p.sub, #container > .row > .col:not(.printing) { display:none !important; }
-  .printing { display:block !important; }
-  @page { size: 62mm 100mm; margin: 0; }
-  .print-child .child-wrap {
-    box-shadow:none; width:62mm; height:100mm;
-    position:fixed; top:0; left:0;
-  }
-  .print-pickup .pickup-wrap {
-    box-shadow:none; width:62mm; height:38mm;
-    position:fixed; top:0; left:0;
-  }
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Noto Sans KR",Arial,sans-serif;}
+body{background:#f0f0f0;padding:24px;}
+h1{font-size:20px;font-weight:700;margin-bottom:4px;}
+p.sub{font-size:12px;color:#666;margin-bottom:24px;}
+.row{display:flex;flex-wrap:wrap;gap:24px;margin-bottom:40px;align-items:flex-start;}
+.col{display:flex;flex-direction:column;gap:8px;align-items:center;}
+.label-title{font-size:11px;font-weight:700;color:#444;text-align:center;}
+.print-btn{background:#1a1a1a;color:#fff;border:none;border-radius:4px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.5px;}
+.print-btn:hover{background:#444;}
+.child-wrap{width:62mm;height:100mm;background:white;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.15);display:flex;flex-direction:column;}
+.lbl-hdr{display:flex;justify-content:space-between;align-items:center;padding:3px 8px;flex-shrink:0;font-size:9px;font-weight:700;}
+.bday-banner{background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:3px 0;flex-shrink:0;text-transform:uppercase;}
+.lbl-body{flex:1;display:flex;flex-direction:row;padding:5px 8px 3px;gap:6px;overflow:hidden;min-height:0;}
+.lbl-left{flex:1;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-width:0;}
+.lbl-right{width:16mm;display:flex;align-items:flex-start;justify-content:center;flex-shrink:0;padding-top:2px;}
+.lbl-foot{text-align:right;font-size:6px;color:#999;padding:1px 8px 2px;border-top:0.5px solid #ccc;flex-shrink:0;}
+.amc-box{border:1.5px dashed #888;padding:2px 6px;font-size:12px;letter-spacing:2px;font-weight:600;white-space:nowrap;display:inline-block;}
+.allergy-box{border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;margin:2px 0;}
+.pickup-wrap{width:62mm;height:38mm;background:white;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.15);display:flex;flex-direction:row;}
+.pt-left{flex:1;padding:5px 8px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0;overflow:hidden;}
+.pt-right{width:36mm;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-left:1px solid #ddd;padding:4px;}
+.pt-amc{border:2px solid #1a1a1a;padding:2px 6px;font-size:13px;font-weight:700;letter-spacing:2px;white-space:nowrap;display:inline-block;}
 </style>
 </head>
 <body>
@@ -99,41 +37,41 @@ p.sub { font-size:12px; color:#666; margin-bottom:24px; }
 <div id="container"></div>
 <script>
 var QR_URL='https://amicus-checkin.vercel.app/';
-function makeQR(){
+var _v=[];
+
+function makeQR(size){
   var c=document.createElement('canvas');
-  try{new QRious({element:c,value:QR_URL,size:168,background:'#ffffff',foreground:'#000000',level:'M'});}catch(e){}
+  try{new QRious({element:c,value:QR_URL,size:size,background:'#ffffff',foreground:'#000000',level:'M'});}catch(e){}
   return c.toDataURL();
 }
-var qrImg=makeQR();
 
-function printLabel(type, idx) {
-  var win=window.open('','_blank','width=400,height=600');
-  var v=variants[idx];
+function doPrint(idx,type){
+  var v=_v[idx];
+  var qrSrc=makeQR(168);
+  var border=v.isBday?'2px solid #1a1a1a':'1.5px solid #888';
   var hBg=v.isBday?'#e8e8e8':'#1a1a1a';
   var hCol=v.isBday?'#1a1a1a':'#fff';
-  var wrapBorder=v.isBday?'2px solid #1a1a1a':'1.5px solid #888';
-  var bday=v.isBday?'<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:3px 0;text-transform:uppercase;">HAPPY BIRTHDAY!</div>':'';
+  var bday=v.isBday?'<div style="background:#000;color:#fff;text-align:center;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:3px 0;text-transform:uppercase;flex-shrink:0;">HAPPY BIRTHDAY!</div>':'';
   var emoji=v.isBday?'<span style="filter:grayscale(100%);font-size:13px;margin-left:3px;">🎂</span>':'';
-  var alrg=(v.allergyFlag&&v.allergy)?'<div style="border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;margin:2px 0;">! 알러지 / ALLERGY<br><span style="font-weight:400;font-size:9px;">'+v.allergy+'</span></div>':'';
+  var alrg=v.allergyFlag?'<div style="border:2px solid #1a1a1a;background:#f8f8f8;padding:3px 6px;font-size:9px;font-weight:700;flex-shrink:0;margin:2px 0;">! 알러지 / ALLERGY<br><span style=\"font-weight:400;font-size:9px;\">'+(v.allergy||'')+'</span></div>':'';
 
+  var html;
   if(type==='child'){
-    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
       +'<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">'
-      +'<sc'+'ript src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></sc'+'ript>'
-      +'<style>'
-      +'*{margin:0;padding:0;box-sizing:border-box;font-family:"Noto Sans KR",Arial,sans-serif;}'
+      +'<style>*{margin:0;padding:0;box-sizing:border-box;font-family:"Noto Sans KR",Arial,sans-serif;}'
       +'@page{size:62mm 100mm;margin:0;}'
-      +'html,body{width:62mm;height:100mm;overflow:hidden;}'
-      +'#lbl{width:62mm;height:100mm;display:flex;flex-direction:column;border:'+wrapBorder+';}'
-      +'.hdr{display:flex;justify-content:space-between;align-items:center;padding:3px 8px;flex-shrink:0;font-size:9px;font-weight:700;background:'+hBg+';color:'+hCol+';}'
+      +'html,body{width:62mm;height:100mm;overflow:hidden;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
+      +'#lbl{width:62mm;height:100mm;display:flex;flex-direction:column;border:'+border+';overflow:hidden;}'
+      +'.hdr{display:flex;justify-content:space-between;align-items:center;padding:3px 8px;flex-shrink:0;font-size:9px;font-weight:700;background:'+hBg+';color:'+hCol+';-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
       +'.body{flex:1;display:flex;flex-direction:row;padding:5px 8px 3px;gap:6px;overflow:hidden;min-height:0;}'
       +'.left{flex:1;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-width:0;}'
       +'.right{width:16mm;display:flex;align-items:flex-start;justify-content:center;flex-shrink:0;padding-top:2px;}'
       +'.foot{text-align:right;font-size:6px;color:#999;padding:1px 8px 2px;border-top:0.5px solid #ccc;flex-shrink:0;}'
       +'</style></head><body>'
       +'<div id="lbl">'
-      +'<div class="hdr"><span>'+v.dept+'</span><span>'+v.grade+'</span></div>'
       +bday
+      +'<div class="hdr"><span>'+v.dept+'</span><span>'+v.grade+'</span></div>'
       +'<div class="body"><div class="left">'
       +'<div style="font-size:22px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+v.korName+emoji+'</div>'
       +'<div style="font-size:10px;color:#555;margin-bottom:3px;white-space:nowrap;">('+v.engName+')</div>'
@@ -141,20 +79,19 @@ function printLabel(type, idx) {
       +alrg
       +'<div style="font-size:8px;color:#333;margin-top:3px;white-space:nowrap;">'+v.guardianText+'</div>'
       +'<div style="font-size:8px;color:#333;white-space:nowrap;">'+v.checkinText+'</div>'
-      +'</div><div class="right"><canvas id="qrc"></canvas></div></div>'
+      +'</div>'
+      +'<div class="right"><img src="'+qrSrc+'" width="56" height="56" style="display:block;image-rendering:pixelated;"></div>'
+      +'</div>'
       +'<div class="foot">Amicus Next Church</div>'
       +'</div>'
-      +'<sc'+'ript>window.onload=function(){try{new QRious({element:document.getElementById("qrc"),value:"'+QR_URL+'",size:56,background:"#fff",foreground:"#000",level:"M"});}catch(e){}setTimeout(function(){window.print();window.close();},400);};</sc'+'ript>'
-      +'</body></html>');
-    win.document.close();
+      +'<script>window.onload=function(){window.print();setTimeout(window.close,4000);};<\/sc'+'ript>'
+      +'</body></html>';
   } else {
-    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
       +'<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">'
-      +'<sc'+'ript src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></sc'+'ript>'
-      +'<style>'
-      +'*{margin:0;padding:0;box-sizing:border-box;font-family:"Noto Sans KR",Arial,sans-serif;}'
+      +'<style>*{margin:0;padding:0;box-sizing:border-box;font-family:"Noto Sans KR",Arial,sans-serif;}'
       +'@page{size:62mm 38mm;margin:0;}'
-      +'html,body{width:62mm;height:38mm;overflow:hidden;}'
+      +'html,body{width:62mm;height:38mm;overflow:hidden;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
       +'#pt{width:62mm;height:38mm;display:flex;flex-direction:row;border:1.5px solid #888;}'
       +'.ptl{flex:1;padding:5px 8px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0;overflow:hidden;}'
       +'.ptr{width:36mm;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-left:1px solid #ddd;padding:4px;}'
@@ -164,35 +101,40 @@ function printLabel(type, idx) {
       +'<div style="font-size:7px;color:#777;white-space:nowrap;">보호자 지참 바람 / Please keep this tag</div>'
       +'<div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+v.pickupName+'</div>'
       +'<div style="border:2px solid #1a1a1a;padding:2px 6px;font-size:13px;font-weight:700;letter-spacing:2px;white-space:nowrap;display:inline-block;">'+v.amc+'</div>'
-      +'</div><div class="ptr"><canvas id="qrp"></canvas></div></div>'
-      +'<sc'+'ript>window.onload=function(){try{new QRious({element:document.getElementById("qrp"),value:"'+QR_URL+'",size:120,background:"#fff",foreground:"#000",level:"M"});}catch(e){}setTimeout(function(){window.print();window.close();},400);};</sc'+'ript>'
-      +'</body></html>');
-    win.document.close();
+      +'</div><div class="ptr"><img src="'+makeQR(120)+'" style="width:100%;height:100%;object-fit:contain;image-rendering:pixelated;"></div>'
+      +'</div>'
+      +'<script>window.onload=function(){window.print();setTimeout(window.close,4000);};<\/sc'+'ript>'
+      +'</body></html>';
   }
+  var w=window.open('','_blank','width=300,height=460,toolbar=0,menubar=0,location=0,status=0');
+  if(w){w.document.open();w.document.write(html);w.document.close();}
+  else{alert('팝업이 차단되었습니다. 주소창 오른쪽 팝업 허용 버튼을 클릭하세요.');}
 }
 
 var variants=[
-  {title:'① 기본 (Basic)',isBday:false,allergyFlag:false,allergy:null,korName:'이예슬',engName:'Sally Lee',amc:'AMC-025',dept:'중고등부 (Youth)',grade:'9th grade',guardianText:'Guardian : 이강희 / 이지혜',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'이예슬 (Sally Lee)'},
-  {title:'② 생일 (Birthday)',isBday:true,allergyFlag:false,allergy:null,korName:'이예슬',engName:'Sally Lee',amc:'AMC-025b',dept:'중고등부 (Youth)',grade:'9th grade',guardianText:'Guardian : 이강희 / 이지혜',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'이예슬 (Sally Lee)'},
-  {title:'③ 생일+알러지',isBday:true,allergyFlag:true,allergy:'땅콩, 유제품',korName:'김지호',engName:'Jiho Kim',amc:'AMC-012b',dept:'유아부 (Infant)',grade:'만 3세',guardianText:'Guardian : 김철수 / 박영희',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'김지호 (Jiho Kim)'},
-  {title:'④ 알러지 (Allergy)',isBday:false,allergyFlag:true,allergy:'땅콩, 유제품',korName:'김지호',engName:'Jiho Kim',amc:'AMC-012',dept:'유아부 (Infant)',grade:'만 3세',guardianText:'Guardian : 김철수 / 박영희',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'김지호 (Jiho Kim)'},
+  {isBday:false,allergyFlag:false,allergy:null,korName:'이예슬',engName:'Sally Lee',amc:'AMC-025',dept:'중고등부 (Youth)',grade:'9th grade',guardianText:'Guardian : 이강희 / 이지혜',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'이예슬 (Sally Lee)',title:'① 기본 (Basic)'},
+  {isBday:true,allergyFlag:false,allergy:null,korName:'이예슬',engName:'Sally Lee',amc:'AMC-025b',dept:'중고등부 (Youth)',grade:'9th grade',guardianText:'Guardian : 이강희 / 이지혜',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'이예슬 (Sally Lee)',title:'② 생일 (Birthday)'},
+  {isBday:true,allergyFlag:true,allergy:'땅콩, 유제품',korName:'김지호',engName:'Jiho Kim',amc:'AMC-012b',dept:'유아부 (Infant)',grade:'만 3세',guardianText:'Guardian : 김철수 / 박영희',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'김지호 (Jiho Kim)',title:'③ 생일+알러지'},
+  {isBday:false,allergyFlag:true,allergy:'땅콩, 유제품',korName:'김지호',engName:'Jiho Kim',amc:'AMC-012',dept:'유아부 (Infant)',grade:'만 3세',guardianText:'Guardian : 김철수 / 박영희',checkinText:'Checked in : Apr 16, 2026 14:46',pickupName:'김지호 (Jiho Kim)',title:'④ 알러지 (Allergy)'},
 ];
+_v=variants;
 
 var container=document.getElementById('container');
 variants.forEach(function(v,vi){
   var hBg=v.isBday?'#e8e8e8':'#1a1a1a';
   var hCol=v.isBday?'#1a1a1a':'#fff';
-  var wrapBorder=v.isBday?'border:2px solid #1a1a1a;':'border:1.5px solid #888;';
+  var border=v.isBday?'border:2px solid #1a1a1a':'border:1.5px solid #888';
   var bday=v.isBday?'<div class="bday-banner">HAPPY BIRTHDAY!</div>':'';
   var emoji=v.isBday?'<span style="filter:grayscale(100%);font-size:13px;margin-left:3px;">🎂</span>':'';
-  var alrg=(v.allergyFlag&&v.allergy)?'<div class="allergy-box">! 알러지 / ALLERGY<br><span style="font-weight:400;font-size:9px;">'+v.allergy+'</span></div>':'';
+  var alrg=v.allergyFlag?'<div class="allergy-box">! 알러지 / ALLERGY<br><span style="font-weight:400;font-size:9px;">'+(v.allergy||'')+'</span></div>':'';
+  var qrSrc=makeQR(168);
   var id='v'+vi;
   var row=document.createElement('div');
   row.className='row';
   row.innerHTML=
     '<div class="col">'
     +'<div class="label-title">'+v.title+'<br>아이 라벨 62×100mm</div>'
-    +'<div class="child-wrap" style="'+wrapBorder+'">'
+    +'<div class="child-wrap" style="'+border+';">'
     +'<div class="lbl-hdr" style="background:'+hBg+';color:'+hCol+';">'
     +'<span>'+v.dept+'</span><span>'+v.grade+'</span>'
     +'</div>'
@@ -206,11 +148,11 @@ variants.forEach(function(v,vi){
     +'<div style="font-size:8px;color:#333;margin-top:3px;white-space:nowrap;">'+v.guardianText+'</div>'
     +'<div style="font-size:8px;color:#333;white-space:nowrap;">'+v.checkinText+'</div>'
     +'</div>'
-    +'<div class="lbl-right"><img id="qrc'+id+'" style="width:15mm;height:15mm;display:block;image-rendering:pixelated;"></div>'
+    +'<div class="lbl-right"><img id="qrc'+id+'" width="56" height="56" style="display:block;image-rendering:pixelated;"></div>'
     +'</div>'
     +'<div class="lbl-foot">Amicus Next Church</div>'
     +'</div>'
-    +'<button class="print-btn" data-type="child" data-idx="'+vi+'">프린트 아이 라벨 ▶</button>'
+    +'<button class="print-btn" onclick="doPrint('+vi+','child')">프린트 아이 라벨 ▶</button>'
     +'</div>'
     +'<div class="col">'
     +'<div class="label-title">픽업 태그 62×38mm</div>'
@@ -222,11 +164,11 @@ variants.forEach(function(v,vi){
     +'<div class="pt-amc">'+v.amc+'</div>'
     +'</div><div class="pt-right"><img id="qrp'+id+'" style="width:100%;height:100%;object-fit:contain;image-rendering:pixelated;"></div>'
     +'</div>'
-    +'<button class="print-btn" data-type="pickup" data-idx="'+vi+'">프린트 픽업 태그 ▶</button>'
+    +'<button class="print-btn" onclick="doPrint('+vi+','pickup')">프린트 픽업 태그 ▶</button>'
     +'</div>';
   container.appendChild(row);
-  document.getElementById('qrc'+id).src=qrImg;
-  document.getElementById('qrp'+id).src=qrImg;
+  document.getElementById('qrc'+id).src=qrSrc;
+  document.getElementById('qrp'+id).src=qrSrc;
 });
 </script>
 </body>
