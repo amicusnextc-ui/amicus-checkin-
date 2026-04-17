@@ -19,7 +19,7 @@ p.sub { font-size:12px; color:#666; margin-bottom:24px; }
 .lbl-hdr { display:flex; justify-content:space-between; align-items:center; padding:3px 8px; flex-shrink:0; font-size:9px; font-weight:700; letter-spacing:0.5px; }
 .lbl-body { display:flex; flex-direction:row; flex:1; padding:5px 8px 3px; gap:6px; overflow:hidden; }
 .lbl-left { flex:1; display:flex; flex-direction:column; gap:2px; overflow:hidden; min-width:0; }
-.lbl-right { width:62px; display:flex; align-items:flex-start; justify-content:center; flex-shrink:0; padding-top:2px; }
+.lbl-right { width:16mm; display:flex; align-items:flex-start; justify-content:center; flex-shrink:0; padding-top:2px; }
 .lbl-foot { text-align:right; font-size:6px; color:#999; padding:1px 8px 2px; border-top:0.5px solid #ccc; flex-shrink:0; }
 .amc-box { border:1.5px dashed #888; padding:2px 6px; font-size:12px; letter-spacing:2px; font-weight:600; white-space:nowrap; display:inline-block; }
 .allergy-box { margin:3px 0 2px; border:2px solid #1a1a1a; background:#f8f8f8; padding:3px 6px; font-size:9px; font-weight:700; flex-shrink:0; }
@@ -64,7 +64,7 @@ variants.forEach(function(v,vi){
     +alrg
     +'<div style="font-size:8px;color:#333;margin-top:2px;white-space:nowrap;">'+v.guardianText+'</div>'
     +'<div style="font-size:8px;color:#333;white-space:nowrap;">'+v.checkinText+'</div>'
-    +'</div><div class="lbl-right"><img id="qrc'+id+'" width="58" height="58" style="display:block;image-rendering:pixelated;"></div>'
+    +'</div><div class="lbl-right"><img id="qrc'+id+'" style="width:15mm;height:15mm;display:block;image-rendering:pixelated;"></div>'
     +'</div><div class="lbl-foot">Amicus Next Church</div></div></div></div>'
     +'<div class="col"><div class="label-title">픽업 태그 62×38mm</div>'
     +'<div class="pickup-wrap"><div class="pt-left">'
