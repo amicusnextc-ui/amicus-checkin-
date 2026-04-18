@@ -349,48 +349,53 @@ function printTag() {
   var hasAllergy = d.allergyFlag;
   var nameDisplay = isBday ? d.koreanName + " 🎂" : d.koreanName;
   var hdr = isBday
-    ? "<div style=\"background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:2.5mm 3mm;text-align:center;font-family:Arial;font-size:8pt;font-weight:700;letter-spacing:1.5px;\">HAPPY BIRTHDAY!</div><div style=\"background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:2mm 3mm;display:flex;justify-content:space-between;font-family:Arial;font-size:9pt;\"><span style=\"font-weight:700;\">" + (d.dept||d.department||"") + "</span><span>" + (d.grade||"") + "</span></div>"
-    : "<div style=\"background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:2.5mm 3mm;display:flex;justify-content:space-between;font-family:Arial;font-size:9pt;font-weight:700;\"><span>" + (d.dept||d.department||"") + "</span><span style=\"font-weight:400;\">" + (d.grade||"") + "</span></div>";
+    ? "<div style=\"background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:2.5mm 3mm;text-align:center;font-family:Arial;font-size:8pt;font-weight:700;letter-spacing:1.5px;flex-shrink:0;\">HAPPY BIRTHDAY!</div><div style=\"background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:2mm 3mm;display:flex;justify-content:space-between;font-family:Arial;font-size:9pt;flex-shrink:0;\"><span style=\"font-weight:700;\">" + (d.dept||d.department||"") + "</span><span>" + (d.grade||"") + "</span></div>"
+    : "<div style=\"background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:2.5mm 3mm;display:flex;justify-content:space-between;font-family:Arial;font-size:9pt;font-weight:700;flex-shrink:0;\"><span>" + (d.dept||d.department||"") + "</span><span style=\"font-weight:400;\">" + (d.grade||"") + "</span></div>";
   var algHtml = hasAllergy
-    ? "<div style=\"border:1pt solid #000;border-radius:2pt;padding:1.5mm 2mm;display:flex;align-items:center;gap:2mm;margin-bottom:2mm;\"><span style=\"font-size:10pt;font-weight:700;font-family:Arial;\">!</span><div><p style=\"font-size:7pt;font-weight:700;margin:0;text-transform:uppercase;font-family:Arial;\">알러지 / ALLERGY</p><p style=\"font-size:9pt;font-weight:700;margin:0;font-family:Arial;\">" + d.allergy + "</p></div></div>" : "";
+    ? "<div style=\"border:1pt solid #000;border-radius:2pt;padding:1mm 2mm;display:flex;align-items:center;gap:2mm;margin-bottom:1.5mm;\"><span style=\"font-size:9pt;font-weight:700;font-family:Arial;\">!</span><div><p style=\"font-size:6.5pt;font-weight:700;margin:0;font-family:Arial;\">알러지 / ALLERGY</p><p style=\"font-size:8.5pt;font-weight:700;margin:0;font-family:Arial;\">" + d.allergy + "</p></div></div>" : "";
   var CLOSE = "<" + "/" + "script>";
   var QR_SRC = "https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js";
-  var childHTML = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE
-    + "<style>*{box-sizing:border-box;margin:0;padding:0;}@page{size:86mm 54mm;margin:0;}html,body{width:86mm;height:54mm;overflow:hidden;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}#w{width:86mm;height:54mm;display:flex;flex-direction:column;border:1pt solid #000;}.body{display:flex;flex-direction:row;flex:1;min-height:0;padding:2mm 3mm;gap:2mm;}.left{flex:1;min-width:0;display:flex;flex-direction:column;}.nm{font-size:18pt;font-weight:700;color:#000;line-height:1.1;font-family:Arial;margin-bottom:0.5mm;}.enm{font-size:9pt;color:#000;font-family:Arial;margin-bottom:2mm;}.amc{border:1pt dashed #000;border-radius:2pt;padding:2pt 6pt;display:inline-block;margin-bottom:2mm;}.amc span{font-size:10pt;font-weight:700;letter-spacing:2pt;color:#000;white-space:nowrap;font-family:Arial;}.drow{border-top:1pt solid #000;padding-top:1.5mm;margin-top:1.5mm;display:flex;gap:2mm;align-items:center;}.dk{font-size:7.5pt;color:#000;white-space:nowrap;font-family:Arial;}.dv{font-size:8.5pt;font-weight:600;color:#000;white-space:nowrap;font-family:Arial;}.right{width:17mm;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;padding-top:1mm;}.ftr{padding:1mm 3mm;border-top:1pt solid #000;text-align:right;flex-shrink:0;}.ftr span{font-size:6pt;color:#000;font-family:Arial;}</style></head><body>"
-    + "<div id=\"w\">" + hdr
-    + "<div class=\"body\"><div class=\"left\"><div class=\"nm\">" + nameDisplay + "</div><div class=\"enm\">(" + (d.englishName||"") + ")</div><div class=\"amc\"><span>" + d.amcCode + "</span></div>"
+  var CSS =
+    "*{box-sizing:border-box;margin:0;padding:0;}"
+    + "@page{size:86mm 54mm;margin:0;}"
+    + "html,body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
+    + "#child{width:86mm;height:54mm;display:flex;flex-direction:column;border:1pt solid #000;page-break-after:always;}"
+    + ".cbody{display:flex;flex-direction:row;flex:1;min-height:0;padding:2mm 3mm;gap:2mm;}"
+    + ".cleft{flex:1;min-width:0;display:flex;flex-direction:column;}"
+    + ".nm{font-size:17pt;font-weight:700;color:#000;line-height:1.05;font-family:Arial;margin-bottom:0.5mm;}"
+    + ".enm{font-size:8.5pt;color:#000;font-family:Arial;margin-bottom:1.5mm;}"
+    + ".amc{border:1pt dashed #000;border-radius:2pt;padding:1.5pt 5pt;display:inline-block;margin-bottom:1.5mm;}"
+    + ".amc span{font-size:9.5pt;font-weight:700;letter-spacing:2pt;color:#000;white-space:nowrap;font-family:Arial;}"
+    + ".drow{border-top:1pt solid #000;padding-top:1mm;margin-top:1mm;display:flex;gap:2mm;align-items:center;}"
+    + ".dk{font-size:7pt;color:#000;white-space:nowrap;font-family:Arial;}"
+    + ".dv{font-size:8pt;font-weight:600;color:#000;white-space:nowrap;font-family:Arial;}"
+    + ".cright{width:17mm;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;padding-top:1mm;}"
+    + ".cftr{padding:1mm 3mm;border-top:1pt solid #000;text-align:right;flex-shrink:0;}"
+    + ".cftr span{font-size:5.5pt;color:#000;font-family:Arial;}"
+    + "#pickup{width:86mm;height:54mm;display:flex;flex-direction:row;border:1pt solid #000;}"
+    + ".pleft{flex:1;padding:4mm 5mm;display:flex;flex-direction:column;justify-content:center;}"
+    + ".pt{font-size:8pt;font-weight:700;color:#000;margin-bottom:1mm;font-family:Arial;}"
+    + ".ps{font-size:7pt;color:#000;margin-bottom:4mm;font-family:Arial;}"
+    + ".pn{font-size:13pt;font-weight:700;color:#000;margin-bottom:4mm;line-height:1.2;font-family:Arial;}"
+    + ".pa{border:1.5pt solid #000;border-radius:2pt;padding:2mm 4mm;display:inline-block;}"
+    + ".pa span{font-size:12pt;font-weight:700;color:#000;letter-spacing:0.5pt;white-space:nowrap;font-family:Arial;}"
+    + ".pright{width:22mm;flex-shrink:0;border-left:1pt solid #000;display:flex;align-items:center;justify-content:center;}";
+  var BODY =
+    "<div id=\"child\">" + hdr +
+    "<div class=\"cbody\"><div class=\"cleft\"><div class=\"nm\">" + nameDisplay + "</div><div class=\"enm\">(" + (d.englishName||"") + ")</div><div class=\"amc\"><span>" + d.amcCode + "</span></div>"
     + algHtml
-    + "<div class=\"drow\"><span class=\"dk\">Guardian</span><span class=\"dv\">" + (d.guardianText||"") + "</span></div><div class=\"drow\"><span class=\"dk\">Checked in :</span><span class=\"dv\">" + (d.checkinText||"") + "</span></div></div><div class=\"right\"><canvas id=\"qr1\"></canvas></div></div><div class=\"ftr\"><span>Amicus Next Church</span></div></div>"
-    + "<sc"+"ript>new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:66,background:\"white\",foreground:\"#000\",level:\"M\"});function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}"+CLOSE+"</body></html>";
-  var pickupHTML = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE
-    + "<style>*{box-sizing:border-box;margin:0;padding:0;}@page{size:50mm 62mm;margin:0;}html,body{width:50mm;height:62mm;overflow:hidden;background:#fff;font-family:Arial;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
-    + "#w{position:absolute;top:0;left:0;width:62mm;height:50mm;border:1pt solid #000;display:flex;flex-direction:row;transform:rotate(-90deg) translateX(-62mm);transform-origin:top left;}"
-    + ".left{flex:1;padding:3mm 4mm;display:flex;flex-direction:column;justify-content:center;}"
-    + ".t{font-size:7pt;font-weight:700;color:#000;line-height:1.2;}"
-    + ".s{font-size:6pt;color:#000;line-height:1.2;margin-bottom:3mm;}"
-    + ".n{font-size:10pt;font-weight:700;color:#000;margin-bottom:3mm;line-height:1.2;}"
-    + ".a{border:1.5pt solid #000;border-radius:2pt;padding:1.5mm 3mm;display:inline-block;}"
-    + ".a span{font-size:10pt;font-weight:700;color:#000;white-space:nowrap;}"
-    + ".right{width:20mm;flex-shrink:0;border-left:1pt solid #000;display:flex;align-items:center;justify-content:center;}"
-    + "</style></head><body>"
-    + "<div id=\"w\"><div class=\"left\"><div class=\"t\">픽업 태그 / Pickup Tag</div><div class=\"s\">보호자 지참 필수 / Please keep this tag</div><div class=\"n\">" + (d.pickupName||d.koreanName) + " (" + (d.englishName||"") + ")</div><div class=\"a\"><span>" + d.amcCode + "</span></div></div><div class=\"right\"><canvas id=\"qr2\"></canvas></div></div>"
-    + "<sc"+"ript>new QRious({element:document.getElementById(\"qr2\"),value:\""+QR_URL+"\",size:72,background:\"white\",foreground:\"#000\",level:\"M\"});function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}"+CLOSE+"</body></html>";
-  var f1 = document.createElement("iframe");
-  f1.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;";
-  document.body.appendChild(f1);
-  var d1 = f1.contentDocument || f1.contentWindow.document;
-  d1.open(); d1.write(childHTML); d1.close();
-  f1.contentWindow.addEventListener("afterprint", function() {
-    setTimeout(function() {
-      var f2 = document.createElement("iframe");
-      f2.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;";
-      document.body.appendChild(f2);
-      var d2 = f2.contentDocument || f2.contentWindow.document;
-      d2.open(); d2.write(pickupHTML); d2.close();
-      setTimeout(function(){if(document.body.contains(f2))document.body.removeChild(f2);},15000);
-    }, 400);
-  });
-  setTimeout(function(){if(document.body.contains(f1))document.body.removeChild(f1);},15000);
+    + "<div class=\"drow\"><span class=\"dk\">Guardian</span><span class=\"dv\">" + (d.guardianText||"") + "</span></div><div class=\"drow\"><span class=\"dk\">Checked in :</span><span class=\"dv\">" + (d.checkinText||"") + "</span></div></div><div class=\"cright\"><canvas id=\"qr1\"></canvas></div></div><div class=\"cftr\"><span>Amicus Next Church</span></div></div>"
+    + "<div id=\"pickup\"><div class=\"pleft\"><div class=\"pt\">픽업 태그 / Pickup Tag</div><div class=\"ps\">보호자 지참 필수 / Please keep this tag</div><div class=\"pn\">" + (d.pickupName||d.koreanName) + " (" + (d.englishName||"") + ")</div><div class=\"pa\"><span>" + d.amcCode + "</span></div></div><div class=\"pright\"><canvas id=\"qr2\"></canvas></div></div>";
+  var JS = "new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:64,background:\"white\",foreground:\"#000\",level:\"M\"});"
+    + "new QRious({element:document.getElementById(\"qr2\"),value:\""+QR_URL+"\",size:76,background:\"white\",foreground:\"#000\",level:\"M\"});"
+    + "function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}"
+  var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE+"<style>"+CSS+"</style></head><body>"+BODY+"<sc"+"ript>"+JS+CLOSE+"</body></html>";
+  var iframe = document.createElement("iframe");
+  iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;";
+  document.body.appendChild(iframe);
+  var idoc = iframe.contentDocument || iframe.contentWindow.document;
+  idoc.open(); idoc.write(html); idoc.close();
+  setTimeout(function(){if(document.body.contains(iframe))document.body.removeChild(iframe);},15000);
 }
 
 function printChildLabel(d) {
