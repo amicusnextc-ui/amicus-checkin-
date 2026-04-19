@@ -328,7 +328,7 @@ function buildPreview(d) {
     + '<div style="flex:1;padding:5px 8px 5px 6px;display:flex;flex-direction:column;justify-content:center;min-width:0;">'
     + '<div style="font-size:7.5px;font-weight:800;background:#000;color:#fff;padding:2px 6px;margin-bottom:1px;">&#54588;&#50629; &#53468;&#44536; / Pickup Tag</div>'
     + '<div style="font-size:7px;color:#666;margin-bottom:4px;">&#48372;&#54840;&#51088; &#51648;&#52632; &#54596;&#49688; / Please keep this tag</div>'
-    + '<div style="font-size:12px;font-weight:700;margin-bottom:3px;">' + d.pickupName + '</div>'
+    + '<div style="font-size:12px;font-weight:700;margin-bottom:3px;">' + d.koreanName + '</div>'
     + '<span style="display:inline-block;border:2px solid #000;border-radius:3px;padding:2px 6px;font-size:13px;font-weight:900;white-space:nowrap;">' + d.amcCode + '</span>'
     + '</div>'
     + '<div style="background:#fff;border-left:1px solid #ddd;padding:4px;display:flex;align-items:stretch;flex-shrink:0;">'
@@ -393,7 +393,7 @@ function printTag() {
     + "<div id=\"pickup\">"
     + "<div class=\"pleft\"><div class=\"pt\">픽업 태그 / Pickup Tag</div>"
     + "<div class=\"ps\">보호자 지참 필수 / Please keep this tag</div>"
-    + "<div class=\"pn\">"+(d.pickupName||d.koreanName)+"</div>"
+    + "<div class=\"pn\">"+d.koreanName+"</div>"
     + "<div class=\"pa\"><span>"+d.amcCode+"</span></div></div>"
     + "<div class=\"pright\"><canvas id=\"qr2\"></canvas></div></div>";
   var JS = "new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:80,background:\"white\",foreground:\"#000\",level:\"M\"});"
