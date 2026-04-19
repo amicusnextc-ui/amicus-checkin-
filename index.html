@@ -359,8 +359,8 @@ function printTag() {
   var CSS =
     "*{box-sizing:border-box;margin:0;padding:0;}"
     + "@page{size:62mm 86mm portrait;margin:0;}"
-    + "html,body{width:62mm;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
-    + "#child{width:62mm;display:flex;flex-direction:column;border:1pt solid #000;page-break-after:always;}"
+    + "html,body{width:62mm;height:86mm;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
+    + "#child{width:62mm;min-height:82mm;display:flex;flex-direction:column;border:1pt solid #000;page-break-after:always;}"
     + ".body{display:flex;flex-direction:row;padding:2mm 3mm;gap:2mm;}"
     + ".left{flex:1;min-width:0;}"
     + ".nm{font-size:18pt;font-weight:700;color:#000;line-height:1.1;font-family:Arial;margin-bottom:1mm;}"
@@ -375,7 +375,7 @@ function printTag() {
     + ".ftr span{font-size:5.5pt;color:#000;font-family:Arial;}"
     + "#pickup{width:62mm;height:40mm;display:flex;flex-direction:row;border:1pt solid #000;overflow:hidden;}"
     + ".pleft{flex:1;padding:3mm 4mm;display:flex;flex-direction:column;justify-content:center;}"
-    + ".pt{font-size:8pt;font-weight:700;color:#000;margin-bottom:1mm;font-family:Arial;}"
+    + ".pt{font-size:8pt;font-weight:700;background:#000;color:#fff;padding:1mm 2mm;margin-bottom:1mm;font-family:Arial;}"
     + ".ps{font-size:6.5pt;color:#000;margin-bottom:3mm;font-family:Arial;}"
     + ".pn{font-size:12pt;font-weight:700;color:#000;margin-bottom:3mm;line-height:1.2;font-family:Arial;}"
     + ".pa{border:1.5pt solid #000;border-radius:2pt;padding:1.5mm 3mm;display:inline-block;}"
@@ -398,7 +398,7 @@ function printTag() {
     + "<div class=\"pn\">"+(d.pickupName||d.koreanName)+" ("+(d.englishName||"")+")</div>"
     + "<div class=\"pa\"><span>"+d.amcCode+"</span></div></div>"
     + "<div class=\"pright\"><canvas id=\"qr2\"></canvas></div></div>";
-  var JS = "new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:72,background:\"white\",foreground:\"#000\",level:\"M\"});"
+  var JS = "new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:80,background:\"white\",foreground:\"#000\",level:\"M\"});"
     + "new QRious({element:document.getElementById(\"qr2\"),value:\""+QR_URL+"\",size:80,background:\"white\",foreground:\"#000\",level:\"M\"});"
     + "function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}";
   var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE+"<style>"+CSS+"</style></head><body>"+BODY+"<sc"+"ript>"+JS+CLOSE+"</body></html>";
