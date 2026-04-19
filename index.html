@@ -275,7 +275,7 @@ function buildTag(s, time) {
   var pickupName = koreanName + (englishName ? ' (' + englishName + ')' : '');
 
   // Store on window for printTag()
-  window._printData = { amcCode, koreanName, englishName, pickupName, isBday, allergyFlag, allergy: s.allergy, dept: s.department || '', grade: s.grade || '', guardianText, checkinText, QR_URL, isBday: isBday };
+  window._printData = { amcCode, koreanName, englishName, pickupName, isBday, allergyFlag, allergy: s.allergy, dept: s.department || '', grade: s.grade || '', guardianText, checkinText, QR_URL, isBday: !!(s.birthdayThisMonth || s.birthdayToday || isBirthdayThisMonth(s.dob)) };
 
   // Build preview card
   buildPreview(window._printData);
