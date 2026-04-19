@@ -363,24 +363,24 @@ function printTag() {
     + "#child{width:62mm;height:82mm;display:flex;flex-direction:column;border:1pt solid #000;overflow:hidden;page-break-after:always;}"
     + ".body{display:flex;flex-direction:row;padding:2mm 3mm;gap:2mm;overflow:hidden;flex:1;}"
     + ".left{flex:1;min-width:0;}"
-    + ".nm{font-size:16pt;font-weight:700;color:#000;line-height:1.1;font-family:Arial;margin-bottom:1mm;word-wrap:break-word;overflow-wrap:break-word;}"
+    + ".nm{font-size:18pt;font-weight:700;color:#000;line-height:1.1;font-family:Arial;margin-bottom:1mm;word-wrap:break-word;overflow-wrap:break-word;}"
     + ".enm{font-size:9pt;color:#000;font-family:Arial;margin-bottom:2mm;word-wrap:break-word;}"
     + ".amc{border:1pt dashed #000;border-radius:2pt;padding:2pt 6pt;display:inline-block;margin-bottom:2mm;}"
     + ".amc span{font-size:10pt;font-weight:700;letter-spacing:2pt;color:#000;white-space:nowrap;font-family:Arial;}"
     + ".drow{border-top:1pt solid #000;padding-top:1.5mm;margin-top:1.5mm;display:flex;gap:2mm;align-items:center;}"
-    + ".dk{font-size:6.5pt;color:#000;white-space:nowrap;font-family:Arial;}"
-    + ".dv{font-size:7pt;font-weight:600;color:#000;font-family:Arial;word-wrap:break-word;}"
-    + ".right{width:22mm;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;padding-top:1mm;}"
+    + ".dk{font-size:7.5pt;color:#000;white-space:nowrap;font-family:Arial;}"
+    + ".dv{font-size:7.5pt;font-weight:600;color:#000;font-family:Arial;word-wrap:break-word;}"
+    + ".right{width:17mm;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;padding-top:1mm;}"
     + ".ftr{padding:1mm 3mm;border-top:1pt solid #000;text-align:right;}"
     + ".ftr span{font-size:5.5pt;color:#000;font-family:Arial;}"
     + "#pickup{width:62mm;height:40mm;display:flex;flex-direction:row;border:1pt solid #000;overflow:hidden;}"
     + ".pleft{flex:1;padding:3mm 4mm;display:flex;flex-direction:column;justify-content:center;}"
     + ".pt{font-size:8pt;font-weight:700;background:#000;color:#fff;padding:1mm 2mm;margin-bottom:1mm;font-family:Arial;}"
     + ".ps{font-size:6.5pt;color:#000;margin-bottom:3mm;font-family:Arial;}"
-    + ".pn{font-size:9pt;font-weight:700;color:#000;margin-bottom:2mm;line-height:1.2;font-family:Arial;word-wrap:break-word;}"
+    + ".pn{font-size:10pt;font-weight:700;color:#000;margin-bottom:2mm;line-height:1.2;font-family:Arial;word-wrap:break-word;}"
     + ".pa{border:1.5pt solid #000;border-radius:2pt;padding:1.5mm 3mm;display:inline-block;}"
     + ".pa span{font-size:11pt;font-weight:700;color:#000;white-space:nowrap;font-family:Arial;}"
-    + ".pright{width:24mm;flex-shrink:0;border-left:1pt solid #000;display:flex;align-items:center;justify-content:center;}";
+    + ".pright{width:22mm;flex-shrink:0;border-left:1pt solid #000;display:flex;align-items:center;justify-content:center;}";
   var BODY =
     "<div id=\"child\">" + hdr +
     "<div class=\"body\"><div class=\"left\">"
@@ -389,7 +389,7 @@ function printTag() {
     + "<div class=\"amc\"><span>" + d.amcCode + "</span></div>"
     + algHtml
     + "<div class=\"drow\"><span class=\"dk\">Guardian</span><span class=\"dv\">"+(d.guardianText||"")+"</span></div>"
-    + "<div class=\"drow\"><span class=\"dk\">Checked in :</span><span class=\"dv\">"+(d.checkinText||"")+"</span></div>"
+    + "<div class=\"drow\"><span class=\"dk\">In:</span><span class=\"dv\">"+(d.checkinText||"")+"</span></div>"
     + "</div><div class=\"right\"><canvas id=\"qr1\"></canvas></div></div>"
     + "<div class=\"ftr\"><span>Amicus Next Church</span></div></div>"
     + "<div id=\"pickup\">"
@@ -398,7 +398,7 @@ function printTag() {
     + "<div class=\"pn\">"+(d.pickupName||d.koreanName)+" ("+(d.englishName||"")+")</div>"
     + "<div class=\"pa\"><span>"+d.amcCode+"</span></div></div>"
     + "<div class=\"pright\"><canvas id=\"qr2\"></canvas></div></div>";
-  var JS = "new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:80,background:\"white\",foreground:\"#000\",level:\"M\"});"
+  var JS = "new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:56,background:\"white\",foreground:\"#000\",level:\"M\"});"
     + "new QRious({element:document.getElementById(\"qr2\"),value:\""+QR_URL+"\",size:80,background:\"white\",foreground:\"#000\",level:\"M\"});"
     + "function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}";
   var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE+"<style>"+CSS+"</style></head><body>"+BODY+"<sc"+"ript>"+JS+CLOSE+"</body></html>";
