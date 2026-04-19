@@ -42,7 +42,7 @@ function mapStudent(p, twoWeeksAgo) {
           id: p.id,
           studentId: idNum ? "AMC-" + String(idNum).padStart(3, "0") : "",
           studentIdNum: idNum || 0,
-          name: props["이름 (Name)"]?.title?.[0]?.plain_text || "",
+          name: cleanName(props["이름 (Name)"]?.title?.[0]?.plain_text || ""),
           nameEN: rt("영문이름 (Name EN)"),
           department: dept,
           grade: rt("학년 (Grade)"),
@@ -65,7 +65,14 @@ function mapStudent(p, twoWeeksAgo) {
           baptized: props["세례 여부 (Baptized)"]?.select?.name || "",
           photo: props["사진 촬영 (Photo)"]?.select?.name || "",
           householdMatch: true,
-    };
+          checkedInToday: false,
+    }
+
+function cleanName(raw) {
+  if (!raw) return "";
+  return raw.replace(/\s*\([^)]*\)\s*$/, "").trim();
+}
+;
 }
 
 module.exports = async (req, res) => {
