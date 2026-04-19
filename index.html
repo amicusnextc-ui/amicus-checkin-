@@ -358,7 +358,7 @@ function printTag() {
   var QR_SRC = "https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js";
   var CSS =
     "*{box-sizing:border-box;margin:0;padding:0;}"
-    + "@page{size:62mm 86mm;margin:0;}"
+    + "@page{size:62mm 86mm portrait;margin:0;}"
     + "html,body{width:62mm;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
     + "#child{width:62mm;display:flex;flex-direction:column;border:1pt solid #000;page-break-after:always;}"
     + ".body{display:flex;flex-direction:row;padding:2mm 3mm;gap:2mm;}"
@@ -423,8 +423,8 @@ function printChildLabel(d) {
     '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>' +
     '<style>' +
     '*{box-sizing:border-box;margin:0;padding:0;}' +
-    '@page{size:86mm 62mm;margin:0;}' +
-    'html,body{width:86mm;height:62mm;overflow:hidden;background:white;}' +
+    '@page{size:62mm 86mm portrait;margin:0;}' +
+    'html,body{width:62mm;height:86mm;overflow:hidden;background:white;}' +
     '#w{width:86mm;height:62mm;display:flex;flex-direction:column;background:white;}' +
     '.hdr{background:#1a1a1a;color:#fff;padding:2mm 3mm;display:flex;justify-content:space-between;flex-shrink:0;}' +
     '.hdr span{font-size:8pt;font-family:Arial;}' +
