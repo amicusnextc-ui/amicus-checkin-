@@ -338,7 +338,7 @@ function buildPreview(d) {
   pc.innerHTML = childHTML + pickupHTML;
 
   // Draw QR codes in preview
-  try { new QRious({ element: document.getElementById('prev-qr1'), value: d.QR_URL, size: 56, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
+  try { new QRious({ element: document.getElementById('prev-qr1'), value: d.QR_URL, size: 54, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
   try { new QRious({ element: document.getElementById('prev-qr2'), value: d.QR_URL, size: 54, background: '#ffffff', foreground: '#000000', level: 'M' }); } catch(e) {}
 }
 
@@ -387,18 +387,16 @@ function printTag() {
     + "<div class=\"nm\">" + nameDisplay + "</div>"
     + "<div class=\"enm\">("+( d.englishName||"")+")</div>"
     + "<div class=\"amc\"><span>" + d.amcCode + "</span></div>"
-    + algHtml
-    + "<div class=\"drow\"><span class=\"dk\">Guardian</span><span class=\"dv\">"+(d.guardianText||"")+"</span></div>"
     + "<div class=\"drow\"><span class=\"dk\">In:</span><span class=\"dv\">"+(d.checkinText||"")+"</span></div>"
     + "</div><div class=\"right\"><canvas id=\"qr1\"></canvas></div></div>"
     + "<div class=\"ftr\"><span>Amicus Next Church</span></div></div>"
     + "<div id=\"pickup\">"
     + "<div class=\"pleft\"><div class=\"pt\">픽업 태그 / Pickup Tag</div>"
     + "<div class=\"ps\">보호자 지참 필수 / Please keep this tag</div>"
-    + "<div class=\"pn\">"+(d.pickupName||d.koreanName)+" ("+(d.englishName||"")+")</div>"
+    + "<div class=\"pn\">"+(d.pickupName||d.koreanName)+"</div>"
     + "<div class=\"pa\"><span>"+d.amcCode+"</span></div></div>"
     + "<div class=\"pright\"><canvas id=\"qr2\"></canvas></div></div>";
-  var JS = "new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:56,background:\"white\",foreground:\"#000\",level:\"M\"});"
+  var JS = "new QRious({element:document.getElementById(\"qr1\"),value:\""+QR_URL+"\",size:80,background:\"white\",foreground:\"#000\",level:\"M\"});"
     + "new QRious({element:document.getElementById(\"qr2\"),value:\""+QR_URL+"\",size:80,background:\"white\",foreground:\"#000\",level:\"M\"});"
     + "function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}";
   var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE+"<style>"+CSS+"</style></head><body>"+BODY+"<sc"+"ript>"+JS+CLOSE+"</body></html>";
