@@ -19,6 +19,12 @@ function prop(page, name) {
   }
 }
 
+function cleanName(raw) {
+  if (!raw) return "";
+  return raw.replace(/\s*\([^)]*\)\s*$/, "").trim();
+}
+
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const { dept } = req.query;
@@ -66,7 +72,7 @@ module.exports = async (req, res) => {
 
       return {
         id: page.id,
-        name: prop(page, '이름 (Name)'),
+        name: cleanName(prop(page, '이름 (Name)')),
         nameEN: prop(page, '영문이름 (Name EN)'),
         department: d,
         grade: prop(page, '학년 (Grade)'),
