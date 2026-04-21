@@ -1,62 +1,51 @@
 const { Client } = require('@notionhq/client');
+const notion = new Client({ auth: process.env.NOTION_TOKEN });
 
 module.exports = async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    if (req.method === 'OPTIONS') return res.status(200).end();
-    const {
-    // ── LIABILITY action ──
-    if (req.body && req.body.action === 'liability') {
-      const { pageId, guardianName, signature, timestamp } = req.body;
-      const note = 'Liability signed by ' + (guardianName||'') + ' on ' + (timestamp||new Date().toISOString()) + (signature ? ' | Sig: '+signature : '');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  try {
+    const body = req.body || {};
+    const { pageId, action, name, department, grade, allergy, notes,
+            liabilityForm, baptized, photo, status,
+            guardianName, signature, timestamp } = body;
+
+    if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
+
+    // LIABILITY action
+    if (action === 'liability') {
+      const note = 'Signed by ' + (guardianName||'') + ' on ' + (timestamp||new Date().toISOString()) + (signature ? ' | Sig: '+signature : '');
       await notion.pages.update({
         page_id: pageId,
         properties: {
           'Liability Form': { select: { name: '제출 완료' } },
-          '특이사항 (Notes)': { rich_text: [{ text: { content: '[LIABILITY] '+note } }] }
+          '특이사항 (Notes)': { rich_text: [{ text: { content: '[LIABILITY] ' + note } }] }
         }
       });
       return res.json({ success: true, action: 'liability', message: 'Liability form recorded' });
     }
 
-          pageId, name, nameEN, department, grade, school, dob,
-          guardian, fatherName, fatherPhone, fatherEmail,
-          motherName, motherPhone, motherEmail,
-          address, allergy, notes, liabilityForm, baptized, photo, status
-    } = req.body;
+    // General update
     const props = {};
-    if (name !== undefined) props['\uc774\ub984 (Name)'] = { title: [{ text: { content: name } }] };
-    if (nameEN !== undefined) props['\uc601\ubb38\uc774\ub984 (Name EN)'] = { rich_text: [{ text: { content: nameEN||'' } }] };
-    if (department !== undefined) props['\ubd80\uc11c (Department)'] = { select: department ? { name: department } : null };
-    if (grade !== undefined) props['\ud559\ub144 (Grade)'] = { rich_text: [{ text: { content: grade||'' } }] };
-    if (school !== undefined) props['\ud559\uad50 (School)'] = { rich_text: [{ text: { content: school||'' } }] };
-    if (dob !== undefined) props['\uc0dd\ub144\uc6d4\uc77c (DOB)'] = dob ? { date: { start: dob } } : { date: null };
-    if (guardian !== undefined) props['\ubcf4\ud638\uc790 (Guardian)'] = { rich_text: [{ text: { content: guardian||'' } }] };
-    if (fatherName !== undefined) props['\uc544\ubc84\uc9c0 \uc774\ub984 (Father Name)'] = { rich_text: [{ text: { content: fatherName||'' } }] };
-    if (fatherPhone !== undefined) props['\uc544\ubc84\uc9c0 \uc5f0\ub77d\ucc98 (Father Phone)'] = { phone_number: fatherPhone||null };
-    if (fatherEmail !== undefined) props['\uc544\ubc84\uc9c0 \uc774\uba54\uc77c (Father Email)'] = { email: fatherEmail||null };
-    if (motherName !== undefined) props['\uc5b4\uba38\ub2c8 \uc774\ub984 (Mother Name)'] = { rich_text: [{ text: { content: motherName||'' } }] };
-    if (motherPhone !== undefined) props['\uc5b4\uba38\ub2c8 \uc5f0\ub77d\ucc98 (Mother Phone)'] = { phone_number: motherPhone||null };
-    if (motherEmail !== undefined) props['\uc5b4\uba38\ub2c8 \uc774\uba54\uc77c (Mother Email)'] = { email: motherEmail||null };
-    if (address !== undefined) props['\uc9d1\uc8fc\uc18c (Address)'] = { rich_text: [{ text: { content: address||'' } }] };
-    if (allergy !== undefined) props['\uc54c\ub7ec\uc9c0 (Allergy)'] = { rich_text: [{ text: { content: allergy||'' } }] };
-    if (notes !== undefined) props['\ud2b9\uc774\uc0ac\ud56d (Notes)'] = { rich_text: [{ text: { content: notes||'' } }] };
+    if (name !== undefined) props['이름 (Name)'] = { title: [{ text: { content: name } }] };
+    if (department !== undefined) props['부서 (Department)'] = { select: department ? { name: department } : null };
+    if (grade !== undefined) props['학년 (Grade)'] = { rich_text: [{ text: { content: grade||'' } }] };
+    if (allergy !== undefined) props['알러지 (Allergy)'] = { rich_text: [{ text: { content: allergy||'' } }] };
+    if (notes !== undefined) props['특이사항 (Notes)'] = { rich_text: [{ text: { content: notes||'' } }] };
     if (liabilityForm !== undefined) props['Liability Form'] = { select: liabilityForm ? { name: liabilityForm } : null };
-    if (baptized !== undefined) props['\uc138\ub840 \uc5ec\ubd80 (Baptized)'] = { select: baptized ? { name: baptized } : null };
-    if (photo !== undefined) props['\uc0ac\uc9c4 \ucd94\uc601 (Photo)'] = { select: photo ? { name: photo } : null };
-    if (status !== undefined) props['\uc0c1\ud0dc (Status)'] = { select: status ? { name: status } : null };
-    try {
-          if (pageId) {
-                  await notion.pages.update({ page_id: pageId, properties: props });
-                  res.json({ success: true, action: 'updated' });
-          } else {
-                  const page = await notion.pages.create({ parent: { database_id: DB }, properties: props });
-                  res.json({ success: true, action: 'created', pageId: page.id });
+    if (status !== undefined) props['상태 (Status)'] = { select: status ? { name: status } : null };
 
-                    }
-          }
-    } catch(e) {
-          res.status(500).json({ error: e.message });
+    if (Object.keys(props).length > 0) {
+      await notion.pages.update({ page_id: pageId, properties: props });
     }
+    return res.json({ success: true, action: 'updated' });
+
+  } catch(e) {
+    console.error('update-student error:', e.message);
+    return res.status(500).json({ error: e.message });
+  }
 };
