@@ -246,6 +246,23 @@ function isBirthdayToday(d){if(!d)return false;var dob=new Date(d),now=new Date(
 function getDeptFromAge(m){var y=m/12;if(m<48)return"유아부 (Infant)";if(y<6)return"유치부 (Preschool)";if(y<9)return"유년부 (Elementary Jr)";if(y<12)return"초등부 (Elementary)";return"중고등부 (Youth)";}
 var dateStr=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
 document.getElementById("welcomeDate").textContent=dateStr;
+
+// Saturday detection - show renew state
+function checkSaturdayReset() {
+  var now = new Date();
+  var laStr = now.toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'long' });
+  var isSaturday = laStr === 'Saturday';
+  var satBanner = document.getElementById('saturdayResetBanner');
+  var checkinBtn = document.getElementById('checkinBtn');
+  var checkoutBtn = document.getElementById('checkoutBtn');
+  if (satBanner) {
+    satBanner.style.display = isSaturday ? 'block' : 'none';
+  }
+  if (checkinBtn) checkinBtn.style.opacity = isSaturday ? '0.4' : '1';
+  if (checkoutBtn) checkoutBtn.style.opacity = isSaturday ? '0.4' : '1';
+  return isSaturday;
+}
+
 function goHome(){document.getElementById("welcomeScreen").classList.remove("hidden");document.getElementById("mainHeader").classList.add("hidden");document.getElementById("mainApp").classList.add("hidden");_currentMode=null;clearPins();}
 
 // ── Name Search Mode ──
@@ -758,6 +775,9 @@ async function submitVisitor(){var name=document.getElementById("v-name").value.
 document.getElementById("modal").addEventListener("click",function(e){if(e.target===this)closeModal();});
 document.getElementById("success").addEventListener("click",function(e){if(e.target===this)closeSuccess();});
 document.getElementById("visitorModal").addEventListener("click",function(e){if(e.target===this)closeVisitorModal();});
+
+// Auto-check Saturday reset on page load
+(function(){ checkSaturdayReset(); })();
 </script>
 
   <!-- ══ LIABILITY FORM MODAL ══ -->
@@ -831,6 +851,11 @@ document.getElementById("visitorModal").addEventListener("click",function(e){if(
         <p class="text-center text-xs text-gray-400 mt-2">&#xC11C;&#xBA85; &#xC2DC;&#xAC04;: <span id="liabilityTimestamp"></span></p>
       </div>
     </div>
+  </div>
+
+  <!-- Saturday Reset Banner -->
+  <div id="saturdayResetBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9999; background:#7c3aed; color:white; text-align:center; padding:16px; font-weight:bold; font-size:15px;">
+    토요일 자동 초기화 중 ✨ Saturday Auto-Renew &mdash; 내일 주일 준비 완료!
   </div>
 </body>
 </html>
