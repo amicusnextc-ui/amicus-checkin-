@@ -335,11 +335,12 @@ function submitLiabilityForm() {
   var signedText = '서명: ' + signature + ' (보호자: ' + guardian + ') 시간: ' + timestamp;
 
   // Update Notion student record
-  fetch('/api/update-liability', {
+  fetch('/api/update-student', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({
-      studentId: student.id,
+      action: 'liability',
+      pageId: student.id,
       guardianName: guardian,
       signature: signature,
       timestamp: timestamp,
