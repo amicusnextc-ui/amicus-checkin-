@@ -514,14 +514,20 @@ function switchTab(tab){
   if(tab==='requests') loadRequests();
   if(tab==='absentees') loadAbsentees();
 }
-function switchLeaderTab(tab){
-  var sumP=document.getElementById("ldrSummaryTab"),absP=document.getElementById("ldrAbsentTab"),reqP=document.getElementById("ldrRequestsTab");
-  var sumB=document.getElementById("ltabSummary"),absB=document.getElementById("ltabAbsent"),reqB=document.getElementById("ltabRequests");
-  [sumP,absP,reqP].forEach(function(el){if(el)el.classList.add("hidden");});
-  [sumB,absB,reqB].forEach(function(el){if(el)el.classList.remove("active");});
-  if(tab==="summary"){sumP.classList.remove("hidden");sumB.classList.add("active");loadLeaderSummary();}
-  else if(tab==="absent"){absP.classList.remove("hidden");absB.classList.add("active");loadLeaderAbsent();}
-  else if(tab==="requests"){reqP.classList.remove("hidden");reqB.classList.add("active");loadLeaderRequests();}
+function switchLeaderTab(tab) {
+  var panels = ['ldrSummaryTab', 'ldrAbsentTab', 'ldrRequestsTab'];
+  var btns = ['ltabSummary', 'ltabAbsent', 'ltabRequests'];
+  panels.forEach(function(id) { var el=document.getElementById(id); if(el) el.classList.add('hidden'); });
+  btns.forEach(function(id) { var el=document.getElementById(id); if(el) { el.classList.remove('active'); el.style.background=''; el.style.color=''; } });
+  var panelMap = { summary: 'ldrSummaryTab', absent: 'ldrAbsentTab', requests: 'ldrRequestsTab' };
+  var btnMap = { summary: 'ltabSummary', absent: 'ltabAbsent', requests: 'ltabRequests' };
+  var panel = document.getElementById(panelMap[tab]);
+  var btn = document.getElementById(btnMap[tab]);
+  if(panel) panel.classList.remove('hidden');
+  if(btn) { btn.classList.add('active'); }
+  if(tab === 'requests') { window._isLeader = true; loadRequests(); }
+  if(tab === 'absent') { window._isLeader = true; loadAbsentees(); }
+  if(tab === 'summary') { loadLeaderSummary && loadLeaderSummary(); }
 }
 
 async function loadAttendance(){
@@ -968,38 +974,32 @@ function closeRequestModal(){
   var modal = document.getElementById('requestModal');
   if(modal) modal.classList.add('hidden');
 }
-async function submitRequest(){
-  var title = document.getElementById('reqTitle')?.value?.trim();
-  var content = document.getElementById('reqContent')?.value?.trim();
-  if(!title || !content){ showToast("제목과 내용을 입력해주세요", 'success'); return; }
+async function submitRequest() {
+  var titleEl = document.getElementById('reqTitle');
+  var contentEl = document.getElementById('reqContent');
+  var title = (titleEl && titleEl.value) ? titleEl.value.trim() : '';
+  var content = (contentEl && contentEl.value) ? contentEl.value.trim() : '';
+  if(!title || !content) { showToast('제목과 내용을 입력해주세요', 'error'); return; }
   var btn = document.getElementById('reqSubmitBtn');
-  if(btn){ btn.disabled=true; btn.textContent='전송 중...'; }
+  if(btn) { btn.disabled=true; btn.textContent='전송 중...'; }
   try {
     var r = await fetch('/api/attendance?type=requests', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        title: title,
-        content: content,
-        requester: window._staffName || '간사',
-        department: window._staffDept || ''
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: title, content: content, requester: window._staffName||'간사', department: window._staffDept||'' })
     });
     var d = await r.json();
-    if(d.success){
-      document.getElementById('reqTitle').value='';
-      document.getElementById('reqContent').value='';
+    if(d.success) {
+      if(titleEl) titleEl.value='';
+      if(contentEl) contentEl.value='';
       closeRequestModal();
-      showToast("📨 요청이 전송되었습니다!", 'success');
-      if(document.getElementById('requestsTab') && !document.getElementById('requestsTab').classList.contains('hidden')){
-        loadRequests();
-      }
-    }
-  } catch(e){ showToast("오류: " + e.message, 'error'); }
-  finally { if(btn){ btn.disabled=false; btn.textContent='요청 보내기'; } }
+      showToast('📨 요청이 전송되었습니다!');
+    } else { showToast(d.error||'오류 발생', 'error'); }
+  } catch(err) { showToast('오류: '+err.message, 'error'); }
+  finally { if(btn) { btn.disabled=false; btn.textContent='요청 보내기'; } }
 }
 
 async function loadRequests(){
-  var list = document.getElementById('requestsList');
+  var list = document.getElementById('requestsList') || document.getElementById('ldrRequestsBody');
   if(!list) return;
   var dept = window._staffDept || '';
   var isLeader = window._isLeader || false;
@@ -1037,7 +1037,19 @@ async function loadRequests(){
     var statusColors = {'대기중':'bg-gray-100 text-gray-600','확인됨':'bg-blue-100 text-blue-700','진행중':'bg-yellow-100 text-yellow-700','완료':'bg-green-100 text-green-700'};
     var statusIcons = {'대기중':'⏳','확인됨':'👀','진행중':'🔧','완료':'✅'};
 
-    window._reqs = reqs;
+    // Separate active from archived completed (> 7 days)
+    var now7 = new Date();
+    var activeReqs = reqs.filter(function(r){
+      if(r.status !== '완료') return true;
+      if(!r.completedAt) return true;
+      return (now7 - new Date(r.completedAt)) / (1000*60*60*24) < 7;
+    });
+    var archivedReqs = reqs.filter(function(r){
+      if(r.status !== '완료') return false;
+      if(!r.completedAt) return false;
+      return (now7 - new Date(r.completedAt)) / (1000*60*60*24) >= 7;
+    });
+    window._reqs = activeReqs;
     list.innerHTML = reqs.map(function(req,idx){
       var sc = statusColors[req.status] || 'bg-gray-100 text-gray-600';
       var si = statusIcons[req.status] || '⏳';
@@ -1125,7 +1137,7 @@ async function loadRequests() {
     var sc = { '대기중': 'bg-gray-100 text-gray-600', '확인됨': 'bg-blue-100 text-blue-700', '진행중': 'bg-yellow-100 text-yellow-700', '완료': 'bg-green-100 text-green-700' };
     var si2 = { '대기중': '⏳', '확인됨': '👀', '진행중': '🔧', '완료': '✅' };
 
-    list.innerHTML = _reqs.map(function(req, idx) {
+    list.innerHTML = activeReqs.map(function(req, idx) {
       var statusCls = sc[req.status] || 'bg-gray-100 text-gray-600';
       var statusIcon = si2[req.status] || '⏳';
       var dt = req.createdAt ? new Date(req.createdAt).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
@@ -1146,6 +1158,20 @@ async function loadRequests() {
         + '</div></div>';
     }).join('');
 
+    // Archived requests section (completed > 7 days)
+    if(archivedReqs.length > 0) {
+      list.innerHTML += '<details class="mt-3 px-5"><summary class="text-xs text-gray-400 cursor-pointer py-2 hover:text-gray-600">📋 완료된 요청 (' + archivedReqs.length + '건)</summary><div class="space-y-0 mt-1">'
+        + archivedReqs.map(function(req,idx) {
+          var sc2 = sc[req.status]||'bg-gray-100 text-gray-600';
+          var dt = req.completedAt ? new Date(req.completedAt).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}) : '';
+          return '<div class="py-3 border-b border-gray-50 opacity-60"><div class="flex items-center gap-2 flex-wrap">'
+            + '<span class="text-sm text-gray-700 line-through">'+req.title+'</span>'
+            + '<span class="text-xs px-2 py-0.5 rounded-full '+sc2+'">✅ 완료</span>'
+            + (dt?'<span class="text-xs text-gray-400">'+dt+'</span>':'')
+            + '</div></div>';
+        }).join('')+'</div></details>';
+    }
+
     // event delegation for detail buttons
     list.onclick = function(e) {
       var btn = e.target.closest('.req-detail-btn');
@@ -1159,31 +1185,29 @@ function openReqDetail(id, req) {
   var modal = document.getElementById('reqDetailModal');
   var content = document.getElementById('reqDetailContent');
   var btns = document.getElementById('reqStatusBtns');
-  if (!modal || !content || !btns) return;
-
-  var scMap = { '대기중': 'bg-gray-100 text-gray-600', '확인됨': 'bg-blue-100 text-blue-700', '진행중': 'bg-yellow-100 text-yellow-700', '완료': 'bg-green-100 text-green-700' };
+  if(!modal || !content || !btns) return;
+  var scMap = { '대기중':'bg-gray-100 text-gray-600', '확인됨':'bg-blue-100 text-blue-700', '진행중':'bg-yellow-100 text-yellow-700', '완료':'bg-green-100 text-green-700' };
   var sc2 = scMap[req.status] || 'bg-gray-100 text-gray-600';
+  var isDone = req.status === '완료';
   content.innerHTML = '<div class="space-y-3">'
-    + '<div><p class="text-xs text-gray-400 mb-0.5">제목</p><p class="font-bold text-gray-900">' + req.title + '</p></div>'
-    + '<div><p class="text-xs text-gray-400 mb-0.5">내용</p><p class="text-sm text-gray-700 bg-gray-50 rounded-xl p-3">' + req.content + '</p></div>'
-    + '<div class="flex gap-2 flex-wrap">'
-    + '<span class="text-xs ' + sc2 + ' px-2 py-0.5 rounded-full font-bold">' + req.status + '</span>'
-    + '<span class="text-xs text-gray-400">' + req.requester + ' · ' + req.department + '</span>'
-    + '</div></div>';
-
-  btns.innerHTML = ['확인됨', '진행중', '완료'].map(function(st) {
-    var active = req.status === st;
-    return '<button data-status="' + st + '" class="req-status-btn flex-1 py-2 rounded-xl text-xs font-bold '
-      + (active ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-indigo-100') + '">' + st + '</button>';
-  }).join('');
-
-  btns.onclick = function(e) {
-    var btn = e.target.closest('.req-status-btn');
-    if (btn) setReqStatus(btn.getAttribute('data-status'));
-  };
-
+    + '<div><p class="text-xs text-gray-400 mb-0.5">제목</p><p class="font-bold text-gray-900">'+req.title+'</p></div>'
+    + '<div><p class="text-xs text-gray-400 mb-0.5">내용</p><p class="text-sm text-gray-700 bg-gray-50 rounded-xl p-3">'+req.content+'</p></div>'
+    + '<div class="flex gap-2 flex-wrap"><span class="text-xs '+sc2+' px-2 py-0.5 rounded-full font-bold">'+req.status+'</span><span class="text-xs text-gray-400">'+req.requester+' · '+req.department+'</span></div>'
+    + (req.handler ? '<div class="text-xs text-gray-500">담당: '+req.handler+'</div>' : '')
+    + '</div>';
+  if(isDone) {
+    btns.innerHTML = '<div class="w-full text-center py-3 rounded-xl bg-green-50 text-green-600 text-sm font-bold">✅ 완료된 요청입니다</div>';
+  } else {
+    btns.innerHTML = ['확인됨','진행중','완료'].map(function(st) {
+      var active = req.status===st;
+      return '<button data-status="'+st+'" class="req-status-btn flex-1 py-2 rounded-xl text-xs font-bold '+(active?'bg-indigo-600 text-white':'bg-gray-100 text-gray-600 hover:bg-indigo-100')+'">'+st+'</button>';
+    }).join('');
+    btns.onclick = function(e) { var b=e.target.closest('.req-status-btn'); if(b) setReqStatus(b.getAttribute('data-status')); };
+  }
   var noteEl = document.getElementById('reqHandlerNote');
-  if (noteEl) noteEl.value = req.notes || '';
+  if(noteEl) { noteEl.value = req.notes||''; noteEl.disabled = isDone; noteEl.style.opacity = isDone ? '0.5' : '1'; }
+  var saveBtn = document.getElementById('reqSaveNoteBtn');
+  if(saveBtn) { saveBtn.disabled = isDone; saveBtn.style.opacity = isDone ? '0.5' : '1'; }
   modal.classList.remove('hidden');
 }
 
@@ -1225,7 +1249,7 @@ var _absentees = [];
 var _currentAbsentee = null;
 
 async function loadAbsentees() {
-  var list = document.getElementById('absenteesList');
+  var list = document.getElementById('absenteesList') || document.getElementById('ldrAbsentBody');
   if (!list) return;
   list.innerHTML = '<div class="px-5 py-8 text-center text-gray-400 text-sm">로딩 중...</div>';
   var isLeader = window._isLeader || false;
