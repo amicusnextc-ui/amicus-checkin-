@@ -995,16 +995,21 @@ async function loadRequests(){
     var statusColors = {'대기중':'bg-gray-100 text-gray-600','확인됨':'bg-blue-100 text-blue-700','진행중':'bg-yellow-100 text-yellow-700','완료':'bg-green-100 text-green-700'};
     var statusIcons = {'대기중':'⏳','확인됨':'👀','진행중':'🔧','완료':'✅'};
 
-    list.innerHTML = reqs.map(function(req){
+    window._reqs = reqs;
+    list.innerHTML = reqs.map(function(req,idx){
       var sc = statusColors[req.status] || 'bg-gray-100 text-gray-600';
       var si = statusIcons[req.status] || '⏳';
-      var date = req.createdAt ? new Date(req.createdAt).toLocaleDateString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
-      var leaderBtns = isLeader ? '<button onclick="openReqDetail(''+req.id+'','+JSON.stringify(req).replace(/'/g,"\'").replace(/"/g,'&quot;')+')" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-lg font-bold hover:bg-indigo-200">상세/처리</button>' : '';
-      return '<div class="px-5 py-4 hover:bg-gray-50"><div class="flex items-start justify-between gap-2"><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="font-semibold text-gray-900 text-sm">'+req.title+'</span><span class="text-xs px-2 py-0.5 rounded-full font-bold '+sc+'">'+si+' '+req.status+'</span></div><div class="text-xs text-gray-500 mt-0.5 truncate">'+req.content+'</div><div class="text-xs text-gray-400 mt-1">'+req.requester+' · '+req.department+' · '+date+'</div>'+(req.notes?'<div class="text-xs text-indigo-600 mt-1 bg-indigo-50 px-2 py-1 rounded-lg">📝 '+req.notes+'</div>':'')+'</div><div>'+leaderBtns+'</div></div></div>';
+      var date = req.createdAt ? new Date(req.createdAt).toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      var leaderBtns = isLeader ? '<button onclick="openReqByIdx('+idx+')" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-lg font-bold hover:bg-indigo-200">상세/처리</button>' : '';
+      return '<div class="px-5 py-4 hover:bg-gray-50"><div class="flex items-start justify-between gap-2"><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="font-semibold text-gray-900 text-sm">'+req.title+'</span><span class="text-xs px-2 py-0.5 rounded-full font-bold '+sc+'">' +si+ ' '+req.status+'</span></div><div class="text-xs text-gray-500 mt-0.5">'+req.content+'</div><div class="text-xs text-gray-400 mt-1">'+req.requester+' · '+req.department+' · '+date+'</div>'+(req.notes?'<div class="text-xs text-indigo-600 mt-1 bg-indigo-50 px-2 py-1 rounded-lg">📝 '+req.notes+'</div>':'')+'</div><div>'+leaderBtns+'</div></div></div>';
     }).join('');
   } catch(e){ list.innerHTML='<div class="px-5 py-8 text-center text-red-400 text-sm">오류: '+e.message+'</div>'; }
 }
 
+function openReqByIdx(idx){
+  var req = (window._reqs||[])[idx];
+  if(req) openReqDetail(req.id, req);
+}
 function openReqDetail(id, req){
   _currentReqId = id;
   var modal = document.getElementById('reqDetailModal');
