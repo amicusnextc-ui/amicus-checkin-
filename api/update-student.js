@@ -41,6 +41,20 @@ module.exports = async (req, res) => {
           } else {
                   const page = await notion.pages.create({ parent: { database_id: DB }, properties: props });
                   res.json({ success: true, action: 'created', pageId: page.id });
+
+          // ── LIABILITY action ──
+          if (action === 'liability') {
+            const { guardianName, signature, timestamp } = req.body;
+            const note = 'Liability signed by ' + (guardianName||'') + ' on ' + (timestamp||new Date().toISOString()) + (signature ? ' | Sig: '+signature : '');
+            await notion.pages.update({
+              page_id: pageId,
+              properties: {
+                'liabilityForm': { checkbox: true },
+                '특이사항 (Notes)': { rich_text: [{ text: { content: '[LIABILITY] '+note } }] }
+              }
+            });
+            return res.json({ success: true, action: 'liability' });
+          }
           }
     } catch(e) {
           res.status(500).json({ error: e.message });
