@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
             await notion.pages.update({
               page_id: pageId,
               properties: {
-                'liabilityForm': { checkbox: true },
+                'Liability Form': { select: { name: '제출 완료' } },
                 '특이사항 (Notes)': { rich_text: [{ text: { content: '[LIABILITY] '+note } }] }
               }
             });
