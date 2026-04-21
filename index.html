@@ -455,7 +455,7 @@ function openModal(action,student,record){_action=action;_student=student;_recor
   // Show liability warning if not submitted
   var liabWarn = document.getElementById("liabilityWarning");
   if(liabWarn && s) {
-    var needsLiab = !s.liabilityForm || s.liabilityForm === false || s.liabilityForm === 'false' || s.liabilityForm === '__NO__';
+    var lf = s.liabilityForm; var needsLiab = !lf || lf === false || lf === 'false' || lf === '__NO__' || lf === '미제출' || lf === '미제출' || lf === 'X' || lf === '❌' || lf === 'null' || lf === 'undefined';
     if(needsLiab) {
       liabWarn.classList.remove("hidden");
     } else {
