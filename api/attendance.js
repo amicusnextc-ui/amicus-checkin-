@@ -1,123 +1,186 @@
-const ATTENDANCE_DB = process.env.NOTION_ATTENDANCE_DB_ID || "89b6c47f85a842968493ce28ad93f8de";
-const STUDENT_DB = process.env.NOTION_STUDENT_DB_ID || "107828732f784c39bcb0136a4397c758";
-const NOTION_VERSION = "2022-06-28";
-const TIMEZONE = "America/Los_Angeles";
+const { Client } = require('@notionhq/client');
+const notion = new Client({ auth: process.env.NOTION_TOKEN });
+const REQUESTS_DB = 'd25f9fdaeeb748ac97ffda2f68f776bb';
+const ABSENTEES_DB = 'de7bb42e89254fad949dde9123cd4cdb';
+const STUDENT_DB = process.env.NOTION_STUDENT_DB || '107828732f784c39bcb0136a4397c758';
+const ATTENDANCE_DB = process.env.NOTION_ATTENDANCE_DB || '89b6c47f85a842968493ce28ad93f8de';
+const TIMEZONE = 'America/Los_Angeles';
+
+function getServiceSunday() {
+  const now = new Date();
+  const laDate = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit' }).format(now);
+  const [yr,mo,dy] = laDate.split('-').map(Number);
+  const laDay = new Date(Date.UTC(yr, mo-1, dy));
+  const dow = laDay.getUTCDay();
+  if (dow === 6) return null;
+  const sunday = new Date(laDay);
+  sunday.setUTCDate(laDay.getUTCDate() - dow);
+  return sunday.toISOString().split('T')[0];
+}
 
 module.exports = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const dept = req.query.dept || "";
-  const today = new Date().toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
+  const type = req.query.type || (req.body && req.body.type);
 
   try {
-    // Query attendance records for today
-    const filter = {
-      and: [
-        { property: "\uC8FC\uC77C \uB0A0\uC9DC (Date)", date: { equals: today } }
-      ]
-    };
-    if (dept) {
-      filter.and.push({ property: "\uBD80\uC11C (Department)", select: { equals: dept } });
-    }
-
-    let allRecords = [], cursor;
-    do {
-      const resp = await fetch("https://api.notion.com/v1/databases/" + ATTENDANCE_DB + "/query", {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + process.env.NOTION_TOKEN,
-          "Notion-Version": NOTION_VERSION,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ filter, page_size: 100, start_cursor: cursor || undefined })
-      });
-      const data = await resp.json();
-      if (!resp.ok) return res.status(500).json({ error: data.message });
-      allRecords = allRecords.concat(data.results || []);
-      cursor = data.has_more ? data.next_cursor : null;
-    } while (cursor);
-
-    // For each attendance record, look up student details from student DB
-    const studentNames = [...new Set(allRecords.map(r => r.properties["\uC774\uB984 (Name)"]?.title?.[0]?.plain_text || "").filter(Boolean))];
-
-    // Batch-fetch student info
-    const studentMap = {};
-    for (const name of studentNames) {
-      try {
-        const sr = await fetch("https://api.notion.com/v1/databases/" + STUDENT_DB + "/query", {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + process.env.NOTION_TOKEN,
-            "Notion-Version": NOTION_VERSION,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            filter: { property: "\uC774\uB984 (Name)", title: { equals: name } },
-            page_size: 1
-          })
+    // ══ REQUESTS ══
+    if (type === 'requests') {
+      if (req.method === 'GET') {
+        const dept = req.query.department;
+        const filter = dept && dept !== 'all'
+          ? { property: '\ube80\uc11c (Department)', select: { equals: dept } }
+          : undefined;
+        const res2 = await notion.databases.query({
+          database_id: REQUESTS_DB,
+          sorts: [{ timestamp: 'created_time', direction: 'descending' }],
+          filter
         });
-        const sd = await sr.json();
-        if (sd.results && sd.results.length > 0) {
-          const p = sd.results[0];
-          const rt = (prop, field) => p.properties[field]?.rich_text?.[0]?.plain_text || "";
-          const ph = (field) => p.properties[field]?.phone_number || "";
-          studentMap[name] = {
-            nameEN: rt(p, "\uC601\uBB38\uC774\uB984 (Name EN)"),
-            grade: rt(p, "\uD559\uB144 (Grade)"),
-            dob: p.properties["\uC0DD\uB144\uC6D4\uC77C (DOB)"]?.date?.start || "",
-            allergy: rt(p, "\uC54C\uB7EC\uC9C0 (Allergy)"),
-            fatherName: rt(p, "\uC544\uBC84\uC9C0 \uC774\uB984 (Father Name)"),
-            motherName: rt(p, "\uC5B4\uBA38\uB2C8 \uC774\uB984 (Mother Name)"),
-            fatherPhone: ph("\uC544\uBC84\uC9C0 \uC5F0\uB77D\uCC98 (Father Phone)"),
-            motherPhone: ph("\uC5B4\uBA38\uB2C8 \uC5F0\uB77D\uCC98 (Mother Phone)"),
-            guardian: rt(p, "\uBCF4\uD638\uC790 (Guardian)"),
-            phone: ph("\uC5F0\uB77D\uCC98 (Phone)")
+        const rows = res2.results.map(p => {
+          const pr = p.properties;
+          return {
+            id: p.id,
+            title: pr['\uc81c\ubaa9 (Title)']?.title?.[0]?.text?.content || '',
+            content: pr['\uc694\uccad \ub0b4\uc6a9 (Content)']?.rich_text?.[0]?.text?.content || '',
+            requester: pr['\uc694\uccad\uc790 (Requester)']?.rich_text?.[0]?.text?.content || '',
+            department: pr['\ube80\uc11c (Department)']?.select?.name || '',
+            status: pr['\uc0c1\ud0dc (Status)']?.select?.name || '\ub300\uae30\uc911',
+            handler: pr['\ub2f4\ub2f9\uc790 (Handler)']?.rich_text?.[0]?.text?.content || '',
+            notes: pr['\ucc98\ub9ac \uba54\ubaa8 (Notes)']?.rich_text?.[0]?.text?.content || '',
+            createdAt: p.created_time,
           };
+        });
+        return res.json({ success: true, requests: rows });
+      }
+      if (req.method === 'POST') {
+        const { title, content, requester, department } = req.body;
+        const newPage = await notion.pages.create({
+          parent: { database_id: REQUESTS_DB },
+          properties: {
+            '\uc81c\ubaa9 (Title)': { title: [{ text: { content: title || '\uc694\uccad' } }] },
+            '\uc694\uccad \ub0b4\uc6a9 (Content)': { rich_text: [{ text: { content: content || '' } }] },
+            '\uc694\uccad\uc790 (Requester)': { rich_text: [{ text: { content: requester || '' } }] },
+            '\ube80\uc11c (Department)': { select: department ? { name: department } : null },
+            '\uc0c1\ud0dc (Status)': { select: { name: '\ub300\uae30\uc911' } },
+          }
+        });
+        return res.json({ success: true, id: newPage.id, action: 'created' });
+      }
+      if (req.method === 'PATCH') {
+        const { id, status, handler, notes } = req.body;
+        const props = {};
+        if (status) props['\uc0c1\ud0dc (Status)'] = { select: { name: status } };
+        if (handler) props['\ub2f4\ub2f9\uc790 (Handler)'] = { rich_text: [{ text: { content: handler } }] };
+        if (notes) props['\ucc98\ub9ac \uba54\ubaa8 (Notes)'] = { rich_text: [{ text: { content: notes } }] };
+        if (status === '\uc644\ub8cc') {
+          const today = new Date().toISOString().split('T')[0];
+          props['\uc644\ub8cc\uc77c (Completed)'] = { date: { start: today } };
         }
-      } catch(e) {}
+        await notion.pages.update({ page_id: id, properties: props });
+        return res.json({ success: true, action: 'updated', status });
+      }
     }
 
-    const records = allRecords.map(p => {
-      const name = p.properties["\uC774\uB984 (Name)"]?.title?.[0]?.plain_text || "";
-      const checkIn = p.properties["\uCCB4\uD06C\uC778 \uC2DC\uAC04 (Check-in)"]?.rich_text?.[0]?.plain_text || "";
-      const checkOut = p.properties["\uCCB4\uD06C\uC544\uC6C3 \uC2DC\uAC04 (Check-out)"]?.rich_text?.[0]?.plain_text || "";
-      const dept2 = p.properties["\uBD80\uC11C (Department)"]?.select?.name || "";
-      const isNew = p.properties["\uBC29\uBB38\uC790 (Visitor)"]?.checkbox || false;
-      const hasAllergy = p.properties["\uC54C\uB7EC\uC9C0 \uC54C\uB9BC (Allergy Alert)"]?.checkbox || false;
-      const notes = p.properties["\uD2B9\uC774\uC0AC\uD56D (Notes)"]?.rich_text?.[0]?.plain_text || "";
-      const student = studentMap[name] || {};
-      return {
-        id: p.id,
-        name,
-        nameEN: student.nameEN || "",
-        department: dept2,
-        checkIn,
-        checkOut,
-        isNew,
-        hasAllergy,
-        allergy: student.allergy || "",
-        grade: student.grade || "",
-        dob: student.dob || "",
-        fatherName: student.fatherName || "",
-        motherName: student.motherName || "",
-        fatherPhone: student.fatherPhone || "",
-        motherPhone: student.motherPhone || "",
-        guardian: student.guardian || "",
-        phone: student.phone || "",
-        notes
-      };
-    });
+    // ══ ABSENTEES ══
+    if (type === 'absentees') {
+      if (req.method === 'GET') {
+        const dept = req.query.department;
+        const serviceSunday = getServiceSunday();
+        // Find students absent 2+ weeks: last attended older than 2 sundays ago
+        // Get all students
+        let filter = { property: '\uc0c1\ud0dc (Status)', select: { equals: '\ud65c\uc131 (Active)' } };
+        if (dept && dept !== 'all') {
+          filter = { and: [filter, { property: '\ube80\uc11c (Department)', select: { equals: dept } }] };
+        }
+        const students = await notion.databases.query({ database_id: STUDENT_DB, filter, page_size: 100 });
 
-    // Sort: checked-in first, then by name
-    records.sort((a, b) => {
-      if (a.checkOut && !b.checkOut) return 1;
-      if (!a.checkOut && b.checkOut) return -1;
-      return a.name.localeCompare(b.name, "ko");
-    });
+        // Calculate 2 sundays ago
+        const twoWeeksAgo = serviceSunday ? new Date(serviceSunday) : new Date();
+        twoWeeksAgo.setUTCDate(twoWeeksAgo.getUTCDate() - 14);
+        const twoWeeksAgoStr = twoWeeksAgo.toISOString().split('T')[0];
 
-    return res.status(200).json({ records, date: today });
+        const absentees = students.results.filter(p => {
+          const lastAttended = p.properties['\ub9c8\uc9c0\ub9c9 \ucd9c\uc11d (Last Attended)']?.date?.start;
+          return !lastAttended || lastAttended <= twoWeeksAgoStr;
+        }).map(p => {
+          const pr = p.properties;
+          return {
+            id: p.id,
+            name: pr['\uc774\ub984 (Name)']?.title?.[0]?.text?.content || '',
+            department: pr['\ube80\uc11c (Department)']?.select?.name || '',
+            grade: pr['\ud559\ub144 (Grade)']?.rich_text?.[0]?.text?.content || '',
+            lastAttended: pr['\ub9c8\uc9c0\ub9c9 \ucd9c\uc11d (Last Attended)']?.date?.start || null,
+            phone: pr['\uc5b4\uba38\ub2c8 \uc5f0\ub77d\ucc98 (Mother Phone)']?.rich_text?.[0]?.text?.content || pr['\uc5f0\ub77d\ucc98 (Phone)']?.phone_number || '',
+          };
+        });
+
+        // Also check if there's already a contact record this week
+        const weekFilter = serviceSunday
+          ? { property: '\uc8fc\uac04 \uae30\uc900\uc77c (Week)', date: { equals: serviceSunday } }
+          : undefined;
+        const contactRecs = weekFilter
+          ? await notion.databases.query({ database_id: ABSENTEES_DB, filter: weekFilter, page_size: 100 })
+          : { results: [] };
+
+        const contactedMap = {};
+        contactRecs.results.forEach(p => {
+          const name = p.properties['\ud559\uc0dd \uc774\ub984 (Student)']?.title?.[0]?.text?.content;
+          if (name) contactedMap[name] = {
+            contacted: p.properties['\uc5f0\ub77d \uc5ec\ubd80 (Contacted)']?.select?.name || '\ubbf8\uc5f0\ub77d',
+            reason: p.properties['\uc5f0\ub77d \uc0ac\uc720 \/ \uba54\ubaa8 (Reason)']?.rich_text?.[0]?.text?.content || '',
+            staff: p.properties['\uc5f0\ub77d\ud55c \uac04\uc0ac (Staff)']?.rich_text?.[0]?.text?.content || '',
+            recordId: p.id,
+          };
+        });
+
+        const result = absentees.map(a => ({ ...a, ...(contactedMap[a.name] || { contacted: '\ubbf8\uc5f0\ub77d' }) }));
+        return res.json({ success: true, absentees: result, serviceSunday, count: result.length });
+      }
+
+      if (req.method === 'POST') {
+        const { studentId, studentName, department, grade, lastAttended, reason, staffName, recordId } = req.body;
+        const serviceSunday = getServiceSunday();
+        const today = new Date().toISOString().split('T')[0];
+
+        if (recordId) {
+          // Update existing record
+          await notion.pages.update({
+            page_id: recordId,
+            properties: {
+              '\uc5f0\ub77d \uc5ec\ubd80 (Contacted)': { select: { name: '\uc5f0\ub77d\ud568' } },
+              '\uc5f0\ub77d \uc0ac\uc720 \/ \uba54\ubaa8 (Reason)': { rich_text: [{ text: { content: reason || '' } }] },
+              '\uc5f0\ub77d\ud55c \uac04\uc0ac (Staff)': { rich_text: [{ text: { content: staffName || '' } }] },
+              '\uc5f0\ub77d\uc77c (Contact Date)': { date: { start: today } },
+            }
+          });
+          return res.json({ success: true, action: 'updated' });
+        }
+
+        // Create new record
+        const props = {
+          '\ud559\uc0dd \uc774\ub984 (Student)': { title: [{ text: { content: studentName || '' } }] },
+          '\ube80\uc11c (Department)': { rich_text: [{ text: { content: department || '' } }] },
+          '\ud559\ub144 (Grade)': { rich_text: [{ text: { content: grade || '' } }] },
+          '\uc5f0\ub77d \uc5ec\ubd80 (Contacted)': { select: { name: '\uc5f0\ub77d\ud568' } },
+          '\uc5f0\ub77d \uc0ac\uc720 \/ \uba54\ubaa8 (Reason)': { rich_text: [{ text: { content: reason || '' } }] },
+          '\uc5f0\ub77d\ud55c \uac04\uc0ac (Staff)': { rich_text: [{ text: { content: staffName || '' } }] },
+          '\uc5f0\ub77d\uc77c (Contact Date)': { date: { start: today } },
+        };
+        if (lastAttended) props['\ub9c8\uc9c0\ub9c9 \ucd9c\uc11d (Last Attended)'] = { date: { start: lastAttended } };
+        if (serviceSunday) props['\uc8fc\uac04 \uae30\uc900\uc77c (Week)'] = { date: { start: serviceSunday } };
+
+        const newPage = await notion.pages.create({ parent: { database_id: ABSENTEES_DB }, properties: props });
+        return res.json({ success: true, id: newPage.id, action: 'created' });
+      }
+    }
+
+    return res.status(400).json({ error: 'Unknown type. Use ?type=requests or ?type=absentees' });
+
   } catch(e) {
+    console.error('staff-ops error:', e.message);
     return res.status(500).json({ error: e.message });
   }
 };
