@@ -1,4 +1,18 @@
 const { Client } = require('@notionhq/client');
+
+  // ── LIABILITY action ──
+          if (action === 'liability') {
+            const { guardianName, signature, timestamp } = req.body;
+            const note = 'Liability signed by ' + (guardianName||'') + ' on ' + (timestamp||new Date().toISOString()) + (signature ? ' | Sig: '+signature : '');
+            await notion.pages.update({
+              page_id: pageId,
+              properties: {
+                'Liability Form': { select: { name: '제출 완료' } },
+                '특이사항 (Notes)': { rich_text: [{ text: { content: '[LIABILITY] '+note } }] }
+              }
+            });
+            return res.json({ success: true, action: 'liability' });
+
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 const DB = process.env.NOTION_STUDENT_DB_ID;
 
@@ -42,19 +56,7 @@ module.exports = async (req, res) => {
                   const page = await notion.pages.create({ parent: { database_id: DB }, properties: props });
                   res.json({ success: true, action: 'created', pageId: page.id });
 
-          // ── LIABILITY action ──
-          if (action === 'liability') {
-            const { guardianName, signature, timestamp } = req.body;
-            const note = 'Liability signed by ' + (guardianName||'') + ' on ' + (timestamp||new Date().toISOString()) + (signature ? ' | Sig: '+signature : '');
-            await notion.pages.update({
-              page_id: pageId,
-              properties: {
-                'Liability Form': { select: { name: '제출 완료' } },
-                '특이사항 (Notes)': { rich_text: [{ text: { content: '[LIABILITY] '+note } }] }
-              }
-            });
-            return res.json({ success: true, action: 'liability' });
-          }
+                    }
           }
     } catch(e) {
           res.status(500).json({ error: e.message });
