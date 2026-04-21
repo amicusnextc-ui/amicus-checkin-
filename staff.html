@@ -971,7 +971,7 @@ function closeRequestModal(){
 async function submitRequest(){
   var title = document.getElementById('reqTitle')?.value?.trim();
   var content = document.getElementById('reqContent')?.value?.trim();
-  if(!title || !content){ alert('제목과 내용을 입력해주세요'); return; }
+  if(!title || !content){ showToast("제목과 내용을 입력해주세요", 'success'); return; }
   var btn = document.getElementById('reqSubmitBtn');
   if(btn){ btn.disabled=true; btn.textContent='전송 중...'; }
   try {
@@ -989,12 +989,12 @@ async function submitRequest(){
       document.getElementById('reqTitle').value='';
       document.getElementById('reqContent').value='';
       closeRequestModal();
-      alert('📨 요청이 전송되었습니다!');
+      showToast("📨 요청이 전송되었습니다!", 'success');
       if(document.getElementById('requestsTab') && !document.getElementById('requestsTab').classList.contains('hidden')){
         loadRequests();
       }
     }
-  } catch(e){ alert('오류: '+e.message); }
+  } catch(e){ showToast("오류: " + e.message, 'error'); }
   finally { if(btn){ btn.disabled=false; btn.textContent='요청 보내기'; } }
 }
 
@@ -1071,7 +1071,7 @@ async function submitRequest() {
   var title = (document.getElementById('reqTitle') || {}).value || '';
   var content = (document.getElementById('reqContent') || {}).value || '';
   title = title.trim(); content = content.trim();
-  if (!title || !content) { alert('제목과 내용을 입력해주세요'); return; }
+  if (!title || !content) { showToast("제목과 내용을 입력해주세요", 'success'); return; }
   var btn = document.getElementById('reqSubmitBtn');
   if (btn) { btn.disabled = true; btn.textContent = '전송 중...'; }
   try {
@@ -1085,9 +1085,9 @@ async function submitRequest() {
       document.getElementById('reqTitle').value = '';
       document.getElementById('reqContent').value = '';
       closeRequestModal();
-      alert('📨 요청이 전송되었습니다!');
+      showToast("📨 요청이 전송되었습니다!", 'success');
     }
-  } catch(e) { alert('오류: ' + e.message); }
+  } catch(e) { showToast("오류: " + e.message, 'error'); }
   finally { if (btn) { btn.disabled = false; btn.textContent = '요청 보내기'; } }
 }
 
@@ -1203,8 +1203,8 @@ async function setReqStatus(status) {
       body: JSON.stringify({ id: _currentReqId, status: status, handler: window._staffName || '', notes: note })
     });
     var d = await r.json();
-    if (d.success) { closeReqDetailModal(); loadRequests(); alert('📝 상태 [' + status + ']로 업데이트 완료'); }
-  } catch(e) { alert('오류: ' + e.message); }
+    if (d.success) { closeReqDetailModal(); loadRequests(); showToast("📝 상태 [" + status + ']로 업데이트 완료', 'error'); }
+  } catch(e) { showToast("오류: " + e.message, 'error'); }
 }
 
 async function saveReqNote() {
@@ -1216,8 +1216,8 @@ async function saveReqNote() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: _currentReqId, notes: note, handler: window._staffName || '' })
     });
-    alert('📝 메모 저장 완료');
-  } catch(e) { alert('오류: ' + e.message); }
+    showToast("📝 메모 저장 완료", 'success');
+  } catch(e) { showToast("오류: " + e.message, 'error'); }
 }
 
 // ═══════════ ABSENTEES ═══════════
@@ -1378,7 +1378,7 @@ function closeContactModal() {
 async function submitContact() {
   if (!_currentAbsentee) return;
   var reason = ((document.getElementById('contactReason') || {}).value || '').trim();
-  if (!reason) { alert('사유를 입력해주세요'); return; }
+  if (!reason) { showToast("사유를 입력해주세요", 'success'); return; }
   try {
     var r = await fetch('/api/attendance?type=absentees', {
       method: 'POST',
@@ -1392,8 +1392,21 @@ async function submitContact() {
       })
     });
     var d = await r.json();
-    if (d.success) { closeContactModal(); loadAbsentees(); alert('📞 연락 완료 기록 저장!'); }
-  } catch(e) { alert('오류: ' + e.message); }
+    if (d.success) { closeContactModal(); loadAbsentees(); showToast("📞 연락 완료 기록 저장!", 'success'); }
+  } catch(e) { showToast("오류: " + e.message, 'error'); }
+}
+
+
+function showToast(msg, type) {
+  var container = document.getElementById('toastContainer');
+  if(!container) return;
+  var el = document.createElement('div');
+  var bg = type === 'error' ? '#ef4444' : type === 'warn' ? '#f97316' : '#22c55e';
+  el.style.cssText = 'background:'+bg+';color:white;padding:10px 20px;border-radius:999px;font-size:14px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.18);opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;';
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(function(){ el.style.opacity='1'; }, 10);
+  setTimeout(function(){ el.style.opacity='0'; setTimeout(function(){ el.remove(); }, 300); }, 2800);
 }
 
 function startRequestPolling() {
@@ -1423,5 +1436,8 @@ function startRequestPolling() {
       </div>
     </div>
   </div>
+
+  <!-- Toast notification -->
+  <div id="toastContainer" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;"></div>
 </body>
 </html>
