@@ -107,13 +107,13 @@
     <!-- Name Search Input -->
     <div id="nameSearchSection" class="hidden mb-4">
       <div class="relative">
-        <input id="nameInput" type="text" placeholder="? ???? ?? (예: ???)" 
+        <input id="nameInput" type="text" placeholder="&#xC774;&#xB984; &#xC785;&#xB825; (&#xC608;: &#xBD09;&#xC11C;&#xC544;)" 
           oninput="onNameInput(this.value)"
           class="w-full px-5 py-4 text-lg rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold"
           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
         />
       </div>
-      <p class="text-gray-400 text-xs mt-2 text-center">?? ??? ??? ??? ??</p>
+      <p class="text-gray-400 text-xs mt-2 text-center">&#xD55C;&#xAE00; &#xB610;&#xB294; &#xC601;&#xC5B4; &#xC774;&#xB984;&#xC73C;&#xB85C; &#xAC80;&#xC0C9;</p>
     </div>
     <div id="checkinResults"></div>
     <button onclick="openVisitorModal()" class="w-full mt-4 py-3 rounded-2xl border-2 border-dashed border-indigo-300 text-indigo-600 font-semibold text-sm hover:bg-indigo-50 hover:border-indigo-400 transition-all flex items-center justify-center gap-2">
@@ -282,7 +282,27 @@ function onNameInput(val) {
           document.getElementById('checkinResults').innerHTML = '<div class="text-center py-8"><p class="text-4xl mb-2">🔍</p><p class="font-bold text-gray-700">검색 결과 없음</p><p class="text-gray-400 text-sm mt-1">' + trimmed + ' (이)라는 이름을 찾을 수 없어요</p></div>';
           return;
         }
-        renderStudentResults(data.students, null);
+        (function(students) {
+        var container = document.getElementById('checkinResults');
+        if(!container) return;
+        // Group by household if same phone
+        var html = '';
+        var phones = {};
+        students.forEach(function(s) {
+          var phone = s.phone || s.fatherPhone || s.motherPhone || '';
+          var key = phone.slice(-4) || s.id;
+          if(!phones[key]) phones[key] = [];
+          phones[key].push(s);
+        });
+        Object.keys(phones).forEach(function(key) {
+          var group = phones[key];
+          if(group.length > 1) {
+            html += '<div class="mb-2 px-1 py-1 bg-blue-50 border border-blue-100 rounded-2xl flex items-center gap-2 text-xs text-blue-500 font-semibold"><span>&#x1F46A;</span> &#xAC00;&#xC871; &#xCCB4;&#xD06C;&#xC778; &mdash; ' + group.length + '&#xBA85;</div>';
+          }
+          group.forEach(function(s) { html += studentCard(s); });
+        });
+        container.innerHTML = html || '<div class="text-center py-8 text-gray-400">&#xAC80;&#xC0C9; &#xACB0;&#xACFC; &#xC5C6;&#xC74C;</div>';
+      })(data.students);
       }).catch(function(){ 
         document.getElementById('checkinResults').innerHTML = '<div class="text-center py-6 text-red-400">검색 오류가 발생했어요</div>';
       });
