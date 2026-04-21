@@ -1,87 +1,118 @@
-const ATTENDANCE_DB = process.env.NOTION_ATTENDANCE_DB_ID || "89b6c47f85a842968493ce28ad93f8de";
-const STUDENT_DB = process.env.NOTION_STUDENT_DB_ID || "107828732f784c39bcb0136a4397c758";
-const NOTION_VERSION = "2022-06-28";
-const TIMEZONE = "America/Los_Angeles";
+const TIMEZONE = 'America/Los_Angeles';
+const ATTENDANCE_DB = process.env.NOTION_ATTENDANCE_DB || '89b6c47f85a842968493ce28ad93f8de';
+const STUDENT_DB = process.env.NOTION_STUDENT_DB || '107828732f784c39bcb0136a4397c758';
+
+// Get the Sunday date for the current service week (LA time)
+// Sun: today, Mon-Fri: last Sunday, Sat: returns null (reset day)
+function getServiceSunday() {
+  const now = new Date();
+  const laDate = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit'
+  }).format(now);
+  const [yr,mo,dy] = laDate.split('-').map(Number);
+  const laDay = new Date(Date.UTC(yr, mo-1, dy));
+  const dow = laDay.getUTCDay(); // 0=Sun,1=Mon,...,6=Sat
+  if (dow === 6) return null; // Saturday = reset day
+  const diff = dow; // days since Sunday
+  const sunday = new Date(laDay);
+  sunday.setUTCDate(laDay.getUTCDate() - diff);
+  return sunday.toISOString().split('T')[0];
+}
 
 module.exports = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") return res.status(200).end();
-  if (req.method !== "POST") return res.status(405).end();
-  const { name, department, isNew, hasAllergy, notes, staff, studentId } = req.body;
-  if (!name) return res.status(400).json({ error: "name required" });
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const now = new Date();
-  const today = now.toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
-  const checkInTime = now.toLocaleTimeString("ko-KR", { timeZone: TIMEZONE, hour: "2-digit", minute: "2-digit", hour12: false });
-
-  // Check for duplicate check-in today
   try {
-    const checkRes = await fetch("https://api.notion.com/v1/databases/" + ATTENDANCE_DB + "/query", {
-      method: "POST",
+    const { studentId, studentName, department, isVisitor, allergyAlert, staffName, guardianName, notes } = req.body || {};
+    if (!studentId && !studentName) return res.status(400).json({ error: 'Missing studentId or studentName' });
+
+    // Get service Sunday
+    const serviceSunday = getServiceSunday();
+    if (!serviceSunday) {
+      return res.status(403).json({ error: 'Saturday is reset day - no check-ins', resetDay: true });
+    }
+
+    const now = new Date();
+    const checkInTime = now.toLocaleTimeString('ko-KR', { timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit' });
+
+    // Check for existing attendance record for this service week
+    const checkRes = await fetch('https://api.notion.com/v1/databases/' + ATTENDANCE_DB + '/query', {
+      method: 'POST',
       headers: {
-        "Authorization": "Bearer " + process.env.NOTION_TOKEN,
-        "Notion-Version": NOTION_VERSION,
-        "Content-Type": "application/json"
+        'Authorization': 'Bearer ' + process.env.NOTION_TOKEN,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         filter: {
           and: [
-            { property: "\uC774\uB984 (Name)", title: { equals: name.trim() } },
-            { property: "\uC8FC\uC77C \uB0A0\uC9DC (Date)", date: { equals: today } },
+            { property: '\uc8fc\uc77c \ub0a0\uc9dc (Date)', date: { equals: serviceSunday } },
+            { property: '\uc774\ub984 (Name)', rich_text: { equals: studentName || studentId } }
           ]
-        },
-        page_size: 1
-      }),
+        }
+      })
     });
     const checkData = await checkRes.json();
-    if (checkData.results && checkData.results.length > 0) {
-      const existing = checkData.results[0];
-      const checkInProp = existing.properties["\uCCB4\uD06C\uC778 \uC2DC\uAC04 (Check-in)"]?.rich_text?.[0]?.plain_text || "";
-      const checkOutProp = existing.properties["\uCCB4\uD06C\uC544\uC6C3 \uC2DC\uAC04 (Check-out)"]?.rich_text?.[0]?.plain_text || "";
-      if (!checkOutProp) {
-        return res.status(200).json({ success: true, alreadyCheckedIn: true, pageId: existing.id, checkInTime: checkInProp });
-      }
+    const existing = checkData.results?.[0];
+
+    if (existing) {
+      // Already checked in this week - update time
+      await fetch('https://api.notion.com/v1/pages/' + existing.id, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': 'Bearer ' + process.env.NOTION_TOKEN,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          properties: {
+            '\uccb4\ud06c\uc778 \uc2dc\uac04 (Check-in)': { rich_text: [{ text: { content: checkInTime } }] }
+          }
+        })
+      });
+      return res.json({ success: true, action: 'updated', existingId: existing.id, serviceSunday, checkInTime });
     }
-  } catch(e) {}
 
-  // Create new attendance record
-  const properties = {
-    "\uC774\uB984 (Name)": { title: [{ text: { content: name } }] },
-    "\uC8FC\uC77C \uB0A0\uC9DC (Date)": { date: { start: today } },
-    "\uCCB4\uD06C\uC778 \uC2DC\uAC04 (Check-in)": { rich_text: [{ text: { content: checkInTime } }] },
-    "\uC54C\uB7EC\uC9C0 \uC54C\uB9BC (Allergy Alert)": { checkbox: Boolean(hasAllergy) },
-    "\uBCF4\uD638\uC790 \uC778\uACC4 \uD655\uC778 (Guardian)": { checkbox: false },
-  };
-  if (department) properties["\uBD80\uC11C (Department)"] = { select: { name: department } };
-  if (notes) properties["\uD2B9\uC774\uC0AC\uD56D (Notes)"] = { rich_text: [{ text: { content: notes } }] };
-  if (staff) properties["\uAC04\uC0AC (Staff)"] = { rich_text: [{ text: { content: staff } }] };
+    // Create new attendance record for this service week
+    const props = {
+      '\uc774\ub984 (Name)': { title: [{ text: { content: studentName || studentId } }] },
+      '\uc8fc\uc77c \ub0a0\uc9dc (Date)': { date: { start: serviceSunday } },
+      '\uccb4\ud06c\uc778 \uc2dc\uac04 (Check-in)': { rich_text: [{ text: { content: checkInTime } }] },
+      '\ubd80\uc11c (Department)': { select: department ? { name: department } : null },
+    };
+    if (isVisitor) props['\ubc29\ubb38\uc790 (Visitor)'] = { checkbox: true };
+    if (allergyAlert) props['\uc54c\ub7ec\uc9c0 \uc54c\ub9bc (Allergy Alert)'] = { checkbox: true };
+    if (staffName) props['\uac04\uc0ac (Staff)'] = { rich_text: [{ text: { content: staffName } }] };
+    if (notes) props['\ud2b9\uc774\uc0ac\ud56d (Notes)'] = { rich_text: [{ text: { content: notes } }] };
 
-  const response = await fetch("https://api.notion.com/v1/pages", {
-    method: "POST",
-    headers: {
-      "Authorization": "Bearer " + process.env.NOTION_TOKEN,
-      "Notion-Version": NOTION_VERSION,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ parent: { database_id: ATTENDANCE_DB }, properties }),
-  });
-  const data = await response.json();
-  if (!response.ok) return res.status(500).json({ error: data.message || "checkin failed" });
-
-  // Update student's last attended date (fire and forget)
-  if (studentId && !isNew) {
-    fetch("https://api.notion.com/v1/pages/" + studentId, {
-      method: "PATCH",
+    const createRes = await fetch('https://api.notion.com/v1/pages', {
+      method: 'POST',
       headers: {
-        "Authorization": "Bearer " + process.env.NOTION_TOKEN,
-        "Notion-Version": NOTION_VERSION,
-        "Content-Type": "application/json"
+        'Authorization': 'Bearer ' + process.env.NOTION_TOKEN,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ properties: { "\uB9C8\uC9C0\uB9C9 \uCD9C\uC11D (Last Attended)": { date: { start: today } } } })
-    }).catch(() => {});
-  }
+      body: JSON.stringify({ parent: { database_id: ATTENDANCE_DB }, properties: props })
+    });
+    const newRecord = await createRes.json();
 
-  return res.status(200).json({ success: true, alreadyCheckedIn: false, pageId: data.id, checkInTime });
+    // Update student last attended (fire and forget)
+    if (studentId) {
+      fetch(process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL + '/api/update-student' : 'http://localhost:3000/api/update-student', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pageId: studentId, lastAttended: serviceSunday })
+      }).catch(()=>{});
+    }
+
+    return res.json({ success: true, action: 'created', recordId: newRecord.id, serviceSunday, checkInTime });
+
+  } catch(e) {
+    console.error('checkin error:', e.message);
+    return res.status(500).json({ error: e.message });
+  }
 };
