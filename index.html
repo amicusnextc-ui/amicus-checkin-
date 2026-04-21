@@ -452,16 +452,20 @@ function loadStatus(s){fetch("/api/check-status?name="+encodeURIComponent(s.name
 function openModalById(action,sid){var s=_studentMap[sid];window._currentModalStudent=s;var rec=(action==="checkout")?(_recordMap[sid]||null):null;if(s)openModal(action,s,rec);}
 var _action,_student,_record;
 function openModal(action,student,record){_action=action;_student=student;_record=record;var isIn=action==="checkin";var hdr=document.getElementById("modalHeader");hdr.className="text-center mb-4 p-4 rounded-2xl "+(isIn?"bg-emerald-50":"bg-indigo-50");hdr.innerHTML='<div class="text-5xl mb-2 check-pop inline-block">'+(isIn?"👋":"🙏")+'</div><h2 class="text-xl font-bold text-gray-900">'+(isIn?"체크인 확인":"체크아웃 확인")+'</h2>';var rows=[];rows.push(["이름","<strong>"+student.name+"</strong>"+(student.nameEN?' <span class="text-sm text-gray-400">'+student.nameEN+'</span>':'')+(student.studentId?' <span class="text-xs font-mono text-gray-400">'+student.studentId+'</span>':"")]);rows.push(["부서",deptBadge(student.department)+(student.grade?' <span class="text-xs text-gray-500 ml-1">'+student.grade+'</span>':"")]);var gd=guardianStr(student);if(gd)rows.push(["보호자",gd]);if(!isIn&&record&&record.checkIn)rows.push(["체크인",record.checkIn]);document.getElementById("modalInfo").innerHTML=rows.map(function(r){return'<div class="flex justify-between items-center px-4 py-3 border-b border-gray-100 last:border-0"><span class="text-xs text-gray-400 font-medium">'+r[0]+'</span><span class="text-sm text-gray-800 font-medium">'+r[1]+'</span></div>';}).join("");document.getElementById("pickupMsg").classList.toggle("hidden",!isIn);document.getElementById("guardianRow").classList.toggle("hidden",isIn);document.getElementById("guardianCheck").checked=false;var btn=document.getElementById("confirmBtn");btn.className="flex-1 py-3.5 rounded-2xl font-bold text-white transition-colors "+(isIn?"bg-emerald-600 hover:bg-emerald-700":"bg-indigo-600 hover:bg-indigo-700");document.getElementById("modal").classList.remove("hidden");
-  // Show liability warning if not submitted
-  var liabWarn = document.getElementById("liabilityWarning");
-  if(liabWarn && s) {
-    var lf = s.liabilityForm; var needsLiab = !lf || lf === false || lf === 'false' || lf === '__NO__' || lf === '미제출' || lf === '미제출' || lf === 'X' || lf === '❌' || lf === 'null' || lf === 'undefined';
-    if(needsLiab) {
-      liabWarn.classList.remove("hidden");
-    } else {
-      liabWarn.classList.add("hidden");
+  // Show liability warning - use setTimeout to ensure DOM is ready
+  setTimeout(function() {
+    var liabWarn = document.getElementById("liabilityWarning");
+    var cs = window._currentModalStudent;
+    if(liabWarn && cs) {
+      var lf = cs.liabilityForm;
+      var needsLiab = !lf || lf === false || lf === 'false' || lf === '__NO__' || lf === '미제출' || lf === 'X' || lf === '❌' || lf === 'null' || lf === 'undefined';
+      if(needsLiab) {
+        liabWarn.classList.remove("hidden");
+      } else {
+        liabWarn.classList.add("hidden");
+      }
     }
-  }
+  }, 50);
 }
 function closeModal(){document.getElementById("modal").classList.add("hidden");}
 async function doAction(){var btn=document.getElementById("confirmBtn");btn.textContent="처리 중...";btn.disabled=true;var isIn=_action==="checkin";try{var time;if(isIn){var res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:_student.name,department:_student.department,isNew:_student.isVisitor===true,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||"",studentId:_student.id})});var data=await res.json();if(!res.ok)throw new Error(data.error||"체크인 실패");if(data.alreadyCheckedIn){closeModal();loadStatus(_student);return;}time=data.checkInTime;}else{var res2=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked})});var data2=await res2.json();if(!res2.ok)throw new Error(data2.error||"체크아웃 실패");time=data2.checkOutTime;}closeModal();showSuccess(isIn,_student,time);loadStatus(_student);}catch(e){alert(e.message||"오류가 발생했습니다");}btn.textContent="확인 / Confirm";btn.disabled=false;}
