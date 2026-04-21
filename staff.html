@@ -1377,23 +1377,47 @@ function closeContactModal() {
 
 async function submitContact() {
   if (!_currentAbsentee) return;
-  var reason = ((document.getElementById('contactReason') || {}).value || '').trim();
-  if (!reason) { showToast("사유를 입력해주세요", 'success'); return; }
+  var dateEl = document.getElementById('contactDate');
+  var dateVal = (dateEl && dateEl.value) ? dateEl.value : '';
+  if (!dateVal) { showContactValidation('연락한 날짜를 적어주세요'); return; }
+  var sel = document.getElementById('contactReasonSelect');
+  var reasonVal = sel ? sel.value : '';
+  if (!reasonVal) { showContactValidation('사유를 적어주세요'); return; }
+  var finalReason = reasonVal;
+  if (reasonVal === '다른 이유') {
+    var otherEl = document.getElementById('contactOtherText');
+    var otherVal = (otherEl && otherEl.value) ? otherEl.value.trim() : '';
+    if (!otherVal) { showContactValidation('상세 내용을 적어주세요'); return; }
+    finalReason = otherVal;
+  }
+  var fullReason = dateVal + ' / ' + finalReason;
+  var btn = document.querySelector('#contactModal button:last-child');
+  if (btn) { btn.disabled = true; btn.textContent = '저장 중...'; }
   try {
     var r = await fetch('/api/attendance?type=absentees', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         studentId: _currentAbsentee.id,
         studentName: _currentAbsentee.name,
-        reason: reason,
+        reason: fullReason,
         staffName: window._staffName || '간사',
-        recordId: _currentAbsentee.recordId
+        recordId: _currentAbsentee.recordId,
+        contactDate: dateVal
       })
     });
     var d = await r.json();
-    if (d.success) { closeContactModal(); loadAbsentees(); showToast("📞 연락 완료 기록 저장!", 'success'); }
-  } catch(e) { showToast("오류: " + e.message, 'error'); }
+    if (d.success) {
+      closeContactModal();
+      showToast('📞 연락 완료 기록 저장!');
+      loadAbsentees();
+    } else {
+      showContactValidation('저장 실패: ' + (d.error || ''));
+    }
+  } catch(e2) {
+    showContactValidation('오류: ' + e2.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '연락함 ✔️'; }
+  }
 }
 
 
@@ -1421,6 +1445,20 @@ function startRequestPolling() {
 // Auto-check Saturday reset on page load
 (function() { if (typeof checkSaturdayReset === 'function') checkSaturdayReset(); })();
 
+
+
+function showToast(msg, type) {
+  var el = document.getElementById('toastMsg');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'fixed bottom-6 z-[200] px-5 py-3 rounded-2xl shadow-xl text-white text-sm font-bold ' + (type==='error' ? 'bg-red-500' : 'bg-green-500');
+  el.style.left = '50%';
+  el.style.transform = 'translateX(-50%)';
+  el.style.minWidth = '200px';
+  el.style.textAlign = 'center';
+  setTimeout(function(){ el.className = 'hidden'; }, 2500);
+}
+
 </script>
 
   <!-- ── 2주 결석자 첫 화면 팝업 ── -->
@@ -1439,5 +1477,8 @@ function startRequestPolling() {
 
   <!-- Toast notification -->
   <div id="toastContainer" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;"></div>
+
+  <!-- Toast notification -->
+  <div id="toastMsg" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-5 py-3 rounded-2xl shadow-xl text-white text-sm font-bold transition-all" style="transform:translateX(-50%);min-width:200px;text-align:center;"></div>
 </body>
 </html>
