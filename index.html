@@ -285,7 +285,6 @@ function onNameInput(val) {
         (function(students) {
         var container = document.getElementById('checkinResults');
         if(!container) return;
-        // Group by household if same phone
         var html = '';
         var phones = {};
         students.forEach(function(s) {
@@ -302,6 +301,8 @@ function onNameInput(val) {
           group.forEach(function(s) { html += studentCard(s); });
         });
         container.innerHTML = html || '<div class="text-center py-8 text-gray-400">&#xAC80;&#xC0C9; &#xACB0;&#xACFC; &#xC5C6;&#xC74C;</div>';
+        // Load live status for each student
+        students.forEach(function(s) { loadStatus(s); });
       })(data.students);
       }).catch(function(){ 
         document.getElementById('checkinResults').innerHTML = '<div class="text-center py-6 text-red-400">검색 오류가 발생했어요</div>';
