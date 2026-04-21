@@ -1,27 +1,25 @@
 const { Client } = require('@notionhq/client');
 
-  // ── LIABILITY action ──
-          if (action === 'liability') {
-            const { guardianName, signature, timestamp } = req.body;
-            const note = 'Liability signed by ' + (guardianName||'') + ' on ' + (timestamp||new Date().toISOString()) + (signature ? ' | Sig: '+signature : '');
-            await notion.pages.update({
-              page_id: pageId,
-              properties: {
-                'Liability Form': { select: { name: '제출 완료' } },
-                '특이사항 (Notes)': { rich_text: [{ text: { content: '[LIABILITY] '+note } }] }
-              }
-            });
-            return res.json({ success: true, action: 'liability' });
-
-const notion = new Client({ auth: process.env.NOTION_TOKEN });
-const DB = process.env.NOTION_STUDENT_DB_ID;
-
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') return res.status(200).end();
     const {
+    // ── LIABILITY action ──
+    if (req.body && req.body.action === 'liability') {
+      const { pageId, guardianName, signature, timestamp } = req.body;
+      const note = 'Liability signed by ' + (guardianName||'') + ' on ' + (timestamp||new Date().toISOString()) + (signature ? ' | Sig: '+signature : '');
+      await notion.pages.update({
+        page_id: pageId,
+        properties: {
+          'Liability Form': { select: { name: '제출 완료' } },
+          '특이사항 (Notes)': { rich_text: [{ text: { content: '[LIABILITY] '+note } }] }
+        }
+      });
+      return res.json({ success: true, action: 'liability', message: 'Liability form recorded' });
+    }
+
           pageId, name, nameEN, department, grade, school, dob,
           guardian, fatherName, fatherPhone, fatherEmail,
           motherName, motherPhone, motherEmail,
