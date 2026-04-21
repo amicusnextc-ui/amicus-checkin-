@@ -82,6 +82,89 @@ tbody tr:hover { background:#fafafa; }
     </div>
     
     <!-- ── REQUESTS TAB ── -->
+
+
+<a href="/" class="block text-center text-sm text-gray-400 mt-4">← 체크인 페이지로</a>
+  </div>
+</div><div id="dashboard" class="hidden min-h-screen">
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div id="deptDot" class="w-2.5 h-2.5 rounded-full bg-gray-400"></div>
+        <div>
+          <p id="dashName" class="text-sm font-bold text-gray-900 leading-tight"></p>
+          <p id="dashDept" class="text-xs text-gray-400 leading-tight"></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="tabAttendance" onclick="switchTab('attendance')" class="tab-btn active">출석</button>
+        <button id="tabRoster" onclick="switchTab('roster')" class="tab-btn">명단</button>
+        <button id="tabRequests" onclick="switchTab('requests')" class="tab-btn">📋 요청<span id="reqBadge" style="display:none;margin-left:4px;background:#ef4444;color:white;font-size:11px;border-radius:9999px;padding:0 5px;font-weight:700;vertical-align:middle;">0</span></button>
+        <button id="tabAbsentees" onclick="switchTab('absentees')" class="tab-btn">📞 결석자<span id="absBadge" style="display:none;margin-left:4px;background:#f97316;color:white;font-size:11px;border-radius:9999px;padding:0 5px;font-weight:700;vertical-align:middle;">0</span></button>
+        <button onclick="openRequestModal()" class="text-xs bg-amber-500 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-amber-600 transition-colors">요청 보내기</button>
+        <button onclick="doLogout()" class="text-xs text-gray-400 ml-2">로그아웃</button>
+      </div>
+    </div>
+  </nav>
+  <div class="max-w-6xl mx-auto px-4 py-6">
+    <div id="attendanceTab" class="fade-in">
+      <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
+        <div class="stat-card" style="--c1:#6366f1;--c2:#8b5cf6"><p class="text-xs opacity-75 mb-1">전체</p><p id="statTotal" class="text-2xl font-bold">—</p></div>
+        <div class="stat-card" style="--c1:#10b981;--c2:#059669"><p class="text-xs opacity-75 mb-1">체크인</p><p id="statIn" class="text-2xl font-bold">—</p></div>
+        <div class="stat-card" style="--c1:#f59e0b;--c2:#d97706"><p class="text-xs opacity-75 mb-1">체크아웃</p><p id="statOut" class="text-2xl font-bold">—</p></div>
+        <div class="stat-card" style="--c1:#ec4899;--c2:#db2777"><p class="text-xs opacity-75 mb-1">방문자</p><p id="statNew" class="text-2xl font-bold">—</p></div>
+      </div>
+            <div id="weeklySummary" class="card overflow-hidden mb-4 hidden">
+        <div class="px-5 py-4 border-b border-gray-100">
+          <h2 class="font-bold text-gray-900" id="weeklySummaryTitle">이번 주 출석 요약</h2>
+        </div>
+        <div id="weeklySummaryBody" class="p-5"></div>
+      </div>
+      <div class="card overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h2 class="font-bold text-gray-900">오늘 출석</h2>
+          <div class="flex items-center gap-2"><p id="lastUpdated" class="text-xs text-gray-400"></p><div class="flex items-center gap-2">
+          <span id="liveIndicator" class="flex items-center gap-1 text-xs text-green-600 font-semibold">
+            <span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            LIVE
+          </span>
+          <span id="autoRefreshCountdown" class="text-xs text-gray-400"></span>
+          <button onclick="loadAttendance(true)" class="text-xs text-indigo-600 font-semibold px-2 py-1 rounded-lg hover:bg-indigo-50">수동 새로고침</button>
+        </div></div>
+        </div>
+        <div class="overflow-x-auto"><table class="w-full">
+          <thead class="bg-gray-50 border-b border-gray-100"><tr>
+            <th>이름</th><th>학년</th><th>생일</th><th>알러지</th><th>부모</th>
+            <th style="text-align:center">체크인</th><th style="text-align:center">체크아웃</th><th style="text-align:center">상태</th>
+          </tr></thead>
+          <tbody id="attendanceTable"><tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+    <div id="rosterTab" class="hidden fade-in">
+      <div class="card overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h2 class="font-bold text-gray-900">학생 명단</h2>
+            <span id="rosterCount" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <input id="rosterSearch" type="text" placeholder="이름 검색..." oninput="filterRoster()" class="px-3 py-2 rounded-xl border border-gray-200 text-sm w-44"/>
+            <button onclick="openAddStudent()" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-xl font-bold">추가 +</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto"><table class="w-full">
+          <thead class="bg-gray-50 border-b border-gray-100"><tr>
+            <th>이름</th><th>학년/나이</th><th>부/모</th>
+            <th style="text-align:center">사진</th><th style="text-align:center">세례</th>
+            <th style="text-align:center">Liability</th><th style="text-align:center">결석</th><th style="text-align:center">생일</th><th></th>
+          </tr></thead>
+          <tbody id="rosterTable"><tr><td colspan="9" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+
     <div id="requestsTab" class="hidden fade-in">
       <!-- Leader notification popup -->
       <div id="newRequestAlert" class="hidden mb-4 bg-amber-50 border-2 border-amber-400 rounded-2xl p-4 flex items-start gap-3">
@@ -164,85 +247,6 @@ tbody tr:hover { background:#fafafa; }
       </div>
     </div>
 
-<a href="/" class="block text-center text-sm text-gray-400 mt-4">← 체크인 페이지로</a>
-  </div>
-</div><div id="dashboard" class="hidden min-h-screen">
-  <nav class="bg-white border-b border-gray-100 sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div id="deptDot" class="w-2.5 h-2.5 rounded-full bg-gray-400"></div>
-        <div>
-          <p id="dashName" class="text-sm font-bold text-gray-900 leading-tight"></p>
-          <p id="dashDept" class="text-xs text-gray-400 leading-tight"></p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button id="tabAttendance" onclick="switchTab('attendance')" class="tab-btn active">출석</button>
-        <button id="tabRoster" onclick="switchTab('roster')" class="tab-btn">명단</button>
-        <button id="tabRequests" onclick="switchTab('requests')" class="tab-btn">📋 요청<span id="reqBadge" style="display:none;margin-left:4px;background:#ef4444;color:white;font-size:11px;border-radius:9999px;padding:0 5px;font-weight:700;vertical-align:middle;">0</span></button>
-        <button id="tabAbsentees" onclick="switchTab('absentees')" class="tab-btn">📞 결석자<span id="absBadge" style="display:none;margin-left:4px;background:#f97316;color:white;font-size:11px;border-radius:9999px;padding:0 5px;font-weight:700;vertical-align:middle;">0</span></button>
-        <button onclick="openRequestModal()" class="text-xs bg-amber-500 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-amber-600 transition-colors">요청 보내기</button>
-        <button onclick="doLogout()" class="text-xs text-gray-400 ml-2">로그아웃</button>
-      </div>
-    </div>
-  </nav>
-  <div class="max-w-6xl mx-auto px-4 py-6">
-    <div id="attendanceTab" class="fade-in">
-      <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
-        <div class="stat-card" style="--c1:#6366f1;--c2:#8b5cf6"><p class="text-xs opacity-75 mb-1">전체</p><p id="statTotal" class="text-2xl font-bold">—</p></div>
-        <div class="stat-card" style="--c1:#10b981;--c2:#059669"><p class="text-xs opacity-75 mb-1">체크인</p><p id="statIn" class="text-2xl font-bold">—</p></div>
-        <div class="stat-card" style="--c1:#f59e0b;--c2:#d97706"><p class="text-xs opacity-75 mb-1">체크아웃</p><p id="statOut" class="text-2xl font-bold">—</p></div>
-        <div class="stat-card" style="--c1:#ec4899;--c2:#db2777"><p class="text-xs opacity-75 mb-1">방문자</p><p id="statNew" class="text-2xl font-bold">—</p></div>
-      </div>
-            <div id="weeklySummary" class="card overflow-hidden mb-4 hidden">
-        <div class="px-5 py-4 border-b border-gray-100">
-          <h2 class="font-bold text-gray-900" id="weeklySummaryTitle">이번 주 출석 요약</h2>
-        </div>
-        <div id="weeklySummaryBody" class="p-5"></div>
-      </div>
-      <div class="card overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 class="font-bold text-gray-900">오늘 출석</h2>
-          <div class="flex items-center gap-2"><p id="lastUpdated" class="text-xs text-gray-400"></p><div class="flex items-center gap-2">
-          <span id="liveIndicator" class="flex items-center gap-1 text-xs text-green-600 font-semibold">
-            <span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            LIVE
-          </span>
-          <span id="autoRefreshCountdown" class="text-xs text-gray-400"></span>
-          <button onclick="loadAttendance(true)" class="text-xs text-indigo-600 font-semibold px-2 py-1 rounded-lg hover:bg-indigo-50">수동 새로고침</button>
-        </div></div>
-        </div>
-        <div class="overflow-x-auto"><table class="w-full">
-          <thead class="bg-gray-50 border-b border-gray-100"><tr>
-            <th>이름</th><th>학년</th><th>생일</th><th>알러지</th><th>부모</th>
-            <th style="text-align:center">체크인</th><th style="text-align:center">체크아웃</th><th style="text-align:center">상태</th>
-          </tr></thead>
-          <tbody id="attendanceTable"><tr><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
-        </table></div>
-      </div>
-    </div>
-    <div id="rosterTab" class="hidden fade-in">
-      <div class="card overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <h2 class="font-bold text-gray-900">학생 명단</h2>
-            <span id="rosterCount" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold"></span>
-          </div>
-          <div class="flex items-center gap-2">
-            <input id="rosterSearch" type="text" placeholder="이름 검색..." oninput="filterRoster()" class="px-3 py-2 rounded-xl border border-gray-200 text-sm w-44"/>
-            <button onclick="openAddStudent()" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-xl font-bold">추가 +</button>
-          </div>
-        </div>
-        <div class="overflow-x-auto"><table class="w-full">
-          <thead class="bg-gray-50 border-b border-gray-100"><tr>
-            <th>이름</th><th>학년/나이</th><th>부/모</th>
-            <th style="text-align:center">사진</th><th style="text-align:center">세례</th>
-            <th style="text-align:center">Liability</th><th style="text-align:center">결석</th><th style="text-align:center">생일</th><th></th>
-          </tr></thead>
-          <tbody id="rosterTable"><tr><td colspan="9" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
-        </table></div>
-      </div>
-    </div>
 
 
   </div>
