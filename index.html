@@ -301,6 +301,9 @@ function onNameInput(val) {
           group.forEach(function(s) { html += studentCard(s); });
         });
         container.innerHTML = html || '<div class="text-center py-8 text-gray-400">&#xAC80;&#xC0C9; &#xACB0;&#xACFC; &#xC5C6;&#xC74C;</div>';
+        // Register students in _studentMap so openModalById can find them
+        window._studentMap = window._studentMap || {};
+        students.forEach(function(s) { window._studentMap[s.id] = s; });
         // Load live status for each student
         students.forEach(function(s) { loadStatus(s); });
       })(data.students);
