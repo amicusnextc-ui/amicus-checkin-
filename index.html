@@ -154,7 +154,20 @@
         <span class="text-sm font-semibold text-indigo-700">✅ 보호자 인계 확인</span>
       </label>
     </div>
-    <div class="flex gap-3">
+    <!-- Liability Warning Banner -->
+  <div id="liabilityWarning" class="hidden mb-3 px-4 py-3 bg-orange-50 border border-orange-300 rounded-2xl">
+    <div class="flex items-start gap-3">
+      <span class="text-xl flex-shrink-0">&#x26A0;&#xFE0F;</span>
+      <div class="flex-1">
+        <p class="font-bold text-orange-800 text-sm">&#xCC45;&#xC784; &#xB3D9;&#xC758;&#xC11C; &#xBBF8;&#xC81C;&#xCD9C;</p>
+        <p class="text-orange-700 text-xs mt-0.5">&#xC774; &#xD559;&#xC0DD;&#xC740; Liability Form&#xC744; &#xC544;&#xC9C1; &#xC81C;&#xCD9C;&#xD558;&#xC9C0; &#xC54A;&#xC558;&#xC5B4;&#xC694;.</p>
+        <button onclick="openLiabilityFormFromModal()" class="mt-2 px-4 py-1.5 bg-orange-500 text-white text-xs font-bold rounded-xl hover:bg-orange-600 transition-colors">
+          &#x1F4DD; &#xC9C0;&#xAE08; &#xC791;&#xC131;&#xD558;&#xAE30;
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="flex gap-3">
       <button onclick="closeModal()" class="flex-1 py-3.5 rounded-2xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">취소</button>
       <button id="confirmBtn" onclick="doAction()" class="flex-1 py-3.5 rounded-2xl font-bold text-white transition-colors">확인 / Confirm</button>
     </div>
@@ -236,6 +249,116 @@ document.getElementById("welcomeDate").textContent=dateStr;
 function goHome(){document.getElementById("welcomeScreen").classList.remove("hidden");document.getElementById("mainHeader").classList.add("hidden");document.getElementById("mainApp").classList.add("hidden");_currentMode=null;clearPins();}
 
 // ── Name Search Mode ──
+
+// ── Liability Form ──
+window._liabilityStudent = null;
+window._liabilityCheckinCallback = null;
+
+
+function openLiabilityFormFromModal() {
+  var s = window._currentModalStudent;
+  if(!s) return;
+  closeModal();
+  openLiabilityForm(s, function() {
+    // After liability submitted, re-open confirm modal and proceed
+    s.liabilityForm = true;
+    openModal('checkin', s);
+  });
+}
+function openLiabilityForm(student, checkinCallback) {
+  window._liabilityStudent = student;
+  window._liabilityCheckinCallback = checkinCallback;
+
+  // Fill auto info
+  var nameEl = document.getElementById('liabilityStudentName');
+  var infoEl = document.getElementById('liabilityStudentInfo2');
+  if(nameEl) nameEl.textContent = student.name + (student.nameEN ? ' (' + student.nameEN + ')' : '');
+  if(infoEl) infoEl.textContent = (student.department||'') + ' · ' + (student.grade||'') + ' · DOB: ' + (student.dob||'-');
+
+  // Pre-fill guardian name if available
+  var guardianInput = document.getElementById('liabilityGuardianName');
+  if(guardianInput && student.guardian) guardianInput.value = student.guardian;
+
+  // Set timestamp
+  var ts = document.getElementById('liabilityTimestamp');
+  if(ts) ts.textContent = new Date().toLocaleString('ko-KR', {timeZone:'America/Los_Angeles'});
+
+  // Reset fields
+  document.getElementById('liabilitySignature').value = '';
+  document.getElementById('liabilityAgree').checked = false;
+
+  // Show modal
+  var modal = document.getElementById('liabilityModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  // Focus guardian name
+  setTimeout(function(){ 
+    var g = document.getElementById('liabilityGuardianName');
+    if(g && !g.value) g.focus(); 
+    else document.getElementById('liabilitySignature').focus();
+  }, 300);
+}
+
+function closeLiabilityModal() {
+  var modal = document.getElementById('liabilityModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+function submitLiabilityForm() {
+  var guardian = document.getElementById('liabilityGuardianName').value.trim();
+  var signature = document.getElementById('liabilitySignature').value.trim();
+  var agreed = document.getElementById('liabilityAgree').checked;
+
+  if(!guardian) {
+    document.getElementById('liabilityGuardianName').focus();
+    document.getElementById('liabilityGuardianName').classList.add('border-red-400');
+    return;
+  }
+  if(!signature) {
+    document.getElementById('liabilitySignature').focus();
+    document.getElementById('liabilitySignature').classList.add('border-red-400');
+    return;
+  }
+  if(!agreed) {
+    alert('据 ま동의 쬬체크화시고 수진 해주세요.');
+    return;
+  }
+
+  var btn = document.getElementById('liabilitySubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '제출 중...';
+
+  var student = window._liabilityStudent;
+  var timestamp = new Date().toISOString();
+  var signedText = '서명: ' + signature + ' (보호자: ' + guardian + ') 시간: ' + timestamp;
+
+  // Update Notion student record
+  fetch('/api/update-liability', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      studentId: student.id,
+      guardianName: guardian,
+      signature: signature,
+      timestamp: timestamp,
+      signedText: signedText
+    })
+  }).then(function(r){ return r.json(); }).then(function(data) {
+    closeLiabilityModal();
+    btn.disabled = false;
+    btn.textContent = '제출 & 체크인 완료 ✓';
+    // Continue with original checkin
+    if(window._liabilityCheckinCallback) window._liabilityCheckinCallback();
+  }).catch(function(err) {
+    // Even if API fails, allow checkin
+    closeLiabilityModal();
+    btn.disabled = false;
+    if(window._liabilityCheckinCallback) window._liabilityCheckinCallback();
+  });
+}
+
 function setSearchMode(mode) {
   var phoneSection = document.getElementById('phoneDigitSection');
   var nameSection = document.getElementById('nameSearchSection');
@@ -325,9 +448,20 @@ function deptBadge(d){var c=(DEPT_INFO[d]&&DEPT_INFO[d].color&&DEPT_INFO[d].colo
 function guardianStr(s){if(s.fatherName&&s.motherName)return"👨 "+s.fatherName+" / 👩 "+s.motherName;if(s.fatherName)return"👨 "+s.fatherName+(s.fatherPhone?" · "+s.fatherPhone:"");if(s.motherName)return"👩 "+s.motherName+(s.motherPhone?" · "+s.motherPhone:"");if(s.guardian)return s.guardian+(s.phone?" · "+s.phone:"");return"";}
 function studentCard(s){var dc=(DEPT_INFO[s.department]&&DEPT_INFO[s.department].color)||{};var leftColor=dc.left||"border-l-gray-300";var allergy=hasAllergy(s.allergy);var isBdayToday=isBirthdayToday(s.dob);var isBday=isBdayToday||isBirthdayThisMonth(s.dob);var h='<div id="card-'+s.id+'" class="student-card bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 '+leftColor+' p-4 fade-in">';h+='<div class="mb-2"><div class="flex flex-wrap items-center gap-2 mb-1">';h+='<span class="text-xl font-bold text-gray-900">'+s.name+'</span>';if(s.studentId)h+='<span class="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">'+s.studentId+'</span>';if(s.isVisitor)h+='<span class="badge-newcomer">🆕 NEW</span>';if(isBdayToday)h+='<span class="badge-birthday-today">🎂 Happy Birthday!</span>';else if(isBday)h+='<span class="badge-birthday">🎂 이달 생일</span>';if(allergy)h+='<span class="badge-allergy">⚠️ 알러지</span>';h+='</div>';if(s.nameEN)h+='<div class="text-sm text-gray-400 mb-1">'+s.nameEN+'</div>';h+='</div>';h+='<div class="flex flex-wrap gap-2 mb-3">'+deptBadge(s.department)+(s.grade?'<span class="text-xs text-gray-500 flex items-center">'+s.grade+'</span>':'')+'</div>';h+='<div id="action-'+s.id+'" class="mt-1"><div class="text-center py-2 text-gray-400 text-sm"><span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full spin align-middle mr-1"></span>상태 확인 중...</div></div>';h+='</div>';return h;}
 function loadStatus(s){fetch("/api/check-status?name="+encodeURIComponent(s.name)).then(function(r){return r.json();}).then(function(data){var el=document.getElementById("action-"+s.id);if(!el)return;if(data.status==="checked_out"){el.innerHTML='<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center flex items-center justify-center gap-2"><span class="text-green-500 font-bold">✓</span> 체크아웃 완료 · '+data.record.checkIn+' → '+data.record.checkOut+'</div>';}else if(data.status==="checked_in"){_recordMap[s.id]=data.record;el.innerHTML='<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 mb-2 text-sm text-emerald-700 flex items-center gap-2"><span class="text-emerald-500 font-bold text-base">✓</span><span>체크인됨 · '+data.record.checkIn+' 입실</span></div>'+'<button data-sid="'+s.id+'" class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700 transition-colors active:scale-95">체크아웃 / Check Out</button>';el.querySelector("button").addEventListener("click",function(){openModalById("checkout",this.dataset.sid);});}else{el.innerHTML='<button data-sid="'+s.id+'" class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700 transition-colors active:scale-95 pulse-ring">체크인 / Check In</button>';el.querySelector("button").addEventListener("click",function(){openModalById("checkin",this.dataset.sid);});}}).catch(function(){var el2=document.getElementById("action-"+s.id);if(el2)el2.innerHTML='<div class="text-xs text-gray-400 text-center py-2">상태 확인 실패</div>';});}
-function openModalById(action,sid){var s=_studentMap[sid];var rec=(action==="checkout")?(_recordMap[sid]||null):null;if(s)openModal(action,s,rec);}
+function openModalById(action,sid){var s=_studentMap[sid];window._currentModalStudent=s;var rec=(action==="checkout")?(_recordMap[sid]||null):null;if(s)openModal(action,s,rec);}
 var _action,_student,_record;
-function openModal(action,student,record){_action=action;_student=student;_record=record;var isIn=action==="checkin";var hdr=document.getElementById("modalHeader");hdr.className="text-center mb-4 p-4 rounded-2xl "+(isIn?"bg-emerald-50":"bg-indigo-50");hdr.innerHTML='<div class="text-5xl mb-2 check-pop inline-block">'+(isIn?"👋":"🙏")+'</div><h2 class="text-xl font-bold text-gray-900">'+(isIn?"체크인 확인":"체크아웃 확인")+'</h2>';var rows=[];rows.push(["이름","<strong>"+student.name+"</strong>"+(student.nameEN?' <span class="text-sm text-gray-400">'+student.nameEN+'</span>':'')+(student.studentId?' <span class="text-xs font-mono text-gray-400">'+student.studentId+'</span>':"")]);rows.push(["부서",deptBadge(student.department)+(student.grade?' <span class="text-xs text-gray-500 ml-1">'+student.grade+'</span>':"")]);var gd=guardianStr(student);if(gd)rows.push(["보호자",gd]);if(!isIn&&record&&record.checkIn)rows.push(["체크인",record.checkIn]);document.getElementById("modalInfo").innerHTML=rows.map(function(r){return'<div class="flex justify-between items-center px-4 py-3 border-b border-gray-100 last:border-0"><span class="text-xs text-gray-400 font-medium">'+r[0]+'</span><span class="text-sm text-gray-800 font-medium">'+r[1]+'</span></div>';}).join("");document.getElementById("pickupMsg").classList.toggle("hidden",!isIn);document.getElementById("guardianRow").classList.toggle("hidden",isIn);document.getElementById("guardianCheck").checked=false;var btn=document.getElementById("confirmBtn");btn.className="flex-1 py-3.5 rounded-2xl font-bold text-white transition-colors "+(isIn?"bg-emerald-600 hover:bg-emerald-700":"bg-indigo-600 hover:bg-indigo-700");document.getElementById("modal").classList.remove("hidden");}
+function openModal(action,student,record){_action=action;_student=student;_record=record;var isIn=action==="checkin";var hdr=document.getElementById("modalHeader");hdr.className="text-center mb-4 p-4 rounded-2xl "+(isIn?"bg-emerald-50":"bg-indigo-50");hdr.innerHTML='<div class="text-5xl mb-2 check-pop inline-block">'+(isIn?"👋":"🙏")+'</div><h2 class="text-xl font-bold text-gray-900">'+(isIn?"체크인 확인":"체크아웃 확인")+'</h2>';var rows=[];rows.push(["이름","<strong>"+student.name+"</strong>"+(student.nameEN?' <span class="text-sm text-gray-400">'+student.nameEN+'</span>':'')+(student.studentId?' <span class="text-xs font-mono text-gray-400">'+student.studentId+'</span>':"")]);rows.push(["부서",deptBadge(student.department)+(student.grade?' <span class="text-xs text-gray-500 ml-1">'+student.grade+'</span>':"")]);var gd=guardianStr(student);if(gd)rows.push(["보호자",gd]);if(!isIn&&record&&record.checkIn)rows.push(["체크인",record.checkIn]);document.getElementById("modalInfo").innerHTML=rows.map(function(r){return'<div class="flex justify-between items-center px-4 py-3 border-b border-gray-100 last:border-0"><span class="text-xs text-gray-400 font-medium">'+r[0]+'</span><span class="text-sm text-gray-800 font-medium">'+r[1]+'</span></div>';}).join("");document.getElementById("pickupMsg").classList.toggle("hidden",!isIn);document.getElementById("guardianRow").classList.toggle("hidden",isIn);document.getElementById("guardianCheck").checked=false;var btn=document.getElementById("confirmBtn");btn.className="flex-1 py-3.5 rounded-2xl font-bold text-white transition-colors "+(isIn?"bg-emerald-600 hover:bg-emerald-700":"bg-indigo-600 hover:bg-indigo-700");document.getElementById("modal").classList.remove("hidden");
+  // Show liability warning if not submitted
+  var liabWarn = document.getElementById("liabilityWarning");
+  if(liabWarn && s) {
+    var needsLiab = !s.liabilityForm || s.liabilityForm === false || s.liabilityForm === 'false' || s.liabilityForm === '__NO__';
+    if(needsLiab) {
+      liabWarn.classList.remove("hidden");
+    } else {
+      liabWarn.classList.add("hidden");
+    }
+  }
+}
 function closeModal(){document.getElementById("modal").classList.add("hidden");}
 async function doAction(){var btn=document.getElementById("confirmBtn");btn.textContent="처리 중...";btn.disabled=true;var isIn=_action==="checkin";try{var time;if(isIn){var res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:_student.name,department:_student.department,isNew:_student.isVisitor===true,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||"",studentId:_student.id})});var data=await res.json();if(!res.ok)throw new Error(data.error||"체크인 실패");if(data.alreadyCheckedIn){closeModal();loadStatus(_student);return;}time=data.checkInTime;}else{var res2=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked})});var data2=await res2.json();if(!res2.ok)throw new Error(data2.error||"체크아웃 실패");time=data2.checkOutTime;}closeModal();showSuccess(isIn,_student,time);loadStatus(_student);}catch(e){alert(e.message||"오류가 발생했습니다");}btn.textContent="확인 / Confirm";btn.disabled=false;}
 var _successTimer;
@@ -620,6 +754,79 @@ document.getElementById("modal").addEventListener("click",function(e){if(e.targe
 document.getElementById("success").addEventListener("click",function(e){if(e.target===this)closeSuccess();});
 document.getElementById("visitorModal").addEventListener("click",function(e){if(e.target===this)closeVisitorModal();});
 </script>
+
+  <!-- ══ LIABILITY FORM MODAL ══ -->
+  <div id="liabilityModal" class="fixed inset-0 z-50 hidden flex items-end justify-center">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeLiabilityModal()"></div>
+    <div class="relative bg-white w-full max-w-lg rounded-t-3xl shadow-2xl flex flex-col" style="max-height:92vh;">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 pt-5 pb-3 border-b border-gray-100 flex-shrink-0">
+        <div>
+          <h2 class="text-lg font-black text-gray-900">&#xCC45;&#xC784; &#xB3D9;&#xC758;&#xC11C; <span class="text-xs font-normal text-gray-400 ml-1">Liability Waiver</span></h2>
+          <p class="text-xs text-gray-400 mt-0.5">&#xC791;&#xC131; &#xD6C4; &#xCCB4;&#xD06C;&#xC778;&#xC774; &#xC644;&#xB8CC;&#xB429;&#xB2C8;&#xB2E4;</p>
+        </div>
+        <button onclick="closeLiabilityModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-light">&times;</button>
+      </div>
+
+      <!-- Scrollable content -->
+      <div class="overflow-y-auto flex-1 px-6 py-4">
+
+        <!-- Auto-filled info banner -->
+        <div id="liabilityStudentInfo" class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-4">
+          <p class="text-xs text-indigo-500 font-semibold mb-1">&#xC790;&#xB3D9; &#xC785;&#xB825;&#xB428;</p>
+          <p id="liabilityStudentName" class="font-bold text-gray-900"></p>
+          <p id="liabilityStudentInfo2" class="text-sm text-gray-500"></p>
+        </div>
+
+        <!-- Form text (scrollable) -->
+        <div class="bg-gray-50 rounded-2xl p-4 mb-4 text-xs text-gray-600 leading-relaxed" style="max-height:220px;overflow-y:auto;">
+          <p class="font-bold text-gray-800 mb-2">WAIVER OF LIABILITY, ASSUMPTION OF RISK, AND INDEMNITY AGREEMENT</p>
+          <p class="mb-2"><strong>Effective Dates: January 1, 2025 &ndash; December 31, 2027</strong><br/>FOR USE ONLY IF THE PARTICIPANT IS A MINOR</p>
+          <p class="mb-2"><strong>Functions and Activities:</strong> Prior to my child&#x2019;s participation in the programs and recreational and other activities of Amicus Presbyterian Church (&ldquo;Amicus&rdquo;), I acknowledge that there are certain risks associated with the activities, including physical injury, illness, even death, or property loss.</p>
+          <p class="mb-2"><strong>Release of Liability:</strong> I expressly assume all risks of the child when participating in the activities. I further release Amicus and its ministers, leaders, employees, volunteers, and agents from any claim that my child may have as a result of injury or illness incurred during participation. This release shall include any claims of negligence or breach of warranty.</p>
+          <p class="mb-2"><strong>Special Events and Field Trips:</strong> My child may take part in activities such as: Religious Studies, discussion groups, music, worship services, group songs, games of skill and experience, drama, walking to outside events at other locales and establishments, and other activities consistent with the purposes of the church&#x2019;s student ministry.</p>
+          <p class="mb-2"><strong>Photography, Audio, Video, and Social Media:</strong> I authorize Amicus to include my child in pictures or on audio or video for promotional purposes. I also authorize Amicus to post pictures or recordings of my children on conference presentations, worship services, educational presentations, or church website.</p>
+          <p class="mb-2"><strong>First Aid and Emergency Medical Treatment:</strong> I give permission for agents of Amicus to seek and secure any needed medical attention or treatment for the child named above including hospitalization. I agree to pay all fees and costs arising from this action.</p>
+          <p class="mb-2"><strong>Indemnification:</strong> I agree to indemnify and hold harmless Amicus for any and all claims, actions, suits, costs, expenses, damages, and liabilities including attorneys&#x2019; fees brought as a result of my involvement in the Activity.</p>
+          <p><strong>Acknowledgment:</strong> I have read this Waiver of Liability, Assumption of Risk, and Indemnity Agreement, and fully understand its terms. I understand that I am giving up substantial rights, including my right to sue.</p>
+        </div>
+
+        <!-- Guardian name input -->
+        <div class="mb-3">
+          <label class="block text-sm font-bold text-gray-700 mb-1">&#xBCF4;&#xD638;&#xC790; &#xC774;&#xB984; <span class="text-red-400">*</span> <span class="text-xs font-normal text-gray-400">Guardian Name</span></label>
+          <input id="liabilityGuardianName" type="text" placeholder="&#xC774;&#xB984; &#xC785;&#xB825; (e.g. &#xBC15;&#xC138;&#xC5F4; / Peter Park)"
+            class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
+            autocomplete="off"/>
+        </div>
+
+        <!-- Signature input -->
+        <div class="mb-4">
+          <label class="block text-sm font-bold text-gray-700 mb-1">&#xC11C;&#xBA85; (&#xC774;&#xB984; &#xC785;&#xB825;) <span class="text-red-400">*</span> <span class="text-xs font-normal text-gray-400">Signature</span></label>
+          <input id="liabilitySignature" type="text" placeholder="&#xC774;&#xB984;&#xC744; &#xC785;&#xB825;&#xD558;&#xBA74; &#xC11C;&#xBA85;&#xC73C;&#xB85C; &#xC778;&#xC815;&#xB429;&#xB2C8;&#xB2E4;"
+            class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
+            autocomplete="off"/>
+        </div>
+
+        <!-- Agree checkbox -->
+        <label class="flex items-start gap-3 cursor-pointer mb-5">
+          <input id="liabilityAgree" type="checkbox" class="mt-1 w-5 h-5 rounded accent-indigo-500 flex-shrink-0"/>
+          <span class="text-sm text-gray-700 leading-relaxed">
+            <strong>&#xC704; &#xB0B4;&#xC6A9;&#xC744; &#xC77D;&#xACE0; &#xC774;&#xD574;&#xD558;&#xC600;&#xC73C;&#xBA70; &#xB3D9;&#xC758;&#xD569;&#xB2C8;&#xB2E4;.</strong><br/>
+            <span class="text-xs text-gray-400">I have read and agree to the above Waiver of Liability, Assumption of Risk, and Indemnity Agreement. (California E-SIGN Act compliant)</span>
+          </span>
+        </label>
+      </div>
+
+      <!-- Submit button -->
+      <div class="px-6 pb-6 pt-3 flex-shrink-0 border-t border-gray-100">
+        <button id="liabilitySubmitBtn" onclick="submitLiabilityForm()"
+          class="w-full py-4 rounded-2xl bg-indigo-600 text-white font-black text-base disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:bg-indigo-700">
+          &#xC81C;&#xCD9C; &amp; &#xCCB4;&#xD06C;&#xC778; &#xC644;&#xB8CC; &#x2713;
+        </button>
+        <p class="text-center text-xs text-gray-400 mt-2">&#xC11C;&#xBA85; &#xC2DC;&#xAC04;: <span id="liabilityTimestamp"></span></p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 
