@@ -459,15 +459,20 @@ function doLogin(){
   window._dept=dept;window._user=staffName;window._staffDept=dept;window._staffName=staffName;
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
-  // Check 2-week absentees on login
+  // Check 2-week absentees on login — strict dept filter (popup only for depts with own absentees)
   setTimeout(function() {
     var dept = window._staffDept || '';
-    var url = '/api/attendance?type=absentees' + (dept ? '&department=' + encodeURIComponent(dept) : '');
+    if (!dept) return;
+    var deptShort = (dept.match(/중고등부|초등부|유년부|유치부|유아부/)||[])[0] || '';
+    var url = '/api/attendance?type=absentees&department=' + encodeURIComponent(dept);
     fetch(url).then(function(r) { return r.json(); }).then(function(d) {
-      if (d.success) {
-        var unc = (d.absentees || []).filter(function(a) { return a.contacted !== '연락함'; });
-        showAbsenteePopupIfNeeded(unc.length);
-      }
+      if (!d.success) return;
+      var mine = (d.absentees || []).filter(function(a) {
+        var ad = a.dept || a.department || '';
+        return deptShort ? ad.indexOf(deptShort) >= 0 : ad === dept;
+      });
+      var unc = mine.filter(function(a) { return a.contacted !== '연락함'; });
+      showAbsenteePopupIfNeeded(unc.length);
     }).catch(function() {});
   }, 1500);
   document.getElementById("dashName").textContent=staffName+(staffName.indexOf("전도사님")>=0?"":" 간사님");
@@ -1266,13 +1271,19 @@ async function loadAbsentees() {
   var __deptFull = window._dept || window._staffDept || '';
   var __deptShort = __LD2[window._leaderName] || (__deptFull.match(/중고등부|초등부|유년부|유치부|유아부/)||[])[0] || '';
   var dept = __deptFull;
-  var url = '/api/attendance?type=absentees' + (isLeader ? '&department=all' : (dept ? '&department=' + encodeURIComponent(dept) : ''));
+  if (!__deptFull && !isLeader) { list.innerHTML = '<div class="px-5 py-8 text-center text-gray-400 text-sm">로그인 필요</div>'; return; }
+  var url = '/api/attendance?type=absentees' + (isLeader ? '&department=all' : '&department=' + encodeURIComponent(dept));
   try {
     var r = await fetch(url);
     var d = await r.json();
     if (!d.success) { list.innerHTML = '<div class="px-5 py-8 text-center text-red-400 text-sm">로딩 실패</div>'; return; }
     _absentees = d.absentees || [];
-    if (__deptShort) _absentees = _absentees.filter(function(a){ return (a.dept||a.department||'').indexOf(__deptShort) >= 0; });
+    // Strict client-side filter: only show absentees matching user's dept (safety net for banner)
+    if (__deptShort) {
+      _absentees = _absentees.filter(function(a){ return (a.dept||a.department||'').indexOf(__deptShort) >= 0; });
+    } else if (!isLeader && __deptFull) {
+      _absentees = _absentees.filter(function(a){ return (a.dept||a.department||'') === __deptFull; });
+    }
 
     var countEl = document.getElementById('absListCount');
     if (countEl) countEl.textContent = _absentees.length + '명';
