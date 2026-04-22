@@ -486,7 +486,50 @@ function openModal(action,student,record){_action=action;_student=student;_recor
   }, 50);
 }
 function closeModal(){document.getElementById("modal").classList.add("hidden");}
-async function doAction(){var btn=document.getElementById("confirmBtn");btn.textContent="처리 중...";btn.disabled=true;var isIn=_action==="checkin";try{var time;if(isIn){var res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:_student.name,department:_student.department,isNew:_student.isVisitor===true,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||"",studentId:_student.id})});var data=await res.json();if(!res.ok)throw new Error(data.error||"체크인 실패");if(data.alreadyCheckedIn){closeModal();loadStatus(_student);return;}time=data.checkInTime;}else{var res2=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked})});var data2=await res2.json();if(!res2.ok)throw new Error(data2.error||"체크아웃 실패");time=data2.checkOutTime;}closeModal();showSuccess(isIn,_student,time);loadStatus(_student);}catch(e){alert(e.message||"오류가 발생했습니다");}btn.textContent="확인 / Confirm";btn.disabled=false;}
+async function doAction(){
+  var btn=document.getElementById("confirmBtn");
+  btn.textContent="처리 중...";
+  btn.disabled=true;
+  var isIn=_action==="checkin";
+  var directorPw = "";
+  async function callApi(){
+    var body;
+    if (isIn) {
+      body = {name:_student.name,department:_student.department,isNew:_student.isVisitor===true,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||"",studentId:_student.id};
+    } else {
+      body = {pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked};
+    }
+    if (directorPw) body.directorPassword = directorPw;
+    var r = await fetch(isIn ? "/api/checkin" : "/api/checkout", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    var d = await r.json();
+    return {res:r, data:d};
+  }
+  try {
+    var result = await callApi();
+    if (result.data.requiresDirectorAuth) {
+      var pw = prompt("⚠️ 오늘은 일요일이 아닙니다.\n" + (isIn ? "체크인" : "체크아웃") + "을 진행하려면 디렉터 비밀번호가 필요합니다:");
+      if (!pw) { btn.textContent="확인 / Confirm"; btn.disabled=false; return; }
+      directorPw = pw;
+      result = await callApi();
+      if (result.data.requiresDirectorAuth) throw new Error("디렉터 비밀번호가 틀렸습니다");
+    }
+    if (!result.res.ok) throw new Error(result.data.error||(isIn?"체크인 실패":"체크아웃 실패"));
+    var time;
+    if (isIn) {
+      if (result.data.alreadyCheckedIn) { closeModal(); loadStatus(_student); return; }
+      time = result.data.checkInTime;
+    } else {
+      time = result.data.checkOutTime;
+    }
+    closeModal();
+    showSuccess(isIn,_student,time);
+    loadStatus(_student);
+  } catch(e) {
+    alert(e.message||"오류가 발생했습니다");
+  }
+  btn.textContent="확인 / Confirm";
+  btn.disabled=false;
+}
 var _successTimer;
 function showSuccess(isIn,student,time){document.getElementById("successIcon").textContent=isIn?"🎉":"👋";document.getElementById("successTitle").textContent=student.name+(isIn?" 체크인 완료!":" 체크아웃 완료!");document.getElementById("successTime").textContent=time||"";document.getElementById("success").classList.remove("hidden");document.getElementById("successPickup").classList.toggle("hidden",!isIn);if(isIn){document.getElementById("tagContainer").classList.remove("hidden");document.getElementById("printBtn").classList.remove("hidden");buildTag(student,time);}else{document.getElementById("tagContainer").classList.add("hidden");document.getElementById("printBtn").classList.add("hidden");}clearTimeout(_successTimer);_successTimer=window._cd=10;document.getElementById("countdownBanner").classList.remove("hidden");document.getElementById("countdownNum").textContent=10;document.getElementById("countdownBar").style.width="100%";clearInterval(window._cd_interval);window._cd_interval=setInterval(function(){window._cd=window._cd-1;document.getElementById("countdownNum").textContent=window._cd;document.getElementById("countdownBar").style.width=(window._cd*10)+"%";if(window._cd<=0)clearInterval(window._cd_interval);},1000);setTimeout(closeSuccess,10000);}
 function buildTag(s, time) {
