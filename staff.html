@@ -1137,7 +1137,9 @@ async function loadRequests() {
     var sc = { '대기중': 'bg-gray-100 text-gray-600', '확인됨': 'bg-blue-100 text-blue-700', '진행중': 'bg-yellow-100 text-yellow-700', '완료': 'bg-green-100 text-green-700' };
     var si2 = { '대기중': '⏳', '확인됨': '👀', '진행중': '🔧', '완료': '✅' };
 
-    var activeReqs = _reqs;
+    var __nowTs = Date.now();
+    var activeReqs = _reqs.filter(function(r){ if(r.status!=='완료') return true; if(!r.completedAt) return true; return (__nowTs - new Date(r.completedAt).getTime())/(86400000) < 7; });
+    var archivedReqs = _reqs.filter(function(r){ if(r.status!=='완료') return false; if(!r.completedAt) return false; return (__nowTs - new Date(r.completedAt).getTime())/(86400000) >= 7; });
     list.innerHTML = activeReqs.map(function(req, idx) {
       var statusCls = sc[req.status] || 'bg-gray-100 text-gray-600';
       var statusIcon = si2[req.status] || '⏳';
