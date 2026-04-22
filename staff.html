@@ -852,7 +852,7 @@ function loadLeaderAbsent(){
     try{
       var r=await fetch("/api/weekly-summary"),d=await r.json();
       if(!r.ok)throw new Error(d.error||"failed");
-      var absentList=d.absentList||[];var __mDn=(window._leaderName||window._staffDept||'').toString();var __my=(__mDn.match(/중고등부|초등부|유년부|유치부|유아부/)||[])[0];if(__my)absentList=absentList.filter(function(s){return(s.dept||'').indexOf(__my)>=0;});
+      var absentList=d.absentList||[];var __mDn=({'이강희':'중고등부','최재원':'중고등부'}[window._leaderName]||window._staffDept||'');var __my=(__mDn.match(/중고등부|초등부|유년부|유치부|유아부/)||[])[0];if(__my)absentList=absentList.filter(function(s){return(s.dept||'').indexOf(__my)>=0;});
       var state=JSON.parse(localStorage.getItem("absentState")||"{}");
       var html="";
       absentList.forEach(function(s){
