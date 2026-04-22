@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>교육부 디렉터 포털 | 아미쿠스</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  * { font-family: 'Noto Sans KR', sans-serif; }
+  body { background: #f0f4f8; }
+  .fade-in { animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .card { background:#fff; border-radius:16px; box-shadow:0 1px 4px rgba(0,0,0,.07); }
+  .tab-btn { padding:10px 20px; border-radius:10px; font-size:14px; font-weight:600; transition:all .15s; cursor:pointer; }
+  .tab-btn.active { background:#4f46e5; color:#fff; box-shadow:0 2px 8px rgba(79,70,229,.3); }
+  .tab-btn:not(.active) { color:#6b7280; background:#f3f4f6; }
+  .tab-btn:not(.active):hover { background:#e5e7eb; }
+  .stat-pill { display:inline-flex; align-items:center; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+  .dept-blue  { background:#dbeafe; color:#1e40af; }
+  .dept-green { background:#dcfce7; color:#166534; }
+  .dept-yellow{ background:#fef3c7; color:#854d0e; }
+  .dept-orange{ background:#fed7aa; color:#9a3412; }
+  .dept-purple{ background:#ede9fe; color:#5b21b6; }
+  .dept-gray  { background:#f3f4f6; color:#374151; }
+  table { font-size:13px; }
+  thead th { background:#f9fafb; color:#6b7280; font-size:11px; text-transform:uppercase; letter-spacing:.5px; font-weight:700; padding:10px 8px; text-align:left; border-bottom:2px solid #e5e7eb; }
+  tbody td { padding:10px 8px; border-bottom:1px solid #f3f4f6; vertical-align:top; }
+  tbody tr:hover { background:#f9fafb; }
+  .btn-primary { background:#4f46e5; color:#fff; padding:10px 20px; border-radius:10px; font-weight:600; transition:all .15s; }
+  .btn-primary:hover { background:#4338ca; }
+  .btn-ghost { color:#4f46e5; padding:6px 12px; border-radius:8px; font-weight:500; font-size:13px; }
+  .btn-ghost:hover { background:#eef2ff; }
+  input, select { outline:none; padding:10px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; width:100%; }
+  input:focus, select:focus { border-color:#4f46e5; box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+  .inactive-row { opacity:.55; }
+  .badge { display:inline-flex; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; }
+  .badge-green { background:#dcfce7; color:#166534; }
+  .badge-red { background:#fee2e2; color:#991b1b; }
+  .badge-yellow { background:#fef3c7; color:#854d0e; }
+  .badge-gray { background:#f3f4f6; color:#6b7280; }
+  .warn-card { background:linear-gradient(135deg,#fef3c7,#fde68a); border:1px solid #fcd34d; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
+        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900">교육부 디렉터 포털</h1>
+      <p class="text-gray-500 mt-1">Amicus Next — Director Portal</p>
+    </div>
+
+    <div class="card p-6">
+      <div class="flex gap-2 mb-5">
+        <button class="tab-btn active flex-1" data-role="director">⭐ 디렉터</button>
+        <button class="tab-btn flex-1" data-role="leader">🎖️ 부장/위원장</button>
+      </div>
+
+      <label class="block text-xs font-semibold text-gray-600 mb-1 mt-3">이름 / NAME</label>
+      <select id="loginName" class="mb-4">
+        <option value="">이름을 선택하세요...</option>
+      </select>
+
+      <label class="block text-xs font-semibold text-gray-600 mb-1">비밀번호 / PASSWORD</label>
+      <input type="password" id="loginPass" placeholder="비밀번호" class="mb-4"/>
+
+      <div id="loginErr" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm text-center py-2 rounded-lg mb-4">비밀번호가 틀렸습니다</div>
+
+      <button id="loginBtn" class="btn-primary w-full">로그인 / Login</button>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="/staff.html" class="text-gray-500 text-sm hover:text-gray-700">← 간사 포털로</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="appScreen" class="hidden fade-in">
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+          <span class="text-white font-bold">⭐</span>
+        </div>
+        <div>
+          <div class="font-bold text-gray-900" id="roleTitle">교육부 디렉터 포털</div>
+          <div class="text-xs text-gray-500">
+            <span id="whoami">박명철</span> ·
+            <span id="nowDate"></span>
+          </div>
+        </div>
+      </div>
+      <button id="logoutBtn" class="btn-ghost">로그아웃</button>
+    </div>
+    <!-- Tabs -->
+    <div class="max-w-7xl mx-auto px-4 pb-2 flex gap-2 overflow-x-auto">
+      <button class="tab-btn active" data-view="dashboard">📊 대시보드</button>
+      <button class="tab-btn" data-view="registry">📋 전체 명단</button>
+      <button class="tab-btn" data-view="team">👥 팀</button>
+      <button class="tab-btn" data-view="tools" id="toolsTabBtn">🔧 관리 도구</button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6">
+
+    <!-- =========== DASHBOARD =========== -->
+    <section id="view-dashboard" class="view fade-in">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-gray-900">이번 주 현황</h2>
+        <span id="dashDate" class="text-sm text-gray-500"></span>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div class="card p-4">
+          <div class="text-xs text-gray-500">총원</div>
+          <div class="text-3xl font-bold text-gray-900" id="statTotal">—</div>
+        </div>
+        <div class="card p-4">
+          <div class="text-xs text-gray-500">출석</div>
+          <div class="text-3xl font-bold text-green-600" id="statAttended">—</div>
+        </div>
+        <div class="card p-4">
+          <div class="text-xs text-gray-500">결석</div>
+          <div class="text-3xl font-bold text-red-600" id="statAbsent">—</div>
+        </div>
+        <div class="card p-4">
+          <div class="text-xs text-gray-500">방문자</div>
+          <div class="text-3xl font-bold text-purple-600" id="statVisitors">—</div>
+        </div>
+      </div>
+
+      <div class="card p-5 mb-6">
+        <h3 class="font-bold text-gray-900 mb-3">부서별 집계</h3>
+        <div id="deptTable" class="overflow-x-auto"><div class="text-gray-400 text-sm">불러오는 중…</div></div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div class="card p-5">
+          <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">⚠️ 이번 주 결석자 <span id="absentCount" class="text-sm text-gray-500 font-normal"></span></h3>
+          <div id="absentList" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-400 text-sm">불러오는 중…</div></div>
+        </div>
+        <div class="warn-card rounded-2xl p-5">
+          <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">🚨 3주+ 연속 결석 (연락 필요)</h3>
+          <div id="longAbsent" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-500 text-sm">계산 중…</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========== REGISTRY =========== -->
+    <section id="view-registry" class="view fade-in hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-gray-900">전체 학생 명단</h2>
+        <span id="rosterCount" class="text-sm text-gray-500"></span>
+      </div>
+
+      <div class="card p-4 mb-4">
+        <div class="grid md:grid-cols-4 gap-3">
+          <input id="rosterSearch" placeholder="🔍 이름/영문/보호자 검색…" class="md:col-span-2"/>
+          <select id="rosterDept">
+            <option value="">전체 부서</option>
+            <option>유아부 (Infant)</option>
+            <option>유치부 (Preschool)</option>
+            <option>유년부 (Elementary Jr)</option>
+            <option>초등부 (Elementary)</option>
+            <option>중고등부 (Youth)</option>
+          </select>
+          <select id="rosterStatus">
+            <option value="active">활성만</option>
+            <option value="all">전체 (비활성 포함)</option>
+            <option value="inactive">비활성만</option>
+            <option value="long-absent">3주+ 결석만</option>
+            <option value="birthday">이번 달 생일만</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card p-0 overflow-hidden">
+        <div id="rosterTable" class="overflow-x-auto"><div class="p-6 text-center text-gray-400">불러오는 중…</div></div>
+      </div>
+    </section>
+
+    <!-- =========== TEAM =========== -->
+    <section id="view-team" class="view fade-in hidden">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">교육부 팀</h2>
+
+      <div class="card p-5 mb-4">
+        <h3 class="font-bold text-gray-900 mb-3">⭐ 디렉터</h3>
+        <div class="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
+          <div class="w-10 h-10 bg-indigo-500 text-white rounded-full flex items-center justify-center font-bold">박</div>
+          <div>
+            <div class="font-semibold text-gray-900">박명철</div>
+            <div class="text-xs text-gray-500">교육부 디렉터 · 중고등부 간사 겸직</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5 mb-4">
+        <h3 class="font-bold text-gray-900 mb-3">🎖️ 부장 / 위원장</h3>
+        <div class="space-y-2" id="leaderListUI"></div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="font-bold text-gray-900 mb-3">👤 간사</h3>
+        <div id="staffListUI" class="space-y-2"><div class="text-gray-400 text-sm">불러오는 중…</div></div>
+      </div>
+    </section>
+
+    <!-- =========== TOOLS =========== -->
+    <section id="view-tools" class="view fade-in hidden">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">🔧 관리 도구 (디렉터 전용)</h2>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <a href="https://www.notion.so/107828732f784c39bcb0136a4397c758" target="_blank" class="card p-5 hover:shadow-md transition">
+          <div class="text-2xl mb-2">📋</div>
+          <div class="font-bold">학생 명단 DB 직접 편집</div>
+          <div class="text-xs text-gray-500 mt-1">Notion에서 학생 정보·부서 이동·상태 변경</div>
+        </a>
+        <a href="https://www.notion.so/89b6c47f85a842968493ce28ad93f8de" target="_blank" class="card p-5 hover:shadow-md transition">
+          <div class="text-2xl mb-2">📊</div>
+          <div class="font-bold">출석 기록 DB</div>
+          <div class="text-xs text-gray-500 mt-1">전체 출석 로그 조회</div>
+        </a>
+        <a href="https://www.notion.so/d25f9fdaeeb748ac97ffda2f68f776bb" target="_blank" class="card p-5 hover:shadow-md transition">
+          <div class="text-2xl mb-2">📨</div>
+          <div class="font-bold">요청사항 DB</div>
+          <div class="text-xs text-gray-500 mt-1">간사 요청 일괄 처리</div>
+        </a>
+        <a href="https://www.notion.so/de7bb42e89254fad949dde9123cd4cdb" target="_blank" class="card p-5 hover:shadow-md transition">
+          <div class="text-2xl mb-2">📞</div>
+          <div class="font-bold">결석자 연락 기록</div>
+          <div class="text-xs text-gray-500 mt-1">학부모 연락 히스토리</div>
+        </a>
+      </div>
+
+      <div class="card p-5 mt-4">
+        <h3 class="font-bold text-gray-900 mb-3">📥 데이터 내보내기</h3>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="exportRoster('csv')" class="btn-primary">전체 명단 CSV</button>
+          <button onclick="exportAbsent()" class="btn-primary" style="background:#dc2626">3주+ 결석자 연락처 CSV</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===== STUDENT DETAIL MODAL ===== -->
+<div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-5 border-b border-gray-200 sticky top-0 bg-white flex items-center justify-between">
+      <h3 class="font-bold text-lg" id="detailTitle">학생 정보</h3>
+      <button onclick="document.getElementById('detailModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-700">✕</button>
+    </div>
+    <div id="detailBody" class="p-5"></div>
+  </div>
+</div>
+
+<script>
+/* =================== AUTH =================== */
+const ACCOUNTS = {
+  director: { "박명철": "3167" },
+  leader:   { "이강희": "777", "최재원": "777" }
+};
+const LEADER_INFO = [
+  { name:"이강희", role:"중고등부 부장" },
+  { name:"최재원", role:"중고등부 위원장" }
+];
+
+let ROLE = 'director';
+let CURRENT_USER = null;
+
+function populateLoginNames() {
+  const sel = document.getElementById('loginName');
+  sel.innerHTML = '<option value="">이름을 선택하세요...</option>' +
+    Object.keys(ACCOUNTS[ROLE]).map(n => `<option value="${n}">${n}${ROLE==='leader' ? ' — ' + (LEADER_INFO.find(l=>l.name===n)?.role||'') : ' — 교육부 디렉터'}</option>`).join('');
+}
+
+document.querySelectorAll('#loginScreen .tab-btn').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('#loginScreen .tab-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    ROLE = b.dataset.role;
+    populateLoginNames();
+    document.getElementById('loginErr').classList.add('hidden');
+  };
+});
+
+document.getElementById('loginBtn').onclick = doLogin;
+document.getElementById('loginPass').onkeydown = e => { if(e.key==='Enter') doLogin(); };
+
+function doLogin() {
+  const name = document.getElementById('loginName').value;
+  const pass = document.getElementById('loginPass').value;
+  if (!name || !ACCOUNTS[ROLE][name] || ACCOUNTS[ROLE][name] !== pass) {
+    document.getElementById('loginErr').classList.remove('hidden');
+    return;
+  }
+  CURRENT_USER = name;
+  sessionStorage.setItem('director_role', ROLE);
+  sessionStorage.setItem('director_user', name);
+  showApp();
+}
+
+document.getElementById('logoutBtn').onclick = () => {
+  sessionStorage.removeItem('director_role');
+  sessionStorage.removeItem('director_user');
+  location.reload();
+};
+
+function showApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appScreen').classList.remove('hidden');
+  document.getElementById('whoami').textContent =
+    ROLE === 'director' ? `${CURRENT_USER} (디렉터)` : `${CURRENT_USER} (${LEADER_INFO.find(l=>l.name===CURRENT_USER)?.role})`;
+  document.getElementById('roleTitle').textContent =
+    ROLE === 'director' ? '교육부 디렉터 포털' : '부장/위원장 포털';
+  if (ROLE !== 'director') document.getElementById('toolsTabBtn').style.display='none';
+  const now = new Date();
+  document.getElementById('nowDate').textContent =
+    now.toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric',weekday:'short'});
+  loadAll();
+}
+
+/* =================== TABS =================== */
+document.querySelectorAll('#appScreen header .tab-btn').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('#appScreen header .tab-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+    document.getElementById('view-' + b.dataset.view).classList.remove('hidden');
+  };
+});
+
+/* =================== DATA LOAD =================== */
+let ROSTER = [];
+let SUMMARY = null;
+let STAFF_LIST = [];
+
+async function loadAll() {
+  try {
+    const [roster, sum, staff] = await Promise.all([
+      fetch('/api/roster').then(r=>r.json()),
+      fetch('/api/weekly-summary').then(r=>r.json()),
+      fetch('/api/staff-list').then(r=>r.json()),
+    ]);
+    ROSTER = roster.students || [];
+    SUMMARY = sum;
+    STAFF_LIST = staff.staff || [];
+    renderDashboard();
+    renderRoster();
+    renderTeam();
+  } catch (e) {
+    console.error(e);
+    alert('데이터 로드 실패: ' + e.message);
+  }
+}
+
+/* =================== DASHBOARD =================== */
+const DEPT_COLOR = {
+  '유아부 (Infant)':'dept-blue','유치부 (Preschool)':'dept-green','유년부 (Elementary Jr)':'dept-yellow',
+  '초등부 (Elementary)':'dept-orange','중고등부 (Youth)':'dept-purple'
+};
+
+function renderDashboard() {
+  if (!SUMMARY) return;
+  document.getElementById('dashDate').textContent = SUMMARY.sundayStr || SUMMARY.date || '';
+  const g = SUMMARY.grand || {};
+  document.getElementById('statTotal').textContent = g.total ?? SUMMARY.total ?? '—';
+  document.getElementById('statAttended').textContent = g.attended ?? '—';
+  document.getElementById('statAbsent').textContent = g.absent ?? '—';
+  document.getElementById('statVisitors').textContent = g.visitors ?? '—';
+
+  // Dept table
+  const depts = SUMMARY.depts || [];
+  document.getElementById('deptTable').innerHTML = `
+    <table class="w-full">
+      <thead><tr>
+        <th>부서</th><th class="text-right">총원</th><th class="text-right">출석</th>
+        <th class="text-right">결석</th><th class="text-right">방문자</th><th class="text-right">출석률</th>
+      </tr></thead>
+      <tbody>${depts.map(d => {
+        const rate = d.total ? Math.round(d.attended/d.total*100) : 0;
+        const color = DEPT_COLOR[d.dept] || 'dept-gray';
+        return `<tr>
+          <td><span class="stat-pill ${color}">${d.short || d.dept}</span></td>
+          <td class="text-right font-semibold">${d.total}</td>
+          <td class="text-right text-green-600 font-semibold">${d.attended}</td>
+          <td class="text-right text-red-600">${d.absent}</td>
+          <td class="text-right text-purple-600">${d.visitors}</td>
+          <td class="text-right"><span class="badge ${rate>=80?'badge-green':rate>=50?'badge-yellow':'badge-red'}">${rate}%</span></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+
+  // Weekly absent list
+  const absent = SUMMARY.absentList || [];
+  document.getElementById('absentCount').textContent = absent.length ? `(${absent.length}명)` : '';
+  document.getElementById('absentList').innerHTML = absent.length === 0
+    ? '<div class="text-gray-400 text-sm">결석자 없음 🎉</div>'
+    : absent.map(a => `
+        <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+          <div>
+            <div class="font-medium text-sm">${a.name || '—'}</div>
+            <div class="text-xs text-gray-500">${a.dept || a.short || ''}</div>
+          </div>
+          ${a.phone ? `<a href="tel:${a.phone}" class="text-xs text-indigo-600">📞</a>` : ''}
+        </div>`).join('');
+
+  // Long-absent (3주+) - compute from roster.lastAttended
+  renderLongAbsent();
+}
+
+function weeksSince(dateStr) {
+  if (!dateStr) return Infinity;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return Infinity;
+  return Math.floor((Date.now() - d.getTime()) / (7*24*3600*1000));
+}
+
+function renderLongAbsent() {
+  const list = ROSTER.filter(s => {
+    // ignore inactive/transferred & visitors
+    const notes = (s.notes || '').toString();
+    if (/이동|transfer/i.test(notes)) return false;
+    return weeksSince(s.lastAttended) >= 3;
+  }).sort((a,b) => (a.lastAttended || '').localeCompare(b.lastAttended || ''));
+  const el = document.getElementById('longAbsent');
+  if (list.length === 0) { el.innerHTML = '<div class="text-sm text-gray-600">현재 3주 이상 결석자 없음 ✨</div>'; return; }
+  el.innerHTML = list.map(s => `
+    <div class="flex items-center justify-between bg-white/60 backdrop-blur rounded-lg p-2">
+      <div>
+        <div class="font-semibold text-sm">${s.name}</div>
+        <div class="text-xs text-gray-700">${s.department || ''} · 마지막: ${s.lastAttended || '기록없음'}</div>
+      </div>
+      ${s.phone ? `<a href="tel:${s.phone}" class="text-xs bg-white px-2 py-1 rounded">📞 연락</a>` : ''}
+    </div>`).join('');
+}
+
+/* =================== REGISTRY =================== */
+function applyFilters() {
+  const q = document.getElementById('rosterSearch').value.trim().toLowerCase();
+  const dept = document.getElementById('rosterDept').value;
+  const status = document.getElementById('rosterStatus').value;
+
+  return ROSTER.filter(s => {
+    if (dept && s.department !== dept) return false;
+    if (status === 'long-absent' && weeksSince(s.lastAttended) < 3) return false;
+    if (status === 'birthday' && !s.isBirthdayMonth) return false;
+    if (q) {
+      const hay = [s.name, s.nameEN, s.guardian, s.fatherName, s.motherName, s.school].filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderRoster() {
+  const filtered = applyFilters();
+  document.getElementById('rosterCount').textContent = `${filtered.length}명 / 전체 ${ROSTER.length}명`;
+  if (filtered.length === 0) {
+    document.getElementById('rosterTable').innerHTML = '<div class="p-8 text-center text-gray-400">조건에 맞는 학생이 없습니다</div>';
+    return;
+  }
+  document.getElementById('rosterTable').innerHTML = `
+    <table class="w-full">
+      <thead><tr>
+        <th>이름</th><th>부서</th><th>학년</th><th>보호자</th>
+        <th>연락처</th><th>알러지</th><th>마지막 출석</th><th>Liability</th>
+      </tr></thead>
+      <tbody>${filtered.map((s,i) => {
+        const weeks = weeksSince(s.lastAttended);
+        const attColor = weeks >= 3 ? 'text-red-600 font-semibold' : weeks >= 2 ? 'text-orange-600' : 'text-gray-600';
+        return `<tr onclick="showDetail(${i})" class="cursor-pointer">
+          <td>
+            <div class="font-semibold text-gray-900">${s.name}${s.isBirthdayMonth ? ' 🎂' : ''}</div>
+            ${s.nameEN ? `<div class="text-xs text-gray-500">${s.nameEN}</div>` : ''}
+          </td>
+          <td><span class="stat-pill ${DEPT_COLOR[s.department]||'dept-gray'}">${(s.department||'').split(' ')[0]}</span></td>
+          <td>${s.grade || '—'}</td>
+          <td>${s.guardian || '—'}</td>
+          <td class="text-xs">${s.phone || '—'}</td>
+          <td class="text-xs ${(s.allergy && s.allergy!=='없음') ? 'text-red-600 font-semibold' : 'text-gray-500'}">${s.allergy || '—'}</td>
+          <td class="text-xs ${attColor}">${s.lastAttended ? s.lastAttended + (weeks>=3?` (${weeks}주)`:'') : '기록없음'}</td>
+          <td>${s.liabilityForm === '제출 완료' ? '<span class="badge badge-green">제출</span>' : '<span class="badge badge-red">미제출</span>'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  // store filtered list for detail
+  window.__filtered = filtered;
+}
+
+function showDetail(i) {
+  const s = window.__filtered[i];
+  const f = (label, val) => val ? `<div class="grid grid-cols-3 gap-3 py-1.5 border-b border-gray-100"><div class="text-xs text-gray-500 font-semibold">${label}</div><div class="col-span-2 text-sm">${val}</div></div>` : '';
+  document.getElementById('detailTitle').textContent = s.name + (s.nameEN ? ` (${s.nameEN})` : '');
+  document.getElementById('detailBody').innerHTML = `
+    ${f('부서', s.department)}
+    ${f('학년', s.grade)}
+    ${f('학교', s.school)}
+    ${f('생년월일', s.dob + (s.age ? ` (${s.age}세)` : ''))}
+    ${f('보호자', s.guardian)}
+    ${f('연락처', s.phone)}
+    ${f('아버지', [s.fatherName, s.fatherPhone, s.fatherEmail].filter(Boolean).join(' · '))}
+    ${f('어머니', [s.motherName, s.motherPhone, s.motherEmail].filter(Boolean).join(' · '))}
+    ${f('주소', s.address)}
+    ${f('알러지', s.allergy)}
+    ${f('세례', s.baptized)}
+    ${f('Liability', s.liabilityForm)}
+    ${f('마지막 출석', s.lastAttended)}
+    ${f('특이사항', s.notes)}
+    ${s.id ? `<div class="mt-4 pt-4 border-t"><a href="https://www.notion.so/${s.id.replace(/-/g,'')}" target="_blank" class="btn-primary inline-block">Notion에서 편집 →</a></div>` : ''}
+  `;
+  document.getElementById('detailModal').classList.remove('hidden');
+}
+
+document.getElementById('rosterSearch').oninput = renderRoster;
+document.getElementById('rosterDept').onchange = renderRoster;
+document.getElementById('rosterStatus').onchange = renderRoster;
+
+/* =================== TEAM =================== */
+function renderTeam() {
+  // Leaders
+  document.getElementById('leaderListUI').innerHTML = LEADER_INFO.map(l => `
+    <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
+      <div class="w-10 h-10 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold">${l.name[0]}</div>
+      <div>
+        <div class="font-semibold text-gray-900">${l.name}</div>
+        <div class="text-xs text-gray-500">${l.role}</div>
+      </div>
+    </div>`).join('');
+
+  // Staff
+  const DEPT_ICON = { '유아부':'👶','유치부':'🧒','유년부':'👦','초등부':'🎒','중고등부':'🎓' };
+  document.getElementById('staffListUI').innerHTML = STAFF_LIST.map(s => {
+    const short = (s.dept||'').split(' ')[0];
+    return `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+      <div class="w-10 h-10 bg-gray-400 text-white rounded-full flex items-center justify-center font-bold">${DEPT_ICON[short]||'👤'}</div>
+      <div>
+        <div class="font-semibold text-gray-900">${s.name}</div>
+        <div class="text-xs text-gray-500">${s.dept}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* =================== EXPORT =================== */
+function downloadCSV(rows, filename) {
+  const csv = rows.map(r => r.map(c => {
+    const s = (c ?? '').toString().replace(/"/g,'""');
+    return /[",\n]/.test(s) ? `"${s}"` : s;
+  }).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportRoster() {
+  const header = ['이름','영문','부서','학년','학교','생년월일','보호자','연락처','알러지','주소','Liability','마지막 출석','특이사항'];
+  const rows = [header, ...ROSTER.map(s => [
+    s.name, s.nameEN, s.department, s.grade, s.school, s.dob, s.guardian, s.phone, s.allergy, s.address, s.liabilityForm, s.lastAttended, s.notes
+  ])];
+  downloadCSV(rows, `registry_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+function exportAbsent() {
+  const list = ROSTER.filter(s => {
+    const notes = (s.notes || '').toString();
+    if (/이동|transfer/i.test(notes)) return false;
+    return weeksSince(s.lastAttended) >= 3;
+  });
+  const header = ['이름','부서','학년','보호자','연락처','마지막 출석','몇 주 결석'];
+  const rows = [header, ...list.map(s => [
+    s.name, s.department, s.grade, s.guardian, s.phone, s.lastAttended || '기록없음', weeksSince(s.lastAttended)
+  ])];
+  downloadCSV(rows, `long_absent_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+/* =================== BOOT =================== */
+populateLoginNames();
+const savedRole = sessionStorage.getItem('director_role');
+const savedUser = sessionStorage.getItem('director_user');
+if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUser]) {
+  ROLE = savedRole; CURRENT_USER = savedUser;
+  showApp();
+}
+</script>
+</body>
+</html>
