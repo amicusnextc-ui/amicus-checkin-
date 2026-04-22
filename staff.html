@@ -540,7 +540,7 @@ async function loadAttendance(){
     document.getElementById("statIn").textContent=records.filter(function(r){return r.checkIn;}).length;
     document.getElementById("statOut").textContent=records.filter(function(r){return r.checkOut;}).length;
     document.getElementById("statNew").textContent=records.filter(function(r){return r.isNew;}).length;
-    document.getElementById("lastUpdated").textContent=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})+" 업데이트";startAutoRefresh();
+    document.getElementById("lastUpdated").textContent=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})+" 업데이트";/*noop*/
     if(!records.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>오늘 체크인 기록이 없습니다</td></tr>";return;}
     var html="";
     for(var i=0;i<records.length;i++){
