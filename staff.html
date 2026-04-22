@@ -155,9 +155,10 @@ tbody tr:hover { background:#fafafa; }
           <thead class="bg-gray-50 border-b border-gray-100"><tr>
             <th>이름</th><th>학년/나이</th><th>부/모</th>
             <th style="text-align:center">사진</th><th style="text-align:center">세례</th>
-            <th style="text-align:center">Liability</th><th style="text-align:center">결석</th><th style="text-align:center">생일</th><th></th>
+            <th style="text-align:center">Liability</th><th style="text-align:center">결석</th><th style="text-align:center">생일</th>
+            <th style="text-align:center">출석</th><th></th>
           </tr></thead>
-          <tbody id="rosterTable"><tr><td colspan="9" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
+          <tbody id="rosterTable"><tr><td colspan="10" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
         </table></div>
       </div>
     </div>
@@ -644,9 +645,51 @@ function filterRoster(){
   if(!q){renderRoster(_allStudents);return;}
   renderRoster(_allStudents.filter(function(s){return(s.name&&s.name.toLowerCase().indexOf(q)>=0)||(s.nameEN&&s.nameEN.toLowerCase().indexOf(q)>=0);}));
 }
+function getStaffServiceSundayISO(){
+  var now=new Date();
+  var laDate=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+  var p=laDate.split('-').map(Number);
+  var laDow=new Date(p[0],p[1]-1,p[2]).getDay();
+  var offset=laDow===0?0:laDow;
+  var sun=new Date(p[0],p[1]-1,p[2]-offset);
+  return sun.getFullYear()+'-'+String(sun.getMonth()+1).padStart(2,'0')+'-'+String(sun.getDate()).padStart(2,'0');
+}
+async function quickCheckin(btn){
+  var sid=btn.getAttribute('data-sid');
+  var name=btn.getAttribute('data-name');
+  var dept=btn.getAttribute('data-dept');
+  var hasAllergy=btn.getAttribute('data-allergy')==='1';
+  var originalText=btn.textContent;
+  btn.disabled=true;btn.textContent='처리 중...';
+  var directorPw='';
+  async function doCall(){
+    var body={name:name,department:dept,isNew:false,hasAllergy:hasAllergy,staff:window._staffName||'',studentId:sid};
+    if(directorPw)body.directorPassword=directorPw;
+    var r=await fetch('/api/checkin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    return {res:r,data:await r.json()};
+  }
+  try{
+    var r=await doCall();
+    if(r.data.requiresDirectorAuth){
+      var pw=prompt('⚠️ 오늘은 일요일이 아닙니다.\n체크인을 진행하려면 디렉터 비밀번호가 필요합니다:');
+      if(!pw){btn.disabled=false;btn.textContent=originalText;return;}
+      directorPw=pw;
+      r=await doCall();
+      if(r.data.requiresDirectorAuth)throw new Error('디렉터 비밀번호가 틀렸습니다');
+    }
+    if(!r.res.ok)throw new Error(r.data.error||'체크인 실패');
+    btn.style.background='#10b981';btn.style.color='#fff';btn.style.borderColor='#10b981';
+    btn.textContent=r.data.alreadyCheckedIn?'✓ 이미 출석':'✅ 출석 완료';
+    if(typeof showToast==='function')showToast('✅ '+name+' 체크인 완료','success');
+  }catch(e){
+    alert('오류: '+e.message);
+    btn.disabled=false;btn.textContent=originalText;
+  }
+}
 function renderRoster(students){
   var tbody=document.getElementById("rosterTable");
-  if(!students||!students.length){tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:40px;color:#9ca3af'>등록된 학생이 없습니다</td></tr>";return;}
+  if(!students||!students.length){tbody.innerHTML="<tr><td colspan='10' style='text-align:center;padding:40px;color:#9ca3af'>등록된 학생이 없습니다</td></tr>";return;}
+  var serviceSunday=getStaffServiceSundayISO();
   var now=new Date(),html="";
   for(var i=0;i<students.length;i++){
     var s=students[i];
@@ -682,6 +725,14 @@ function renderRoster(students){
     html+="<td style='text-align:center'>"+liabBadge+"</td>";
     html+="<td style='text-align:center'>"+absenceBadge+"</td>";
     html+="<td style='text-align:center'>"+bdayBadge+"</td>";
+    var alreadyAttended=s.lastAttended===serviceSunday;
+    if(alreadyAttended){
+      html+="<td style='text-align:center'><span style='color:#10b981;font-weight:700;font-size:13px'>✅ 출석</span></td>";
+    }else{
+      var safeName=(s.name||'').replace(/'/g,'&#39;').replace(/\"/g,'&quot;');
+      var safeDept=(s.department||'').replace(/'/g,'&#39;');
+      html+="<td style='text-align:center'><button data-sid='"+s.id+"' data-name='"+safeName+"' data-dept='"+safeDept+"' data-allergy='"+(hasAllergy?1:0)+"' onclick='quickCheckin(this)' style='font-size:12px;padding:4px 10px;border-radius:8px;background:#ecfdf5;color:#059669;font-weight:600;border:1px solid #6ee7b7'>✓ 체크인</button></td>";
+    }
     html+="<td style='text-align:center'><button data-sid='"+s.id+"' onclick='openEditById(this)' style='font-size:12px;padding:4px 10px;border-radius:8px;background:#eef2ff;color:#4f46e5;font-weight:600'>수정</button></td>";
     html+="</tr>";
   }
