@@ -456,7 +456,7 @@ function doLogin(){
   var pw=document.getElementById("pwInput").value;
   if(!dept){showLoginError("이름을 선택해주세요");return;}
   if(pw!=="3"){showLoginError("비밀번호가 틀렸습니다");return;}
-  window._dept=dept;window._user=staffName;
+  window._dept=dept;window._user=staffName;window._staffDept=dept;window._staffName=staffName;
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
   // Check 2-week absentees on login
@@ -481,7 +481,7 @@ function doLogout(){
   document.getElementById("dashboard").classList.add("hidden");
   document.getElementById("pwInput").value="";
   document.getElementById("loginError").classList.add("hidden");
-  window._dept=null;window._user=null;
+  window._dept=null;window._user=null;window._staffDept=null;window._staffName=null;
 }
 function doLeaderLogin(){ var sel=document.getElementById("leaderNameInput"),name=sel.value; var pw=document.getElementById("leaderPwInput").value; if(!name){showLeaderLoginError("이름을 선택해주세요");return;} if(pw!=="777"){showLeaderLoginError("비밀번호가 틀렸습니다");return;} window._leaderName=name; document.getElementById("loginScreen").classList.add("hidden"); document.getElementById("leaderDashboard").classList.remove("hidden"); var selText=(sel.options[sel.selectedIndex]||{}).text||""; var role=selText.indexOf("위원장")>=0?"위원장":"부장"; document.getElementById("leaderDashName").textContent=name+" "+role+"님";
   switchLeaderTab("summary");
@@ -1136,15 +1136,22 @@ async function loadRequests() {
     var si2 = { '대기중': '⏳', '확인됨': '👀', '진행중': '🔧', '완료': '✅' };
 
     var __nowTs = Date.now();
-    var activeReqs = _reqs.filter(function(r){ if(r.status!=='완료') return true; if(!r.completedAt) return true; return (__nowTs - new Date(r.completedAt).getTime())/(86400000) < 7; });
-    var archivedReqs = _reqs.filter(function(r){ if(r.status!=='완료') return false; if(!r.completedAt) return false; return (__nowTs - new Date(r.completedAt).getTime())/(86400000) >= 7; });
-    list.innerHTML = activeReqs.map(function(req, idx) {
+    var pendingReqs = _reqs.filter(function(r){ return r.status !== '완료'; });
+    var completedReqs = _reqs.filter(function(r){
+      if(r.status !== '완료') return false;
+      if(!r.completedAt) return true;
+      return (__nowTs - new Date(r.completedAt).getTime())/(86400000) < 7;
+    }).sort(function(a,b){ return new Date(b.completedAt||0) - new Date(a.completedAt||0); });
+
+    var renderReq = function(req, idx, isCompleted){
       var statusCls = sc[req.status] || 'bg-gray-100 text-gray-600';
       var statusIcon = si2[req.status] || '⏳';
       var dt = req.createdAt ? new Date(req.createdAt).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      var completedDt = req.completedAt ? new Date(req.completedAt).toLocaleString('ko-KR', { month: 'short', day: 'numeric' }) : '';
       var noteHtml = req.notes ? '<div class="text-xs text-indigo-600 mt-1 bg-indigo-50 px-2 py-1 rounded-lg">📝 ' + req.notes + '</div>' : '';
-      var leaderBtn = isLeader ? '<button data-req-idx="' + idx + '" class="req-detail-btn text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-lg font-bold hover:bg-indigo-200 whitespace-nowrap">상세/처리</button>' : '';
-      return '<div class="px-5 py-4 hover:bg-gray-50 border-b border-gray-50 last:border-0">'
+      var opacityCls = isCompleted ? 'opacity-70' : '';
+      var metaExtra = isCompleted && completedDt ? ' · 완료 ' + completedDt + (req.handler ? ' (' + req.handler + ')' : '') : '';
+      return '<div class="px-5 py-4 hover:bg-gray-50 border-b border-gray-50 last:border-0 ' + opacityCls + '">'
         + '<div class="flex items-start justify-between gap-2">'
         + '<div class="flex-1 min-w-0">'
         + '<div class="flex items-center gap-2 flex-wrap mb-0.5">'
@@ -1152,13 +1159,26 @@ async function loadRequests() {
         + '<span class="text-xs px-2 py-0.5 rounded-full font-bold ' + statusCls + '">' + statusIcon + ' ' + req.status + '</span>'
         + '</div>'
         + '<div class="text-xs text-gray-500 line-clamp-2">' + req.content + '</div>'
-        + '<div class="text-xs text-gray-400 mt-1">' + req.requester + ' · ' + req.department + ' · ' + dt + '</div>'
+        + '<div class="text-xs text-gray-400 mt-1">' + req.requester + ' · ' + req.department + ' · ' + dt + metaExtra + '</div>'
         + noteHtml
-        + '</div>'
-        + '<div class="flex-shrink-0">' + leaderBtn + '</div>'
-        + '</div></div>';
-    }).join('');
+        + '</div></div></div>';
+    };
 
+    var countEl2 = document.getElementById('reqListCount');
+    if (countEl2) countEl2.textContent = pendingReqs.length ? '진행 중 ' + pendingReqs.length + '건' : '';
+
+    var html = '';
+    if (pendingReqs.length === 0) {
+      html += '<div class="px-5 py-8 text-center text-gray-400 text-sm">진행 중인 요청이 없습니다 ✨</div>';
+    } else {
+      html += pendingReqs.map(function(req, idx){ return renderReq(req, idx, false); }).join('');
+    }
+    if (completedReqs.length > 0) {
+      html += '<details class="border-t border-gray-200 bg-gray-50"><summary class="px-5 py-3 text-xs font-semibold text-gray-500 cursor-pointer hover:bg-gray-100 select-none">✅ 완료된 요청 (최근 7일, ' + completedReqs.length + '건)</summary><div class="bg-white">'
+        + completedReqs.map(function(req, idx){ return renderReq(req, idx, true); }).join('')
+        + '</div></details>';
+    }
+    list.innerHTML = html;
     // Completed requests older than 7 days disappear from list (kept in Notion)
 
     // event delegation for detail buttons
