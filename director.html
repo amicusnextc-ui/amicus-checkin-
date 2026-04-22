@@ -103,7 +103,8 @@
     <!-- Tabs -->
     <div class="max-w-7xl mx-auto px-4 pb-2 flex gap-2 overflow-x-auto">
       <button class="tab-btn active" data-view="dashboard">📊 대시보드</button>
-      <button class="tab-btn" data-view="registry">📋 전체 명단</button>
+      <button class="tab-btn" data-view="registry">📋 명단</button>
+      <button class="tab-btn" data-view="requests">📨 간사 요청 <span id="reqBadge" class="hidden ml-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span></button>
       <button class="tab-btn" data-view="team">👥 팀</button>
       <button class="tab-btn" data-view="tools" id="toolsTabBtn">🔧 관리 도구</button>
     </div>
@@ -114,7 +115,10 @@
     <!-- =========== DASHBOARD =========== -->
     <section id="view-dashboard" class="view fade-in">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold text-gray-900">이번 주 현황</h2>
+        <div class="flex items-center gap-2">
+          <h2 class="text-xl font-bold text-gray-900">이번 주 현황</h2>
+          <span id="scopeBadge" class="hidden text-xs font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full"></span>
+        </div>
         <span id="dashDate" class="text-sm text-gray-500"></span>
       </div>
 
@@ -152,6 +156,11 @@
           <div id="longAbsent" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-500 text-sm">계산 중…</div></div>
         </div>
       </div>
+
+      <div class="card p-5 mt-6">
+        <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">📝 Liability Form 미제출 <span id="liabilityCount" class="text-sm text-gray-500 font-normal"></span></h3>
+        <div id="liabilityList" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-400 text-sm">불러오는 중…</div></div>
+      </div>
     </section>
 
     <!-- =========== REGISTRY =========== -->
@@ -187,16 +196,27 @@
       </div>
     </section>
 
+    <!-- =========== REQUESTS =========== -->
+    <section id="view-requests" class="view fade-in hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-gray-900">📨 간사 요청</h2>
+        <span id="reqListCount" class="text-sm text-gray-500"></span>
+      </div>
+      <div class="card p-0 overflow-hidden">
+        <div id="requestsUI" class="divide-y divide-gray-100"><div class="p-6 text-center text-gray-400">불러오는 중…</div></div>
+      </div>
+    </section>
+
     <!-- =========== TEAM =========== -->
     <section id="view-team" class="view fade-in hidden">
       <h2 class="text-xl font-bold text-gray-900 mb-4">교육부 팀</h2>
 
       <div class="card p-5 mb-4">
         <h3 class="font-bold text-gray-900 mb-3">⭐ 디렉터</h3>
-        <div class="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
+        <div id="directorCard" class="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
           <div class="w-10 h-10 bg-indigo-500 text-white rounded-full flex items-center justify-center font-bold">박</div>
           <div>
-            <div class="font-semibold text-gray-900">박명철</div>
+            <div class="font-semibold text-gray-900"><span>박명철</span><span id="directorMeTag"></span></div>
             <div class="text-xs text-gray-500">교육부 디렉터 · 중고등부 간사 겸직</div>
           </div>
         </div>
@@ -270,9 +290,11 @@ const ACCOUNTS = {
   leader:   { "이강희": "777", "최재원": "777" }
 };
 const LEADER_INFO = [
-  { name:"이강희", role:"중고등부 부장" },
-  { name:"최재원", role:"중고등부 위원장" }
+  { name:"이강희", role:"중고등부 부장", dept:"중고등부 (Youth)", short:"중고등부" },
+  { name:"최재원", role:"중고등부 위원장", dept:"중고등부 (Youth)", short:"중고등부" }
 ];
+// Map leader name → dept short for filtering
+const LEADER_DEPT = Object.fromEntries(LEADER_INFO.map(l => [l.name, l.short]));
 
 let ROLE = 'director';
 let CURRENT_USER = null;
@@ -323,6 +345,26 @@ function showApp() {
   document.getElementById('roleTitle').textContent =
     ROLE === 'director' ? '교육부 디렉터 포털' : '부장/위원장 포털';
   if (ROLE !== 'director') document.getElementById('toolsTabBtn').style.display='none';
+  // Scope badge on dashboard
+  const scopeBadge = document.getElementById('scopeBadge');
+  if (scopeBadge) {
+    if (ROLE === 'leader') {
+      const myShort = LEADER_DEPT[CURRENT_USER];
+      if (myShort) { scopeBadge.textContent = `${myShort} 기준`; scopeBadge.classList.remove('hidden'); }
+    } else {
+      scopeBadge.classList.add('hidden');
+    }
+  }
+  // If leader: lock registry dept filter to their own dept
+  if (ROLE === 'leader') {
+    const myShort = LEADER_DEPT[CURRENT_USER];
+    if (myShort) {
+      const rDept = document.getElementById('rosterDept');
+      // Find matching full dept name and select it
+      const matchOpt = Array.from(rDept.options).find(o => o.value.includes(myShort));
+      if (matchOpt) { rDept.value = matchOpt.value; rDept.disabled = true; }
+    }
+  }
   const now = new Date();
   document.getElementById('nowDate').textContent =
     now.toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric',weekday:'short'});
@@ -355,11 +397,117 @@ async function loadAll() {
     SUMMARY = sum;
     STAFF_LIST = staff.staff || [];
     renderDashboard();
+    renderLiability();
     renderRoster();
     renderTeam();
+    loadRequests();
   } catch (e) {
     console.error(e);
     alert('데이터 로드 실패: ' + e.message);
+  }
+}
+
+/* =================== LIABILITY =================== */
+function getMyDeptShort() {
+  if (ROLE === 'leader') return LEADER_DEPT[CURRENT_USER] || null;
+  return null; // director = all depts
+}
+function renderLiability() {
+  const myShort = getMyDeptShort();
+  const list = ROSTER.filter(s => {
+    if (s.liabilityForm === '제출 완료') return false;
+    const notes = (s.notes || '').toString();
+    if (/이동|transfer/i.test(notes)) return false;
+    if (myShort && !(s.department || '').includes(myShort)) return false;
+    return true;
+  });
+  const cnt = document.getElementById('liabilityCount');
+  if (cnt) cnt.textContent = list.length ? `(${list.length}명)` : '';
+  const el = document.getElementById('liabilityList');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div class="text-sm text-gray-600">모두 제출 완료! ✨</div>'; return; }
+  el.innerHTML = list.map(s => `
+    <div class="flex items-center justify-between p-2 bg-red-50 rounded-lg">
+      <div>
+        <div class="font-semibold text-sm">${s.name}</div>
+        <div class="text-xs text-gray-500">${(s.department||'').split(' ')[0]} · ${s.liabilityForm || '미제출'}</div>
+      </div>
+      ${s.phone ? `<a href="tel:${s.phone}" class="text-xs text-red-600">📞</a>` : ''}
+    </div>`).join('');
+}
+
+/* =================== REQUESTS =================== */
+async function loadRequests() {
+  const el = document.getElementById('requestsUI');
+  if (!el) return;
+  el.innerHTML = '<div class="p-6 text-center text-gray-400">불러오는 중…</div>';
+  const myShort = getMyDeptShort();
+  try {
+    const r = await fetch('/api/attendance?type=requests&department=all');
+    const d = await r.json();
+    let reqs = d.requests || [];
+    // Filter by leader's dept (match on department string)
+    if (myShort) reqs = reqs.filter(r => (r.department||'').includes(myShort));
+    // Active = not completed OR completed within 7 days
+    const now = Date.now();
+    const active = reqs.filter(x => {
+      if (x.status !== '완료') return true;
+      if (!x.completedAt) return true;
+      return (now - new Date(x.completedAt).getTime())/(86400000) < 7;
+    });
+    // Badge - show pending count on tab
+    const pending = active.filter(x => x.status === '대기중').length;
+    const badge = document.getElementById('reqBadge');
+    if (badge) {
+      if (pending > 0) { badge.classList.remove('hidden'); badge.textContent = pending; }
+      else badge.classList.add('hidden');
+    }
+    document.getElementById('reqListCount').textContent = active.length ? `활성 ${active.length}건` : '';
+    if (active.length === 0) {
+      el.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm">요청 내역이 없습니다</div>';
+      return;
+    }
+    const sc = { '대기중':'bg-yellow-100 text-yellow-800', '확인중':'bg-blue-100 text-blue-700', '진행중':'bg-amber-100 text-amber-800', '완료':'bg-green-100 text-green-800' };
+    const si = { '대기중':'⏳', '확인중':'👀', '진행중':'🔧', '완료':'✅' };
+    el.innerHTML = active.map((req, idx) => {
+      const cls = sc[req.status] || 'bg-gray-100 text-gray-600';
+      const ico = si[req.status] || '⏳';
+      const dt = req.createdAt ? new Date(req.createdAt).toLocaleString('ko-KR', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) : '';
+      return `<div class="p-4 hover:bg-gray-50">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <span class="font-semibold text-gray-900">${req.title || '요청'}</span>
+              <span class="text-xs px-2 py-0.5 rounded-full font-bold ${cls}">${ico} ${req.status}</span>
+            </div>
+            <div class="text-sm text-gray-600 whitespace-pre-wrap">${(req.content||'').replace(/</g,'&lt;')}</div>
+            <div class="text-xs text-gray-400 mt-1">${req.requester || '간사'} · ${req.department || ''} · ${dt}</div>
+          </div>
+          ${req.status !== '완료' ? `<button onclick="markRequestDone('${req.id}', ${idx})" class="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 whitespace-nowrap">✓ 완료</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    window.__activeReqs = active;
+  } catch (e) {
+    el.innerHTML = `<div class="p-6 text-center text-red-500 text-sm">오류: ${e.message}</div>`;
+  }
+}
+
+async function markRequestDone(id, idx) {
+  if (!confirm('이 요청을 완료 처리하시겠습니까?')) return;
+  try {
+    const r = await fetch('/api/attendance?type=requests&action=update', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ id, status: '완료', completedAt: new Date().toISOString(), handler: CURRENT_USER })
+    });
+    if (r.ok) {
+      loadRequests();
+    } else {
+      alert('상태 변경 실패: ' + r.status + '\n(Notion에서 직접 수정해주세요)');
+    }
+  } catch (e) {
+    alert('오류: ' + e.message);
   }
 }
 
@@ -426,10 +574,12 @@ function weeksSince(dateStr) {
 }
 
 function renderLongAbsent() {
+  const myShort = getMyDeptShort();
   const list = ROSTER.filter(s => {
     // ignore inactive/transferred & visitors
     const notes = (s.notes || '').toString();
     if (/이동|transfer/i.test(notes)) return false;
+    if (myShort && !(s.department || '').includes(myShort)) return false;
     return weeksSince(s.lastAttended) >= 3;
   }).sort((a,b) => (a.lastAttended || '').localeCompare(b.lastAttended || ''));
   const el = document.getElementById('longAbsent');
@@ -447,10 +597,13 @@ function renderLongAbsent() {
 /* =================== REGISTRY =================== */
 function applyFilters() {
   const q = document.getElementById('rosterSearch').value.trim().toLowerCase();
-  const dept = document.getElementById('rosterDept').value;
+  let dept = document.getElementById('rosterDept').value;
   const status = document.getElementById('rosterStatus').value;
+  // Force leader filter regardless of dropdown value
+  const myShort = getMyDeptShort();
 
   return ROSTER.filter(s => {
+    if (myShort && !(s.department || '').includes(myShort)) return false;
     if (dept && s.department !== dept) return false;
     if (status === 'long-absent' && weeksSince(s.lastAttended) < 3) return false;
     if (status === 'birthday' && !s.isBirthdayMonth) return false;
@@ -527,24 +680,42 @@ document.getElementById('rosterStatus').onchange = renderRoster;
 
 /* =================== TEAM =================== */
 function renderTeam() {
+  const meTag = '<span class="ml-2 text-[10px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded-full">나</span>';
+  // Director card highlight
+  const dc = document.getElementById('directorCard');
+  const dmt = document.getElementById('directorMeTag');
+  if (dc && dmt) {
+    if (ROLE === 'director') {
+      dc.classList.add('ring-2', 'ring-indigo-500');
+      dmt.innerHTML = meTag;
+    } else {
+      dc.classList.remove('ring-2', 'ring-indigo-500');
+      dmt.innerHTML = '';
+    }
+  }
   // Leaders
-  document.getElementById('leaderListUI').innerHTML = LEADER_INFO.map(l => `
-    <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
+  document.getElementById('leaderListUI').innerHTML = LEADER_INFO.map(l => {
+    const isMe = (ROLE === 'leader' && l.name === CURRENT_USER);
+    const ring = isMe ? 'ring-2 ring-indigo-500' : '';
+    return `<div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg ${ring}">
       <div class="w-10 h-10 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold">${l.name[0]}</div>
       <div>
-        <div class="font-semibold text-gray-900">${l.name}</div>
+        <div class="font-semibold text-gray-900">${l.name}${isMe ? meTag : ''}</div>
         <div class="text-xs text-gray-500">${l.role}</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   // Staff
   const DEPT_ICON = { '유아부':'👶','유치부':'🧒','유년부':'👦','초등부':'🎒','중고등부':'🎓' };
   document.getElementById('staffListUI').innerHTML = STAFF_LIST.map(s => {
     const short = (s.dept||'').split(' ')[0];
-    return `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+    const isMe = (ROLE === 'director' && s.name && CURRENT_USER && s.name.includes(CURRENT_USER));
+    const ring = isMe ? 'ring-2 ring-indigo-500' : '';
+    return `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg ${ring}">
       <div class="w-10 h-10 bg-gray-400 text-white rounded-full flex items-center justify-center font-bold">${DEPT_ICON[short]||'👤'}</div>
       <div>
-        <div class="font-semibold text-gray-900">${s.name}</div>
+        <div class="font-semibold text-gray-900">${s.name}${isMe ? meTag : ''}</div>
         <div class="text-xs text-gray-500">${s.dept}</div>
       </div>
     </div>`;
