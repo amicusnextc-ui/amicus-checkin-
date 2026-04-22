@@ -581,9 +581,9 @@ function renderDashboard() {
   document.getElementById('dashDate').textContent = SUMMARY.sundayStr || SUMMARY.date || '';
   const g = SUMMARY.grand || {};
   document.getElementById('statTotal').textContent = g.total ?? SUMMARY.total ?? '—';
-  document.getElementById('statAttended').textContent = g.attended ?? '—';
+  document.getElementById('statAttended').textContent = g.attended ?? g.checkin ?? '—';
   document.getElementById('statAbsent').textContent = g.absent ?? '—';
-  document.getElementById('statVisitors').textContent = g.visitors ?? '—';
+  document.getElementById('statVisitors').textContent = g.visitors ?? g.visitor ?? '—';
 
   // Dept table
   const depts = SUMMARY.depts || [];
