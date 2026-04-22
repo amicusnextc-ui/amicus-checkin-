@@ -515,6 +515,7 @@ function switchTab(tab){
   var btn=document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1));
   if(panel) panel.classList.remove('hidden');
   if(btn) btn.classList.add('active');
+  if(tab==='roster') loadRoster();
   if(tab==='requests') loadRequests();
   if(tab==='absentees') loadAbsentees();
 }
