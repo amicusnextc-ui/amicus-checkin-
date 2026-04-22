@@ -975,7 +975,7 @@ function closeRequestModal(){
   if(modal) modal.classList.add('hidden');
 }
 async function submitRequest() {
-  var titleEl = document.getElementById('reqTitle');
+  var titleEl = document.getElementById('reqType');
   var contentEl = document.getElementById('reqContent');
   var title = (titleEl && titleEl.value) ? titleEl.value.trim() : '';
   var content = (contentEl && contentEl.value) ? contentEl.value.trim() : '';
@@ -1080,7 +1080,7 @@ function closeRequestModal() {
 }
 
 async function submitRequest() {
-  var title = (document.getElementById('reqTitle') || {}).value || '';
+  var title = (document.getElementById('reqType') || {}).value || '';
   var content = (document.getElementById('reqContent') || {}).value || '';
   title = title.trim(); content = content.trim();
   if (!title || !content) { showToast("제목과 내용을 입력해주세요", 'success'); return; }
@@ -1094,7 +1094,7 @@ async function submitRequest() {
     });
     var d = await r.json();
     if (d.success) {
-      document.getElementById('reqTitle').value = '';
+      document.getElementById('reqType').value = '';
       document.getElementById('reqContent').value = '';
       closeRequestModal();
       showToast("📨 요청이 전송되었습니다!", 'success');
