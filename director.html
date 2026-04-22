@@ -291,10 +291,12 @@ const ACCOUNTS = {
 };
 const LEADER_INFO = [
   { name:"이강희", role:"중고등부 부장", dept:"중고등부 (Youth)", short:"중고등부" },
-  { name:"최재원", role:"중고등부 위원장", dept:"중고등부 (Youth)", short:"중고등부" }
+  { name:"최재원", role:"교육부 위원장", dept:null, short:null }
 ];
-// Map leader name → dept short for filtering
+// Map leader name → dept short for filtering (null = sees all depts)
 const LEADER_DEPT = Object.fromEntries(LEADER_INFO.map(l => [l.name, l.short]));
+// Leaders with global visibility (see all depts for dashboard/liability/absent)
+const GLOBAL_LEADERS = new Set(['이강희', '최재원']);
 
 let ROLE = 'director';
 let CURRENT_USER = null;
@@ -348,19 +350,18 @@ function showApp() {
   // Scope badge on dashboard
   const scopeBadge = document.getElementById('scopeBadge');
   if (scopeBadge) {
-    if (ROLE === 'leader') {
+    if (ROLE === 'leader' && !GLOBAL_LEADERS.has(CURRENT_USER)) {
       const myShort = LEADER_DEPT[CURRENT_USER];
       if (myShort) { scopeBadge.textContent = `${myShort} 기준`; scopeBadge.classList.remove('hidden'); }
     } else {
       scopeBadge.classList.add('hidden');
     }
   }
-  // If leader: lock registry dept filter to their own dept
-  if (ROLE === 'leader') {
+  // If dept-scoped leader: lock registry dept filter. Global leaders/director see all depts.
+  if (ROLE === 'leader' && !GLOBAL_LEADERS.has(CURRENT_USER)) {
     const myShort = LEADER_DEPT[CURRENT_USER];
     if (myShort) {
       const rDept = document.getElementById('rosterDept');
-      // Find matching full dept name and select it
       const matchOpt = Array.from(rDept.options).find(o => o.value.includes(myShort));
       if (matchOpt) { rDept.value = matchOpt.value; rDept.disabled = true; }
     }
@@ -409,8 +410,9 @@ async function loadAll() {
 
 /* =================== LIABILITY =================== */
 function getMyDeptShort() {
-  if (ROLE === 'leader') return LEADER_DEPT[CURRENT_USER] || null;
-  return null; // director = all depts
+  // Global leaders (부장/위원장) and director all see all depts
+  if (ROLE === 'leader' && !GLOBAL_LEADERS.has(CURRENT_USER)) return LEADER_DEPT[CURRENT_USER] || null;
+  return null; // director + global leaders = all depts
 }
 function renderLiability() {
   const myShort = getMyDeptShort();
