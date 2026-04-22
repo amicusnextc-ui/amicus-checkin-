@@ -681,7 +681,7 @@ function showDetail(i) {
     ${f('Liability', s.liabilityForm)}
     ${f('마지막 출석', s.lastAttended)}
     ${f('특이사항', s.notes)}
-    ${s.id ? `<div class="mt-4 pt-4 border-t"><a href="https://www.notion.so/${s.id.replace(/-/g,'')}" target="_blank" class="btn-primary inline-block">Notion에서 편집 →</a></div>` : ''}
+    ${s.id && ROLE === 'director' ? `<div class="mt-4 pt-4 border-t"><a href="https://www.notion.so/${s.id.replace(/-/g,'')}" target="_blank" class="btn-primary inline-block">Notion에서 편집 →</a></div>` : ''}
   `;
   document.getElementById('detailModal').classList.remove('hidden');
 }
