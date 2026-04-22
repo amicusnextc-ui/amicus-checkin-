@@ -161,6 +161,11 @@
         <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">📝 Liability Form 미제출 <span id="liabilityCount" class="text-sm text-gray-500 font-normal"></span></h3>
         <div id="liabilityList" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-400 text-sm">불러오는 중…</div></div>
       </div>
+
+      <div class="card p-5 mt-6" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); border:1px solid #c4b5fd;">
+        <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">🆕 이번 주 신규 방문자 <span id="newVisitorCount" class="text-sm text-gray-500 font-normal"></span></h3>
+        <div id="newVisitorsList" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-400 text-sm">불러오는 중…</div></div>
+      </div>
     </section>
 
     <!-- =========== REGISTRY =========== -->
@@ -399,6 +404,7 @@ async function loadAll() {
     STAFF_LIST = staff.staff || [];
     renderDashboard();
     renderLiability();
+    renderNewVisitors();
     renderRoster();
     renderTeam();
     loadRequests();
@@ -435,6 +441,47 @@ function renderLiability() {
         <div class="text-xs text-gray-500">${(s.department||'').split(' ')[0]} · ${s.liabilityForm || '미제출'}</div>
       </div>
       ${s.phone ? `<a href="tel:${s.phone}" class="text-xs text-red-600">📞</a>` : ''}
+    </div>`).join('');
+}
+
+/* =================== NEW VISITORS (THIS WEEK) =================== */
+function getCurrentServiceSundayISO() {
+  const now = new Date();
+  const laDate = new Intl.DateTimeFormat('en-CA', {timeZone:'America/Los_Angeles', year:'numeric', month:'2-digit', day:'2-digit'}).format(now);
+  const [yr,mo,dy] = laDate.split('-').map(Number);
+  const laDow = new Date(yr, mo-1, dy).getDay();
+  const offset = laDow === 0 ? 0 : laDow;
+  const sunday = new Date(yr, mo-1, dy - offset);
+  return sunday.getFullYear() + '-' + String(sunday.getMonth()+1).padStart(2,'0') + '-' + String(sunday.getDate()).padStart(2,'0');
+}
+function renderNewVisitors() {
+  const myShort = getMyDeptShort();
+  const serviceSunday = getCurrentServiceSundayISO();
+  const list = ROSTER.filter(s => {
+    if (!s.isVisitor) return false;
+    if (!s.lastAttended) return false;
+    if (s.lastAttended !== serviceSunday) return false;
+    if (myShort && !(s.department || '').includes(myShort)) return false;
+    return true;
+  });
+  const cntEl = document.getElementById('newVisitorCount');
+  if (cntEl) cntEl.textContent = list.length ? `(${list.length}명)` : '';
+  const el = document.getElementById('newVisitorsList');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div class="text-sm text-gray-600">이번 주 신규 방문자 없음</div>'; return; }
+  el.innerHTML = list.map(s => `
+    <div class="flex items-start justify-between p-3 bg-white/70 backdrop-blur rounded-lg">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-semibold text-gray-900">${s.name}</span>
+          ${s.nameEN ? `<span class="text-xs text-gray-500">${s.nameEN}</span>` : ''}
+          <span class="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full font-bold">🆕 NEW</span>
+        </div>
+        <div class="text-xs text-gray-600 mt-1">${(s.department||'').split(' ')[0]}${s.grade ? ' · '+s.grade : ''}${s.dob ? ' · '+s.dob : ''}</div>
+        <div class="text-xs text-gray-500 mt-0.5">보호자: ${s.guardian || '—'}</div>
+        ${s.allergy && s.allergy !== '없음' ? `<div class="text-xs text-red-600 mt-0.5">⚠️ 알러지: ${s.allergy}</div>` : ''}
+      </div>
+      ${s.phone ? `<a href="tel:${s.phone}" class="text-xs text-indigo-600 font-semibold ml-2 whitespace-nowrap">📞 ${s.phone}</a>` : ''}
     </div>`).join('');
 }
 
