@@ -1253,13 +1253,17 @@ async function loadAbsentees() {
   if (!list) return;
   list.innerHTML = '<div class="px-5 py-8 text-center text-gray-400 text-sm">로딩 중...</div>';
   var isLeader = window._isLeader || false;
-  var dept = window._staffDept || '';
+  var __LD2={'이강희':'중고등부','최재원':'중고등부'};
+  var __deptFull = window._dept || window._staffDept || '';
+  var __deptShort = __LD2[window._leaderName] || (__deptFull.match(/중고등부|초등부|유년부|유치부|유아부/)||[])[0] || '';
+  var dept = __deptFull;
   var url = '/api/attendance?type=absentees' + (isLeader ? '&department=all' : (dept ? '&department=' + encodeURIComponent(dept) : ''));
   try {
     var r = await fetch(url);
     var d = await r.json();
     if (!d.success) { list.innerHTML = '<div class="px-5 py-8 text-center text-red-400 text-sm">로딩 실패</div>'; return; }
     _absentees = d.absentees || [];
+    if (__deptShort) _absentees = _absentees.filter(function(a){ return (a.dept||a.department||'').indexOf(__deptShort) >= 0; });
 
     var countEl = document.getElementById('absListCount');
     if (countEl) countEl.textContent = _absentees.length + '명';
