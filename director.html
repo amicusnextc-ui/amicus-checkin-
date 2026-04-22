@@ -484,7 +484,7 @@ async function loadRequests() {
             <div class="text-sm text-gray-600 whitespace-pre-wrap">${(req.content||'').replace(/</g,'&lt;')}</div>
             <div class="text-xs text-gray-400 mt-1">${req.requester || '간사'} · ${req.department || ''} · ${dt}${isCompleted && completedDt ? ` · 완료 ${completedDt}${req.handler ? ' (' + req.handler + ')' : ''}` : ''}</div>
           </div>
-          ${!isCompleted && ROLE === 'director' ? `<button onclick="markRequestDone('${req.id}', ${idx})" class="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 whitespace-nowrap">✓ 완료</button>` : ''}
+          ${!isCompleted ? `<button onclick="markRequestDone('${req.id}', ${idx})" class="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 whitespace-nowrap">✓ 완료</button>` : ''}
         </div>
       </div>`;
     };
