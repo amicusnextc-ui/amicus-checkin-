@@ -496,10 +496,10 @@ async function loadRequests() {
 async function markRequestDone(id, idx) {
   if (!confirm('이 요청을 완료 처리하시겠습니까?')) return;
   try {
-    const r = await fetch('/api/attendance?type=requests&action=update', {
-      method: 'POST',
+    const r = await fetch('/api/attendance?type=requests', {
+      method: 'PATCH',
       headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ id, status: '완료', completedAt: new Date().toISOString(), handler: CURRENT_USER })
+      body: JSON.stringify({ id, status: '완료', handler: CURRENT_USER })
     });
     if (r.ok) {
       loadRequests();
