@@ -1118,6 +1118,14 @@ async function loadRequests() {
     var d = await r.json();
     if (!d.success) { list.innerHTML = '<div class="px-5 py-8 text-center text-red-400 text-sm">로딩 실패</div>'; return; }
     _reqs = d.requests || [];
+    // Filter to own submissions only — staff see only their own requests
+    var myNamePart = ((window._staffName || '') + '').split(/\s+/)[0];
+    if (myNamePart) {
+      _reqs = _reqs.filter(function(r){
+        var rn = ((r.requester || '') + '').split(/\s+/)[0];
+        return rn === myNamePart;
+      });
+    }
 
     var countEl = document.getElementById('reqListCount');
     if (countEl) countEl.textContent = _reqs.length + '건';
