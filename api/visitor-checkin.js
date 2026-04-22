@@ -42,6 +42,17 @@ module.exports = async (req, res) => {
     // NORMAL VISITOR CHECKIN
     const{name,nameEN,dob,guardian,phone,allergy,notes,grade}=body;
     if(!name||!dob)return res.status(400).json({error:"\uC774\uB984\uACFC \uC0DD\uB144\uC6D4\uC77C \uD544\uC218"});
+    // Day-of-week gate: match /api/checkin behavior
+    const nowGate = new Date();
+    const laDateGate = new Intl.DateTimeFormat('en-CA', {timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit'}).format(nowGate);
+    const [yGate, mGate, dGate] = laDateGate.split('-').map(Number);
+    const dowGate = new Date(Date.UTC(yGate, mGate-1, dGate)).getUTCDay();
+    if (dowGate === 6) return res.status(403).json({ error: 'Saturday is reset day', resetDay: true });
+    if (dowGate !== 0) {
+      if (body.directorPassword !== '3167') {
+        return res.status(403).json({ error: '일요일 외 방문자 등록은 디렉터 인증이 필요합니다', requiresDirectorAuth: true });
+      }
+    }
     try{
           const ageMonths=calcAge(dob);const dept=getDept(ageMonths);
           const today=new Date().toLocaleDateString("sv-SE",{timeZone:TIMEZONE});
