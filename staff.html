@@ -682,9 +682,9 @@ async function uncheckin(btn){
   btn.disabled=true;btn.textContent='...';
   var directorPw='';
   async function doCall(){
-    var body={name:name,department:dept,studentId:sid};
+    var body={action:'cancel',name:name,department:dept,studentId:sid};
     if(directorPw)body.directorPassword=directorPw;
-    var r=await fetch('/api/checkin-cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var r=await fetch('/api/checkin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     return {res:r,data:await r.json()};
   }
   try{
