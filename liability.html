@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>📝 책임 동의서 · Liability Form | Amicus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+* { font-family: 'Noto Sans KR', Arial, sans-serif; }
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn .25s ease}
+@keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin .7s linear infinite}
+@keyframes checkPop{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}.check-pop{animation:checkPop .4s ease forwards}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}.slide-up{animation:slideUp .3s cubic-bezier(.32,.72,0,1)}
+.pin-digit{width:54px;height:62px;font-size:28px;font-weight:800;text-align:center;border:2px solid #e5e7eb;border-radius:14px;outline:none;transition:all .15s;background:#fff}
+.pin-digit:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.2)}
+.pin-digit.filled{border-color:#6366f1;background:#eef2ff;color:#4338ca}
+.student-card{transition:all .2s}
+.student-card:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+</style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-20 shadow-sm">
+  <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-lg shadow-sm">📝</div>
+      <div>
+        <h1 class="text-sm font-bold text-gray-900 leading-tight">책임 동의서 · Liability Form</h1>
+        <p class="text-xs text-gray-400 leading-tight">Amicus Next Church · 교육부</p>
+      </div>
+    </div>
+    <a href="/" class="text-xs text-gray-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50 font-medium">← 홈</a>
+  </div>
+</header>
+
+<main class="max-w-lg mx-auto px-4 py-6">
+
+  <!-- INTRO -->
+  <div id="introSection" class="fade-in">
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-2xl px-4 py-2 mb-3">
+        <span class="text-indigo-600 font-bold text-sm">📝 Liability Waiver</span>
+      </div>
+      <h2 class="text-2xl font-black text-gray-900">책임 동의서 작성</h2>
+      <p class="text-gray-500 text-sm mt-2">자녀의 이름 또는 전화번호 뒷 4자리로 검색해주세요.<br/>Search by your child's name or last 4 digits of phone.</p>
+    </div>
+
+    <!-- Search Mode Tabs -->
+    <div class="flex gap-2 mb-5 bg-gray-100 p-1 rounded-2xl">
+      <button id="tabPhone" onclick="setMode('phone')" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-gray-900 shadow-sm">
+        📞 전화번호
+      </button>
+      <button id="tabName" onclick="setMode('name')" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-gray-400">
+        🔍 이름 검색
+      </button>
+    </div>
+
+    <!-- Phone digits -->
+    <div id="phoneSection" class="mb-5">
+      <p class="text-center text-gray-500 text-sm mb-3">전화번호 끝 4자리 · Last 4 digits</p>
+      <div class="flex gap-2 justify-center mb-4">
+        <input id="d1" class="pin-digit" inputmode="numeric" maxlength="1" oninput="handleDigit(this,0)" onkeydown="handleDigitKey(event,0)"/>
+        <input id="d2" class="pin-digit" inputmode="numeric" maxlength="1" oninput="handleDigit(this,1)" onkeydown="handleDigitKey(event,1)"/>
+        <input id="d3" class="pin-digit" inputmode="numeric" maxlength="1" oninput="handleDigit(this,2)" onkeydown="handleDigitKey(event,2)"/>
+        <input id="d4" class="pin-digit" inputmode="numeric" maxlength="1" oninput="handleDigit(this,3)" onkeydown="handleDigitKey(event,3)"/>
+      </div>
+      <p class="text-center text-xs text-gray-400">4자리 모두 입력하면 자동 검색</p>
+    </div>
+
+    <!-- Name search -->
+    <div id="nameSection" class="hidden mb-5">
+      <input id="nameInput" type="text" placeholder="이름 입력 (예: 박서연)" oninput="handleNameInput()"
+        class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
+        autocomplete="off"/>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="mt-4"></div>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div id="successSection" class="hidden fade-in text-center py-10">
+    <div class="w-24 h-24 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center check-pop">
+      <span class="text-5xl">✅</span>
+    </div>
+    <h2 class="text-2xl font-black text-gray-900 mb-2">제출 완료!</h2>
+    <p id="successStudentName" class="text-lg font-semibold text-indigo-700 mb-1"></p>
+    <p class="text-gray-500 text-sm mb-6">Liability Form이 성공적으로 저장되었습니다.<br/>Your form has been successfully recorded.</p>
+    <div id="emailStatus" class="bg-indigo-50 border border-indigo-200 rounded-2xl p-4 mb-6 text-sm text-indigo-700"></div>
+    <div class="flex gap-3">
+      <button onclick="restart()" class="flex-1 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">
+        다른 학생 작성하기
+      </button>
+      <a href="/" class="flex-1 py-3.5 rounded-2xl bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition-colors text-center block">
+        홈으로
+      </a>
+    </div>
+  </div>
+</main>
+
+<!-- LIABILITY MODAL -->
+<div id="liabilityModal" class="fixed inset-0 z-50 hidden items-end justify-center">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeLiabilityModal()"></div>
+  <div class="relative bg-white w-full max-w-lg rounded-t-3xl shadow-2xl flex flex-col slide-up" style="max-height:92vh;">
+
+    <div class="flex items-center justify-between px-6 pt-5 pb-3 border-b border-gray-100 flex-shrink-0">
+      <div>
+        <h2 class="text-lg font-black text-gray-900">책임 동의서 <span class="text-xs font-normal text-gray-400 ml-1">Liability Waiver</span></h2>
+        <p class="text-xs text-gray-400 mt-0.5">작성 후 이메일로 사본이 발송됩니다</p>
+      </div>
+      <button onclick="closeLiabilityModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-light">&times;</button>
+    </div>
+
+    <div class="overflow-y-auto flex-1 px-6 py-4">
+
+      <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-4">
+        <p class="text-xs text-indigo-500 font-semibold mb-1">자동 입력됨</p>
+        <p id="liabStudentName" class="font-bold text-gray-900"></p>
+        <p id="liabStudentInfo" class="text-sm text-gray-500"></p>
+        <p id="liabStudentEmail" class="text-xs text-indigo-600 mt-1"></p>
+      </div>
+
+      <div class="bg-gray-50 rounded-2xl p-4 mb-4 text-xs text-gray-600 leading-relaxed" style="max-height:220px;overflow-y:auto;">
+        <p class="font-bold text-gray-800 mb-2">WAIVER OF LIABILITY, ASSUMPTION OF RISK, AND INDEMNITY AGREEMENT</p>
+        <p class="mb-2"><strong>Effective Dates: January 1, 2025 &ndash; December 31, 2027</strong><br/>FOR USE ONLY IF THE PARTICIPANT IS A MINOR</p>
+        <p class="mb-2"><strong>Functions and Activities:</strong> Prior to my child&rsquo;s participation in the programs and recreational and other activities of Amicus Presbyterian Church (&ldquo;Amicus&rdquo;), I acknowledge that there are certain risks associated with the activities, including physical injury, illness, even death, or property loss.</p>
+        <p class="mb-2"><strong>Release of Liability:</strong> I expressly assume all risks of the child when participating in the activities. I further release Amicus and its ministers, leaders, employees, volunteers, and agents from any claim that my child may have as a result of injury or illness incurred during participation. This release shall include any claims of negligence or breach of warranty.</p>
+        <p class="mb-2"><strong>Special Events and Field Trips:</strong> My child may take part in activities such as: Religious Studies, discussion groups, music, worship services, group songs, games of skill and experience, drama, walking to outside events at other locales and establishments, and other activities consistent with the purposes of the church&rsquo;s student ministry.</p>
+        <p class="mb-2"><strong>Photography, Audio, Video, and Social Media:</strong> I authorize Amicus to include my child in pictures or on audio or video for promotional purposes. I also authorize Amicus to post pictures or recordings of my children on conference presentations, worship services, educational presentations, or church website.</p>
+        <p class="mb-2"><strong>First Aid and Emergency Medical Treatment:</strong> I give permission for agents of Amicus to seek and secure any needed medical attention or treatment for the child named above including hospitalization. I agree to pay all fees and costs arising from this action.</p>
+        <p class="mb-2"><strong>Indemnification:</strong> I agree to indemnify and hold harmless Amicus for any and all claims, actions, suits, costs, expenses, damages, and liabilities including attorneys&rsquo; fees brought as a result of my involvement in the Activity.</p>
+        <p><strong>Acknowledgment:</strong> I have read this Waiver of Liability, Assumption of Risk, and Indemnity Agreement, and fully understand its terms. I understand that I am giving up substantial rights, including my right to sue.</p>
+      </div>
+
+      <div class="mb-3">
+        <label class="block text-sm font-bold text-gray-700 mb-1">보호자 이름 <span class="text-red-400">*</span> <span class="text-xs font-normal text-gray-400">Guardian Name</span></label>
+        <input id="liabGuardian" type="text" placeholder="예: 박세열 / Peter Park"
+          class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
+          autocomplete="off"/>
+      </div>
+
+      <div class="mb-3">
+        <label class="block text-sm font-bold text-gray-700 mb-1">이메일 수신 주소 <span class="text-red-400">*</span> <span class="text-xs font-normal text-gray-400">Email for receipt</span></label>
+        <input id="liabEmail" type="email" placeholder="이메일 주소"
+          class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
+          autocomplete="email"/>
+        <p class="text-xs text-gray-400 mt-1">작성된 폼이 이 이메일로 발송됩니다</p>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-bold text-gray-700 mb-1">서명 (이름 입력) <span class="text-red-400">*</span> <span class="text-xs font-normal text-gray-400">Signature</span></label>
+        <input id="liabSignature" type="text" placeholder="이름을 입력하면 서명으로 인정됩니다"
+          class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
+          autocomplete="off"/>
+      </div>
+
+      <label class="flex items-start gap-3 cursor-pointer mb-5">
+        <input id="liabAgree" type="checkbox" class="mt-1 w-5 h-5 rounded accent-indigo-500 flex-shrink-0"/>
+        <span class="text-sm text-gray-700 leading-relaxed">
+          <strong>위 내용을 읽고 이해하였으며 동의합니다.</strong><br/>
+          <span class="text-xs text-gray-400">I have read and agree to the above Waiver of Liability, Assumption of Risk, and Indemnity Agreement. (California E-SIGN Act compliant)</span>
+        </span>
+      </label>
+    </div>
+
+    <div class="px-6 pb-6 pt-3 flex-shrink-0 border-t border-gray-100">
+      <button id="liabSubmitBtn" onclick="submitLiability()"
+        class="w-full py-4 rounded-2xl bg-indigo-600 text-white font-black text-base disabled:opacity-40 transition-all hover:bg-indigo-700">
+        제출하기 ✓
+      </button>
+      <p class="text-center text-xs text-gray-400 mt-2">작성 시간: <span id="liabTimestamp"></span></p>
+    </div>
+  </div>
+</div>
+
+<script>
+var _mode = 'phone';
+var _selectedStudent = null;
+var _searchTimer = null;
+
+function setMode(m){
+  _mode = m;
+  document.getElementById('phoneSection').classList.toggle('hidden', m !== 'phone');
+  document.getElementById('nameSection').classList.toggle('hidden', m !== 'name');
+  var tp = document.getElementById('tabPhone'), tn = document.getElementById('tabName');
+  if(m === 'phone'){
+    tp.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-gray-900 shadow-sm';
+    tn.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-gray-400';
+  } else {
+    tp.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-gray-400';
+    tn.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-gray-900 shadow-sm';
+    setTimeout(function(){ document.getElementById('nameInput').focus(); }, 100);
+  }
+  document.getElementById('results').innerHTML = '';
+  // Clear phone digits
+  ['d1','d2','d3','d4'].forEach(function(id){ var el=document.getElementById(id); if(el){ el.value=''; el.classList.remove('filled'); } });
+}
+
+function handleDigit(input, idx){
+  var v = input.value.replace(/\D/g, '');
+  input.value = v;
+  if(v){
+    input.classList.add('filled');
+    if(idx < 3){
+      document.getElementById('d'+(idx+2)).focus();
+    } else {
+      // All 4 entered, search
+      var phone = ['d1','d2','d3','d4'].map(function(id){ return document.getElementById(id).value; }).join('');
+      if(phone.length === 4) searchByPhone(phone);
+    }
+  } else {
+    input.classList.remove('filled');
+  }
+}
+function handleDigitKey(e, idx){
+  if(e.key === 'Backspace' && !e.target.value && idx > 0){
+    var prev = document.getElementById('d'+idx);
+    prev.focus();
+    prev.value = '';
+    prev.classList.remove('filled');
+  }
+}
+
+function handleNameInput(){
+  clearTimeout(_searchTimer);
+  var v = document.getElementById('nameInput').value.trim();
+  if(v.length < 1){ document.getElementById('results').innerHTML = ''; return; }
+  _searchTimer = setTimeout(function(){ searchByName(v); }, 350);
+}
+
+function showLoading(){
+  document.getElementById('results').innerHTML =
+    '<div class="text-center py-8 text-gray-400"><div class="w-7 h-7 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-sm">검색 중...</p></div>';
+}
+
+async function searchByPhone(phone4){
+  showLoading();
+  try{
+    var r = await fetch('/api/search-student?phone4=' + encodeURIComponent(phone4));
+    var d = await r.json();
+    if(!r.ok) throw new Error(d.error || 'fail');
+    renderResults(d.students || []);
+  } catch(e){
+    document.getElementById('results').innerHTML = '<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠ ' + e.message + '</div>';
+  }
+}
+
+async function searchByName(name){
+  showLoading();
+  try{
+    var r = await fetch('/api/search-student?name=' + encodeURIComponent(name));
+    var d = await r.json();
+    if(!r.ok) throw new Error(d.error || 'fail');
+    renderResults(d.students || []);
+  } catch(e){
+    document.getElementById('results').innerHTML = '<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠ ' + e.message + '</div>';
+  }
+}
+
+function renderResults(students){
+  var el = document.getElementById('results');
+  if(!students || !students.length){
+    el.innerHTML = '<div class="text-center py-8 bg-white rounded-2xl border border-gray-100"><div class="text-3xl mb-2">🔍</div><p class="text-gray-500 font-semibold">검색 결과 없음</p><p class="text-gray-400 text-sm mt-1">다른 방법으로 다시 시도해주세요</p></div>';
+    return;
+  }
+  var html = '<div class="space-y-3">';
+  students.forEach(function(s){
+    var liab = s.liabilityForm || '미제출';
+    var submitted = liab === '제출 완료';
+    var statusBadge = submitted
+      ? '<span class="text-xs font-bold px-3 py-1 rounded-full bg-green-100 text-green-700">✔ 제출 완료</span>'
+      : (liab === '재작성 필요'
+         ? '<span class="text-xs font-bold px-3 py-1 rounded-full bg-orange-100 text-orange-700">📝 재작성 필요</span>'
+         : '<span class="text-xs font-bold px-3 py-1 rounded-full bg-red-100 text-red-700">⚠ ' + liab + '</span>');
+    var btn = submitted
+      ? '<button onclick="startSign(\'' + s.id + '\')" class="w-full mt-3 py-3 rounded-xl bg-gray-100 text-gray-600 font-semibold hover:bg-gray-200 transition-colors">재작성하기</button>'
+      : '<button onclick="startSign(\'' + s.id + '\')" class="w-full mt-3 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">📝 지금 작성하기</button>';
+    html += '<div class="student-card bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">'
+      + '<div class="flex items-start justify-between gap-3">'
+      + '<div class="flex-1 min-w-0">'
+      + '<p class="font-bold text-gray-900">' + (s.name||'') + (s.nameEN ? ' <span class="text-sm font-normal text-gray-400">'+s.nameEN+'</span>' : '') + '</p>'
+      + '<p class="text-xs text-gray-500 mt-1">' + (s.department||'').split(' ')[0] + ' · ' + (s.grade||'-') + ' · DOB ' + (s.dob||'-') + '</p>'
+      + '</div>' + statusBadge + '</div>'
+      + btn + '</div>';
+    // store for later
+    if(!window._sMap) window._sMap = {};
+    window._sMap[s.id] = s;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function startSign(id){
+  var s = window._sMap[id];
+  if(!s) return;
+  _selectedStudent = s;
+  document.getElementById('liabStudentName').textContent = s.name + (s.nameEN ? ' ('+s.nameEN+')' : '');
+  document.getElementById('liabStudentInfo').textContent = (s.department||'-') + ' · ' + (s.grade||'-') + ' · DOB: ' + (s.dob||'-');
+  var email = s.fatherEmail || s.motherEmail || '';
+  document.getElementById('liabEmail').value = email;
+  document.getElementById('liabStudentEmail').textContent = email ? ('기본 수신: ' + email) : '';
+  document.getElementById('liabGuardian').value = s.fatherName || s.motherName || s.guardian || '';
+  document.getElementById('liabSignature').value = '';
+  document.getElementById('liabAgree').checked = false;
+  document.getElementById('liabTimestamp').textContent = new Date().toLocaleString('ko-KR', {timeZone:'America/Los_Angeles'});
+  var m = document.getElementById('liabSubmitBtn');
+  m.disabled = false; m.textContent = '제출하기 ✓';
+  var modal = document.getElementById('liabilityModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  setTimeout(function(){
+    var g = document.getElementById('liabGuardian');
+    if(g && !g.value) g.focus();
+  }, 250);
+}
+
+function closeLiabilityModal(){
+  var modal = document.getElementById('liabilityModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+async function submitLiability(){
+  var guardian = document.getElementById('liabGuardian').value.trim();
+  var email = document.getElementById('liabEmail').value.trim();
+  var signature = document.getElementById('liabSignature').value.trim();
+  var agreed = document.getElementById('liabAgree').checked;
+
+  // Validation
+  var warn = function(id){ var el=document.getElementById(id); el.classList.add('border-red-400'); el.focus(); setTimeout(function(){el.classList.remove('border-red-400');}, 2000); };
+  if(!guardian){ warn('liabGuardian'); return; }
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ warn('liabEmail'); alert('올바른 이메일 주소를 입력해주세요'); return; }
+  if(!signature){ warn('liabSignature'); return; }
+  if(!agreed){ alert('위 내용에 동의해주세요 (체크박스)'); return; }
+
+  var btn = document.getElementById('liabSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '제출 중...';
+
+  var now = new Date();
+  var timestamp = now.toISOString();
+  var signedText = '서명: ' + signature + ' (보호자: ' + guardian + ') 시간: ' + timestamp;
+
+  try{
+    var r = await fetch('/api/update-student', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action: 'liability',
+        pageId: _selectedStudent.id,
+        studentName: _selectedStudent.name,
+        studentDept: _selectedStudent.department,
+        studentAmcId: _selectedStudent.studentId,
+        guardianName: guardian,
+        signature: signature,
+        email: email,
+        timestamp: timestamp,
+        signedText: signedText,
+        userAgent: navigator.userAgent,
+        termsVersion: '2025-2027'
+      })
+    });
+    var d = await r.json();
+    if(!r.ok) throw new Error(d.error || '제출 실패');
+
+    // Success
+    document.getElementById('introSection').classList.add('hidden');
+    document.getElementById('successSection').classList.remove('hidden');
+    document.getElementById('successStudentName').textContent = _selectedStudent.name + ' 학생';
+    var es = document.getElementById('emailStatus');
+    if(d.emailSent){
+      es.innerHTML = '📧 <strong>' + email + '</strong>로 사본이 발송되었습니다';
+    } else {
+      es.innerHTML = '⚠ 이메일 발송 실패 — Notion에는 정상 저장됨';
+      es.className = 'bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mb-6 text-sm text-yellow-700';
+    }
+    closeLiabilityModal();
+    window.scrollTo(0, 0);
+  } catch(e){
+    alert('오류: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = '제출하기 ✓';
+  }
+}
+
+function restart(){
+  _selectedStudent = null;
+  document.getElementById('successSection').classList.add('hidden');
+  document.getElementById('introSection').classList.remove('hidden');
+  document.getElementById('results').innerHTML = '';
+  setMode('phone');
+  window.scrollTo(0, 0);
+}
+
+// Focus first digit on load
+window.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){ document.getElementById('d1').focus(); }, 200);
+});
+</script>
+</body>
+</html>
