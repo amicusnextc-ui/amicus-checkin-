@@ -1,0 +1,12 @@
+{
+  "name": "amicus-checkin",
+  "version": "1.0.0",
+  "description": "Amicus Education ministry check-in app",
+  "private": true,
+  "dependencies": {
+    "@notionhq/client": "^2.2.15"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
