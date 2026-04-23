@@ -1260,7 +1260,7 @@ async function loadRequests() {
       html += pendingReqs.map(function(req, idx){ return renderReq(req, idx, false); }).join('');
     }
     if (completedReqs.length > 0) {
-      html += '<details class="border-t border-gray-200 bg-gray-50"><summary class="px-5 py-3 text-xs font-semibold text-gray-500 cursor-pointer hover:bg-gray-100 select-none">✅ 완료된 요청 (최근 7일, ' + completedReqs.length + '건)</summary><div class="bg-white">'
+      html += '<details open class="border-t border-gray-200 bg-gray-50"><summary class="px-5 py-3 text-xs font-semibold text-gray-500 cursor-pointer hover:bg-gray-100 select-none">✅ 완료된 요청 (최근 7일, ' + completedReqs.length + '건)</summary><div class="bg-white">'
         + completedReqs.map(function(req, idx){ return renderReq(req, idx, true); }).join('')
         + '</div></details>';
     }
