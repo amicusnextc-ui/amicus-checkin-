@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-<title>📝 책임 동의서 · Liability Form | Amicus</title>
+<title>Liability Form · 책임 동의서 | Amicus Presbyterian Church</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -19,6 +19,10 @@
 .pin-digit.filled{border-color:#6366f1;background:#eef2ff;color:#4338ca}
 .student-card{transition:all .2s}
 .student-card:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.waiver-sec{margin-bottom:14px}
+.waiver-sec h4{font-weight:700;color:#111827;margin-bottom:4px;font-size:12px}
+.waiver-sec p{font-size:11.5px;line-height:1.55;color:#4b5563}
+.waiver-sec .emph{background:#fef3c7;padding:2px 4px;font-weight:600;color:#78350f}
 </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
@@ -29,8 +33,8 @@
     <div class="flex items-center gap-2">
       <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-lg shadow-sm">📝</div>
       <div>
-        <h1 class="text-sm font-bold text-gray-900 leading-tight">책임 동의서 · Liability Form</h1>
-        <p class="text-xs text-gray-400 leading-tight">Amicus Next Church · 교육부</p>
+        <h1 class="text-sm font-bold text-gray-900 leading-tight">Liability Waiver · 책임 동의서</h1>
+        <p class="text-xs text-gray-400 leading-tight">Amicus Presbyterian Church · 교육부</p>
       </div>
     </div>
     <a href="/" class="text-xs text-gray-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50 font-medium">← 홈</a>
@@ -46,13 +50,16 @@
         <span class="text-indigo-600 font-bold text-sm">📝 Liability Waiver</span>
       </div>
       <h2 class="text-2xl font-black text-gray-900">책임 동의서 작성</h2>
-      <p class="text-gray-500 text-sm mt-2">자녀의 이름 또는 전화번호 뒷 4자리로 검색해주세요.<br/>Search by your child's name or last 4 digits of phone.</p>
+      <p class="text-gray-500 text-xs mt-2 leading-relaxed">
+        Amicus Presbyterian Church · 10960 Via Frontera, San Diego CA 92127 · 760.300.5659<br/>
+        <span class="text-gray-400">자녀의 이름 또는 전화번호 뒷 4자리로 검색해주세요.</span>
+      </p>
     </div>
 
     <!-- Search Mode Tabs -->
     <div class="flex gap-2 mb-5 bg-gray-100 p-1 rounded-2xl">
       <button id="tabPhone" onclick="setMode('phone')" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-gray-900 shadow-sm">
-        📞 전화번호
+        📞 전홄번호
       </button>
       <button id="tabName" onclick="setMode('name')" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-gray-400">
         🔍 이름 검색
@@ -89,7 +96,7 @@
     </div>
     <h2 class="text-2xl font-black text-gray-900 mb-2">제출 완료!</h2>
     <p id="successStudentName" class="text-lg font-semibold text-indigo-700 mb-1"></p>
-    <p class="text-gray-500 text-sm mb-6">Liability Form이 성공적으로 저장되었습니다.<br/>Your form has been successfully recorded.</p>
+    <p class="text-gray-500 text-sm mb-6">Liability Waiver가 성공적으로 저장되었습니다.<br/>Your form has been successfully recorded.</p>
     <div id="emailStatus" class="bg-indigo-50 border border-indigo-200 rounded-2xl p-4 mb-6 text-sm text-indigo-700"></div>
     <div class="flex gap-3">
       <button onclick="restart()" class="flex-1 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">
@@ -109,41 +116,109 @@
 
     <div class="flex items-center justify-between px-6 pt-5 pb-3 border-b border-gray-100 flex-shrink-0">
       <div>
-        <h2 class="text-lg font-black text-gray-900">책임 동의서 <span class="text-xs font-normal text-gray-400 ml-1">Liability Waiver</span></h2>
-        <p class="text-xs text-gray-400 mt-0.5">작성 후 이메일로 사본이 발송됩니다</p>
+        <h2 class="text-base font-black text-gray-900">WAIVER OF LIABILITY, ASSUMPTION OF RISK,<br/>AND INDEMNITY AGREEMENT</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Effective: January 1, 2025 – December 31, 2027 · FOR MINOR PARTICIPANT</p>
       </div>
-      <button onclick="closeLiabilityModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-light">&times;</button>
+      <button onclick="closeLiabilityModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-light flex-shrink-0 ml-2">&times;</button>
     </div>
 
     <div class="overflow-y-auto flex-1 px-6 py-4">
 
+      <!-- Student info auto-filled -->
       <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-4">
-        <p class="text-xs text-indigo-500 font-semibold mb-1">자동 입력됨</p>
+        <p class="text-xs text-indigo-500 font-semibold mb-1">자동 입력됨 · Auto-filled</p>
         <p id="liabStudentName" class="font-bold text-gray-900"></p>
         <p id="liabStudentInfo" class="text-sm text-gray-500"></p>
+        <p id="liabStudentDOB" class="text-xs text-gray-500 mt-1">DOB: <span class="font-mono"></span></p>
         <p id="liabStudentEmail" class="text-xs text-indigo-600 mt-1"></p>
       </div>
 
-      <div class="bg-gray-50 rounded-2xl p-4 mb-4 text-xs text-gray-600 leading-relaxed" style="max-height:220px;overflow-y:auto;">
-        <p class="font-bold text-gray-800 mb-2">WAIVER OF LIABILITY, ASSUMPTION OF RISK, AND INDEMNITY AGREEMENT</p>
-        <p class="mb-2"><strong>Effective Dates: January 1, 2025 &ndash; December 31, 2027</strong><br/>FOR USE ONLY IF THE PARTICIPANT IS A MINOR</p>
-        <p class="mb-2"><strong>Functions and Activities:</strong> Prior to my child&rsquo;s participation in the programs and recreational and other activities of Amicus Presbyterian Church (&ldquo;Amicus&rdquo;), I acknowledge that there are certain risks associated with the activities, including physical injury, illness, even death, or property loss.</p>
-        <p class="mb-2"><strong>Release of Liability:</strong> I expressly assume all risks of the child when participating in the activities. I further release Amicus and its ministers, leaders, employees, volunteers, and agents from any claim that my child may have as a result of injury or illness incurred during participation. This release shall include any claims of negligence or breach of warranty.</p>
-        <p class="mb-2"><strong>Special Events and Field Trips:</strong> My child may take part in activities such as: Religious Studies, discussion groups, music, worship services, group songs, games of skill and experience, drama, walking to outside events at other locales and establishments, and other activities consistent with the purposes of the church&rsquo;s student ministry.</p>
-        <p class="mb-2"><strong>Photography, Audio, Video, and Social Media:</strong> I authorize Amicus to include my child in pictures or on audio or video for promotional purposes. I also authorize Amicus to post pictures or recordings of my children on conference presentations, worship services, educational presentations, or church website.</p>
-        <p class="mb-2"><strong>First Aid and Emergency Medical Treatment:</strong> I give permission for agents of Amicus to seek and secure any needed medical attention or treatment for the child named above including hospitalization. I agree to pay all fees and costs arising from this action.</p>
-        <p class="mb-2"><strong>Indemnification:</strong> I agree to indemnify and hold harmless Amicus for any and all claims, actions, suits, costs, expenses, damages, and liabilities including attorneys&rsquo; fees brought as a result of my involvement in the Activity.</p>
-        <p><strong>Acknowledgment:</strong> I have read this Waiver of Liability, Assumption of Risk, and Indemnity Agreement, and fully understand its terms. I understand that I am giving up substantial rights, including my right to sue.</p>
+      <!-- Full official waiver text -->
+      <div class="bg-gray-50 rounded-2xl p-4 mb-4" style="max-height:280px;overflow-y:auto;">
+        <p class="text-center text-xs text-gray-500 mb-3 font-semibold">— 다음 내용을 반드시 읽어주세요 / Please read carefully —</p>
+
+        <div class="waiver-sec">
+          <h4>Functions and Activities</h4>
+          <p>Prior to my own/child's participation in the programs and recreational and other activities of Amicus Presbyterian Church ("Amicus"), I acknowledge that there are certain risks associated with the activities, including, by way of example, physical injury due to activity-related accidents, physical injury due to transportation-related accidents, illness, even death, or property loss arising from, but not limited to, participation in the activity. In addition, I acknowledge that there may be other risks inherent in these activities of which I may not be presently aware.</p>
+        </div>
+
+        <div class="waiver-sec">
+          <h4>Release of Liability</h4>
+          <p>By signing this Permission/Waiver Form, I expressly warrant that the child named above is capable of withstanding both the physical and mental demands of the activities discussed above. I also expressly assume all risks of the child when participating in the activities, whether such risks are known or unknown to me at this time. I further release of Amicus and its ministers, leaders, employees, volunteers, and agents from any claim that my child may have or that I may have against them as a result of injury or illness incurred during the course of participation in the activities. This release of liability shall include (without limitation) any claims of negligence or breach of warranty. This release of liability is also intended to cover all claims that members of the child's or my family or estate, heirs, representatives, or assigns may have against of Amicus or its ministers, leaders, employees, volunteers, or agents. I further agree to indemnify and hold harmless of Amicus and its ministers, leaders, employees, volunteers, or agents from any and all claims arising from my participation in its activities and programs, or as a result of injury or illness of my child during such activities.</p>
+        </div>
+
+        <div class="waiver-sec">
+          <h4>Special Events and Field Trips</h4>
+          <p>I understand that the child named above will be participating in various activities at Amicus and in the regional area. I understand that during this period my child/ward may take part in activities such as: Religious Studies, discussion groups, music, worship services, group songs, games of skill and experience, drama, walking to outside events at other locales and establishments, and other activities consistent with the purposes of the church's student ministry.</p>
+        </div>
+
+        <div class="waiver-sec">
+          <h4>Photography, Audio, Video, and Social Media</h4>
+          <p>I authorize of Amicus to include myself/child in pictures or on audio or video for promotional purposes of events he/she is participating in. I also authorize of Amicus to post pictures or recordings of my children on the conference presentations and worship services, educational presentations, or church website and related ministries. I hereby release any and all claims any person or organization utilizing this material for educational and ministry purposes.</p>
+        </div>
+
+        <div class="waiver-sec">
+          <h4>First Aid and Emergency Medical Treatment</h4>
+          <p>I recognize that there may be occasions where the child named above may be in need of first aid or emergency medical treatment as a result of an accident, illness, or other health condition or injury. I do hereby give permission for agents of Amicus to seek and secure any needed medical attention or treatment for the child name above including hospitalization, if in the agent's opinion such need arises. In doing so I agree to pay all fees and costs arising from this action to obtain medical treatment.</p>
+          <p class="mt-2"><span class="emph">I give permission for attending physician(s) and other medical personnel to administer any needed medical treatment, including surgery and again, I agree to pay for the medical treatment.</span></p>
+        </div>
+
+        <div class="waiver-sec">
+          <h4>Indemnification and Hold Harmless</h4>
+          <p>I also agree to indemnify and hold harmless Amicus for any and all claims, actions, suits, procedure costs, expenses, damages, and liabilities including attorneys' fees, brought as a result of my involvement in the Activity, and to reimburse them for any such cost incurred.</p>
+        </div>
+
+        <div class="waiver-sec">
+          <h4>Severability</h4>
+          <p>The undersigned further expressively agrees that this Waiver of Liability, Assumption of Risk, and Indemnity Agreement is intended to be as broad and inclusive as permitted by the law of the state of California, and if any portion is later held invalid, it is heretofore agreed that the balance shall continue to be in full force and legal effect.</p>
+        </div>
+
+        <div class="waiver-sec">
+          <h4>Acknowledgment of Understanding</h4>
+          <p>I have read this Waiver of Liability, Assumption of Risk, and Indemnity Agreement, and fully understand its terms, and understand that I am giving up substantial rights, including my right to sue. I acknowledge that I am signing the agreement freely and voluntarily and intend my signature to be complete in unconditional release of all liability to the greatest extent allowed by law.</p>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label class="block text-sm font-bold text-gray-700 mb-1">보호자 이름 <span class="text-red-400">*</span> <span class="text-xs font-normal text-gray-400">Guardian Name</span></label>
-        <input id="liabGuardian" type="text" placeholder="예: 박세열 / Peter Park"
-          class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
-          autocomplete="off"/>
+      <!-- Parent/Guardian 1 (required) -->
+      <div class="border-t border-gray-200 pt-4 mb-3">
+        <p class="text-sm font-bold text-gray-700 mb-2">보호자 1 · Parent/Guardian 1 <span class="text-red-400">*</span></p>
+        <div class="mb-3">
+          <label class="block text-xs font-semibold text-gray-500 mb-1">이름 / Name</label>
+          <input id="liabGuardian" type="text" placeholder="예: 박세열 / Peter Park"
+            class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900 text-sm"
+            autocomplete="off"/>
+        </div>
+        <div class="mb-3">
+          <label class="block text-xs font-semibold text-gray-500 mb-1">서명 (이름 입력) / Signature</label>
+          <input id="liabSignature" type="text" placeholder="이름을 입력하면 서명으로 인정됩니다"
+            class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900 text-sm"
+            autocomplete="off"/>
+        </div>
       </div>
 
-      <div class="mb-3">
+      <!-- Parent/Guardian 2 (optional) -->
+      <details class="border-t border-gray-200 pt-4 mb-4">
+        <summary class="text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700 select-none">
+          + 보호자 2 추가 (선택) · Add Parent/Guardian 2 (optional)
+        </summary>
+        <div class="mt-3">
+          <div class="mb-3">
+            <label class="block text-xs font-semibold text-gray-500 mb-1">이름 / Name</label>
+            <input id="liabGuardian2" type="text" placeholder="두 번째 보호자 이름"
+              class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900 text-sm"
+              autocomplete="off"/>
+          </div>
+          <div class="mb-2">
+            <label class="block text-xs font-semibold text-gray-500 mb-1">서명 (이름 입력) / Signature</label>
+            <input id="liabSignature2" type="text" placeholder="두 번째 보호자 서명"
+              class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900 text-sm"
+              autocomplete="off"/>
+          </div>
+        </div>
+      </details>
+
+      <!-- Email for receipt -->
+      <div class="mb-4">
         <label class="block text-sm font-bold text-gray-700 mb-1">이메일 수신 주소 <span class="text-red-400">*</span> <span class="text-xs font-normal text-gray-400">Email for receipt</span></label>
         <input id="liabEmail" type="email" placeholder="이메일 주소"
           class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
@@ -151,18 +226,11 @@
         <p class="text-xs text-gray-400 mt-1">작성된 폼이 이 이메일로 발송됩니다</p>
       </div>
 
-      <div class="mb-4">
-        <label class="block text-sm font-bold text-gray-700 mb-1">서명 (이름 입력) <span class="text-red-400">*</span> <span class="text-xs font-normal text-gray-400">Signature</span></label>
-        <input id="liabSignature" type="text" placeholder="이름을 입력하면 서명으로 인정됩니다"
-          class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
-          autocomplete="off"/>
-      </div>
-
-      <label class="flex items-start gap-3 cursor-pointer mb-5">
+      <label class="flex items-start gap-3 cursor-pointer mb-5 bg-indigo-50 p-3 rounded-xl">
         <input id="liabAgree" type="checkbox" class="mt-1 w-5 h-5 rounded accent-indigo-500 flex-shrink-0"/>
-        <span class="text-sm text-gray-700 leading-relaxed">
-          <strong>위 내용을 읽고 이해하였으며 동의합니다.</strong><br/>
-          <span class="text-xs text-gray-400">I have read and agree to the above Waiver of Liability, Assumption of Risk, and Indemnity Agreement. (California E-SIGN Act compliant)</span>
+        <span class="text-sm text-gray-800 leading-relaxed">
+          <strong>위 내용 전부를 읽고 이해하였으며 동의합니다.</strong><br/>
+          <span class="text-xs text-gray-500">I have read and agree to the above Waiver of Liability, Assumption of Risk, and Indemnity Agreement. (California E-SIGN Act compliant)</span>
         </span>
       </label>
     </div>
@@ -196,7 +264,6 @@ function setMode(m){
     setTimeout(function(){ document.getElementById('nameInput').focus(); }, 100);
   }
   document.getElementById('results').innerHTML = '';
-  // Clear phone digits
   ['d1','d2','d3','d4'].forEach(function(id){ var el=document.getElementById(id); if(el){ el.value=''; el.classList.remove('filled'); } });
 }
 
@@ -208,7 +275,6 @@ function handleDigit(input, idx){
     if(idx < 3){
       document.getElementById('d'+(idx+2)).focus();
     } else {
-      // All 4 entered, search
       var phone = ['d1','d2','d3','d4'].map(function(id){ return document.getElementById(id).value; }).join('');
       if(phone.length === 4) searchByPhone(phone);
     }
@@ -286,7 +352,6 @@ function renderResults(students){
       + '<p class="text-xs text-gray-500 mt-1">' + (s.department||'').split(' ')[0] + ' · ' + (s.grade||'-') + ' · DOB ' + (s.dob||'-') + '</p>'
       + '</div>' + statusBadge + '</div>'
       + btn + '</div>';
-    // store for later
     if(!window._sMap) window._sMap = {};
     window._sMap[s.id] = s;
   });
@@ -298,13 +363,16 @@ function startSign(id){
   var s = window._sMap[id];
   if(!s) return;
   _selectedStudent = s;
-  document.getElementById('liabStudentName').textContent = s.name + (s.nameEN ? ' ('+s.nameEN+')' : '');
-  document.getElementById('liabStudentInfo').textContent = (s.department||'-') + ' · ' + (s.grade||'-') + ' · DOB: ' + (s.dob||'-');
+  document.getElementById('liabStudentName').textContent = (s.name || '') + (s.nameEN ? ' ('+s.nameEN+')' : '');
+  document.getElementById('liabStudentInfo').textContent = (s.department||'-') + ' · ' + (s.grade||'-');
+  document.getElementById('liabStudentDOB').querySelector('span').textContent = s.dob || '-';
   var email = s.fatherEmail || s.motherEmail || '';
   document.getElementById('liabEmail').value = email;
   document.getElementById('liabStudentEmail').textContent = email ? ('기본 수신: ' + email) : '';
   document.getElementById('liabGuardian').value = s.fatherName || s.motherName || s.guardian || '';
   document.getElementById('liabSignature').value = '';
+  document.getElementById('liabGuardian2').value = s.motherName && s.fatherName ? s.motherName : '';
+  document.getElementById('liabSignature2').value = '';
   document.getElementById('liabAgree').checked = false;
   document.getElementById('liabTimestamp').textContent = new Date().toLocaleString('ko-KR', {timeZone:'America/Los_Angeles'});
   var m = document.getElementById('liabSubmitBtn');
@@ -328,14 +396,21 @@ async function submitLiability(){
   var guardian = document.getElementById('liabGuardian').value.trim();
   var email = document.getElementById('liabEmail').value.trim();
   var signature = document.getElementById('liabSignature').value.trim();
+  var guardian2 = document.getElementById('liabGuardian2').value.trim();
+  var signature2 = document.getElementById('liabSignature2').value.trim();
   var agreed = document.getElementById('liabAgree').checked;
 
-  // Validation
   var warn = function(id){ var el=document.getElementById(id); el.classList.add('border-red-400'); el.focus(); setTimeout(function(){el.classList.remove('border-red-400');}, 2000); };
   if(!guardian){ warn('liabGuardian'); return; }
   if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ warn('liabEmail'); alert('올바른 이메일 주소를 입력해주세요'); return; }
   if(!signature){ warn('liabSignature'); return; }
   if(!agreed){ alert('위 내용에 동의해주세요 (체크박스)'); return; }
+
+  // If guardian2 name is filled, signature2 also required (and vice versa)
+  if((guardian2 && !signature2) || (!guardian2 && signature2)){
+    alert('보호자 2 정보를 완성해주세요 (이름과 서명 모두 입력 또는 둘 다 비우기)');
+    return;
+  }
 
   var btn = document.getElementById('liabSubmitBtn');
   btn.disabled = true;
@@ -343,7 +418,9 @@ async function submitLiability(){
 
   var now = new Date();
   var timestamp = now.toISOString();
-  var signedText = '서명: ' + signature + ' (보호자: ' + guardian + ') 시간: ' + timestamp;
+  var signedText = '서명1: ' + signature + ' (보호자1: ' + guardian + ')' +
+    (guardian2 ? ' · 서명2: ' + signature2 + ' (보호자2: ' + guardian2 + ')' : '') +
+    ' 시간: ' + timestamp;
 
   try{
     var r = await fetch('/api/update-student', {
@@ -355,8 +432,11 @@ async function submitLiability(){
         studentName: _selectedStudent.name,
         studentDept: _selectedStudent.department,
         studentAmcId: _selectedStudent.studentId,
+        studentDOB: _selectedStudent.dob || '',
         guardianName: guardian,
         signature: signature,
+        guardian2Name: guardian2 || null,
+        signature2: signature2 || null,
         email: email,
         timestamp: timestamp,
         signedText: signedText,
@@ -367,7 +447,6 @@ async function submitLiability(){
     var d = await r.json();
     if(!r.ok) throw new Error(d.error || '제출 실패');
 
-    // Success
     document.getElementById('introSection').classList.add('hidden');
     document.getElementById('successSection').classList.remove('hidden');
     document.getElementById('successStudentName').textContent = _selectedStudent.name + ' 학생';
@@ -396,7 +475,6 @@ function restart(){
   window.scrollTo(0, 0);
 }
 
-// Focus first digit on load
 window.addEventListener('DOMContentLoaded', function(){
   setTimeout(function(){ document.getElementById('d1').focus(); }, 200);
 });
