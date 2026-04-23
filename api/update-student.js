@@ -84,7 +84,8 @@ module.exports = async (req, res) => {
       name, department, grade, allergy, notes, liabilityForm, baptized, photo, status, lastAttended,
       guardianName, signature, timestamp,
       guardian2Name, signature2,
-      email, studentName, studentDept, studentAmcId, studentDOB, userAgent, termsVersion
+      email, studentName, studentDept, studentAmcId, studentDOB, userAgent, termsVersion,
+      adminMode, adminName
     } = body;
 
     if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
@@ -94,15 +95,26 @@ module.exports = async (req, res) => {
       var noteLine = 'Signed by ' + (guardianName||'') + ' on ' + ts + (signature ? ' | Sig: '+signature : '');
       if (guardian2Name && signature2) noteLine += ' | Parent2: ' + guardian2Name + ' Sig: ' + signature2;
       if (email) noteLine += ' | Email: ' + email;
+      if (body.adminMode && body.adminName) noteLine += ' | ADMIN-SUBMITTED by ' + body.adminName;
 
-      // 1. Update student record
-      await notion.pages.update({
-        page_id: pageId,
-        properties: {
-          'Liability Form': { select: { name: '제출 완료' } },
-          '특이사항 (Notes)': { rich_text: [{ text: { content: '[LIABILITY] ' + noteLine } }] }
-        }
-      });
+      // 1. Update student record (append to Notes, preserve history)
+      try {
+        const curPage = await notion.pages.retrieve({ page_id: pageId });
+        const curNotes = (curPage.properties['특이사항 (Notes)']?.rich_text || [])
+          .map(b => b.plain_text || (b.text && b.text.content) || '')
+          .join('');
+        const appendPrefix = curNotes ? curNotes + '\n' : '';
+        const newNotes = appendPrefix + '[LIABILITY ' + ts.slice(0,10) + '] ' + noteLine;
+        await notion.pages.update({
+          page_id: pageId,
+          properties: {
+            'Liability Form': { select: { name: '제출 완료' } },
+            '특이사항 (Notes)': { rich_text: [{ text: { content: newNotes.slice(0, 1900) } }] }
+          }
+        });
+      } catch(upE) {
+        console.error('Student update failed (non-fatal):', upE.message);
+      }
 
       // 2. Send email via Resend
       let emailSent = false;
@@ -123,7 +135,7 @@ module.exports = async (req, res) => {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              from: 'Amicus Education <onboarding@resend.dev>',
+              from: 'Amicus \uad50\uc721\ubd80 <education@amicuschurch.com>',
               to: [email],
               bcc: [BCC_EMAIL],
               subject: subject,
@@ -145,7 +157,7 @@ module.exports = async (req, res) => {
       // 3. Log to Liability 제출 이력 DB
       try {
         const ipAddr = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '').toString().split(',')[0].trim();
-        const titleStr = (studentName || '학생') + ' · ' + ts.slice(0,10);
+        const titleStr = (body.adminMode && body.adminName ? '🔑 ADMIN · ' : '') + (studentName || '학생') + ' · ' + ts.slice(0,10);
         const combinedSig = signature + (signature2 ? ' / ' + signature2 : '');
         const combinedGuardian = guardianName + (guardian2Name ? ' / ' + guardian2Name : '');
         await notion.pages.create({
