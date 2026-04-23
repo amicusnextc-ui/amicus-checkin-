@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
     const body = req.body || {};
     const { pageId, action, name, department, grade, allergy, notes,
             liabilityForm, baptized, photo, status,
-            guardianName, signature, timestamp } = body;
+            guardianName, signature, timestamp, lastAttended } = body;
 
     if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
 
@@ -38,6 +38,7 @@ module.exports = async (req, res) => {
     if (notes !== undefined) props['특이사항 (Notes)'] = { rich_text: [{ text: { content: notes||'' } }] };
     if (liabilityForm !== undefined) props['Liability Form'] = { select: liabilityForm ? { name: liabilityForm } : null };
     if (status !== undefined) props['상태 (Status)'] = { select: status ? { name: status } : null };
+    if (lastAttended !== undefined) props['마지막 출석 (Last Attended)'] = { date: { start: lastAttended } };
 
     if (Object.keys(props).length > 0) {
       await notion.pages.update({ page_id: pageId, properties: props });
