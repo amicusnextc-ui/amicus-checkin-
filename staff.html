@@ -674,6 +674,38 @@ async function quickCheckin(btn){
     btn.disabled=false;btn.textContent=originalText;
   }
 }
+async function uncheckin(btn){
+  var sid=btn.getAttribute('data-sid');
+  var name=btn.getAttribute('data-name');
+  var dept=btn.getAttribute('data-dept');
+  if(!confirm(name+' 님의 체크인을 취소할까요?\n(출석 기록이 삭제됩니다)'))return;
+  btn.disabled=true;btn.textContent='...';
+  var directorPw='';
+  async function doCall(){
+    var body={name:name,department:dept,studentId:sid};
+    if(directorPw)body.directorPassword=directorPw;
+    var r=await fetch('/api/checkin-cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    return {res:r,data:await r.json()};
+  }
+  try{
+    var r=await doCall();
+    if(r.data.requiresDirectorAuth){
+      var pw=prompt('⚠️ 오늘은 일요일이 아닙니다.\n체크인 취소를 진행하려면 디렉터 비밀번호가 필요합니다:');
+      if(!pw){btn.disabled=false;btn.textContent='취소';return;}
+      directorPw=pw;
+      r=await doCall();
+      if(r.data.requiresDirectorAuth)throw new Error('디렉터 비밀번호가 틀렸습니다');
+    }
+    if(!r.res.ok)throw new Error(r.data.error||'취소 실패');
+    if(typeof showToast==='function')showToast('↺ '+name+' 체크인 취소됨 ('+(r.data.archivedCount||0)+'건)','success');
+    else alert('취소 완료 ('+(r.data.archivedCount||0)+'건)');
+    await loadRoster();
+    if(typeof loadAttendance==='function')loadAttendance();
+  }catch(e){
+    alert('오류: '+e.message);
+    btn.disabled=false;btn.textContent='취소';
+  }
+}
 function renderRoster(students){
   var tbody=document.getElementById("rosterTable");
   if(!students||!students.length){tbody.innerHTML="<tr><td colspan='10' style='text-align:center;padding:40px;color:#9ca3af'>등록된 학생이 없습니다</td></tr>";return;}
@@ -715,7 +747,9 @@ function renderRoster(students){
     html+="<td style='text-align:center'>"+bdayBadge+"</td>";
     var alreadyAttended=s.lastAttended===serviceSunday;
     if(alreadyAttended){
-      html+="<td style='text-align:center'><span style='color:#10b981;font-weight:700;font-size:13px'>✅ 출석</span></td>";
+      var safeNameU=(s.name||'').replace(/'/g,'&#39;').replace(/\"/g,'&quot;');
+      var safeDeptU=(s.department||'').replace(/'/g,'&#39;');
+      html+="<td style='text-align:center;white-space:nowrap'><span style='color:#10b981;font-weight:700;font-size:13px'>✅ 출석</span> <button data-sid='"+s.id+"' data-name='"+safeNameU+"' data-dept='"+safeDeptU+"' onclick='uncheckin(this)' title='체크인 취소' style='font-size:11px;padding:2px 7px;border-radius:6px;background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;cursor:pointer;margin-left:4px'>취소</button></td>";
     }else{
       var safeName=(s.name||'').replace(/'/g,'&#39;').replace(/\"/g,'&quot;');
       var safeDept=(s.department||'').replace(/'/g,'&#39;');
