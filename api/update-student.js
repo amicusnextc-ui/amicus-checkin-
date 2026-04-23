@@ -15,43 +15,59 @@ function buildEmailHtml(opts){
   try { ts = new Date(opts.timestamp).toLocaleString('ko-KR', {timeZone:'America/Los_Angeles'}); }
   catch(e){ ts = opts.timestamp; }
   var name = escapeHtml(opts.studentName);
+  var dob = escapeHtml(opts.studentDOB || '');
   var dept = escapeHtml((opts.studentDept||'').split(' ')[0]);
   var guardian = escapeHtml(opts.guardian);
   var sig = escapeHtml(opts.signature);
+  var guardian2 = escapeHtml(opts.guardian2 || '');
+  var sig2 = escapeHtml(opts.signature2 || '');
   var ver = escapeHtml(opts.termsVersion || '2025-2027');
+
+  var parent2Row = guardian2 ?
+    '<tr><td style="padding:6px 0;color:#6b7280;">보호자 2</td><td style="padding:6px 0;font-weight:600;">'+guardian2+'</td></tr>' +
+    '<tr><td style="padding:6px 0;color:#6b7280;">서명 2</td><td style="padding:6px 0;font-family:Georgia,serif;font-style:italic;color:#4f46e5;">'+sig2+'</td></tr>'
+    : '';
+
   return [
     '<div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#111827;">',
     '  <div style="text-align:center;padding:16px 0;border-bottom:1px solid #e5e7eb;">',
-    '    <h1 style="margin:0;font-size:22px;color:#4f46e5;">📝 책임 동의서 제출 확인</h1>',
-    '    <p style="margin:4px 0 0;font-size:13px;color:#6b7280;">Amicus Presbyterian Church · 교육부</p>',
+    '    <h1 style="margin:0;font-size:20px;color:#111827;">WAIVER OF LIABILITY, ASSUMPTION OF RISK,</h1>',
+    '    <h1 style="margin:2px 0 0;font-size:20px;color:#111827;">AND INDEMNITY AGREEMENT</h1>',
+    '    <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">Amicus Presbyterian Church</p>',
+    '    <p style="margin:2px 0 0;font-size:12px;color:#9ca3af;">10960 Via Frontera, San Diego CA 92127 · 760.300.5659</p>',
     '  </div>',
-    '  <p style="margin:20px 0 12px;font-size:14px;line-height:1.6;">Amicus Presbyterian Church 책임 동의서(Liability Waiver) 제출을 확인해 드립니다.</p>',
-    '  <p style="margin:0 0 20px;font-size:13px;color:#6b7280;line-height:1.6;">This email serves as your digital receipt for the Liability Waiver submission.</p>',
+    '  <p style="margin:16px 0 6px;font-size:14px;line-height:1.6;">전자 서명된 Liability Waiver 사본입니다. This email serves as your digital receipt for the signed Liability Waiver.</p>',
+    '  <p style="margin:0 0 16px;font-size:12px;color:#6b7280;line-height:1.6;">Effective Dates: January 1, 2025 – December 31, 2027 · FOR USE ONLY IF THE PARTICIPANT IS A MINOR</p>',
     '  <div style="background:#f9fafb;border-radius:12px;padding:16px 20px;margin:16px 0;">',
+    '    <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#4f46e5;">서명 정보 · Signature Details</p>',
     '    <table style="width:100%;font-size:14px;border-collapse:collapse;">',
-    '      <tr><td style="padding:6px 0;color:#6b7280;width:120px;">학생</td><td style="padding:6px 0;font-weight:600;">'+name+'</td></tr>',
+    '      <tr><td style="padding:6px 0;color:#6b7280;width:120px;">학생 이름</td><td style="padding:6px 0;font-weight:600;">'+name+'</td></tr>',
+    '      <tr><td style="padding:6px 0;color:#6b7280;">생년월일 (DOB)</td><td style="padding:6px 0;">'+dob+'</td></tr>',
     '      <tr><td style="padding:6px 0;color:#6b7280;">부서</td><td style="padding:6px 0;">'+dept+'</td></tr>',
-    '      <tr><td style="padding:6px 0;color:#6b7280;">보호자 이름</td><td style="padding:6px 0;">'+guardian+'</td></tr>',
-    '      <tr><td style="padding:6px 0;color:#6b7280;">전자 서명</td><td style="padding:6px 0;font-family:Georgia,serif;font-style:italic;color:#4f46e5;">'+sig+'</td></tr>',
+    '      <tr><td style="padding:6px 0;color:#6b7280;">보호자 1</td><td style="padding:6px 0;font-weight:600;">'+guardian+'</td></tr>',
+    '      <tr><td style="padding:6px 0;color:#6b7280;">서명 1</td><td style="padding:6px 0;font-family:Georgia,serif;font-style:italic;color:#4f46e5;">'+sig+'</td></tr>',
+    parent2Row,
     '      <tr><td style="padding:6px 0;color:#6b7280;">제출 일시</td><td style="padding:6px 0;">'+escapeHtml(ts)+'</td></tr>',
     '      <tr><td style="padding:6px 0;color:#6b7280;">약관 버전</td><td style="padding:6px 0;">'+ver+'</td></tr>',
     '    </table>',
     '  </div>',
-    '  <details style="margin:20px 0;padding:12px 16px;background:#f3f4f6;border-radius:12px;font-size:12px;line-height:1.6;color:#4b5563;">',
-    '    <summary style="cursor:pointer;font-weight:600;color:#111827;">📄 약관 전문 보기 (Full Waiver Text)</summary>',
-    '    <div style="margin-top:10px;">',
-    '      <p><strong>WAIVER OF LIABILITY, ASSUMPTION OF RISK, AND INDEMNITY AGREEMENT</strong></p>',
-    '      <p><strong>Effective Dates:</strong> January 1, 2025 – December 31, 2027</p>',
-    '      <p><strong>Release of Liability:</strong> I expressly assume all risks of the child when participating in the activities. I further release Amicus and its ministers, leaders, employees, volunteers, and agents from any claim that my child may have as a result of injury or illness incurred during participation.</p>',
-    '      <p><strong>Photography & Media:</strong> I authorize Amicus to include my child in pictures or on audio/video for promotional purposes, worship services, and church communications.</p>',
-    '      <p><strong>Emergency Medical:</strong> I give permission for agents of Amicus to seek and secure any needed medical attention for the child named above, including hospitalization.</p>',
-    '      <p><strong>Indemnification:</strong> I agree to indemnify and hold harmless Amicus for any and all claims arising from my child’s involvement in activities.</p>',
+    '  <details style="margin:20px 0;padding:14px 18px;background:#f3f4f6;border-radius:12px;font-size:12px;line-height:1.65;color:#374151;">',
+    '    <summary style="cursor:pointer;font-weight:700;color:#111827;font-size:13px;">📄 전체 약관 보기 (Full Waiver Text)</summary>',
+    '    <div style="margin-top:12px;">',
+    '      <p style="margin:0 0 10px;"><strong>Functions and Activities:</strong> Prior to my own/child\'s participation in the programs and recreational and other activities of Amicus Presbyterian Church (&ldquo;Amicus&rdquo;), I acknowledge that there are certain risks associated with the activities, including, by way of example, physical injury due to activity-related accidents, physical injury due to transportation-related accidents, illness, even death, or property loss arising from, but not limited to, participation in the activity. In addition, I acknowledge that there may be other risks inherent in these activities of which I may not be presently aware.</p>',
+    '      <p style="margin:0 0 10px;"><strong>Release of Liability:</strong> By signing this Permission/Waiver Form, I expressly warrant that the child named above is capable of withstanding both the physical and mental demands of the activities discussed above. I also expressly assume all risks of the child when participating in the activities, whether such risks are known or unknown to me at this time. I further release of Amicus and its ministers, leaders, employees, volunteers, and agents from any claim that my child may have or that I may have against them as a result of injury or illness incurred during the course of participation in the activities. This release of liability shall include (without limitation) any claims of negligence or breach of warranty. This release of liability is also intended to cover all claims that members of the child\'s or my family or estate, heirs, representatives, or assigns may have against of Amicus or its ministers, leaders, employees, volunteers, or agents. I further agree to indemnify and hold harmless of Amicus and its ministers, leaders, employees, volunteers, or agents from any and all claims arising from my participation in its activities and programs, or as a result of injury or illness of my child during such activities.</p>',
+    '      <p style="margin:0 0 10px;"><strong>Special Events and Field Trips:</strong> I understand that the child named above will be participating in various activities at Amicus and in the regional area. I understand that during this period my child/ward may take part in activities such as: Religious Studies, discussion groups, music, worship services, group songs, games of skill and experience, drama, walking to outside events at other locales and establishments, and other activities consistent with the purposes of the church\'s student ministry.</p>',
+    '      <p style="margin:0 0 10px;"><strong>Photography, Audio, Video, and Social Media:</strong> I authorize of Amicus to include myself/child in pictures or on audio or video for promotional purposes of events he/she is participating in. I also authorize of Amicus to post pictures or recordings of my children on the conference presentations and worship services, educational presentations, or church website and related ministries. I hereby release any and all claims any person or organization utilizing this material for educational and ministry purposes.</p>',
+    '      <p style="margin:0 0 10px;"><strong>First Aid and Emergency Medical Treatment:</strong> I recognize that there may be occasions where the child named above may be in need of first aid or emergency medical treatment as a result of an accident, illness, or other health condition or injury. I do hereby give permission for agents of Amicus to seek and secure any needed medical attention or treatment for the child name above including hospitalization, if in the agent\'s opinion such need arises. In doing so I agree to pay all fees and costs arising from this action to obtain medical treatment. <strong>I give permission for attending physician(s) and other medical personnel to administer any needed medical treatment, including surgery and again, I agree to pay for the medical treatment.</strong></p>',
+    '      <p style="margin:0 0 10px;"><strong>Indemnification and hold harmless:</strong> I also agree to indemnify and hold harmless Amicus for any and all claims, actions, suits, procedure costs, expenses, damages, and liabilities including attorneys\' fees, brought as a result of my involvement in the Activity, and to reimburse them for any such cost incurred.</p>',
+    '      <p style="margin:0 0 10px;"><strong>Severability:</strong> The undersigned further expressively agrees that this Waiver of Liability, Assumption of Risk, and Indemnity Agreement is intended to be as broad and inclusive as permitted by the law of the state of California, and if any portion is later held invalid, it is heretofore agreed that the balance shall continue to be in full force and legal effect.</p>',
+    '      <p style="margin:0;"><strong>Acknowledgment of understanding:</strong> I have read this Waiver of Liability, Assumption of Risk, and Indemnity Agreement, and fully understand its terms, and understand that I am giving up substantial rights, including my right to sue. I acknowledge that I am signing the agreement freely and voluntarily and intend my signature to be complete in unconditional release of all liability to the greatest extent allowed by law.</p>',
     '    </div>',
     '  </details>',
-    '  <p style="margin:24px 0 0;font-size:12px;color:#9ca3af;text-align:center;">This is a legally binding electronic signature under the California E-SIGN Act. Please retain this email for your records.</p>',
-    '  <p style="margin:8px 0 0;font-size:12px;color:#9ca3af;text-align:center;">감사합니다. · Thank you.<br/>— Amicus Education</p>',
+    '  <p style="margin:24px 0 0;font-size:11px;color:#9ca3af;text-align:center;line-height:1.6;">This is a legally binding electronic signature under the California E-SIGN Act.<br/>Please retain this email for your records. 이 이메일을 기록용으로 보관해 주세요.</p>',
+    '  <p style="margin:12px 0 0;font-size:12px;color:#6b7280;text-align:center;">감사합니다. · Thank you.<br/><strong>Amicus Presbyterian Church · 교육부</strong></p>',
     '</div>'
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 }
 
 module.exports = async (req, res) => {
@@ -67,15 +83,17 @@ module.exports = async (req, res) => {
       pageId, action,
       name, department, grade, allergy, notes, liabilityForm, baptized, photo, status, lastAttended,
       guardianName, signature, timestamp,
-      email, studentName, studentDept, studentAmcId, userAgent, termsVersion
+      guardian2Name, signature2,
+      email, studentName, studentDept, studentAmcId, studentDOB, userAgent, termsVersion
     } = body;
 
     if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
 
-    // ===== LIABILITY action =====
     if (action === 'liability') {
       const ts = timestamp || new Date().toISOString();
-      const noteLine = 'Signed by ' + (guardianName||'') + ' on ' + ts + (signature ? ' | Sig: '+signature : '') + (email ? ' | Email: '+email : '');
+      var noteLine = 'Signed by ' + (guardianName||'') + ' on ' + ts + (signature ? ' | Sig: '+signature : '');
+      if (guardian2Name && signature2) noteLine += ' | Parent2: ' + guardian2Name + ' Sig: ' + signature2;
+      if (email) noteLine += ' | Email: ' + email;
 
       // 1. Update student record
       await notion.pages.update({
@@ -91,8 +109,13 @@ module.exports = async (req, res) => {
       let emailStatus = '발송 안 함';
       if (process.env.RESEND_API_KEY && email) {
         try {
-          const html = buildEmailHtml({ studentName, studentDept, guardian: guardianName, signature, timestamp: ts, termsVersion });
-          const subject = '[Amicus] 책임 동의서 제출 확인 — ' + (studentName || '');
+          const html = buildEmailHtml({
+            studentName, studentDept, studentDOB,
+            guardian: guardianName, signature,
+            guardian2: guardian2Name, signature2,
+            timestamp: ts, termsVersion
+          });
+          const subject = '[Amicus] Liability Waiver 제출 확인 — ' + (studentName || '');
           const r = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
@@ -123,14 +146,16 @@ module.exports = async (req, res) => {
       try {
         const ipAddr = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '').toString().split(',')[0].trim();
         const titleStr = (studentName || '학생') + ' · ' + ts.slice(0,10);
+        const combinedSig = signature + (signature2 ? ' / ' + signature2 : '');
+        const combinedGuardian = guardianName + (guardian2Name ? ' / ' + guardian2Name : '');
         await notion.pages.create({
           parent: { database_id: LIABILITY_ARCHIVE_DB },
           properties: {
             '제출 제목': { title: [{ text: { content: titleStr } }] },
             '학생 이름': { rich_text: [{ text: { content: studentName || '' } }] },
             '학생 부서': studentDept ? { select: { name: studentDept } } : { select: null },
-            '보호자 이름': { rich_text: [{ text: { content: guardianName || '' } }] },
-            '서명 (텍스트)': { rich_text: [{ text: { content: signature || '' } }] },
+            '보호자 이름': { rich_text: [{ text: { content: combinedGuardian } }] },
+            '서명 (텍스트)': { rich_text: [{ text: { content: combinedSig } }] },
             '제출 일시': { date: { start: ts } },
             '약관 버전': { select: { name: termsVersion || '2025-2027' } },
             '수신 이메일': email ? { email: email } : { email: null },
@@ -148,7 +173,7 @@ module.exports = async (req, res) => {
       return res.json({ success: true, action: 'liability', emailSent, emailStatus });
     }
 
-    // ===== General update =====
+    // General update
     const props = {};
     if (name !== undefined) props['이름 (Name)'] = { title: [{ text: { content: name } }] };
     if (department !== undefined) props['부서 (Department)'] = { select: department ? { name: department } : null };
