@@ -27,8 +27,12 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { studentId, studentName, department, isVisitor, allergyAlert, staffName, guardianName, notes } = req.body || {};
-    if (!studentId && !studentName) return res.status(400).json({ error: 'Missing studentId or studentName' });
+    const { studentId, studentName, name, department, isVisitor, isNew, allergyAlert, hasAllergy, staffName, staff, guardianName, notes } = req.body || {};
+    const displayName = studentName || name || '';
+    const isVisitorFlag = isVisitor === true || isNew === true;
+    const allergyFlag = allergyAlert === true || hasAllergy === true;
+    const staffField = staffName || staff || '';
+    if (!studentId && !displayName) return res.status(400).json({ error: 'Missing studentId or name' });
 
     // Get service Sunday
     const serviceSunday = getServiceSunday();
@@ -60,7 +64,7 @@ module.exports = async (req, res) => {
         filter: {
           and: [
             { property: '\uc8fc\uc77c \ub0a0\uc9dc (Date)', date: { equals: serviceSunday } },
-            { property: '\uc774\ub984 (Name)', rich_text: { equals: studentName || studentId } }
+            { property: '\uc774\ub984 (Name)', rich_text: { equals: displayName || studentId } }
           ]
         }
       })
@@ -88,14 +92,14 @@ module.exports = async (req, res) => {
 
     // Create new attendance record for this service week
     const props = {
-      '\uc774\ub984 (Name)': { title: [{ text: { content: studentName || studentId } }] },
+      '\uc774\ub984 (Name)': { title: [{ text: { content: displayName || studentId } }] },
       '\uc8fc\uc77c \ub0a0\uc9dc (Date)': { date: { start: serviceSunday } },
       '\uccb4\ud06c\uc778 \uc2dc\uac04 (Check-in)': { rich_text: [{ text: { content: checkInTime } }] },
       '\ubd80\uc11c (Department)': { select: department ? { name: department } : null },
     };
-    if (isVisitor) props['\ubc29\ubb38\uc790 (Visitor)'] = { checkbox: true };
-    if (allergyAlert) props['\uc54c\ub7ec\uc9c0 \uc54c\ub9bc (Allergy Alert)'] = { checkbox: true };
-    if (staffName) props['\uac04\uc0ac (Staff)'] = { rich_text: [{ text: { content: staffName } }] };
+    if (isVisitorFlag) props['\ubc29\ubb38\uc790 (Visitor)'] = { checkbox: true };
+    if (allergyFlag) props['\uc54c\ub7ec\uc9c0 \uc54c\ub9bc (Allergy Alert)'] = { checkbox: true };
+    if (staffField) props['\uac04\uc0ac (Staff)'] = { rich_text: [{ text: { content: staffField } }] };
     if (notes) props['\ud2b9\uc774\uc0ac\ud56d (Notes)'] = { rich_text: [{ text: { content: notes } }] };
 
     const createRes = await fetch('https://api.notion.com/v1/pages', {
