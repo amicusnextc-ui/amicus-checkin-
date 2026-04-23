@@ -26,6 +26,56 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // === CANCEL branch: uncheckin (soft-delete attendance + revert student.lastAttended) ===
+  if (req.body && req.body.action === 'cancel') {
+    try {
+      const { studentId, name, department } = req.body;
+      if (!name && !studentId) return res.status(400).json({ error: 'Missing name or studentId' });
+      const serviceSundayC = getServiceSunday();
+      if (!serviceSundayC) return res.status(403).json({ error: 'Saturday is reset day', resetDay: true });
+      const todayLAc = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+      const isSundayTodayC = todayLAc === serviceSundayC;
+      if (!isSundayTodayC && req.body.directorPassword !== '3167') {
+        return res.status(403).json({ error: '디렉터 인증이 필요합니다', requiresDirectorAuth: true });
+      }
+      const hdrs = { 'Authorization': 'Bearer ' + process.env.NOTION_TOKEN, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' };
+      // Find the attendance record(s) for this student this week
+      const qRes = await fetch('https://api.notion.com/v1/databases/' + ATTENDANCE_DB + '/query', {
+        method: 'POST', headers: hdrs,
+        body: JSON.stringify({ filter: { and: [
+          { property: '\uc8fc\uc77c \ub0a0\uc9dc (Date)', date: { equals: serviceSundayC } },
+          { property: '\uc774\ub984 (Name)', title: { equals: name } }
+        ]}, page_size: 5 })
+      });
+      const qData = await qRes.json();
+      const recs = qData.results || [];
+      if (recs.length === 0) return res.json({ success: false, message: '이번 주 출석 기록이 없습니다' });
+      const archived = [];
+      for (const rec of recs) {
+        const aRes = await fetch('https://api.notion.com/v1/pages/' + rec.id, { method: 'PATCH', headers: hdrs, body: JSON.stringify({ archived: true }) });
+        if (aRes.ok) archived.push(rec.id);
+      }
+      // Recompute student's lastAttended from remaining records
+      let newLast = null;
+      if (studentId) {
+        const hRes = await fetch('https://api.notion.com/v1/databases/' + ATTENDANCE_DB + '/query', {
+          method: 'POST', headers: hdrs,
+          body: JSON.stringify({ filter: { property: '\uc774\ub984 (Name)', title: { equals: name } }, sorts: [{ property: '\uc8fc\uc77c \ub0a0\uc9dc (Date)', direction: 'descending' }], page_size: 1 })
+        });
+        const hData = await hRes.json();
+        const latest = (hData.results || [])[0];
+        if (latest) newLast = latest.properties?.['\uc8fc\uc77c \ub0a0\uc9dc (Date)']?.date?.start || null;
+        try {
+          await fetch('https://api.notion.com/v1/pages/' + studentId, {
+            method: 'PATCH', headers: hdrs,
+            body: JSON.stringify({ properties: newLast ? { ['\uB9C8\uC9C0\uB9C9 \uCD9C\uC11D (Last Attended)']: { date: { start: newLast } } } : { ['\uB9C8\uC9C0\uB9C9 \uCD9C\uC11D (Last Attended)']: { date: null } } })
+          });
+        } catch(eu) { console.warn('lastAttended revert failed:', eu.message); }
+      }
+      return res.json({ success: true, archivedCount: archived.length, archivedIds: archived, newLastAttended: newLast, serviceSunday: serviceSundayC });
+    } catch(ec) { console.error('cancel error:', ec.message); return res.status(500).json({ error: ec.message }); }
+  }
+
   try {
     const { studentId, studentName, name, department, isVisitor, isNew, allergyAlert, hasAllergy, staffName, staff, guardianName, notes } = req.body || {};
     const displayName = studentName || name || '';
