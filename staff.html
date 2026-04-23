@@ -546,7 +546,7 @@ async function loadAttendance(){
     document.getElementById("statOut").textContent=records.filter(function(r){return r.checkOut;}).length;
     document.getElementById("statNew").textContent=records.filter(function(r){return r.isNew;}).length;
     document.getElementById("lastUpdated").textContent=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})+" 업데이트";/*noop*/
-    if(!records.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>오늘 체크인 기록이 없습니다</td></tr>";return;}
+    if(!records.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>오늘 체크인 기록이 없습니다</td></tr>";}
     var html="";
     for(var i=0;i<records.length;i++){
       var r=records[i];
@@ -564,7 +564,7 @@ async function loadAttendance(){
       html+="<td style='text-align:center;color:#4f46e5;font-weight:600'>"+(r.checkOut||"-")+"</td>";
       html+="<td style='text-align:center'>"+statusBadge+"</td></tr>";
     }
-    tbody.innerHTML=html;
+    if(records.length>0)tbody.innerHTML=html;
     // Weekly summary (서비스 주일 기준 — 주중에도 지난 주일 현황 유지)
     try{
       var sumRes=await fetch("/api/weekly-summary");
