@@ -565,64 +565,50 @@ async function loadAttendance(){
       html+="<td style='text-align:center'>"+statusBadge+"</td></tr>";
     }
     tbody.innerHTML=html;
-    // Weekly summary
+    // Weekly summary (서비스 주일 기준 — 주중에도 지난 주일 현황 유지)
     try{
-      var today=new Date();
-      var dayOfWeek=today.getDay();
-      var sunday=new Date(today);
-      sunday.setDate(today.getDate()-(dayOfWeek===0?0:dayOfWeek));
-      var mm=String(sunday.getMonth()+1).padStart(2,"0");
-      var dd=String(sunday.getDate()).padStart(2,"0");
-      var yy=String(sunday.getFullYear()).slice(2);
+      var sumRes=await fetch("/api/weekly-summary");
+      var sumData=await sumRes.json();
       var titleEl=document.getElementById("weeklySummaryTitle");
-      if(titleEl)titleEl.textContent="이번 주 출석 요약 — "+mm+"/"+dd+"/"+yy+" (주일)";
-      var depts=["유아부 (Infant)","유치부 (Preschool)","유년부 (Elementary Jr)","초등부 (Elementary)","중고등부 (Youth)"];
-      // Count from attendance records
-      var deptStats={};
-      depts.forEach(function(d){deptStats[d]={checkin:0,checkout:0,visitor:0,total:0};});
-      records.forEach(function(r){
-        var dep=r.department||"";
-        if(!deptStats[dep])deptStats[dep]={checkin:0,checkout:0,visitor:0,total:0};
-        if(r.checkIn)deptStats[dep].checkin++;
-        if(r.checkOut)deptStats[dep].checkout++;
-        if(r.isNew)deptStats[dep].visitor++;
-      });
-      // Fetch roster totals
-      var rosterUrl="/api/roster"+(dept?"?dept="+encodeURIComponent(dept):"");
-      var rRes=await fetch(rosterUrl),rData=await rRes.json(),allStu=rData.students||[];
-      allStu.forEach(function(st){var dep=st.department||"";if(!deptStats[dep])deptStats[dep]={checkin:0,checkout:0,visitor:0,total:0};deptStats[dep].total++;});
-      // Build summary HTML
-      var activeDepts=Object.keys(deptStats).filter(function(d){return deptStats[d].checkin>0||deptStats[d].total>0;});
-      var sumHtml="";
-      var grandCheckin=0,grandTotal=0,grandVisitor=0,grandAbsent=0;
-      sumHtml+="<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:13px'>";
+      if(titleEl)titleEl.textContent="📊 이번 주 현황 — "+(sumData.sundayStr||"")+" (주일)";
+      var deptsArr=sumData.depts||[];
+      var myShort=(window._dept||"").match(/중고등부|초등부|유년부|유치부|유아부/);
+      myShort=myShort?myShort[0]:"";
+      if(myShort)deptsArr=deptsArr.filter(function(d){return (d.dept||"").indexOf(myShort)>=0;});
+      var sumHtml="<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:13px'>";
       sumHtml+="<thead><tr style='background:#f8fafc'>";
       sumHtml+="<th style='padding:8px 12px;text-align:left;color:#6b7280;font-size:11px;font-weight:700;text-transform:uppercase'>부서</th>";
       sumHtml+="<th style='padding:8px 12px;text-align:center;color:#059669;font-size:11px;font-weight:700'>출석</th>";
       sumHtml+="<th style='padding:8px 12px;text-align:center;color:#dc2626;font-size:11px;font-weight:700'>결석</th>";
       sumHtml+="<th style='padding:8px 12px;text-align:center;color:#7c3aed;font-size:11px;font-weight:700'>방문자</th>";
       sumHtml+="<th style='padding:8px 12px;text-align:center;color:#6b7280;font-size:11px;font-weight:700'>총 등록</th>";
+      sumHtml+="<th style='padding:8px 12px;text-align:center;color:#6b7280;font-size:11px;font-weight:700'>출석률</th>";
       sumHtml+="</tr></thead><tbody>";
-      activeDepts.forEach(function(d){
-        var st=deptStats[d];
-        var absent=st.total>0?Math.max(0,st.total-st.checkin):0;
-        grandCheckin+=st.checkin;grandTotal+=st.total;grandVisitor+=st.visitor;grandAbsent+=absent;
-        var shortDept=d.split(" ")[0];
+      var grandCheckin=0,grandTotal=0,grandVisitor=0,grandAbsent=0;
+      deptsArr.forEach(function(d){
+        grandCheckin+=d.attended||0;grandTotal+=d.total||0;grandVisitor+=d.visitors||0;grandAbsent+=d.absent||0;
+        var rate=d.total>0?Math.round((d.attended||0)/d.total*100):0;
         sumHtml+="<tr style='border-top:1px solid #f3f4f6'>";
-        sumHtml+="<td style='padding:8px 12px;font-weight:600'>"+(shortDept||d)+"</td>";
-        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:600'>"+st.checkin+"</td>";
-        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#dc2626'>"+(absent||"-")+"</td>";
-        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#7c3aed'>"+(st.visitor||"-")+"</td>";
-        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#6b7280'>"+st.total+"</td>";
+        sumHtml+="<td style='padding:8px 12px;font-weight:600'>"+(d.short||"")+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:600'>"+(d.attended||0)+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#dc2626'>"+((d.absent||0)||"-")+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#7c3aed'>"+((d.visitors||0)||"-")+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#6b7280'>"+(d.total||0)+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:"+(rate>=80?"#059669":rate>=50?"#d97706":"#dc2626")+";font-weight:600'>"+rate+"%</td>";
         sumHtml+="</tr>";
       });
-      sumHtml+="<tr style='border-top:2px solid #e5e7eb;background:#f8fafc'>";
-      sumHtml+="<td style='padding:8px 12px;font-weight:700'>전체</td>";
-      sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:700'>"+grandCheckin+"</td>";
-      sumHtml+="<td style='padding:8px 12px;text-align:center;color:#dc2626;font-weight:700'>"+(grandAbsent||"-")+"</td>";
-      sumHtml+="<td style='padding:8px 12px;text-align:center;color:#7c3aed;font-weight:700'>"+(grandVisitor||"-")+"</td>";
-      sumHtml+="<td style='padding:8px 12px;text-align:center;color:#6b7280;font-weight:700'>"+grandTotal+"</td>";
-      sumHtml+="</tr></tbody></table></div>";
+      if(deptsArr.length>1){
+        var grandRate=grandTotal>0?Math.round(grandCheckin/grandTotal*100):0;
+        sumHtml+="<tr style='border-top:2px solid #e5e7eb;background:#f8fafc'>";
+        sumHtml+="<td style='padding:8px 12px;font-weight:700'>전체</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:700'>"+grandCheckin+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#dc2626;font-weight:700'>"+(grandAbsent||"-")+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#7c3aed;font-weight:700'>"+(grandVisitor||"-")+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#6b7280;font-weight:700'>"+grandTotal+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:"+(grandRate>=80?"#059669":grandRate>=50?"#d97706":"#dc2626")+";font-weight:700'>"+grandRate+"%</td>";
+        sumHtml+="</tr>";
+      }
+      sumHtml+="</tbody></table></div>";
       var sumBody=document.getElementById("weeklySummaryBody");
       var sumCard=document.getElementById("weeklySummary");
       if(sumBody)sumBody.innerHTML=sumHtml;
