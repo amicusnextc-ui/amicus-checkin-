@@ -109,13 +109,19 @@ module.exports = async (req, res) => {
     });
     const newRecord = await createRes.json();
 
-    // Update student last attended (fire and forget)
+    // Update student last attended — direct Notion API call (avoid Vercel self-fetch flakiness)
     if (studentId) {
-      fetch(process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL + '/api/update-student' : 'http://localhost:3000/api/update-student', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pageId: studentId, lastAttended: serviceSunday })
-      }).catch(()=>{});
+      try {
+        await fetch('https://api.notion.com/v1/pages/' + studentId, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': 'Bearer ' + process.env.NOTION_TOKEN,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ properties: { '\uB9C8\uC9C0\uB9C9 \uCD9C\uC11D (Last Attended)': { date: { start: serviceSunday } } } })
+        });
+      } catch(e) { console.warn('lastAttended update failed:', e.message); }
     }
 
     return res.json({ success: true, action: 'created', recordId: newRecord.id, serviceSunday, checkInTime });
