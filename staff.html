@@ -119,6 +119,9 @@ tbody tr:hover { background:#fafafa; }
         </div>
         <div id="weeklySummaryBody" class="p-5"></div>
       </div>
+      <div id="pendingCheckoutBadge" class="hidden mb-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm font-semibold flex items-center justify-between">
+        <span>🟠 미체크아웃 <span id="pendingCheckoutCount">0</span>명 — 픽업 후 체크아웃 잊지 마세요</span>
+      </div>
       <div class="card overflow-hidden">
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 class="font-bold text-gray-900">오늘 출석</h2>
@@ -548,6 +551,9 @@ async function loadAttendance(){
     document.getElementById("statTotal").textContent=records.length;
     document.getElementById("statIn").textContent=records.filter(function(r){return r.checkIn;}).length;
     document.getElementById("statOut").textContent=records.filter(function(r){return r.checkOut;}).length;
+    var _pendingCnt=records.filter(function(r){return r.checkIn && !r.checkOut;}).length;
+    var _pendBadge=document.getElementById("pendingCheckoutBadge");
+    if(_pendBadge){if(_pendingCnt>0){document.getElementById("pendingCheckoutCount").textContent=_pendingCnt;_pendBadge.classList.remove("hidden");}else{_pendBadge.classList.add("hidden");}}
     document.getElementById("statNew").textContent=records.filter(function(r){return r.isNew;}).length;
     document.getElementById("lastUpdated").textContent=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})+" 업데이트";/*noop*/
     if(!records.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>오늘 체크인 기록이 없습니다</td></tr>";}
