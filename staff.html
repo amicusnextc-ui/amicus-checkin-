@@ -1,4 +1,4 @@
-→<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8"/>
@@ -67,6 +67,7 @@ tbody tr:hover { background:#fafafa; }
           <option value="">이름을 선택하세요...</option>
           <option value="이강희">이강희 — 중고등부 부장</option>
           <option value="최재원">최재원 — 중고등부 위원장</option>
+          <option value="박명철">⭐ 박명철 — 교육부 디렉터</option>
         </select>
         </div>
         <div>
@@ -489,7 +490,7 @@ function doLogout(){
   document.getElementById("loginError").classList.add("hidden");
   window._dept=null;window._user=null;window._staffName=null;
 }
-function doLeaderLogin(){ var sel=document.getElementById("leaderNameInput"),name=sel.value; var pw=document.getElementById("leaderPwInput").value; if(!name){showLeaderLoginError("이름을 선택해주세요");return;} if(pw!=="777"){showLeaderLoginError("비밀번호가 틀렸습니다");return;} window._leaderName=name; document.getElementById("loginScreen").classList.add("hidden"); document.getElementById("leaderDashboard").classList.remove("hidden"); var selText=(sel.options[sel.selectedIndex]||{}).text||""; var role=selText.indexOf("위원장")>=0?"위원장":"부장"; document.getElementById("leaderDashName").textContent=name+" "+role+"님";
+function doLeaderLogin(){ var sel=document.getElementById("leaderNameInput"),name=sel.value; var pw=document.getElementById("leaderPwInput").value; if(!name){showLeaderLoginError("이름을 선택해주세요");return;} var isDir=(name==="박명철"); var requiredPw=isDir?"3167":"777"; if(pw!==requiredPw){showLeaderLoginError(isDir?"디렉터 비밀번호가 틀렸습니다":"비밀번호가 틀렸습니다");return;} window._leaderName=name; window._isDirector=isDir; if(isDir){ window._dept=null; /* director = all-dept, no filter */ } document.getElementById("loginScreen").classList.add("hidden"); document.getElementById("leaderDashboard").classList.remove("hidden"); var selText=(sel.options[sel.selectedIndex]||{}).text||""; var role=isDir?"디렉터":(selText.indexOf("위원장")>=0?"위원장":"부장"); document.getElementById("leaderDashName").textContent=name+" "+role+"님";
   switchLeaderTab("summary");
 }
 function showLeaderLoginError(m){var e=document.getElementById("leaderLoginError");if(e){e.textContent=m;e.classList.remove("hidden");}}
@@ -500,6 +501,7 @@ function doLeaderLogout(){
   document.getElementById("leaderNameInput").value="";
   document.getElementById("leaderLoginError").classList.add("hidden");
   window._leaderName=null;
+  window._isDirector=false;
   switchRole("staff");
 }
 function switchTab(tab){
