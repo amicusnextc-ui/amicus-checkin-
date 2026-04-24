@@ -721,7 +721,9 @@ function renderRoster(students){
     var absenceBadge=isAbsent?"<span style='background:#fee2e2;color:#b91c1c' class='badge'>⚠️ 결석</span>":"-";
     var photoBadge=s.photo==="촬영 완료"?"<span style='background:#d1fae5;color:#065f46' class='badge'>✔</span>":"-";
     var baptBadge=s.baptized==="세례"?"<span style='background:#dbeafe;color:#1d4ed8' class='badge'>💧</span>":"-";
-    var liabBadge=s.liabilityForm==="제출 완료"?"<span style='background:#d1fae5;color:#065f46' class='badge'>✔</span>":s.liabilityForm==="미제출"?"<span style='background:#fee2e2;color:#b91c1c' class='badge'>X</span>":"-";
+    var needsLiab=s.liabilityForm!=="제출 완료";
+    var liabAdminBtn=needsLiab?" <a href='/liability.html?admin=1&studentId="+s.id+"&adminName="+encodeURIComponent(window._staffName||'간사')+"' target='_blank' title='Liability 대리 작성' style='font-size:11px;padding:1px 6px;border-radius:6px;background:#ede9fe;color:#6d28d9;border:1px solid #c4b5fd;text-decoration:none;margin-left:3px'>✏️</a>":"";
+    var liabBadge=s.liabilityForm==="제출 완료"?"<span style='background:#d1fae5;color:#065f46' class='badge'>✔</span>":s.liabilityForm==="미제출"?"<span style='background:#fee2e2;color:#b91c1c' class='badge'>X</span>"+liabAdminBtn:(s.liabilityForm==="재작성 필요"?"<span style='background:#fed7aa;color:#9a3412' class='badge'>📝</span>"+liabAdminBtn:(s.liabilityForm==="확인 필요"?"<span style='background:#fef3c7;color:#92400e' class='badge'>?</span>"+liabAdminBtn:"-"));
     var bdayBadge=isBday?"<span style='background:#fce7f3;color:#9d174d' class='badge'>🎂</span>":"-";
     html+="<tr>";
     html+="<td><div style='font-weight:600'>"+(s.name||"")+"</div>";
