@@ -25,6 +25,9 @@
 .waiver-sec .emph{background:#fef3c7;padding:2px 4px;font-weight:600;color:#78350f}
 .scroll-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(17,24,39,0.85);color:white;font-size:10px;padding:4px 10px;border-radius:999px;pointer-events:none;animation:fadeIn .3s ease;z-index:5}
 .avatar-initial{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+#consentLabel:has(input:disabled){opacity:.55;cursor:not-allowed!important;background:#f3f4f6!important;border:1px dashed #d1d5db}
+#consentLabel:has(input:disabled) input{cursor:not-allowed!important}
+#consentLabel:has(input:disabled)::after{content:"🔒 약관을 끝까지 읽어주세요";display:block;width:100%;margin-top:4px;font-size:11px;color:#dc2626;font-weight:600;text-align:center}
 </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
