@@ -686,11 +686,39 @@ function restart(){
 }
 
 window.addEventListener('DOMContentLoaded', function(){
-  // Show version badge
   document.getElementById('termsBadge').textContent = TERMS_VERSION;
-  // Focus first digit
+  // Auto-load student if studentId in URL
+  var params = new URLSearchParams(window.location.search);
+  var presetId = params.get('studentId');
+  if(presetId){
+    document.getElementById('introSection').classList.add('hidden');
+    // Show loading indicator
+    var loading = document.createElement('div');
+    loading.id = 'autoLoadingMsg';
+    loading.className = 'text-center py-20 text-gray-500 fade-in';
+    loading.innerHTML = '<div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-4"></div><p class="text-sm">학생 정보 불러오는 중...</p>';
+    document.querySelector('main').insertBefore(loading, document.querySelector('main').firstChild);
+    fetch('/api/roster',{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+      var students = d.students || [];
+      var s = students.find(function(x){return x.id === presetId;});
+      loading.remove();
+      if(s){
+        window._sMap = window._sMap || {};
+        window._sMap[presetId] = s;
+        startSign(presetId);
+      } else {
+        document.getElementById('introSection').classList.remove('hidden');
+        alert('학생 정보를 찾을 수 없습니다. 직접 검색해주세요.');
+      }
+    }).catch(function(e){
+      loading.remove();
+      document.getElementById('introSection').classList.remove('hidden');
+      alert('학생 정보 로드 실패: ' + e.message);
+    });
+    return;
+  }
+  // Normal flow: focus first digit + show draft banner
   setTimeout(function(){ var d=document.getElementById('d1'); if(d)d.focus(); }, 200);
-  // Show draft resume if exists
   showDraftBanner();
 });
 </script>
