@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
       if (!serviceSundayC) return res.status(403).json({ error: 'Saturday is reset day', resetDay: true });
       const todayLAc = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
       const isSundayTodayC = todayLAc === serviceSundayC;
-      if (!isSundayTodayC && req.body.directorPassword !== '3167') {
+      if (!isSundayTodayC && req.body.directorPassword !== process.env.DIRECTOR_PASSWORD) {
         return res.status(403).json({ error: '디렉터 인증이 필요합니다', requiresDirectorAuth: true });
       }
       const hdrs = { 'Authorization': 'Bearer ' + process.env.NOTION_TOKEN, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' };
@@ -94,7 +94,7 @@ module.exports = async (req, res) => {
     const todayLA = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
     const isSundayToday = todayLA === serviceSunday;
     if (!isSundayToday) {
-      if (req.body.directorPassword !== '3167') {
+      if (req.body.directorPassword !== process.env.DIRECTOR_PASSWORD) {
         return res.status(403).json({ error: '일요일 외 체크인은 디렉터 인증이 필요합니다', requiresDirectorAuth: true });
       }
     }
