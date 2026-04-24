@@ -185,16 +185,33 @@ module.exports = async (req, res) => {
       return res.json({ success: true, action: 'liability', emailSent, emailStatus });
     }
 
-    // General update
+    // General update (with full parent/contact fields support)
     const props = {};
-    if (name !== undefined) props['이름 (Name)'] = { title: [{ text: { content: name } }] };
-    if (department !== undefined) props['부서 (Department)'] = { select: department ? { name: department } : null };
-    if (grade !== undefined) props['학년 (Grade)'] = { rich_text: [{ text: { content: grade||'' } }] };
-    if (allergy !== undefined) props['알러지 (Allergy)'] = { rich_text: [{ text: { content: allergy||'' } }] };
-    if (notes !== undefined) props['특이사항 (Notes)'] = { rich_text: [{ text: { content: notes||'' } }] };
+    if (name !== undefined) props['\uc774\ub984 (Name)'] = { title: [{ text: { content: name || '' } }] };
+    if (body.nameEN !== undefined) props['\uc601\ubb38\uc774\ub984 (Name EN)'] = { rich_text: [{ text: { content: body.nameEN || '' } }] };
+    if (department !== undefined) props['\ubd80\uc11c (Department)'] = { select: department ? { name: department } : null };
+    if (grade !== undefined) props['\ud559\ub144 (Grade)'] = { rich_text: [{ text: { content: grade||'' } }] };
+    if (body.school !== undefined) props['\ud559\uad50 (School)'] = { rich_text: [{ text: { content: body.school||'' } }] };
+    if (body.dob !== undefined) props['date:\uc0dd\ub144\uc6d4\uc77c (DOB):start'] = body.dob || null; // might need adjustment — but Notion API requires date object
+    if (allergy !== undefined) props['\uc54c\ub7ec\uc9c0 (Allergy)'] = { rich_text: [{ text: { content: allergy||'' } }] };
+    if (notes !== undefined) props['\ud2b9\uc774\uc0ac\ud56d (Notes)'] = { rich_text: [{ text: { content: notes||'' } }] };
     if (liabilityForm !== undefined) props['Liability Form'] = { select: liabilityForm ? { name: liabilityForm } : null };
-    if (status !== undefined) props['상태 (Status)'] = { select: status ? { name: status } : null };
-    if (lastAttended !== undefined) props['마지막 출석 (Last Attended)'] = { date: { start: lastAttended } };
+    if (status !== undefined) props['\uc0c1\ud0dc (Status)'] = { select: status ? { name: status } : null };
+    if (lastAttended !== undefined) props['\ub9c8\uc9c0\ub9c9 \ucd9c\uc11d (Last Attended)'] = { date: { start: lastAttended } };
+    if (body.fatherName !== undefined) props['\uc544\ubc84\uc9c0 \uc774\ub984 (Father Name)'] = { rich_text: [{ text: { content: body.fatherName||'' } }] };
+    if (body.fatherPhone !== undefined) props['\uc544\ubc84\uc9c0 \uc5f0\ub77d\ucc98 (Father Phone)'] = { phone_number: body.fatherPhone || null };
+    if (body.fatherEmail !== undefined) props['\uc544\ubc84\uc9c0 \uc774\uba54\uc77c (Father Email)'] = { email: body.fatherEmail || null };
+    if (body.motherName !== undefined) props['\uc5b4\uba38\ub2c8 \uc774\ub984 (Mother Name)'] = { rich_text: [{ text: { content: body.motherName||'' } }] };
+    if (body.motherPhone !== undefined) props['\uc5b4\uba38\ub2c8 \uc5f0\ub77d\ucc98 (Mother Phone)'] = { phone_number: body.motherPhone || null };
+    if (body.motherEmail !== undefined) props['\uc5b4\uba38\ub2c8 \uc774\uba54\uc77c (Mother Email)'] = { email: body.motherEmail || null };
+    if (body.address !== undefined) props['\uc9d1\uc8fc\uc18c (Address)'] = { rich_text: [{ text: { content: body.address||'' } }] };
+    if (body.photo !== undefined) props['\uc0ac\uc9c4 \ucd2c\uc601 (Photo)'] = { select: body.photo ? { name: body.photo } : null };
+    if (body.baptized !== undefined) props['\uc138\ub840 \uc5ec\ubd80 (Baptized)'] = { select: body.baptized ? { name: body.baptized } : null };
+    // DOB needs special handling (date object not flat string)
+    if (body.dob !== undefined) {
+      props['\uc0dd\ub144\uc6d4\uc77c (DOB)'] = body.dob ? { date: { start: body.dob } } : { date: null };
+      delete props['date:\uc0dd\ub144\uc6d4\uc77c (DOB):start'];
+    }
 
     if (Object.keys(props).length > 0) {
       await notion.pages.update({ page_id: pageId, properties: props });
