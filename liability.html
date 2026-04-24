@@ -580,6 +580,22 @@ function closeLiabilityModal(){
   var modal = document.getElementById('liabilityModal');
   modal.classList.add('hidden');
   modal.classList.remove('flex');
+  // If auto-loaded from external link (?studentId=) → redirect to home with confirmation
+  var params = new URLSearchParams(window.location.search);
+  if(params.get('studentId') && !document.getElementById('successSection').classList.contains('hidden') === false){
+    // Only redirect if we haven't submitted yet
+    if(!confirm('서명을 완료하지 않고 나가시겠어요?')){
+      // User cancelled → reopen modal
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      return;
+    }
+    window.location.href = '/';
+    return;
+  }
+  // Regular mode: show intro back to allow new search
+  var intro = document.getElementById('introSection');
+  if(intro) intro.classList.remove('hidden');
 }
 
 // ===== SUBMIT =====
