@@ -457,7 +457,7 @@ function doLogin(){
   var pw=document.getElementById("pwInput").value;
   if(!dept){showLoginError("이름을 선택해주세요");return;}
   if(pw!=="3"){showLoginError("비밀번호가 틀렸습니다");return;}
-  window._dept=dept;window._user=staffName;window._staffDept=dept;window._staffName=staffName;
+  window._dept=dept;window._user=staffName;window._staffDept=dept;window._staffName=staffName;sessionStorage.removeItem("absenteesPopupDismissed_"+staffName);
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
   // Check 2-week absentees on login — strict dept filter (popup only for depts with own absentees)
