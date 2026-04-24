@@ -1,18 +1,72 @@
+// Unified auth endpoint for staff / leader / director
+// - GET (legacy):  ?name=<staff_name>&password=<staff_pw>    → staff-role auth (backward compat)
+// - POST (new):    { role, name, password }                  → any role
+// Returns: { ok, role, name, dept, token } on success
+// token = process.env.API_SECRET (used by protected APIs as shared secret)
 module.exports = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  if (req.method !== "GET") return res.status(405).end();
-  const { name, password } = req.query;
-  if (!name || !password) return res.status(400).json({ error: "missing params" });
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
   const STAFF = {
-    "\uC774\uC9C0\uD61C": "\uC720\uC544\uBD80 (Infant)",
-    "\uAE40\uD5A5\uC219": "\uC720\uCE58\uBD80 (Preschool)",
-    "\uBC15\uC740\uD61C": "\uC720\uB144\uBD80 (Elementary Jr)",
-    "\uBC31\uC9C4\uC8FC": "\uCD08\uB4F1\uBD80 (Elementary)",
-    "\uBC15\uBA85\uCCA0": "\uC911\uACE0\uB4F1\uBD80 (Youth)",
+    '\uc774\uc9c0\ud61c': '\uc720\uc544\ubd80 (Infant)',
+    '\uae40\ud5a5\uc219': '\uc720\uce58\ubd80 (Preschool)',
+    '\ubc15\uc740\ud61c': '\uc720\ub144\ubd80 (Elementary Jr)',
+    '\ubc31\uc9c4\uc8fc': '\ucd08\ub4f1\ubd80 (Elementary)',
+    '\ubc15\uba85\ucca0': '\uc911\uace0\ub4f1\ubd80 (Youth)',
   };
-  const sharedPw = process.env.STAFF_PASSWORD || process.env.ADMIN_PASSWORD;
-  if (password !== sharedPw) return res.status(401).json({ ok: false, error: "\uBE44\uBC00\uBC88\uD638\uAC00 \uD2C0\uB838\uC2B5\uB2C8\uB2E4" });
-  const dept = STAFF[name];
-  if (!dept) return res.status(404).json({ ok: false, error: "\uAC04\uC0AC \uC815\uBCF4\uB97C \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4" });
-  return res.status(200).json({ ok: true, name, dept });
+  // Leader name → dept short ('' or null = all-dept visibility)
+  const LEADERS = {
+    '\uc774\uac15\ud76c': '\uc911\uace0\ub4f1\ubd80',
+    '\ucd5c\uc7ac\uc6d0': null,
+  };
+  const DIRECTORS = new Set(['\ubc15\uba85\ucca0']);
+
+  let role, name, password;
+  if (req.method === 'POST') {
+    const body = req.body || {};
+    role = body.role || 'staff';
+    name = body.name;
+    password = body.password;
+  } else if (req.method === 'GET') {
+    role = 'staff';
+    name = req.query.name;
+    password = req.query.password;
+  } else {
+    return res.status(405).end();
+  }
+
+  if (!name || !password) return res.status(400).json({ ok: false, error: 'missing params' });
+
+  const staffPw = process.env.STAFF_PASSWORD || process.env.ADMIN_PASSWORD;
+  const leaderPw = process.env.LEADER_PASSWORD;
+  const directorPw = process.env.DIRECTOR_PASSWORD;
+
+  let ok = false;
+  let dept = null;
+
+  if (role === 'staff') {
+    if (staffPw && password === staffPw && STAFF[name]) {
+      ok = true;
+      dept = STAFF[name];
+    }
+  } else if (role === 'leader') {
+    if (leaderPw && password === leaderPw && LEADERS.hasOwnProperty(name)) {
+      ok = true;
+      dept = LEADERS[name]; // may be null → sees all depts
+    }
+  } else if (role === 'director') {
+    if (directorPw && password === directorPw && DIRECTORS.has(name)) {
+      ok = true;
+      dept = null;
+    }
+  }
+
+  if (!ok) {
+    return res.status(401).json({ ok: false, error: '\ube44\ubc00\ubc88\ud638\uac00 \ud2c0\ub838\uc2b5\ub2c8\ub2e4' });
+  }
+
+  const token = process.env.API_SECRET || null;
+  return res.status(200).json({ ok: true, role, name, dept, token });
 };
