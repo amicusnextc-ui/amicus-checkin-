@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
     const todayLA = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
     const isSundayToday = todayLA === serviceSunday;
     if (!isSundayToday) {
-      if (req.body.directorPassword !== '3167') {
+      if (req.body.directorPassword !== process.env.DIRECTOR_PASSWORD) {
         return res.status(403).json({ error: '일요일 외 체크아웃은 디렉터 인증이 필요합니다', requiresDirectorAuth: true });
       }
     }
