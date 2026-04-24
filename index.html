@@ -632,7 +632,16 @@ function _validAddress(v){
 }
 function showInfoPopup(s){document.getElementById('infoPopupStudent').textContent=s.name+' ('+(s.department||'').split(' ')[0]+')';var fillOrEmpty=function(id,v){var el=document.getElementById(id);if(el)el.value=v||'';};fillOrEmpty('infoStudentName',s.name);fillOrEmpty('infoStudentNameEN',s.nameEN);fillOrEmpty('infoStudentGrade',s.grade);updateSchoolOptions(s.school||'');_attachPhoneFormatters();_attachAddressAutocomplete();fillOrEmpty('infoFather',s.fatherName);fillOrEmpty('infoFatherEmail',s.fatherEmail);fillOrEmpty('infoFatherPhone',s.fatherPhone);fillOrEmpty('infoMother',s.motherName);fillOrEmpty('infoMotherEmail',s.motherEmail);fillOrEmpty('infoMotherPhone',s.motherPhone);(function(){var h=document.getElementById('infoAddress');if(h)h.value=s.address||'';var f=document.getElementById('infoAddressFallback');if(f)f.value=s.address||'';})();document.getElementById('infoAllergy').value=(s.allergy&&s.allergy!=='없음')?s.allergy:'';var ip=document.getElementById('infoPopup');ip.classList.remove('hidden');ip.classList.add('flex');if(_inInfoGracePeriod()){var sk=document.getElementById('infoSkipBtn');if(sk)sk.classList.remove('hidden');var gb=document.getElementById('infoGraceBanner');if(gb)gb.classList.remove('hidden');}else{var sk2=document.getElementById('infoSkipBtn');if(sk2)sk2.classList.add('hidden');var gb2=document.getElementById('infoGraceBanner');if(gb2)gb2.classList.add('hidden');}}
 function closeInfoPopup(){var ip=document.getElementById('infoPopup');ip.classList.add('hidden');ip.classList.remove('flex');}
-// TEMPORARY GRACE PERIOD — remove after 2026-05-03 (첫 주일 소프트 런칭, 이메일 수집 후 제거 권장)
+// ╔═══ TEMPORARY GRACE PERIOD ═══╗
+// 첫 주일 소프트 런칭용. 5/4 이후 아래 7개 모두 제거:
+//   1. var _INFO_GRACE_END = '...'
+//   2. function _inInfoGracePeriod()
+//   3. function skipInfoAndContinue()
+//   4. proceedWithAction의 '!window._skipInfoCheck &&' 부분
+//   5. <div id="infoGraceBanner"> HTML 블록
+//   6. <button id="infoSkipBtn"> HTML 블록
+//   7. showInfoPopup의 'if(_inInfoGracePeriod())' 분기
+// 검색어로 'GRACE PERIOD' or '_skipInfoCheck' 'infoSkipBtn' 'infoGraceBanner' 찾으면 됨
 var _INFO_GRACE_END = '2026-05-04'; // exclusive — grace active Apr 26 through May 3
 function _inInfoGracePeriod(){ try{ return new Date() < new Date(_INFO_GRACE_END); }catch(e){ return false; } }
 function skipInfoAndContinue(){ window._skipInfoCheck = true; closeInfoPopup(); proceedWithAction(window._pendingBypass||false); window._pendingBypass = false; window._skipInfoCheck = false; }
