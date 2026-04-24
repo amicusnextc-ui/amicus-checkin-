@@ -280,13 +280,9 @@ window._liabilityCheckinCallback = null;
 
 function openLiabilityFormFromModal() {
   var s = window._currentModalStudent;
-  if(!s) return;
-  closeModal();
-  openLiabilityForm(s, function() {
-    // After liability submitted, re-open confirm modal and proceed
-    s.liabilityForm = true;
-    openModal('checkin', s);
-  });
+  if(!s || !s.id) return;
+  // Open new unified /liability.html page (same as popup flow). Keep confirm modal open.
+  window.open('/liability.html?studentId=' + encodeURIComponent(s.id), '_blank');
 }
 function openLiabilityForm(student, checkinCallback) {
   window._liabilityStudent = student;
