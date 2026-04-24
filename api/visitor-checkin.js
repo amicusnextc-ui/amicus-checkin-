@@ -58,6 +58,32 @@ module.exports = async (req, res) => {
           const today=new Date().toLocaleDateString("sv-SE",{timeZone:TIMEZONE});
           const hasAllergy=allergy&&allergy.trim()&&allergy.toLowerCase()!=="\uC5C6\uC74C"&&allergy.toLowerCase()!=="none";
           const headers2={"Authorization":`Bearer ${process.env.NOTION_TOKEN}`,"Notion-Version":NOTION_VERSION,"Content-Type":"application/json"};
+          // ── DEDUP CHECK ── (skip if force=true)
+          if (!body.force) {
+            const dupCheck = await fetch("https://api.notion.com/v1/databases/" + STUDENT_DB + "/query", {
+              method: "POST", headers: headers2,
+              body: JSON.stringify({
+                filter: {
+                  and: [
+                    { property: "\uC774\uB984 (Name)", title: { equals: name } },
+                    { property: "\uC0C1\uD0DC (Status)", select: { equals: "\uD65C\uC131 (Active)" } }
+                  ]
+                },
+                page_size: 5
+              })
+            });
+            const dupData = await dupCheck.json();
+            if (dupData.results && dupData.results.length > 0) {
+              const matches = dupData.results.map(p => {
+                const nm = p.properties["\uC774\uB984 (Name)"]?.title?.[0]?.plain_text || "";
+                const dp = p.properties["\uBD80\uC11C (Department)"]?.select?.name || "";
+                const isVis = p.properties["\uBC29\uBB38\uC790 (Visitor)"]?.checkbox || false;
+                const dobExisting = p.properties["\uC0DD\uB144\uC6D4\uC77C (DOB)"]?.date?.start || null;
+                return { id: p.id, name: nm, dept: dp, isVisitor: isVis, dob: dobExisting };
+              });
+              return res.status(200).json({ duplicate: true, matches });
+            }
+          }
           const sr=await fetch("https://api.notion.com/v1/pages",{method:"POST",headers:headers2,body:JSON.stringify({parent:{database_id:STUDENT_DB},properties:{
                   "\uC774\uB984 (Name)":{title:[{text:{content:name}}]},
                   "\uC601\uBB38\uC774\uB984 (Name EN)":{rich_text:[{text:{content:nameEN||""}}]},
