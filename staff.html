@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+→<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8"/>
@@ -457,12 +457,12 @@ function doLogin(){
   var pw=document.getElementById("pwInput").value;
   if(!dept){showLoginError("이름을 선택해주세요");return;}
   if(pw!=="3"){showLoginError("비밀번호가 틀렸습니다");return;}
-  window._dept=dept;window._user=staffName;window._staffDept=dept;window._staffName=staffName;sessionStorage.removeItem("absenteesPopupDismissed_"+staffName);
+  window._dept=dept;window._user=staffName;window._staffName=staffName;sessionStorage.removeItem("absenteesPopupDismissed_"+staffName);
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
   // Check 2-week absentees on login — strict dept filter (popup only for depts with own absentees)
   setTimeout(function() {
-    var dept = window._staffDept || '';
+    var dept = window._dept || '';
     if (!dept) return;
     var deptShort = (dept.match(/중고등부|초등부|유년부|유치부|유아부/)||[])[0] || '';
     var url = '/api/attendance?type=absentees&department=' + encodeURIComponent(dept);
@@ -487,7 +487,7 @@ function doLogout(){
   document.getElementById("dashboard").classList.add("hidden");
   document.getElementById("pwInput").value="";
   document.getElementById("loginError").classList.add("hidden");
-  window._dept=null;window._user=null;window._staffDept=null;window._staffName=null;
+  window._dept=null;window._user=null;window._staffName=null;
 }
 function doLeaderLogin(){ var sel=document.getElementById("leaderNameInput"),name=sel.value; var pw=document.getElementById("leaderPwInput").value; if(!name){showLeaderLoginError("이름을 선택해주세요");return;} if(pw!=="777"){showLeaderLoginError("비밀번호가 틀렸습니다");return;} window._leaderName=name; document.getElementById("loginScreen").classList.add("hidden"); document.getElementById("leaderDashboard").classList.remove("hidden"); var selText=(sel.options[sel.selectedIndex]||{}).text||""; var role=selText.indexOf("위원장")>=0?"위원장":"부장"; document.getElementById("leaderDashName").textContent=name+" "+role+"님";
   switchLeaderTab("summary");
@@ -930,7 +930,7 @@ function loadLeaderAbsent(){
     try{
       var r=await fetch("/api/weekly-summary"),d=await r.json();
       if(!r.ok)throw new Error(d.error||"failed");
-      var absentList=d.absentList||[];var __mDn=({'이강희':'중고등부','최재원':'중고등부'}[window._leaderName]||window._staffDept||'');var __my=(__mDn.match(/중고등부|초등부|유년부|유치부|유아부/)||[])[0];if(__my)absentList=absentList.filter(function(s){return(s.dept||'').indexOf(__my)>=0;});
+      var absentList=d.absentList||[];var __mDn=({'이강희':'중고등부','최재원':'중고등부'}[window._leaderName]||window._dept||'');var __my=(__mDn.match(/중고등부|초등부|유년부|유치부|유아부/)||[])[0];if(__my)absentList=absentList.filter(function(s){return(s.dept||'').indexOf(__my)>=0;});
       var state=JSON.parse(localStorage.getItem("absentState")||"{}");
       var html="";
       absentList.forEach(function(s){
@@ -1063,7 +1063,7 @@ async function submitRequest() {
   try {
     var r = await fetch('/api/attendance?type=requests', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: title, content: content, requester: window._staffName||'간사', department: window._staffDept||'' })
+      body: JSON.stringify({ title: title, content: content, requester: window._staffName||'간사', department: window._dept||'' })
     });
     var d = await r.json();
     if(d.success) {
@@ -1079,7 +1079,7 @@ async function submitRequest() {
 async function loadRequests(){
   var list = document.getElementById('requestsList') || document.getElementById('ldrRequestsBody');
   if(!list) return;
-  var dept = window._staffDept || '';
+  var dept = window._dept || '';
   var isLeader = window._isLeader || false;
   var url = '/api/attendance?type=requests' + (isLeader ? '&department=all' : (dept ? '&department='+encodeURIComponent(dept) : ''));
   try {
@@ -1168,7 +1168,7 @@ async function submitRequest() {
     var r = await fetch('/api/attendance?type=requests', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: title, content: content, requester: window._staffName || '간사', department: window._staffDept || '' })
+      body: JSON.stringify({ title: title, content: content, requester: window._staffName || '간사', department: window._dept || '' })
     });
     var d = await r.json();
     if (d.success) {
@@ -1186,7 +1186,7 @@ async function loadRequests() {
   if (!list) return;
   list.innerHTML = '<div class="px-5 py-8 text-center text-gray-400 text-sm">로딩 중...</div>';
   var isLeader = window._isLeader || false;
-  var dept = window._staffDept || '';
+  var dept = window._dept || '';
   var url = '/api/attendance?type=requests' + (isLeader ? '&department=all' : (dept ? '&department=' + encodeURIComponent(dept) : ''));
   try {
     var r = await fetch(url);
@@ -1351,7 +1351,7 @@ async function loadAbsentees() {
   list.innerHTML = '<div class="px-5 py-8 text-center text-gray-400 text-sm">로딩 중...</div>';
   var isLeader = window._isLeader || false;
   var __LD2={'이강희':'중고등부','최재원':'중고등부'};
-  var __deptFull = window._dept || window._staffDept || '';
+  var __deptFull = window._dept || '';
   var __deptShort = __LD2[window._leaderName] || (__deptFull.match(/중고등부|초등부|유년부|유치부|유아부/)||[])[0] || '';
   var dept = __deptFull;
   if (!__deptFull && !isLeader) { list.innerHTML = '<div class="px-5 py-8 text-center text-gray-400 text-sm">로그인 필요</div>'; return; }
