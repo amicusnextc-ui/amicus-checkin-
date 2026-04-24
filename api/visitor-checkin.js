@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
     const dowGate = new Date(Date.UTC(yGate, mGate-1, dGate)).getUTCDay();
     if (dowGate === 6) return res.status(403).json({ error: 'Saturday is reset day', resetDay: true });
     if (dowGate !== 0) {
-      if (body.directorPassword !== '3167') {
+      if (body.directorPassword !== process.env.DIRECTOR_PASSWORD) {
         return res.status(403).json({ error: '일요일 외 방문자 등록은 디렉터 인증이 필요합니다', requiresDirectorAuth: true });
       }
     }
