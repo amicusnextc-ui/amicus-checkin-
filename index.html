@@ -487,7 +487,11 @@ function openModal(action,student,record){_action=action;_student=student;_recor
   }, 50);
 }
 function closeModal(){document.getElementById("modal").classList.add("hidden");}
-async function doAction(){var isIn=_action==="checkin";if(isIn){var lf=_student.liabilityForm;var needsLiab=!lf||lf==='미제출'||lf==='null'||lf==='undefined'||lf===false||lf==='false'||lf==='__NO__'||lf==='X'||lf==='❌';if(needsLiab){document.getElementById('liabPopupStudent').textContent=_student.name+' ('+(_student.department||'').split(' ')[0]+(_student.grade?' · '+_student.grade:'')+')';var lp=document.getElementById('liabPopup');lp.classList.remove('hidden');lp.classList.add('flex');return;}}proceedWithAction(false);}
+async function doAction(){var isIn=_action==="checkin";if(isIn){var lf=_student.liabilityForm;var needsLiab=!lf||lf==='미제출'||lf==='null'||lf==='undefined'||lf===false||lf==='false'||lf==='__NO__'||lf==='X'||lf==='❌';if(needsLiab){document.getElementById('liabPopupStudent').textContent=_student.name+' ('+(_student.department||'').split(' ')[0]+(_student.grade?' · '+_student.grade:'')+')';var lp=document.getElementById('liabPopup');lp.classList.remove('hidden');lp.classList.add('flex');return;}if(checkInfoMissing(_student)){showInfoPopup(_student);return;}}proceedWithAction(false);}
+function checkInfoMissing(s){if(!s)return false;var hasEmail=(s.fatherEmail||'').trim()||(s.motherEmail||'').trim();var hasPhone=(s.fatherPhone||'').trim()||(s.motherPhone||'').trim()||(s.phone||'').trim();var hasName=(s.fatherName||'').trim()||(s.motherName||'').trim()||(s.guardian||'').trim();return !hasEmail||!hasPhone||!hasName;}
+function showInfoPopup(s){document.getElementById('infoPopupStudent').textContent=s.name+' ('+(s.department||'').split(' ')[0]+')';document.getElementById('infoFather').value=s.fatherName||'';document.getElementById('infoFatherEmail').value=s.fatherEmail||'';document.getElementById('infoFatherPhone').value=s.fatherPhone||'';document.getElementById('infoMother').value=s.motherName||'';document.getElementById('infoMotherEmail').value=s.motherEmail||'';document.getElementById('infoMotherPhone').value=s.motherPhone||'';document.getElementById('infoAddress').value=s.address||'';document.getElementById('infoAllergy').value=(s.allergy&&s.allergy!=='없음')?s.allergy:'';var ip=document.getElementById('infoPopup');ip.classList.remove('hidden');ip.classList.add('flex');}
+function closeInfoPopup(){var ip=document.getElementById('infoPopup');ip.classList.add('hidden');ip.classList.remove('flex');}
+async function saveInfoAndContinue(){var fName=document.getElementById('infoFather').value.trim();var fEmail=document.getElementById('infoFatherEmail').value.trim();var fPhone=document.getElementById('infoFatherPhone').value.trim();var mName=document.getElementById('infoMother').value.trim();var mEmail=document.getElementById('infoMotherEmail').value.trim();var mPhone=document.getElementById('infoMotherPhone').value.trim();var addr=document.getElementById('infoAddress').value.trim();var allergy=document.getElementById('infoAllergy').value.trim();var anyEmail=fEmail||mEmail;var anyPhone=fPhone||mPhone;var anyName=fName||mName;if(!anyName){alert('보호자 이름을 입력해주세요 (아버지 또는 어머니 중 한 명)');return;}if(!anyEmail){alert('이메일을 입력해주세요 (영수증/공지 수신용)');return;}if(!anyPhone){alert('전화번호를 입력해주세요 (비상연락용)');return;}var btn=document.getElementById('infoSaveBtn');btn.disabled=true;btn.textContent='저장 중...';try{var r=await fetch('/api/update-student',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pageId:_student.id,fatherName:fName,fatherEmail:fEmail,fatherPhone:fPhone,motherName:mName,motherEmail:mEmail,motherPhone:mPhone,address:addr,allergy:allergy||'없음'})});var d=await r.json();if(!r.ok)throw new Error(d.error||'저장 실패');_student.fatherName=fName;_student.fatherEmail=fEmail;_student.fatherPhone=fPhone;_student.motherName=mName;_student.motherEmail=mEmail;_student.motherPhone=mPhone;_student.address=addr;_student.allergy=allergy||'없음';closeInfoPopup();proceedWithAction(false);}catch(e){alert('저장 오류: '+e.message);btn.disabled=false;btn.textContent='저장하고 체크인';}}
 function liabPopupAction(choice){var popup=document.getElementById('liabPopup');popup.classList.add('hidden');popup.classList.remove('flex');if(choice==='signNow'){window.open('/liability.html?studentId='+encodeURIComponent(_student.id),'_blank');}else if(choice==='bypass'){proceedWithAction(true);}}
 async function proceedWithAction(bypassLiab){var btn=document.getElementById("confirmBtn");btn.textContent="처리 중...";btn.disabled=true;var isIn=_action==="checkin";try{var time;if(isIn){var body={name:_student.name,department:_student.department,isNew:_student.isVisitor===true,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||"",studentId:_student.id};if(bypassLiab)body.bypassLiability=true;var res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});var data=await res.json();if(!res.ok)throw new Error(data.error||"체크인 실패");if(data.alreadyCheckedIn){closeModal();loadStatus(_student);return;}time=data.checkInTime;}else{var res2=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked})});var data2=await res2.json();if(!res2.ok)throw new Error(data2.error||"체크아웃 실패");time=data2.checkOutTime;}closeModal();showSuccess(isIn,_student,time);loadStatus(_student);}catch(e){alert(e.message||"오류가 발생했습니다");}btn.textContent="확인 / Confirm";btn.disabled=false;}
 var _successTimer;
@@ -857,7 +861,50 @@ document.getElementById("visitorModal").addEventListener("click",function(e){if(
     </div>
   </div>
 
-  <!-- LIABILITY POPUP -->
+  <!-- INFO UPDATE POPUP (required on check-in if missing info) -->
+<div id="infoPopup" class="hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md my-8 flex flex-col" style="max-height:92vh;">
+    <div class="px-6 pt-5 pb-3 border-b border-gray-100 flex-shrink-0">
+      <div class="text-center">
+        <div class="text-4xl mb-2">📋</div>
+        <h2 class="text-lg font-black text-gray-900">학생 정보 업데이트 필요</h2>
+        <p id="infoPopupStudent" class="text-sm text-gray-600 mt-1"></p>
+      </div>
+    </div>
+    <div class="overflow-y-auto flex-1 px-6 py-4 text-sm">
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
+        <p class="text-xs text-amber-800 leading-relaxed">체크인 전 아래 보호자 정보를 업데이트해주세요. 영수증 발송, 비상 연락, 교회 공지 수신에 필요합니다.</p>
+      </div>
+      <div class="mb-3">
+        <p class="text-xs font-bold text-gray-700 mb-2">👨 아버지 정보</p>
+        <input id="infoFather" placeholder="이름" class="w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+        <input id="infoFatherEmail" type="email" placeholder="이메일" class="w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+        <input id="infoFatherPhone" type="tel" placeholder="전화번호 (예: 858-123-4567)" class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+      </div>
+      <div class="mb-3">
+        <p class="text-xs font-bold text-gray-700 mb-2">👩 어머니 정보</p>
+        <input id="infoMother" placeholder="이름" class="w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+        <input id="infoMotherEmail" type="email" placeholder="이메일" class="w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+        <input id="infoMotherPhone" type="tel" placeholder="전화번호" class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+      </div>
+      <div class="mb-3">
+        <label class="block text-xs font-bold text-gray-700 mb-1">🏠 집주소 (선택)</label>
+        <input id="infoAddress" placeholder="주소" class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+      </div>
+      <div class="mb-3">
+        <label class="block text-xs font-bold text-gray-700 mb-1">⚠️ 알러지 (있으면)</label>
+        <input id="infoAllergy" placeholder="예: 땅콩, 우유..." class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+      </div>
+      <p class="text-xs text-gray-500 mb-2">⭐ <strong>필수:</strong> 보호자 이름, 이메일, 전화번호 (아버지 OR 어머니 중 한 명)</p>
+    </div>
+    <div class="px-6 pb-5 pt-3 border-t border-gray-100 flex-shrink-0 space-y-2">
+      <button id="infoSaveBtn" onclick="saveInfoAndContinue()" class="w-full py-3 rounded-2xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">💾 저장하고 체크인</button>
+      <button onclick="closeInfoPopup()" class="w-full py-2 text-gray-500 text-xs hover:text-gray-700">취소 (체크인 취소)</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIABILITY POPUP -->
 <div id="liabPopup" class="hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm items-center justify-center p-4">
   <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 slide-up">
     <div class="text-center mb-4">
