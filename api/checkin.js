@@ -150,7 +150,7 @@ module.exports = async (req, res) => {
     if (isVisitorFlag) props['\ubc29\ubb38\uc790 (Visitor)'] = { checkbox: true };
     if (allergyFlag) props['\uc54c\ub7ec\uc9c0 \uc54c\ub9bc (Allergy Alert)'] = { checkbox: true };
     if (staffField) props['\uac04\uc0ac (Staff)'] = { rich_text: [{ text: { content: staffField } }] };
-    if (notes) props['\ud2b9\uc774\uc0ac\ud56d (Notes)'] = { rich_text: [{ text: { content: notes } }] };
+    var finalNotes = (req.body.bypassLiability ? '[LIABILITY BYPASS] ' : '') + (notes || ''); if (finalNotes) props['특이사항 (Notes)'] = { rich_text: [{ text: { content: finalNotes } }] };
 
     const createRes = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
