@@ -728,7 +728,7 @@ function showDetail(i) {
     ${f('Liability', s.liabilityForm)}
     ${f('마지막 출석', s.lastAttended)}
     ${f('특이사항', s.notes)}
-    ${s.id && ROLE === 'director' ? `<div class="mt-4 pt-4 border-t"><a href="https://www.notion.so/${s.id.replace(/-/g,'')}" target="_blank" class="btn-primary inline-block">Notion에서 편집 →</a></div>` : ''}
+    ${s.id ? `<div class="mt-4 pt-4 border-t flex flex-wrap gap-2">${s.liabilityForm !== '제출 완료' ? `<a href="/liability.html?admin=1&studentId=${s.id}&adminName=${encodeURIComponent(CURRENT_USER||'Director')}" target="_blank" class="inline-block px-3 py-2 rounded-lg bg-purple-100 text-purple-700 text-sm font-semibold hover:bg-purple-200">✏️ Liability 대리 작성</a>` : ''}${ROLE === 'director' ? `<a href="https://www.notion.so/${s.id.replace(/-/g,'')}" target="_blank" class="btn-primary inline-block">Notion에서 편집 →</a>` : ''}</div>` : ''}
   `;
   document.getElementById('detailModal').classList.remove('hidden');
 }
