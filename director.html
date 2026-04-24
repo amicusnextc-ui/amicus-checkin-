@@ -152,7 +152,7 @@
           <div id="absentList" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-400 text-sm">불러오는 중…</div></div>
         </div>
         <div class="warn-card rounded-2xl p-5">
-          <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">🚨 3주+ 연속 결석 (연락 필요)</h3>
+          <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">🚨 2주 연속 결석 (연락 필요)</h3>
           <div id="longAbsent" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-500 text-sm">계산 중…</div></div>
         </div>
       </div>
@@ -190,7 +190,7 @@
             <option value="active">활성만</option>
             <option value="all">전체 (비활성 포함)</option>
             <option value="inactive">비활성만</option>
-            <option value="long-absent">3주+ 결석만</option>
+            <option value="long-absent">2주 연속 결석만</option>
             <option value="birthday">이번 달 생일만</option>
           </select>
         </div>
@@ -269,7 +269,7 @@
         <h3 class="font-bold text-gray-900 mb-3">📥 데이터 내보내기</h3>
         <div class="flex flex-wrap gap-2">
           <button onclick="exportRoster('csv')" class="btn-primary">전체 명단 CSV</button>
-          <button onclick="exportAbsent()" class="btn-primary" style="background:#dc2626">3주+ 결석자 연락처 CSV</button>
+          <button onclick="exportAbsent()" class="btn-primary" style="background:#dc2626">2주 연속 결석자 연락처 CSV</button>
         </div>
       </div>
     </section>
@@ -621,7 +621,7 @@ function renderDashboard() {
           ${a.phone ? `<a href="tel:${a.phone}" class="text-xs text-indigo-600">📞</a>` : ''}
         </div>`).join('');
 
-  // Long-absent (3주+) - compute from roster.lastAttended
+  // Long-absent (2주+) - compute from roster.lastAttended
   renderLongAbsent();
 }
 
@@ -639,10 +639,10 @@ function renderLongAbsent() {
     const notes = (s.notes || '').toString();
     if (/이동|transfer/i.test(notes)) return false;
     if (myShort && !(s.department || '').includes(myShort)) return false;
-    return weeksSince(s.lastAttended) >= 3;
+    return weeksSince(s.lastAttended) >= 2;
   }).sort((a,b) => (a.lastAttended || '').localeCompare(b.lastAttended || ''));
   const el = document.getElementById('longAbsent');
-  if (list.length === 0) { el.innerHTML = '<div class="text-sm text-gray-600">현재 3주 이상 결석자 없음 ✨</div>'; return; }
+  if (list.length === 0) { el.innerHTML = '<div class="text-sm text-gray-600">현재 2주 이상 결석자 없음 ✨</div>'; return; }
   el.innerHTML = list.map(s => `
     <div class="flex items-center justify-between bg-white/60 backdrop-blur rounded-lg p-2">
       <div>
@@ -664,7 +664,7 @@ function applyFilters() {
   return ROSTER.filter(s => {
     if (myShort && !(s.department || '').includes(myShort)) return false;
     if (dept && s.department !== dept) return false;
-    if (status === 'long-absent' && weeksSince(s.lastAttended) < 3) return false;
+    if (status === 'long-absent' && weeksSince(s.lastAttended) < 2) return false;
     if (status === 'birthday' && !s.isBirthdayMonth) return false;
     if (q) {
       const hay = [s.name, s.nameEN, s.guardian, s.fatherName, s.motherName, s.school].filter(Boolean).join(' ').toLowerCase();
@@ -689,7 +689,7 @@ function renderRoster() {
       </tr></thead>
       <tbody>${filtered.map((s,i) => {
         const weeks = weeksSince(s.lastAttended);
-        const attColor = weeks >= 3 ? 'text-red-600 font-semibold' : weeks >= 2 ? 'text-orange-600' : 'text-gray-600';
+        const attColor = weeks >= 2 ? 'text-red-600 font-semibold' : 'text-gray-600';
         return `<tr onclick="showDetail(${i})" class="cursor-pointer">
           <td>
             <div class="font-semibold text-gray-900">${s.name}${s.isBirthdayMonth ? ' 🎂' : ''}</div>
@@ -700,7 +700,7 @@ function renderRoster() {
           <td>${s.guardian || '—'}</td>
           <td class="text-xs">${s.phone || '—'}</td>
           <td class="text-xs ${(s.allergy && s.allergy!=='없음') ? 'text-red-600 font-semibold' : 'text-gray-500'}">${s.allergy || '—'}</td>
-          <td class="text-xs ${attColor}">${s.lastAttended ? s.lastAttended + (weeks>=3?` (${weeks}주)`:'') : '기록없음'}</td>
+          <td class="text-xs ${attColor}">${s.lastAttended ? s.lastAttended + (weeks>=2?` (${weeks}주)`:'') : '기록없음'}</td>
           <td>${s.liabilityForm === '제출 완료' ? '<span class="badge badge-green">제출</span>' : '<span class="badge badge-red">미제출</span>'}</td>
         </tr>`;
       }).join('')}</tbody>
@@ -806,7 +806,7 @@ function exportAbsent() {
   const list = ROSTER.filter(s => {
     const notes = (s.notes || '').toString();
     if (/이동|transfer/i.test(notes)) return false;
-    return weeksSince(s.lastAttended) >= 3;
+    return weeksSince(s.lastAttended) >= 2;
   });
   const header = ['이름','부서','학년','보호자','연락처','마지막 출석','몇 주 결석'];
   const rows = [header, ...list.map(s => [
