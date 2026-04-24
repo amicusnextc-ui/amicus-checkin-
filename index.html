@@ -49,9 +49,11 @@
 #infoPopup input.needs-input:not(:placeholder-shown) { border-color:#10b981; background:#f0fdf4; }
 #infoPopup select.needs-input:invalid, #infoPopup select.needs-input:has(option[value=""]:checked) { border-color:#ef4444!important; background:#fef2f2; color:#dc2626; font-weight:600; }
 #infoPopup select.needs-input:valid:not(:has(option[value=""]:checked)) { border-color:#10b981; background:#f0fdf4; color:#111827; font-weight:500; }
-.pac-container { z-index: 9999 !important; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); margin-top: 4px; font-family: inherit; }
+.pac-container, gmp-place-autocomplete::part(prediction-container), .gmp-pac-container { z-index: 9999 !important; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); margin-top: 4px; font-family: inherit; }
 .pac-item { padding: 8px 12px; font-size: 13px; cursor: pointer; }
 .pac-item:hover { background: #f3f4f6; }
+gmp-place-autocomplete { display: block; width: 100%; }
+#infoAddressContainer gmp-place-autocomplete input { width: 100% !important; padding: 8px 12px !important; border: 2px solid #e5e7eb !important; border-radius: 12px !important; font-size: 14px !important; font-family: inherit !important; background: #fff !important; box-sizing: border-box !important; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-white to-indigo-50 min-h-screen">
@@ -579,34 +581,56 @@ function _attachPhoneFormatters(){
 var _googleReady = false;
 var _addressAutocomplete = null;
 function _onGoogleMapsReady(){ _googleReady = true; _attachAddressAutocomplete(); }
-function _attachAddressAutocomplete(){
+async function _attachAddressAutocomplete(){
   if(!_googleReady) return;
-  var input = document.getElementById('infoAddress');
-  if(!input) return;
-  if(input._acAttached) return;
-  if(!window.google || !google.maps || !google.maps.places) return;
+  var container = document.getElementById('infoAddressContainer');
+  if(!container) return;
+  if(container._acAttached) return;
+  if(!window.google || !google.maps || !google.maps.importLibrary) return;
+  container._acAttached = true;
   try{
-    _addressAutocomplete = new google.maps.places.Autocomplete(input, {
-      types: ['address'],
-      componentRestrictions: { country: 'us' },
-      fields: ['formatted_address','address_components']
+    var placesLib = await google.maps.importLibrary('places');
+    var PAE = placesLib.PlaceAutocompleteElement;
+    if(!PAE){ throw new Error('PlaceAutocompleteElement not available'); }
+    var ac = new PAE({ includedRegionCodes: ['us'] });
+    ac.style.width = '100%';
+    ac.id = 'infoAddressAc';
+    var hidden = document.getElementById('infoAddress');
+    var existing = hidden ? hidden.value : '';
+    if(existing){ try{ ac.value = existing; }catch(_){} }
+    container.innerHTML = '';
+    container.appendChild(ac);
+    _addressAutocomplete = ac;
+    ac.addEventListener('gmp-select', async function(ev){
+      try{
+        var pred = ev.placePrediction;
+        if(!pred) return;
+        var place = pred.toPlace();
+        await place.fetchFields({ fields: ['formattedAddress'] });
+        if(hidden){
+          hidden.value = place.formattedAddress || '';
+          hidden.dispatchEvent(new Event('input',{bubbles:true}));
+        }
+      }catch(e){ console.warn('place fetch failed:', e); }
     });
-    _addressAutocomplete.addListener('place_changed', function(){
-      var place = _addressAutocomplete.getPlace();
-      if(place && place.formatted_address){
-        input.value = place.formatted_address;
-        input.dispatchEvent(new Event('input',{bubbles:true}));
-      }
-    });
-    input._acAttached = true;
-  }catch(e){ console.warn('Places Autocomplete failed:', e); }
+  }catch(e){
+    console.warn('PlaceAutocompleteElement failed, falling back to plain input:', e);
+    container._acAttached = false;
+    container.innerHTML = '<input id="infoAddressFallback" placeholder="집주소 (예: 10960 Via Frontera, San Diego CA 92127)" class="needs-input w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>';
+    var fb = document.getElementById('infoAddressFallback');
+    if(fb){
+      var hiddenEl = document.getElementById('infoAddress');
+      if(hiddenEl && hiddenEl.value) fb.value = hiddenEl.value;
+      fb.addEventListener('input', function(){ if(hiddenEl) hiddenEl.value = fb.value; });
+    }
+  }
 }
 function _validPhone(v){ return /^\d{3}-\d{3}-\d{4}$/.test(String(v||'').trim()); }
 function _validAddress(v){
   var t = String(v||'').trim();
-  return t.length>=15 && /\d/.test(t) && /,/.test(t);
+  return t.length>=5;
 }
-function showInfoPopup(s){document.getElementById('infoPopupStudent').textContent=s.name+' ('+(s.department||'').split(' ')[0]+')';var fillOrEmpty=function(id,v){var el=document.getElementById(id);if(el)el.value=v||'';};fillOrEmpty('infoStudentName',s.name);fillOrEmpty('infoStudentNameEN',s.nameEN);fillOrEmpty('infoStudentGrade',s.grade);updateSchoolOptions(s.school||'');_attachPhoneFormatters();_attachAddressAutocomplete();fillOrEmpty('infoFather',s.fatherName);fillOrEmpty('infoFatherEmail',s.fatherEmail);fillOrEmpty('infoFatherPhone',s.fatherPhone);fillOrEmpty('infoMother',s.motherName);fillOrEmpty('infoMotherEmail',s.motherEmail);fillOrEmpty('infoMotherPhone',s.motherPhone);fillOrEmpty('infoAddress',s.address);document.getElementById('infoAllergy').value=(s.allergy&&s.allergy!=='없음')?s.allergy:'';var ip=document.getElementById('infoPopup');ip.classList.remove('hidden');ip.classList.add('flex');}
+function showInfoPopup(s){document.getElementById('infoPopupStudent').textContent=s.name+' ('+(s.department||'').split(' ')[0]+')';var fillOrEmpty=function(id,v){var el=document.getElementById(id);if(el)el.value=v||'';};fillOrEmpty('infoStudentName',s.name);fillOrEmpty('infoStudentNameEN',s.nameEN);fillOrEmpty('infoStudentGrade',s.grade);updateSchoolOptions(s.school||'');_attachPhoneFormatters();_attachAddressAutocomplete();fillOrEmpty('infoFather',s.fatherName);fillOrEmpty('infoFatherEmail',s.fatherEmail);fillOrEmpty('infoFatherPhone',s.fatherPhone);fillOrEmpty('infoMother',s.motherName);fillOrEmpty('infoMotherEmail',s.motherEmail);fillOrEmpty('infoMotherPhone',s.motherPhone);(function(){var h=document.getElementById('infoAddress');if(h)h.value=s.address||'';var f=document.getElementById('infoAddressFallback');if(f)f.value=s.address||'';})();document.getElementById('infoAllergy').value=(s.allergy&&s.allergy!=='없음')?s.allergy:'';var ip=document.getElementById('infoPopup');ip.classList.remove('hidden');ip.classList.add('flex');}
 function closeInfoPopup(){var ip=document.getElementById('infoPopup');ip.classList.add('hidden');ip.classList.remove('flex');}
 async function saveInfoAndContinue(){var sName=document.getElementById('infoStudentName').value.trim();var sNameEN=document.getElementById('infoStudentNameEN').value.trim();var sGrade=document.getElementById('infoStudentGrade').value.trim();var sSchoolSel=document.getElementById('infoStudentSchool').value.trim();var sSchoolOther=document.getElementById('infoStudentSchoolOther').value.trim();var sSchool=(sSchoolSel==='기타 / Other')?sSchoolOther:sSchoolSel;var fName=document.getElementById('infoFather').value.trim();var fEmail=document.getElementById('infoFatherEmail').value.trim();var fPhone=document.getElementById('infoFatherPhone').value.trim();var mName=document.getElementById('infoMother').value.trim();var mEmail=document.getElementById('infoMotherEmail').value.trim();var mPhone=document.getElementById('infoMotherPhone').value.trim();var addr=document.getElementById('infoAddress').value.trim();var allergy=document.getElementById('infoAllergy').value.trim();if(!sName){alert('학생 한글 이름을 입력해주세요');return;}if(!sNameEN){alert('학생 영문 이름을 입력해주세요');return;}if(!sGrade){alert('학생 학년을 입력해주세요');return;}if(!sSchool){alert('학교를 선택해주세요 (또는 기타 선택 시 학교 이름 입력)');return;}var anyEmail=fEmail||mEmail;var anyPhone=fPhone||mPhone;var anyName=fName||mName;if(!anyName){alert('보호자 이름을 입력해주세요 (아버지 또는 어머니 중 한 명)');return;}if(!anyEmail){alert('이메일을 입력해주세요 (영수증/공지 수신용)');return;}if(!anyPhone){alert('전화번호를 입력해주세요 (비상연락용)');return;}if(fPhone && !_validPhone(fPhone)){alert('아버지 전화번호 형식이 올바르지 않습니다.\n예시: 858-123-4567');return;}if(mPhone && !_validPhone(mPhone)){alert('어머니 전화번호 형식이 올바르지 않습니다.\n예시: 858-123-4567');return;}if(!addr){alert('집주소를 입력해주세요');return;}if(!_validAddress(addr)){alert('집주소 형식을 확인해주세요.\n예시: 10960 Via Frontera, San Diego CA 92127\n(번호, 길이름, 쉼표, 시/주/우편번호 포함)');return;}var btn=document.getElementById('infoSaveBtn');btn.disabled=true;btn.textContent='저장 중...';try{var r=await fetch('/api/update-student',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pageId:_student.id,name:sName,nameEN:sNameEN,grade:sGrade,school:sSchool,fatherName:fName,fatherEmail:fEmail,fatherPhone:fPhone,motherName:mName,motherEmail:mEmail,motherPhone:mPhone,address:addr,allergy:allergy||'없음'})});var d=await r.json();if(!r.ok)throw new Error(d.error||'저장 실패');_student.name=sName;_student.nameEN=sNameEN;_student.grade=sGrade;_student.school=sSchool;_student.fatherName=fName;_student.fatherEmail=fEmail;_student.fatherPhone=fPhone;_student.motherName=mName;_student.motherEmail=mEmail;_student.motherPhone=mPhone;_student.address=addr;_student.allergy=allergy||'없음';closeInfoPopup();proceedWithAction(window._pendingBypass||false);window._pendingBypass=false;}catch(e){alert('저장 오류: '+e.message);btn.disabled=false;btn.textContent='저장하고 체크인';}}
 function liabPopupAction(choice){var popup=document.getElementById('liabPopup');popup.classList.add('hidden');popup.classList.remove('flex');if(choice==='signNow'){window.open('/liability.html?studentId='+encodeURIComponent(_student.id),'_blank');}else if(choice==='bypass'){proceedWithAction(true);}}
@@ -1032,7 +1056,8 @@ document.getElementById("visitorModal").addEventListener("click",function(e){if(
       </div>
       <div class="mb-3">
         <label class="block text-xs font-bold text-gray-700 mb-1">🏠 집주소 <span class="text-red-500">*</span></label>
-        <input id="infoAddress" placeholder="주소 입력 시 자동완성 (Start typing address...)" autocomplete="off" class="needs-input w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+        <div id="infoAddressContainer" class="w-full"><input id="infoAddressFallback" placeholder="주소 입력 (자동완성 로딩 중...)" class="needs-input w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/></div>
+        <input id="infoAddress" type="hidden"/>
       </div>
       <div class="mb-3">
         <label class="block text-xs font-bold text-gray-700 mb-1">⚠️ 알러지 (있으면)</label>
