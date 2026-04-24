@@ -96,8 +96,8 @@
     </div>
     <div class="text-center mb-6">
       <div class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2 mb-3"><span class="text-emerald-600 font-bold text-sm">✅ Check In — 체크인</span></div>
-      <h2 class="text-xl font-black text-gray-900">전화번호 끝 4자리</h2>
-      <p class="text-gray-400 text-sm mt-1">Last 4 digits of registered phone number</p>
+      <h2 id="searchHeader" class="text-xl font-black text-gray-900">전화번호 끝 4자리</h2>
+      <p id="searchSubheader" class="text-gray-400 text-sm mt-1">Last 4 digits of registered phone number</p>
     </div>
     <div id="phoneDigitSection" class="flex justify-center gap-3 mb-6">
       <input class="pin-digit" id="d0" maxlength="1" inputmode="numeric" pattern="[0-9]" type="text"/>
@@ -404,6 +404,7 @@ function setSearchMode(mode) {
     var nameInput = document.getElementById('nameInput');
     if(nameInput){ nameInput.value=''; setTimeout(function(){ nameInput.focus(); }, 100); }
   }
+  var sh=document.getElementById("searchHeader"); var ss=document.getElementById("searchSubheader"); if(sh && ss){ if(mode==="phone"){ sh.textContent="전화번호 끝 4자리"; ss.textContent="Last 4 digits of registered phone number"; } else { sh.textContent="이름 검색"; ss.textContent="Search by student name"; } }
   window._searchMode = mode;
 }
 
