@@ -9,7 +9,7 @@ function getServiceSunday() {
   const [yr,mo,dy] = laDate.split('-').map(Number);
   const laDay = new Date(Date.UTC(yr, mo-1, dy));
   const dow = laDay.getUTCDay();
-  if (dow === 6) return null;
+  if (dow === 6) { const _s = new Date(laDay); _s.setUTCDate(laDay.getUTCDate() + 1); return _s.toISOString().split('T')[0]; } // Sat → next Sun (director auth required downstream)
   const sunday = new Date(laDay);
   sunday.setUTCDate(laDay.getUTCDate() - dow);
   return sunday.toISOString().split('T')[0];
