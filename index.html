@@ -818,7 +818,7 @@ function printTag() {
     + "function doPrint(){window.print();}if(document.readyState===\"complete\"){setTimeout(doPrint,600);}else{window.onload=function(){setTimeout(doPrint,600);};}";
   var html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><sc"+"ript src=\""+QR_SRC+"\">"+CLOSE+"<style>"+CSS+"</style></head><body>"+BODY+"<sc"+"ript>"+JS+CLOSE+"</body></html>";
   var iframe = document.createElement("iframe");
-  iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;";
+  iframe.style.cssText = "position:fixed;right:0;bottom:0;width:62mm;height:100mm;opacity:0;pointer-events:none;z-index:-1;width:1px;height:1px;border:none;";
   document.body.appendChild(iframe);
   var idoc = iframe.contentDocument || iframe.contentWindow.document;
   idoc.open(); idoc.write(html); idoc.close();
