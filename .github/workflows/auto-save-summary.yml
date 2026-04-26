@@ -1,0 +1,19 @@
+name: Auto-save Weekly Summary to Notion
+
+on:
+  schedule:
+    # Every Sunday 23:00 UTC = 4pm LA (PDT) / 3pm LA (PST)
+    - cron: '0 23 * * 0'
+  workflow_dispatch:  # allow manual trigger via Actions tab
+
+jobs:
+  save:
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST to /api/weekly-summary
+        run: |
+          curl -X POST https://amicus-checkin.vercel.app/api/weekly-summary \
+            -H 'Content-Type: application/json' \
+            -d '{}' \
+            --fail \
+            --show-error
