@@ -1112,52 +1112,6 @@ document.getElementById("visitorModal").addEventListener("click",function(e){if(
   <div id="saturdayResetBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9999; background:#7c3aed; color:white; text-align:center; padding:16px; font-weight:bold; font-size:15px;">
     토요일 자동 초기화 중 ✨ Saturday Auto-Renew &mdash; 내일 주일 준비 완료!
   </div>
-
-<script>
-/* iOS Safari label printing via PDF (overrides iframe-print to fix Letter-size bug) */
-(function(){
-  if (typeof window.printTag !== 'function') return;
-  function _load(src){return new Promise(function(r,j){var s=document.createElement('script');s.src=src;s.onload=r;s.onerror=j;document.head.appendChild(s);});}
-  function _libs(){return Promise.all([window.jspdf?Promise.resolve():_load('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'),window.html2canvas?Promise.resolve():_load('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js')]);}
-  function _viaPDF(orig,wMM,hMM){
-    return _libs().then(function(){
-      var captured='';
-      var origWrite=Document.prototype.write;
-      Document.prototype.write=function(){for(var i=0;i<arguments.length;i++)captured+=arguments[i];};
-      var capturedIfr=null;
-      var origCE=document.createElement.bind(document);
-      document.createElement=function(tag){var el=origCE(tag);if(typeof tag==='string'&&tag.toLowerCase()==='iframe')capturedIfr=el;return el;};
-      try{orig();}finally{Document.prototype.write=origWrite;document.createElement=origCE;}
-      if(capturedIfr){try{capturedIfr.remove();}catch(e){}}
-      if(!captured){alert('라벨 데이터 캡처 실패');return;}
-      var parser=new DOMParser();var tempDoc=parser.parseFromString(captured,'text/html');
-      var styles=Array.prototype.map.call(tempDoc.querySelectorAll('style'),function(s){return s.textContent;}).join('\\n');
-      var bodyInner=tempDoc.body?tempDoc.body.innerHTML:captured;
-      var ghost=document.createElement('div');
-      ghost.style.cssText='position:fixed;left:0;top:0;width:'+wMM+'mm;height:'+hMM+'mm;background:#fff;z-index:99999;opacity:0;pointer-events:none;overflow:hidden;';
-      ghost.innerHTML='<style>'+styles+'</style>'+bodyInner;
-      Array.prototype.forEach.call(ghost.querySelectorAll('script'),function(s){s.remove();});
-      document.body.appendChild(ghost);
-      return new Promise(function(r){setTimeout(r,500);}).then(function(){
-        return window.html2canvas(ghost,{scale:6,backgroundColor:'#fff',useCORS:true,logging:false});
-      }).then(function(canvas){
-        document.body.removeChild(ghost);
-        var jsPDF=window.jspdf.jsPDF;
-        var pdf=new jsPDF({unit:'mm',format:[wMM,hMM],orientation:hMM>wMM?'portrait':'landscape'});
-        pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,wMM,hMM);
-        var url=URL.createObjectURL(pdf.output('blob'));
-        var nt=window.open(url,'_blank');
-        if(!nt){var a=document.createElement('a');a.href=url;a.download='label_'+Date.now()+'.pdf';document.body.appendChild(a);a.click();a.remove();}
-      });
-    }).catch(function(e){console.error('PDF print error',e);alert('PDF 생성 오류: '+e.message);});
-  }
-  var _oT=window.printTag,_oC=window.printChildLabel,_oP=window.printParentTag;
-  if(_oT)window.printTag=function(){_viaPDF(_oT,62,86);};
-  if(_oC)window.printChildLabel=function(){_viaPDF(_oC,62,56);};
-  if(_oP)window.printParentTag=function(){_viaPDF(_oP,62,86);};
-  console.log('[Cowork] PDF print override active');
-})();
-</script>
 </body>
 </html>
 
