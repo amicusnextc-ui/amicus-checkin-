@@ -1112,6 +1112,51 @@ document.getElementById("visitorModal").addEventListener("click",function(e){if(
   <div id="saturdayResetBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9999; background:#7c3aed; color:white; text-align:center; padding:16px; font-weight:bold; font-size:15px;">
     토요일 자동 초기화 중 ✨ Saturday Auto-Renew &mdash; 내일 주일 준비 완료!
   </div>
+
+<!-- ===== CHECKOUT BY NAME PANEL (added 2026-04-26) ===== -->
+<button id="cwoBtn" onclick="cwoOpen()" style="position:fixed;bottom:20px;right:20px;background:#10b981;color:white;border:none;padding:14px 22px;border-radius:50px;font-weight:bold;font-size:14px;box-shadow:0 6px 20px rgba(16,185,129,0.4);cursor:pointer;z-index:9998;">🔍 이름으로 체크아웃</button>
+<div id="cwoPanel" style="display:none;position:fixed;bottom:20px;right:20px;background:white;border:2px solid #10b981;border-radius:14px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:9999;width:360px;max-width:92vw;max-height:80vh;flex-direction:column;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <strong style="font-size:16px;">🔍 이름으로 체크아웃</strong>
+    <button onclick="cwoClose()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666;">×</button>
+  </div>
+  <input id="cwoSearch" type="text" placeholder="학생 이름 입력…" style="width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:10px;margin-bottom:10px;font-size:15px;" oninput="cwoLoad(this.value)" autocomplete="off">
+  <div id="cwoResults" style="overflow-y:auto;flex:1;min-height:120px;max-height:50vh;"></div>
+  <div id="cwoStatus" style="font-size:12px;color:#666;margin-top:6px;"></div>
+</div>
+<script>
+function cwoOpen(){var p=document.getElementById('cwoPanel');p.style.display='flex';document.getElementById('cwoBtn').style.display='none';cwoLoad('');setTimeout(function(){var s=document.getElementById('cwoSearch');if(s)s.focus();},100);}
+function cwoClose(){document.getElementById('cwoPanel').style.display='none';document.getElementById('cwoBtn').style.display='block';}
+async function cwoLoad(filter){
+  var results=document.getElementById('cwoResults');var status=document.getElementById('cwoStatus');
+  results.innerHTML='<div style="padding:20px;text-align:center;color:#666;font-size:13px;">로딩 중…</div>';
+  try{
+    var r=await fetch('/api/attendance-today?password=3');var d=await r.json();
+    var recs=d.records||[];
+    recs=recs.filter(function(x){return (x.checkIn||x.checkInTime)&&!(x.checkOut||x.checkOutTime);});
+    if(filter){var f=filter.toLowerCase().trim();if(f)recs=recs.filter(function(x){return (x.name||'').toLowerCase().indexOf(f)!==-1;});}
+    if(recs.length===0){results.innerHTML='<div style="padding:30px;text-align:center;color:#10b981;font-weight:600;">'+(filter?'검색 결과 없음':'✅ 모두 체크아웃 완료')+'</div>';status.textContent='';return;}
+    results.innerHTML=recs.slice(0,30).map(function(x){
+      var nm=(x.name||'').replace(/"/g,'&quot;');
+      var dept=(x.dept||x.department||'').replace(/\([^)]+\)/,'').trim();
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 6px;border-bottom:1px solid #f0f0f0;"><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:15px;">'+nm+'</div><div style="font-size:11px;color:#888;margin-top:2px;">'+dept+' · 체크인 '+(x.checkIn||x.checkInTime||'')+'</div></div><button data-name="'+nm+'" onclick="cwoDo(this)" style="background:#10b981;color:white;border:none;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;flex-shrink:0;margin-left:8px;">체크아웃</button></div>';
+    }).join('');
+    status.textContent=recs.length+'명 미체크아웃'+(recs.length>30?' (30명 표시)':'');
+  }catch(e){results.innerHTML='<div style="padding:20px;color:#dc2626;font-size:13px;">로딩 실패: '+e.message+'</div>';}
+}
+async function cwoDo(btn){
+  btn.disabled=true;btn.textContent='…';btn.style.opacity='0.5';
+  var nm=btn.getAttribute('data-name')||'';
+  try{
+    var r=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({studentName:nm})});
+    var d=await r.json();
+    if(!d.success&&!d.recordId)throw new Error(d.error||'실패');
+    btn.textContent='✅ 완료';btn.style.background='#9ca3af';
+    setTimeout(function(){cwoLoad(document.getElementById('cwoSearch').value);},700);
+  }catch(e){btn.disabled=false;btn.textContent='체크아웃';btn.style.opacity='1';alert('체크아웃 실패: '+e.message);}
+}
+</script>
+<!-- ===== END CHECKOUT BY NAME PANEL ===== -->
 </body>
 </html>
 
