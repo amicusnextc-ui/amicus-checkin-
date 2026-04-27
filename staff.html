@@ -1620,6 +1620,56 @@ function showToast(msg, type) {
 
   <!-- Toast notification -->
   <div id="toastMsg" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-5 py-3 rounded-2xl shadow-xl text-white text-sm font-bold transition-all" style="transform:translateX(-50%);min-width:200px;text-align:center;"></div>
+
+<!-- ============== CHECKOUT SEARCH PANEL (added 2026-04-26) ============== -->
+<button id="cwOpenBtn" onclick="cwOpen()" style="display:none;position:fixed;bottom:20px;right:20px;background:#10b981;color:white;border:none;padding:14px 22px;border-radius:50px;font-weight:bold;font-size:14px;box-shadow:0 6px 20px rgba(16,185,129,0.45);cursor:pointer;z-index:9998;">🚪 체크아웃</button>
+<div id="cwPanel" style="display:none;position:fixed;bottom:20px;right:20px;background:white;border:2px solid #10b981;border-radius:14px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:9999;width:360px;max-width:92vw;max-height:80vh;overflow:hidden;display:none;flex-direction:column;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-shrink:0;">
+    <strong style="font-size:16px;">🚪 체크아웃</strong>
+    <button onclick="cwClose()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666;line-height:1;">×</button>
+  </div>
+  <input id="cwSearch" type="text" placeholder="이름으로 검색…" style="width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:10px;margin-bottom:10px;font-size:15px;flex-shrink:0;" oninput="cwLoad(this.value)" autocomplete="off">
+  <div id="cwResults" style="overflow-y:auto;flex:1;min-height:120px;"></div>
+  <div id="cwStatus" style="font-size:12px;color:#666;margin-top:6px;flex-shrink:0;"></div>
+</div>
+<script>
+async function cwOpen(){var p=document.getElementById('cwPanel');p.style.display='flex';document.getElementById('cwOpenBtn').style.display='none';await cwLoad('');setTimeout(function(){var s=document.getElementById('cwSearch');if(s)s.focus();},100);}
+function cwClose(){document.getElementById('cwPanel').style.display='none';document.getElementById('cwOpenBtn').style.display='block';}
+async function cwLoad(filter){
+  var results=document.getElementById('cwResults');var status=document.getElementById('cwStatus');
+  if(!filter)results.innerHTML='<div style="padding:20px;text-align:center;color:#666;font-size:13px;">로딩 중…</div>';
+  try{
+    var r=await fetch('/api/attendance-today?password=3');var d=await r.json();
+    var recs=d.records||[];
+    var dept=window._dept||'';
+    if(dept)recs=recs.filter(function(x){var rd=x.dept||x.department||'';return rd===dept||rd.indexOf(dept)!==-1||dept.indexOf(rd)!==-1;});
+    recs=recs.filter(function(x){return (x.checkIn||x.checkInTime)&&!(x.checkOut||x.checkOutTime);});
+    if(filter){var f=filter.toLowerCase();recs=recs.filter(function(x){return (x.name||'').toLowerCase().indexOf(f)!==-1;});}
+    if(recs.length===0){results.innerHTML='<div style="padding:30px;text-align:center;color:#10b981;font-weight:600;">✅ '+(filter?'검색 결과 없음':'모두 체크아웃 완료')+'</div>';status.textContent='';return;}
+    results.innerHTML=recs.map(function(x){
+      var nm=(x.name||'').replace(/"/g,'&quot;');
+      var rid=x.id||'';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 6px;border-bottom:1px solid #f0f0f0;"><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:15px;">'+nm+'</div><div style="font-size:11px;color:#888;margin-top:2px;">체크인 '+(x.checkIn||x.checkInTime||'')+(x.dept||x.department?' · '+(x.dept||x.department):'')+'</div></div><button data-rid="'+rid+'" data-name="'+nm+'" onclick="cwDo(this)" style="background:#10b981;color:white;border:none;padding:9px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;flex-shrink:0;margin-left:8px;">체크아웃</button></div>';
+    }).join('');
+    status.textContent=recs.length+'명 미체크아웃';
+  }catch(e){results.innerHTML='<div style="padding:20px;color:#dc2626;font-size:13px;">로딩 실패: '+e.message+'</div>';}
+}
+async function cwDo(btn){
+  btn.disabled=true;btn.textContent='…';btn.style.opacity='0.5';
+  var rid=btn.getAttribute('data-rid')||'';var nm=btn.getAttribute('data-name')||'';
+  try{
+    var body=rid?{recordId:rid,studentName:nm}:{studentName:nm};
+    var r=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var d=await r.json();
+    if(!d.success&&!d.recordId)throw new Error(d.error||'실패');
+    btn.textContent='✅';btn.style.background='#9ca3af';
+    setTimeout(function(){cwLoad(document.getElementById('cwSearch').value);},600);
+  }catch(e){btn.disabled=false;btn.textContent='체크아웃';btn.style.opacity='1';alert('체크아웃 실패: '+e.message);}
+}
+function cwShowIfReady(){if(window._dept||window._staffName||window._role){var b=document.getElementById('cwOpenBtn');if(b)b.style.display='block';}else{setTimeout(cwShowIfReady,1500);}}
+setTimeout(cwShowIfReady,2000);
+</script>
+<!-- ============== END CHECKOUT PANEL ============== -->
 </body>
 </html>
 
