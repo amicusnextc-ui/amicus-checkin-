@@ -1157,6 +1157,56 @@ async function cwoDo(btn){
 }
 </script>
 <!-- ===== END CHECKOUT BY NAME PANEL ===== -->
+
+<!-- ===== CHECKOUT SECTION BUTTON FIX (added 2026-04-26) ===== -->
+<script>
+(function(){
+  function fixCoBtn() {
+    var section = document.getElementById('checkoutSection');
+    if (!section || section.offsetParent === null) return; // not visible
+    var results = document.getElementById('checkoutResults');
+    if (!results) return;
+    var cards = results.querySelectorAll('[id^="card-"]');
+    cards.forEach(function(card){
+      var sid = card.id.replace(/^card-/, '');
+      var actionDiv = card.querySelector('[id^="action-"]') || document.getElementById('action-'+sid);
+      if (!actionDiv || actionDiv.dataset.cwoFixed) return;
+      // Find name (best effort)
+      var nameEl = card.querySelector('h3, .student-name, [class*="name"], strong');
+      var name = nameEl ? (nameEl.innerText||'').trim() : '';
+      // Mark as being processed to avoid race
+      actionDiv.dataset.cwoFixed = 'pending';
+      fetch('/api/check-status?name=' + encodeURIComponent(name)).then(function(r){return r.json();}).then(function(s){
+        var html = '';
+        if (s.checkedInToday && s.checkedOutToday) {
+          html = '<div style="background:#ecfdf5;border:2px solid #10b981;color:#065f46;padding:14px;border-radius:12px;text-align:center;font-weight:600;">✅ 이미 체크아웃 완료됨<div style="font-size:12px;color:#047857;margin-top:4px;font-weight:400;">체크인: ' + (s.checkInTime||'') + ' · 체크아웃: ' + (s.checkOutTime||'') + '</div></div>';
+        } else if (s.checkedInToday && !s.checkedOutToday) {
+          html = '<button onclick="cwoFixedDoCheckout(\''+sid+'\',\''+name.replace(/\x27/g,"")+'\',this)" style="width:100%;background:#10b981;color:white;border:none;padding:14px;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;">🚪 체크아웃 / Check Out</button><div style="font-size:11px;color:#666;margin-top:6px;text-align:center;">체크인: ' + (s.checkInTime||'') + '</div>';
+        } else {
+          html = '<div style="background:#fef3c7;border:2px solid #f59e0b;color:#92400e;padding:14px;border-radius:12px;text-align:center;font-weight:600;">⚠ 오늘 체크인 안 됨<div style="font-size:12px;color:#b45309;margin-top:4px;font-weight:400;">먼저 체크인 페이지에서 체크인하세요</div></div>';
+        }
+        actionDiv.innerHTML = html;
+        actionDiv.dataset.cwoFixed = 'done';
+      }).catch(function(e){actionDiv.dataset.cwoFixed = '';});
+    });
+  }
+  window.cwoFixedDoCheckout = async function(studentId, name, btn) {
+    btn.disabled = true; btn.style.opacity = '0.5'; btn.innerText = '체크아웃 중…';
+    try {
+      var r = await fetch('/api/checkout', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({studentId: studentId, studentName: name})});
+      var d = await r.json();
+      if (!d.success && !d.recordId) throw new Error(d.error || '실패');
+      btn.parentElement.innerHTML = '<div style="background:#ecfdf5;border:2px solid #10b981;color:#065f46;padding:14px;border-radius:12px;text-align:center;font-weight:700;font-size:16px;">✅ 체크아웃 완료! ' + (d.checkOutTime||'') + '</div>';
+    } catch(e) {
+      btn.disabled = false; btn.style.opacity = '1'; btn.innerText = '🚪 체크아웃 / Check Out';
+      alert('체크아웃 실패: ' + e.message);
+    }
+  };
+  // Run periodically (handles dynamic re-renders)
+  setInterval(fixCoBtn, 800);
+})();
+</script>
+<!-- ===== END CHECKOUT BUTTON FIX ===== -->
 </body>
 </html>
 
