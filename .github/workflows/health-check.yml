@@ -17,6 +17,6 @@ jobs:
       - name: Check Roster API
         run: curl -f "https://amicus-checkin.vercel.app/api/roster" --max-time 10
       - name: Check Attendance API
-        run: curl -f "https://amicus-checkin.vercel.app/api/attendance" --max-time 10
+        run: curl -f "https://amicus-checkin.vercel.app/api/weekly-summary" --max-time 10
       - name: Done
         run: echo 'All OK'
