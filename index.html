@@ -1172,8 +1172,16 @@ async function cwoDo(btn){
       var actionDiv = card.querySelector('[id^="action-"]') || document.getElementById('action-'+sid);
       if (!actionDiv || actionDiv.dataset.cwoFixed) return;
       // Find name (best effort)
-      var nameEl = card.querySelector('h3, .student-name, [class*="name"], strong');
-      var name = nameEl ? (nameEl.innerText||'').trim() : '';
+      var name = '';
+      var spans = card.querySelectorAll('span');
+      for (var i=0; i<spans.length; i++) {
+        var t = (spans[i].innerText||'').trim();
+        if (t && t.length<20 && t.indexOf('AMC')===-1 && t.indexOf('AMC-')===-1 && t.indexOf(' ')===-1 && !/[가-힣]+부/.test(t) && t.indexOf('Pre')===-1 && t.indexOf('Toddler')===-1 && t.indexOf('Elementary')===-1 && t.indexOf('Infant')===-1 && t.indexOf('Preschool')===-1 && t.indexOf('Youth')===-1 && t.indexOf('K /')===-1 && !/^[0-9]/.test(t)) {
+          name = t.split('\\n')[0].trim();
+          break;
+        }
+      }
+      if (!name) { var bold=card.querySelector('span.font-bold,span.text-xl'); if(bold) name=(bold.innerText||'').trim().split('\\n')[0]; }
       // Mark as being processed to avoid race
       actionDiv.dataset.cwoFixed = 'pending';
       fetch('/api/check-status?name=' + encodeURIComponent(name)).then(function(r){return r.json();}).then(function(s){
