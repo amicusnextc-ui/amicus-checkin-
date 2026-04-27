@@ -1158,63 +1158,71 @@ async function cwoDo(btn){
 </script>
 <!-- ===== END CHECKOUT BY NAME PANEL ===== -->
 
-<!-- ===== CHECKOUT SECTION BUTTON FIX (added 2026-04-26) ===== -->
+<!-- ===== CHECKOUT SECTION BUTTON FIX v2 (added 2026-04-26) ===== -->
 <script>
 (function(){
-  function fixCoBtn() {
+  function extractName(card){
+    var spans = card.querySelectorAll('span.text-xl, span.font-bold, h3, strong');
+    for (var i=0; i<spans.length; i++){
+      var t = (spans[i].innerText||'').trim().split('\\n')[0].trim();
+      if (!t) continue;
+      if (t.indexOf('AMC')===0) continue;
+      if (/[가-힣]+부\\s*\\(/.test(t)) continue;
+      if (t.indexOf('Pre-K')!==-1||t.indexOf('Toddler')!==-1||t.indexOf('grade')!==-1||t.indexOf('Elementary')!==-1||t.indexOf('Infant')!==-1||t.indexOf('Preschool')!==-1||t.indexOf('Youth')!==-1||t.indexOf('Middle')!==-1||t.indexOf('High')!==-1) continue;
+      if (/^[가-힣\\s]+$/.test(t) && t.length<25) return t.trim();
+    }
+    return '';
+  }
+  function fixCoBtn(){
     var section = document.getElementById('checkoutSection');
-    if (!section || section.offsetParent === null) return; // not visible
+    if (!section || section.offsetParent === null) return;
     var results = document.getElementById('checkoutResults');
     if (!results) return;
     var cards = results.querySelectorAll('[id^="card-"]');
     cards.forEach(function(card){
       var sid = card.id.replace(/^card-/, '');
       var actionDiv = card.querySelector('[id^="action-"]') || document.getElementById('action-'+sid);
-      if (!actionDiv || actionDiv.dataset.cwoFixed) return;
-      // Find name (best effort)
-      var name = '';
-      var spans = card.querySelectorAll('span');
-      for (var i=0; i<spans.length; i++) {
-        var t = (spans[i].innerText||'').trim();
-        if (t && t.length<20 && t.indexOf('AMC')===-1 && t.indexOf('AMC-')===-1 && t.indexOf(' ')===-1 && !/[가-힣]+부/.test(t) && t.indexOf('Pre')===-1 && t.indexOf('Toddler')===-1 && t.indexOf('Elementary')===-1 && t.indexOf('Infant')===-1 && t.indexOf('Preschool')===-1 && t.indexOf('Youth')===-1 && t.indexOf('K /')===-1 && !/^[0-9]/.test(t)) {
-          name = t.split('\\n')[0].trim();
-          break;
-        }
-      }
-      if (!name) { var bold=card.querySelector('span.font-bold,span.text-xl'); if(bold) name=(bold.innerText||'').trim().split('\\n')[0]; }
-      // Mark as being processed to avoid race
-      actionDiv.dataset.cwoFixed = 'pending';
+      if (!actionDiv) return;
+      // Check if our fix is already rendered (look for our marker)
+      if (actionDiv.querySelector('[data-cwofix="1"]')) return;
+      var name = extractName(card);
+      if (!name) return;
       fetch('/api/check-status?name=' + encodeURIComponent(name)).then(function(r){return r.json();}).then(function(s){
         var html = '';
         if (s.checkedInToday && s.checkedOutToday) {
-          html = '<div style="background:#ecfdf5;border:2px solid #10b981;color:#065f46;padding:14px;border-radius:12px;text-align:center;font-weight:600;">✅ 이미 체크아웃 완료됨<div style="font-size:12px;color:#047857;margin-top:4px;font-weight:400;">체크인: ' + (s.checkInTime||'') + ' · 체크아웃: ' + (s.checkOutTime||'') + '</div></div>';
+          html = '<div data-cwofix="1" style="background:#ecfdf5;border:2px solid #10b981;color:#065f46;padding:14px;border-radius:12px;text-align:center;font-weight:600;">✅ 이미 체크아웃 완료됨<div style="font-size:12px;color:#047857;margin-top:4px;font-weight:400;">체크인: ' + (s.checkInTime||'') + ' · 체크아웃: ' + (s.checkOutTime||'') + '</div></div>';
         } else if (s.checkedInToday && !s.checkedOutToday) {
-          html = '<button onclick="cwoFixedDoCheckout(\''+sid+'\',\''+name.replace(/\x27/g,"")+'\',this)" style="width:100%;background:#10b981;color:white;border:none;padding:14px;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;">🚪 체크아웃 / Check Out</button><div style="font-size:11px;color:#666;margin-top:6px;text-align:center;">체크인: ' + (s.checkInTime||'') + '</div>';
+          var safeName = name.replace(/'/g, '');
+          html = '<button data-cwofix="1" data-sid="'+sid+'" data-name="'+safeName+'" onclick="cwoFixedDoCheckout(this)" style="width:100%;background:#10b981;color:white;border:none;padding:14px;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;">🚪 체크아웃 / Check Out</button><div style="font-size:11px;color:#666;margin-top:6px;text-align:center;">체크인: ' + (s.checkInTime||'') + '</div>';
         } else {
-          html = '<div style="background:#fef3c7;border:2px solid #f59e0b;color:#92400e;padding:14px;border-radius:12px;text-align:center;font-weight:600;">⚠ 오늘 체크인 안 됨<div style="font-size:12px;color:#b45309;margin-top:4px;font-weight:400;">먼저 체크인 페이지에서 체크인하세요</div></div>';
+          html = '<div data-cwofix="1" style="background:#fef3c7;border:2px solid #f59e0b;color:#92400e;padding:14px;border-radius:12px;text-align:center;font-weight:600;">⚠ 오늘 체크인 안 됨<div style="font-size:12px;color:#b45309;margin-top:4px;font-weight:400;">먼저 체크인 페이지에서 체크인하세요</div></div>';
         }
         actionDiv.innerHTML = html;
-        actionDiv.dataset.cwoFixed = 'done';
-      }).catch(function(e){actionDiv.dataset.cwoFixed = '';});
+      }).catch(function(e){console.warn('cwo status fetch failed', name, e);});
     });
   }
-  window.cwoFixedDoCheckout = async function(studentId, name, btn) {
+  window.cwoFixedDoCheckout = async function(btn){
     btn.disabled = true; btn.style.opacity = '0.5'; btn.innerText = '체크아웃 중…';
+    var sid = btn.getAttribute('data-sid'); var name = btn.getAttribute('data-name');
     try {
-      var r = await fetch('/api/checkout', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({studentId: studentId, studentName: name})});
+      var r = await fetch('/api/checkout', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({studentId: sid, studentName: name})});
       var d = await r.json();
       if (!d.success && !d.recordId) throw new Error(d.error || '실패');
-      btn.parentElement.innerHTML = '<div style="background:#ecfdf5;border:2px solid #10b981;color:#065f46;padding:14px;border-radius:12px;text-align:center;font-weight:700;font-size:16px;">✅ 체크아웃 완료! ' + (d.checkOutTime||'') + '</div>';
+      btn.parentElement.innerHTML = '<div data-cwofix="1" style="background:#ecfdf5;border:2px solid #10b981;color:#065f46;padding:14px;border-radius:12px;text-align:center;font-weight:700;font-size:16px;">✅ 체크아웃 완료! ' + (d.checkOutTime||'') + '</div>';
     } catch(e) {
       btn.disabled = false; btn.style.opacity = '1'; btn.innerText = '🚪 체크아웃 / Check Out';
       alert('체크아웃 실패: ' + e.message);
     }
   };
-  // Run periodically (handles dynamic re-renders)
-  setInterval(fixCoBtn, 800);
+  // MutationObserver for dynamic re-renders + interval as fallback
+  var results = document.getElementById('checkoutResults');
+  if (results) {
+    new MutationObserver(fixCoBtn).observe(results, {childList:true, subtree:true});
+  }
+  setInterval(fixCoBtn, 600);
 })();
 </script>
-<!-- ===== END CHECKOUT BUTTON FIX ===== -->
+<!-- ===== END CHECKOUT BUTTON FIX v2 ===== -->
 </body>
 </html>
 
