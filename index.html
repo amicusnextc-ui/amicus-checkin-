@@ -961,9 +961,11 @@ function closeSuccess(){
   document.getElementById("countdownBanner").classList.add("hidden");
   clearTimeout(_successTimer);
   clearInterval(window._cd_interval);
+  // Family queue: auto-advance if more students pending
   if(window._familyQueue && window._familyQueue.length > 0){_familyAdvance();return;}
-  if(window._familyTotal > 0){window._familyTotal = 0; goHome(); return;}
-  goHome();
+  // Family flow done — clear state but STAY on search results (no goHome)
+  if(window._familyTotal > 0){window._familyTotal = 0;}
+  // Do NOT goHome — user stays on search results so they can retry or click header logo manually to return to welcome
 }
 function openVisitorModal(){["v-name","v-nameEN","v-grade","v-guardian","v-phone"].forEach(function(id){document.getElementById(id).value="";});document.getElementById("v-dob").value="";document.getElementById("v-allergy").value="없음";document.getElementById("v-pickupAck").checked=false;document.getElementById("v-deptPreview").classList.add("hidden");document.getElementById("visitorError").classList.add("hidden");document.getElementById("visitorModal").classList.remove("hidden");setTimeout(function(){document.getElementById("v-name").focus();},300);}
 function closeVisitorModal(){document.getElementById("visitorModal").classList.add("hidden");}
