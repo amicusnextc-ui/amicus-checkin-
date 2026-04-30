@@ -761,6 +761,13 @@ function buildPreview(d) {
 
 function printTag() {
   if (!window._printData || !window._printData.amcCode) return;
+  // Stop auto-close countdown — user might need to retry print if dialog accidentally closed
+  clearTimeout(_successTimer);
+  clearInterval(window._cd_interval);
+  var _cb = document.getElementById("countdownBanner");
+  if(_cb) _cb.classList.add("hidden");
+  var _closeBtn = document.querySelector('#success button[onclick="closeSuccess()"]');
+  if(_closeBtn) { _closeBtn.textContent = "✅ 옱료 후 닫기"; _closeBtn.className = "flex-1 py-3.5 rounded-2xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition-colors"; }
   var d = window._printData;
   var QR_URL = d.QR_URL || "https://amicus-checkin.vercel.app/";
   var isBday = d.isBday;
