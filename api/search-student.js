@@ -102,7 +102,10 @@ module.exports = async (req, res) => {
                             or: [
                               { property: "이름 (Name)", title: { contains: name.trim() } },
                               { property: "영문이름 (Name EN)", rich_text: { contains: name.trim() } },
-                                      ]
+                              { property: "아버지 이름 (Father Name)", rich_text: { contains: name.trim() } },
+                              { property: "어머니 이름 (Mother Name)", rich_text: { contains: name.trim() } },
+                              { property: "보호자 (Guardian)", rich_text: { contains: name.trim() } },
+                                    ]
                   };
           }
           const response = await fetch("https://api.notion.com/v1/databases/" + STUDENT_DB + "/query", {
