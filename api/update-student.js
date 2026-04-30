@@ -72,9 +72,59 @@ function buildEmailHtml(opts){
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // === GET handler: liability submission history ===
+  if (req.method === 'GET') {
+    try {
+      const action = (req.query && req.query.action) || '';
+      if (action !== 'history') {
+        return res.status(400).json({ error: 'Unknown GET action. Use ?action=history' });
+      }
+      const days = parseInt((req.query && req.query.days) || '30', 10);
+      const cutoffMs = Date.now() - days * 24 * 60 * 60 * 1000;
+      const cutoffISO = new Date(cutoffMs).toISOString();
+      const r = await fetch('https://api.notion.com/v1/databases/' + LIABILITY_ARCHIVE_DB + '/query', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + process.env.NOTION_TOKEN,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          filter: { property: '제출 일시', date: { after: cutoffISO } },
+          sorts: [ { property: '제출 일시', direction: 'descending' } ],
+          page_size: 100
+        })
+      });
+      const data = await r.json();
+      if (!r.ok) return res.status(500).json({ error: data.message || 'Notion query failed' });
+      const submissions = (data.results || []).map(p => {
+        const props = p.properties || {};
+        const rt = (f) => (props[f] && props[f].rich_text && props[f].rich_text[0] && props[f].rich_text[0].plain_text) || '';
+        const title = (props['제출 제목'] && props['제출 제목'].title && props['제출 제목'].title[0] && props['제출 제목'].title[0].plain_text) || '';
+        return {
+          id: p.id,
+          title,
+          studentName: rt('학생 이름'),
+          studentDept: (props['학생 부서'] && props['학생 부서'].select && props['학생 부서'].select.name) || '',
+          studentAmcId: rt('학생 ID (AMC)'),
+          guardianName: rt('보호자 이름'),
+          email: (props['수신 이메일'] && props['수신 이메일'].email) || '',
+          emailStatus: (props['이메일 발송 상태'] && props['이메일 발송 상태'].select && props['이메일 발송 상태'].select.name) || '',
+          submittedAt: (props['제출 일시'] && props['제출 일시'].date && props['제출 일시'].date.start) || '',
+          termsVersion: (props['약관 버전'] && props['약관 버전'].select && props['약관 버전'].select.name) || '',
+          createdAt: p.created_time
+        };
+      });
+      return res.status(200).json({ submissions, count: submissions.length, days });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
