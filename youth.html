@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>중고등부 체크인 키오스크 | 아미쿠스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+* { font-family: 'Noto Sans KR', Arial, sans-serif; }
+.student-card { transition: all .2s; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+.student-card:not(.checked-in):active { transform: scale(.94); }
+.student-card.checked-in { opacity: .55; }
+.student-card.checked-in .avatar { background: #9ca3af !important; }
+@keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(99,102,241,.5); } 70% { box-shadow: 0 0 0 14px rgba(99,102,241,0); } 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); } }
+.tap-hint { animation: pulseRing 1.5s infinite; }
+@keyframes checkPop { 0% { transform: scale(0); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
+.check-pop { animation: checkPop .4s ease forwards; }
+@keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+.toast-anim { animation: slideUp .3s cubic-bezier(.32,.72,0,1); }
+</style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-10 bg-white/95 backdrop-blur shadow-sm border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+    <div class="min-w-0">
+      <h1 class="text-xl sm:text-2xl font-black text-gray-900 truncate">🎉 <span id="deptTitle">중고등부</span> 체크인</h1>
+      <p class="text-xs sm:text-sm text-gray-500" id="dateLabel"></p>
+    </div>
+    <div class="text-right flex-shrink-0">
+      <div class="text-2xl sm:text-3xl font-black text-indigo-600 leading-none"><span id="checkedCount">0</span><span class="text-base text-gray-400">/<span id="totalCount">0</span></span></div>
+      <div class="text-[10px] sm:text-xs text-gray-500 mt-1">체크인 완료</div>
+    </div>
+  </div>
+</header>
+
+<!-- INSTRUCTIONS -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 mt-4">
+  <div class="bg-gradient-to-r from-indigo-100 to-purple-100 border border-indigo-200 rounded-2xl p-3 sm:p-4 text-center">
+    <p class="text-sm sm:text-base font-bold text-indigo-900">👇 <strong>본인 이름 카드를 탭</strong>하세요 / Tap your name to check in</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto p-4 sm:p-6">
+  <div id="loading" class="text-center py-20">
+    <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3"></div>
+    <p class="text-gray-500 text-sm">학생 명단 불러오는 중...</p>
+  </div>
+
+  <div id="cardsContainer" class="hidden">
+    <div id="cards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4"></div>
+
+    <button id="visitorBtn" onclick="openVisitorModal()"
+            class="mt-8 w-full max-w-md mx-auto block py-4 sm:py-5 px-6 rounded-2xl bg-gradient-to-r from-orange-400 to-pink-500 text-white font-black text-lg sm:text-xl shadow-lg hover:shadow-xl active:scale-95 transition-all">
+      🆕 처음 왔어요 / First Time Visitor
+    </button>
+
+    <p class="text-center text-xs text-gray-400 mt-6">
+      🔒 학생 리더가 도와드립니다 · 데이터는 안전하게 보호됩니다
+    </p>
+  </div>
+</main>
+
+<!-- VISITOR MODAL -->
+<div id="visitorModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-xl font-black text-gray-900">🆕 새 친구 등록</h2>
+        <p class="text-xs text-gray-500 mt-0.5">학생 리더가 도와드릴게요</p>
+      </div>
+      <button onclick="closeVisitorModal()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">한글 이름 <span class="text-red-500">*</span></label>
+        <input id="vName" type="text" placeholder="예: 홍길동" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">English Name (Optional)</label>
+        <input id="vNameEN" type="text" placeholder="e.g. John" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">학년 <span class="text-red-500">*</span></label>
+        <select id="vGrade" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base bg-white">
+          <option value="">선택해주세요</option>
+          <option value="6학년">6학년 / 6th</option>
+          <option value="7학년">7학년 / 7th</option>
+          <option value="8학년">8학년 / 8th</option>
+          <option value="9학년">9학년 / 9th</option>
+          <option value="10학년">10학년 / 10th</option>
+          <option value="11학년">11학년 / 11th</option>
+          <option value="12학년">12학년 / 12th</option>
+          <option value="기타">기타 / Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">알러지 (선택)</label>
+        <input id="vAllergy" type="text" placeholder="예: 땅콩 / 없으면 비워두세요" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+      </div>
+    </div>
+    <div id="vError" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="closeVisitorModal()" class="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition-colors">취소</button>
+      <button onclick="submitVisitor()" id="vSubmit" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold shadow-md hover:shadow-lg transition-all">등록 + 체크인</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-emerald-500 text-white px-5 py-3 sm:px-7 sm:py-4 rounded-2xl shadow-2xl text-base sm:text-lg font-bold flex items-center gap-3 max-w-[90vw]">
+  <span id="toastIcon" class="text-2xl">✅</span>
+  <span id="toastMsg"></span>
+</div>
+
+<!-- FOOTER -->
+<footer class="text-center py-6 text-xs text-gray-400">
+  <a href="/staff.html" class="hover:text-indigo-600 transition-colors">간사 모니터링 →</a>
+</footer>
+
+<script>
+// === CONFIG ===
+const params = new URLSearchParams(location.search);
+const DEPT_PARAM = (params.get('dept') || 'middlehigh').toLowerCase();
+const DEPT_MAP = {
+  middlehigh: { full: '중고등부 (Youth)', short: '중고등부' },
+  youth:      { full: '중고등부 (Youth)', short: '중고등부' },
+  elementary: { full: '초등부 (Elementary)', short: '초등부' },
+  juniorelem: { full: '유년부 (Elementary Jr)', short: '유년부' },
+  preschool:  { full: '유치부 (Preschool)', short: '유치부' },
+  infant:     { full: '유아부 (Infant)', short: '유아부' }
+};
+const DEPT = DEPT_MAP[DEPT_PARAM] || DEPT_MAP.middlehigh;
+
+document.getElementById('deptTitle').textContent = DEPT.short;
+document.title = DEPT.short + ' 체크인 키오스크 | 아미쿠스';
+
+const today = new Date();
+const wkday = ['일','월','화','수','목','금','토'][today.getDay()];
+document.getElementById('dateLabel').textContent =
+  (today.getMonth()+1) + '/' + today.getDate() + '/' + (today.getFullYear()-2000) + ' (' + wkday + ')';
+
+let students = [];
+let checkedIds = new Set();
+let _refreshTimer = null;
+
+// === LOAD ROSTER ===
+async function loadStudents() {
+  try {
+    const r = await fetch('/api/roster', { cache: 'no-store' });
+    const d = await r.json();
+    students = (d.students || []).filter(s =>
+      s.department && s.department.indexOf(DEPT.short) === 0
+    );
+    document.getElementById('totalCount').textContent = students.length;
+    renderCards();
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('cardsContainer').classList.remove('hidden');
+    await loadCheckedState();
+  } catch (e) {
+    document.getElementById('loading').innerHTML =
+      '<div class="text-red-500 font-bold">⚠️ 로딩 실패: ' + e.message + '</div>' +
+      '<button onclick="loadStudents()" class="mt-3 px-4 py-2 bg-indigo-600 text-white rounded-xl">다시 시도</button>';
+  }
+}
+
+async function loadCheckedState() {
+  try {
+    const r = await fetch('/api/attendance-today?password=3', { cache: 'no-store' });
+    if (!r.ok) return;
+    const d = await r.json();
+    const records = d.records || [];
+    checkedIds.clear();
+    records.forEach(rec => {
+      const match = students.find(s => (s.name||'').trim() === (rec.name||'').trim());
+      if (match) checkedIds.add(match.id);
+    });
+    renderCards();
+  } catch(e) { console.warn('check state load failed', e); }
+}
+
+function getInitials(s) {
+  const en = (s.nameEN || '').trim();
+  if (en) {
+    const parts = en.split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return en.slice(0,2).toUpperCase();
+  }
+  return (s.name || '?').slice(0,2);
+}
+
+const COLORS = ['bg-blue-500','bg-emerald-500','bg-purple-500','bg-pink-500','bg-orange-500','bg-cyan-500','bg-indigo-500','bg-fuchsia-500','bg-rose-500','bg-teal-500'];
+function getColor(id) {
+  if (!id) return COLORS[0];
+  let h = 0;
+  for (let i=0; i<id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return COLORS[Math.abs(h) % COLORS.length];
+}
+
+function renderCards() {
+  const sorted = students.slice().sort((a,b) => {
+    const aChecked = checkedIds.has(a.id) ? 1 : 0;
+    const bChecked = checkedIds.has(b.id) ? 1 : 0;
+    if (aChecked !== bChecked) return aChecked - bChecked;
+    return (a.name || '').localeCompare(b.name || '', 'ko');
+  });
+  const container = document.getElementById('cards');
+  container.innerHTML = sorted.map(s => {
+    const isChecked = checkedIds.has(s.id);
+    const initials = getInitials(s);
+    const color = getColor(s.id);
+    return `
+      <div class="student-card ${isChecked?'checked-in':'bg-white shadow-md hover:shadow-xl tap-hint'} rounded-2xl p-4 text-center"
+           data-id="${s.id}" onclick="checkInStudent('${s.id}')">
+        <div class="avatar w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto mb-2 flex items-center justify-center text-xl sm:text-2xl font-black text-white ${color} ${isChecked?'check-pop':''}">
+          ${isChecked?'<span class="text-3xl">✓</span>':initials}
+        </div>
+        <div class="text-sm sm:text-base font-bold text-gray-900 truncate">${escapeHtml(s.name)}</div>
+        ${s.nameEN?`<div class="text-[10px] sm:text-xs text-gray-400 truncate">${escapeHtml(s.nameEN)}</div>`:''}
+        ${s.grade?`<div class="text-[10px] sm:text-xs text-gray-500 mt-0.5">${escapeHtml(s.grade)}</div>`:''}
+        <div class="mt-2 text-xs ${isChecked?'text-gray-400 font-bold':'text-indigo-600 font-black'}">
+          ${isChecked?'✓ 체크인 완료':'탭하기 / TAP'}
+        </div>
+      </div>`;
+  }).join('');
+  document.getElementById('checkedCount').textContent = checkedIds.size;
+}
+
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function checkInStudent(studentId) {
+  if (checkedIds.has(studentId)) {
+    showToast('이미 체크인 완료!', 'info');
+    return;
+  }
+  const s = students.find(x => x.id === studentId);
+  if (!s) return;
+  // Optimistic UI
+  checkedIds.add(studentId);
+  renderCards();
+  try {
+    const r = await fetch('/api/checkin', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name: s.name,
+        department: s.department,
+        isNew: s.isVisitor === true,
+        hasAllergy: !!(s.allergy && s.allergy.trim() && s.allergy.trim() !== '없음'),
+        notes: '',
+        staff: '학생리더 (키오스크)',
+        studentId: s.id,
+        bypassLiability: true  // youth: liability handled separately at semester start
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '체크인 실패');
+    showToast(s.name + ' 환영합니다! 🎉', 'success');
+  } catch(e) {
+    checkedIds.delete(studentId);
+    renderCards();
+    showToast('실패: ' + e.message, 'error');
+  }
+}
+
+function showToast(msg, type) {
+  const toast = document.getElementById('toast');
+  const icon = document.getElementById('toastIcon');
+  const msgEl = document.getElementById('toastMsg');
+  msgEl.textContent = msg;
+  if (type === 'error') {
+    icon.textContent = '⚠️';
+    toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-red-500 text-white px-5 py-3 sm:px-7 sm:py-4 rounded-2xl shadow-2xl text-base sm:text-lg font-bold flex items-center gap-3 max-w-[90vw] toast-anim';
+  } else if (type === 'info') {
+    icon.textContent = 'ℹ️';
+    toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-gray-700 text-white px-5 py-3 sm:px-7 sm:py-4 rounded-2xl shadow-2xl text-base sm:text-lg font-bold flex items-center gap-3 max-w-[90vw] toast-anim';
+  } else {
+    icon.textContent = '✅';
+    toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-emerald-500 text-white px-5 py-3 sm:px-7 sm:py-4 rounded-2xl shadow-2xl text-base sm:text-lg font-bold flex items-center gap-3 max-w-[90vw] toast-anim';
+  }
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+// === VISITOR ===
+function openVisitorModal() {
+  ['vName','vNameEN','vGrade','vAllergy'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
+  document.getElementById('vError').classList.add('hidden');
+  document.getElementById('visitorModal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('vName').focus(),100);
+}
+function closeVisitorModal() {
+  document.getElementById('visitorModal').classList.add('hidden');
+}
+async function submitVisitor() {
+  const name = document.getElementById('vName').value.trim();
+  const nameEN = document.getElementById('vNameEN').value.trim();
+  const grade = document.getElementById('vGrade').value.trim();
+  const allergy = document.getElementById('vAllergy').value.trim() || '없음';
+  const err = document.getElementById('vError');
+  err.classList.add('hidden');
+  if (!name) { err.textContent='이름을 입력해주세요'; err.classList.remove('hidden'); return; }
+  if (!grade) { err.textContent='학년을 선택해주세요'; err.classList.remove('hidden'); return; }
+
+  const btn = document.getElementById('vSubmit');
+  btn.disabled = true; const oldText = btn.textContent; btn.textContent = '등록 중...';
+
+  // Compute fake DOB based on grade for backend dept assignment (visitor-checkin uses age to assign dept)
+  const gradeNum = parseInt(grade) || 9;
+  const ageGuess = gradeNum + 6; // rough: grade 9 = 15yo
+  const fakeDOB = new Date();
+  fakeDOB.setFullYear(fakeDOB.getFullYear() - ageGuess);
+  fakeDOB.setMonth(0); fakeDOB.setDate(15);
+  const dobStr = fakeDOB.toISOString().slice(0,10);
+
+  try {
+    const r = await fetch('/api/visitor-checkin', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name, nameEN, grade, allergy,
+        guardian: '(학생 본인)',
+        phone: '',
+        dob: dobStr
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '등록 실패');
+    if (d.duplicate) {
+      err.textContent = '같은 이름 학생이 이미 있어요. 학생 리더 도움 받으세요.';
+      err.classList.remove('hidden');
+      btn.disabled = false; btn.textContent = oldText;
+      return;
+    }
+    closeVisitorModal();
+    showToast(name + ' 환영합니다! 🎉', 'success');
+    await loadStudents();
+  } catch(e) {
+    err.textContent = e.message;
+    err.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = oldText;
+  }
+}
+
+// === Auto-refresh every 30s ===
+function startAutoRefresh() {
+  clearInterval(_refreshTimer);
+  _refreshTimer = setInterval(loadCheckedState, 30000);
+}
+
+// Pause refresh when tab not visible
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) clearInterval(_refreshTimer);
+  else { loadCheckedState(); startAutoRefresh(); }
+});
+
+loadStudents();
+startAutoRefresh();
+</script>
+
+</body>
+</html>
