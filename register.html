@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>정식 등록 / Registration | 아미쿠스 교회</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>* { font-family: 'Noto Sans KR', Arial, sans-serif; }</style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
+
+<header class="bg-white shadow-sm border-b border-gray-100">
+  <div class="max-w-2xl mx-auto px-4 sm:px-6 py-4">
+    <h1 class="text-xl sm:text-2xl font-black text-gray-900">🎉 아미쿠스 교회 정식 등록 / Registration</h1>
+    <p class="text-sm text-gray-500 mt-1">자녀를 정식 등록 해주세요 / Please complete your child's registration</p>
+  </div>
+</header>
+
+<main class="max-w-2xl mx-auto px-4 sm:px-6 py-6">
+
+  <!-- LOADING -->
+  <div id="loading" class="text-center py-20">
+    <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3"></div>
+    <p class="text-gray-500 text-sm">정보 불러오는 중... / Loading...</p>
+  </div>
+
+  <!-- ERROR -->
+  <div id="error" class="hidden bg-red-50 border border-red-200 rounded-2xl p-5 text-center">
+    <div class="text-3xl mb-2">⚠️</div>
+    <h2 class="text-lg font-black text-red-800 mb-2" id="errTitle">링크 오류 / Link Error</h2>
+    <p class="text-sm text-red-700" id="errMsg"></p>
+    <p class="text-xs text-red-600 mt-3">
+      문의: amicusnextc@gmail.com<br/>
+      Contact: amicusnextc@gmail.com
+    </p>
+  </div>
+
+  <!-- FORM -->
+  <form id="registerForm" class="hidden space-y-5">
+    <!-- Student info (auto-filled, readonly) -->
+    <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-4">
+      <h2 class="text-sm font-black text-indigo-900 uppercase tracking-wider mb-3">학생 정보 / Student Info</h2>
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div><span class="text-gray-500">이름 / Name:</span> <strong id="studentName" class="text-gray-900"></strong></div>
+        <div><span class="text-gray-500">영문 / English:</span> <strong id="studentNameEN" class="text-gray-900"></strong></div>
+        <div><span class="text-gray-500">학년 / Grade:</span> <strong id="studentGrade" class="text-gray-900"></strong></div>
+        <div><span class="text-gray-500">알러지 / Allergy:</span> <strong id="studentAllergy" class="text-gray-900">없음</strong></div>
+      </div>
+      <p class="text-xs text-indigo-700 mt-3">
+        ※ 학생 정보는 자동으로 채워졌습니다. 수정이 필요하면 교회로 연락해주세요.<br/>
+        Student info is auto-filled. Contact the church if changes are needed.
+      </p>
+    </div>
+
+    <!-- Parent Info -->
+    <div class="bg-white shadow-md rounded-2xl p-5">
+      <h2 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-4">부모 정보 / Parent Info <span class="text-red-500">*</span></h2>
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Parent Name / 부모 이름 <span class="text-red-500">*</span></label>
+          <input id="pName" type="text" required class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Parent Email / 부모 이메일 <span class="text-red-500">*</span></label>
+          <input id="pEmail" type="email" required class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Parent Phone / 부모 연락처 <span class="text-red-500">*</span></label>
+          <input id="pPhone" type="tel" required placeholder="(213) 555-0123" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency Contact -->
+    <div class="bg-white shadow-md rounded-2xl p-5">
+      <h2 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-4">Emergency Contact / 비상 연락처 <span class="text-red-500">*</span></h2>
+      <p class="text-xs text-gray-500 mb-3">부모님과 다른 분 (조부모, 친척 등) / Different from parent (grandparent, relative, etc.)</p>
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Emergency Name / 비상 연락처 이름 <span class="text-red-500">*</span></label>
+          <input id="emName" type="text" required class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Emergency Phone / 비상 연락처 폰 <span class="text-red-500">*</span></label>
+          <input id="emPhone" type="tel" required class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="bg-white shadow-md rounded-2xl p-5">
+      <h2 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-4">Home Address / 집 주소 <span class="text-red-500">*</span></h2>
+      <input id="addr" type="text" required placeholder="123 Main St, Los Angeles, CA 90001" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+      <p class="text-[10px] text-gray-400 mt-1">전체 주소를 입력해주세요 / Please enter complete address</p>
+    </div>
+
+    <!-- Liability + Media + Signature -->
+    <div class="bg-white shadow-md rounded-2xl p-5">
+      <h2 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-4">Liability Form / 책임 동의서 <span class="text-red-500">*</span></h2>
+      <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 max-h-48 overflow-y-auto text-xs text-gray-700 leading-relaxed mb-4">
+        <p class="font-bold mb-2">아미쿠스 교회 교육부 책임 동의서 / Amicus Church Education Ministry Liability Waiver</p>
+        <p class="mb-2">본인은 아미쿠스 교회 교육부 (이하 "교회") 활동에 자녀를 참여시키는 부모/보호자로서 다음 사항에 동의합니다.</p>
+        <p class="mb-2">As the parent/guardian enrolling my child in Amicus Church Education Ministry (the "Church") programs, I agree to the following:</p>
+        <p class="mb-2"><strong>1. 위험 인지 / Acknowledgment of Risk:</strong> 교회 활동에는 일반적인 안전 위험이 있을 수 있음을 인지합니다. / I acknowledge that Church activities involve standard safety risks.</p>
+        <p class="mb-2"><strong>2. 의료 처치 / Medical Authorization:</strong> 응급 상황 발생 시 교회 직원이 적절한 의료 처치를 받도록 허락합니다. / I authorize Church staff to seek appropriate medical care in emergencies.</p>
+        <p class="mb-2"><strong>3. 책임 면제 / Release of Liability:</strong> 본인은 교회 및 그 직원에 대해 활동 참여로 인한 일반적 부상에 대한 청구를 하지 않을 것에 동의합니다. / I agree not to claim against the Church or its staff for general injuries arising from program participation.</p>
+      </div>
+      <div class="space-y-3">
+        <label class="flex items-start gap-3 text-sm">
+          <input id="agree1" type="checkbox" required class="mt-1 w-5 h-5"/>
+          <span><strong>위험 인지</strong>에 동의합니다 / I agree to <strong>Acknowledgment of Risk</strong></span>
+        </label>
+        <label class="flex items-start gap-3 text-sm">
+          <input id="agree2" type="checkbox" required class="mt-1 w-5 h-5"/>
+          <span><strong>의료 처치 허락</strong>에 동의합니다 / I agree to <strong>Medical Authorization</strong></span>
+        </label>
+        <label class="flex items-start gap-3 text-sm">
+          <input id="agree3" type="checkbox" required class="mt-1 w-5 h-5"/>
+          <span><strong>책임 면제</strong>에 동의합니다 / I agree to <strong>Release of Liability</strong></span>
+        </label>
+        <label class="flex items-start gap-3 text-sm pt-2 border-t border-gray-100">
+          <input id="agreeMedia" type="checkbox" class="mt-1 w-5 h-5"/>
+          <span><strong>미디어 사용 동의</strong> (선택) / <strong>Media use consent</strong> (optional) — 사진/영상이 교회 자료에 사용될 수 있음 / Photos/video may be used in church materials</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Signature -->
+    <div class="bg-white shadow-md rounded-2xl p-5">
+      <h2 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-4">Signature / 전자 서명 <span class="text-red-500">*</span></h2>
+      <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Type your full name as signature / 본인 이름을 입력하여 서명</label>
+      <input id="signature" type="text" required placeholder="e.g. Sarah Kim" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-indigo-200 bg-indigo-50/50 focus:border-indigo-400 focus:outline-none text-base font-bold"/>
+      <p class="text-xs text-gray-500 mt-2">날짜 / Date: <strong id="todayStr"></strong></p>
+    </div>
+
+    <!-- Error -->
+    <div id="formError" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
+
+    <!-- Submit -->
+    <button type="submit" id="submitBtn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black text-lg shadow-lg hover:shadow-xl transition-all">
+      등록 완료 / Complete Registration
+    </button>
+  </form>
+
+  <!-- SUCCESS -->
+  <div id="success" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-8 text-center">
+    <div class="text-5xl mb-3">🎉</div>
+    <h2 class="text-2xl font-black text-emerald-900 mb-2">등록 완료! / Registration Complete!</h2>
+    <p class="text-emerald-800">확인 이메일을 보내드렸습니다. 환영합니다 / We've sent you a confirmation email. Welcome!</p>
+  </div>
+
+</main>
+
+<footer class="text-center py-6 text-xs text-gray-400">
+  🏛️ 아미쿠스 장로교회 교육부 · Amicus Presbyterian Church
+</footer>
+
+<script>
+const params = new URLSearchParams(location.search);
+const STUDENT_ID = params.get('student');
+const TOKEN = params.get('token');
+
+document.getElementById('todayStr').textContent = new Date().toLocaleDateString('en-US', {
+  year: 'numeric', month: 'long', day: 'numeric'
+});
+
+function showError(title, msg) {
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('error').classList.remove('hidden');
+  document.getElementById('errTitle').textContent = title;
+  document.getElementById('errMsg').textContent = msg;
+}
+
+async function loadStudent() {
+  if (!STUDENT_ID || !TOKEN) {
+    showError('잜못된 링크 / Invalid Link', '학생 정보를 찾을 수 없습니다. 이메일의 정확한 링크를 사용해주세요. / Cannot find student info. Please use the exact link from your email.');
+    return;
+  }
+  try {
+    // Call the parent-register endpoint in 'lookup' mode to validate token + fetch student
+    const r = await fetch('/api/update-student?action=parent-register&mode=lookup&student=' + encodeURIComponent(STUDENT_ID) + '&token=' + encodeURIComponent(TOKEN));
+    if (!r.ok) {
+      const d = await r.json().catch(()=>({}));
+      if (r.status === 401 || r.status === 403) {
+        showError('링크 만료 / Link Expired', d.error || '이 링크는 30일 후 만료됩니다. 교회로 연락해주세요. / This link expires after 30 days. Please contact the church.');
+      } else {
+        showError('오류 / Error', d.error || '정보를 불러올 수 없습니다 / Cannot load info');
+      }
+      return;
+    }
+    const d = await r.json();
+    document.getElementById('studentName').textContent = d.name || '';
+    document.getElementById('studentNameEN').textContent = d.nameEN || '';
+    document.getElementById('studentGrade').textContent = d.grade || '';
+    document.getElementById('studentAllergy').textContent = d.allergy || '없음';
+    // Pre-fill email/phone if already known
+    if (d.parentEmail) document.getElementById('pEmail').value = d.parentEmail;
+    if (d.parentPhone) document.getElementById('pPhone').value = d.parentPhone;
+    if (d.parentName) document.getElementById('pName').value = d.parentName;
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('registerForm').classList.remove('hidden');
+  } catch (e) {
+    showError('연결 실패 / Connection Failed', e.message);
+  }
+}
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('formError');
+  err.classList.add('hidden');
+
+  const body = {
+    student: STUDENT_ID,
+    token: TOKEN,
+    parentName: document.getElementById('pName').value.trim(),
+    parentEmail: document.getElementById('pEmail').value.trim(),
+    parentPhone: document.getElementById('pPhone').value.trim(),
+    emergencyName: document.getElementById('emName').value.trim(),
+    emergencyPhone: document.getElementById('emPhone').value.trim(),
+    address: document.getElementById('addr').value.trim(),
+    agreeRisk: document.getElementById('agree1').checked,
+    agreeMedical: document.getElementById('agree2').checked,
+    agreeRelease: document.getElementById('agree3').checked,
+    agreeMedia: document.getElementById('agreeMedia').checked,
+    signature: document.getElementById('signature').value.trim(),
+    submittedDate: new Date().toISOString().slice(0,10)
+  };
+
+  if (!body.agreeRisk || !body.agreeMedical || !body.agreeRelease) {
+    err.textContent = '책임 동의서의 3개 항목 모두 체크해주세요 / Please check all 3 liability boxes';
+    err.classList.remove('hidden'); return;
+  }
+  if (body.signature.length < 2) {
+    err.textContent = '전자 서명을 입력해주세요 / Please enter your signature';
+    err.classList.remove('hidden'); return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '제출 중... / Submitting...';
+
+  try {
+    const r = await fetch('/api/update-student?action=parent-register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '제출 실패 / Submit failed');
+    document.getElementById('registerForm').classList.add('hidden');
+    document.getElementById('success').classList.remove('hidden');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  } catch (ex) {
+    err.textContent = ex.message;
+    err.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = '등록 완료 / Complete Registration';
+  }
+});
+
+loadStudent();
+</script>
+
+</body>
+</html>
