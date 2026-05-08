@@ -42,7 +42,8 @@ module.exports = async (req, res) => {
     // NORMAL VISITOR CHECKIN
     const{name,nameEN,dob,guardian,phone,allergy,notes,grade,school,studentPhone,instagram,invitedBy,parentEmail,parentPhone,visitReason}=body;
     if(!name||!dob)return res.status(400).json({error:"\uC774\uB984\uACFC \uC0DD\uB144\uC6D4\uC77C \uD544\uC218"});
-    if(!nameEN)return res.status(400).json({error:"\uC601\uBB38 \uC774\uB984 \uD544\uC218 / English Name required"});
+    // NOTE: nameEN is validated in the frontend (youth.html requires it; index.html does not).
+    // Do NOT add a backend check here \u2014 index.html submits with empty nameEN and would 400.
     // Day-of-week gate: match /api/checkin behavior
     const nowGate = new Date();
     const laDateGate = new Intl.DateTimeFormat('en-CA', {timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit'}).format(nowGate);
