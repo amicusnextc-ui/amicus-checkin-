@@ -40,8 +40,9 @@ module.exports = async (req, res) => {
           return res.status(200).json({ results, created: results.filter(r=>r.status==="created").length, existing: results.filter(r=>r.status==="exists").length });
     }
     // NORMAL VISITOR CHECKIN
-    const{name,nameEN,dob,guardian,phone,allergy,notes,grade,school,studentPhone,instagram,invitedBy,parentEmail,parentPhone}=body;
+    const{name,nameEN,dob,guardian,phone,allergy,notes,grade,school,studentPhone,instagram,invitedBy,parentEmail,parentPhone,visitReason}=body;
     if(!name||!dob)return res.status(400).json({error:"\uC774\uB984\uACFC \uC0DD\uB144\uC6D4\uC77C \uD544\uC218"});
+    if(!nameEN)return res.status(400).json({error:"\uC601\uBB38 \uC774\uB984 \uD544\uC218 / English Name required"});
     // Day-of-week gate: match /api/checkin behavior
     const nowGate = new Date();
     const laDateGate = new Intl.DateTimeFormat('en-CA', {timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit'}).format(nowGate);
@@ -81,7 +82,7 @@ module.exports = async (req, res) => {
                 const dobExisting = p.properties["\uC0DD\uB144\uC6D4\uC77C (DOB)"]?.date?.start || null;
                 return { id: p.id, name: nm, dept: dp, isVisitor: isVis, dob: dobExisting };
               });
-              return res.status(200).json({ duplicate: true, matches });
+              return res.status(200).json({ duplicate: true, matches: matches });
             }
           }
           const sr=await fetch("https://api.notion.com/v1/pages",{method:"POST",headers:headers2,body:JSON.stringify({parent:{database_id:STUDENT_DB},properties:{
@@ -95,6 +96,7 @@ module.exports = async (req, res) => {
                   "\uD559\uAD50 (School)":{rich_text:[{text:{content:school||""}}]},
                   "Instagram":{rich_text:[{text:{content:instagram||""}}]},
                   "\uCD08\uB300\uC790 (Invited By)":{rich_text:[{text:{content:invitedBy||""}}]},
+                  ...(visitReason?{"\uBC29\uBB38 \uC774\uC720 (Visit Reason)":{select:{name:visitReason}}}:{}),
                   "\uC54C\uB7EC\uC9C0 (Allergy)":{rich_text:[{text:{content:allergy||"\uC5C6\uC74C"}}]},
                   "\uD559\uB144 (Grade)":{rich_text:[{text:{content:grade||""}}]},
                   "\uD2B9\uC774\uC0AC\uD56D (Notes)":{rich_text:[{text:{content:notes||""}}]},
