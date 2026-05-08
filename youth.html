@@ -72,70 +72,65 @@
   <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
     <div class="flex items-center justify-between mb-5">
       <div>
-        <h2 class="text-xl font-black text-gray-900">🆕 새 친구 등록 / New Visitor</h2>
-        <p class="text-xs text-gray-500 mt-0.5">학생 리더가 도와드릴게요 / Student leader will help</p>
+        <h2 class="text-xl font-black text-gray-900">🆕 New Visitor / 새 친구 등록</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Student leader will help / 학생 리더가 도와드릴게요</p>
       </div>
       <button onclick="closeVisitorModal()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
     </div>
     <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 mb-3 text-xs text-indigo-800">
-      📧 <strong>부모 이메일</strong>을 입력해주시면 정식 등록 안내 메일을 보내드릴게요 / Enter parent email to receive registration link
+      📧 Enter <strong>Parent Email</strong> to receive registration link / 부모 이메일을 입력해주시면 정식 등록 안내 메일을 보내드릴게요
     </div>
     <div class="space-y-3">
       <!-- REQUIRED -->
-      <div class="text-xs font-black text-gray-700 uppercase tracking-wider mt-1">필수 / Required</div>
+      <div class="text-xs font-black text-gray-700 uppercase tracking-wider mt-1">Required / 필수</div>
       <div>
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">한글 이름 / Korean Name <span class="text-red-500">*</span></label>
-        <input id="vName" type="text" placeholder="예: 홍길동" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">English Name (Full Name) <span class="text-red-500">*</span></label>
+        <input id="vNameEN" type="text" placeholder="e.g. John Kim" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
       </div>
       <div>
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">학년 / Grade <span class="text-red-500">*</span></label>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Korean Name / 한글 이름 <span class="font-normal text-gray-400">(optional)</span></label>
+        <input id="vName" type="text" placeholder="예: 김길동" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Grade / 학년 <span class="text-red-500">*</span></label>
         <select id="vGrade" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base bg-white">
-          <option value="">선택해주세요 / Please select</option>
-          <option value="6학년">6학년 / 6th</option>
-          <option value="7학년">7학년 / 7th</option>
+          <option value="">Please select / 선택해주세요</option>
+          <option value="6학년">6th / 6학년</option>
+          <option value="7학년">7th / 7학년</option>
           <option value="8학년">8학년 / 8th</option>
-          <option value="9학년">9학년 / 9th</option>
-          <option value="10학년">10학년 / 10th</option>
-          <option value="11학년">11학년 / 11th</option>
-          <option value="12학년">12학년 / 12th</option>
-          <option value="기타">기타 / Other</option>
+          <option value="9학년">9th / 9학년</option>
+          <option value="10학년">10th / 10학년</option>
+          <option value="11학년">11th / 11학년</option>
+          <option value="12학년">12th / 12학년</option>
+          <option value="기타">Other / 기타</option>
         </select>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Parent Name / 부모 이름 <span class="text-red-500">*</span></label>
+        <input id="vParentName" type="text" placeholder="e.g. Sarah Kim" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
       </div>
 
       <!-- OPTIONAL -->
-      <div class="text-xs font-black text-gray-700 uppercase tracking-wider mt-4 pt-3 border-t border-gray-100">선택 / Optional <span class="font-normal text-gray-400 normal-case">(있으면 입력해주세요)</span></div>
+      <div class="text-xs font-black text-gray-700 uppercase tracking-wider mt-4 pt-3 border-t border-gray-100">Optional / 선택 <span class="font-normal text-gray-400 normal-case">(if applicable)</span></div>
       <div>
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">English Name</label>
-        <input id="vNameEN" type="text" placeholder="e.g. John" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">⚠️ Allergies / 알러지</label>
+        <input id="vAllergy" type="text" placeholder="e.g. peanuts / 없으면 비워두세요" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
       </div>
       <div>
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">🏫 학교 / School</label>
-        <input id="vSchool" type="text" placeholder="예: Westview HS" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">🎯 Visit Reason / 방문 이유</label>
+        <select id="vReason" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base bg-white">
+          <option value="">Please select / 선택해주세요</option>
+          <option value="친구 초대">Invited by friend / 친구 초대</option>
+          <option value="가족 (형제자매)">Family (sibling) / 가족 (형제자매)</option>
+          <option value="호기심">Curious / 호기심</option>
+          <option value="행사">Event / 행사</option>
+          <option value="기타">Other / 기타</option>
+        </select>
       </div>
       <div>
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">📱 본인 폰 / Your phone</label>
-        <input id="vStudentPhone" type="tel" placeholder="858-123-4567" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
-      </div>
-      <div>
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">📷 Instagram <span class="font-normal text-gray-400">(without @)</span></label>
-        <input id="vInstagram" type="text" placeholder="yourname" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
-      </div>
-      <div>
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">👋 누가 초대했어요? / Inviting friend</label>
-        <input id="vInvitedBy" type="text" placeholder="예: 김지안" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
-      </div>
-      <div>
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">📧 부모님 이메일 / Parent email</label>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">📧 Parent Email <span class="font-normal text-gray-400">(for registration link)</span> / 부모 이메일</label>
         <input id="vParentEmail" type="email" placeholder="parent@example.com" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-indigo-200 bg-indigo-50/50 focus:border-indigo-400 focus:outline-none text-base"/>
-        <p class="text-[10px] text-indigo-600 mt-1">정식 등록 안내 메일에 사용됩니다 / Used to send registration link</p>
-      </div>
-      <div>
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">📞 부모님 폰 / Parent phone</label>
-        <input id="vParentPhone" type="tel" placeholder="858-123-4567" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
-      </div>
-      <div>
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">⚠️ 알러지 / Allergy</label>
-        <input id="vAllergy" type="text" placeholder="예: 땅콩 / 없으면 비워두세요" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+        <p class="text-[10px] text-indigo-600 mt-1">Used to send registration link / 정식 등록 안내 메일에 사용됩니다</p>
       </div>
     </div>
     <div id="vError" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
@@ -349,7 +344,7 @@ function showToast(msg, type) {
 
 // === VISITOR ===
 function openVisitorModal() {
-  ['vName','vNameEN','vGrade','vAllergy','vSchool','vStudentPhone','vInstagram','vInvitedBy','vParentEmail','vParentPhone'].forEach(id => {
+  ['vName','vNameEN','vGrade','vParentName','vAllergy','vReason','vParentEmail'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     if (el.tagName === 'SELECT') el.selectedIndex = 0;
@@ -357,33 +352,45 @@ function openVisitorModal() {
   });
   document.getElementById('vError').classList.add('hidden');
   document.getElementById('visitorModal').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('vName').focus(),100);
+  setTimeout(()=>document.getElementById('vNameEN').focus(),100);
 }
 function closeVisitorModal() {
   document.getElementById('visitorModal').classList.add('hidden');
 }
 async function submitVisitor() {
-  const name = document.getElementById('vName').value.trim();
-  const nameEN = document.getElementById('vNameEN').value.trim();
+  const koreanName = document.getElementById('vName').value.trim();
+  const englishName = document.getElementById('vNameEN').value.trim();
   const grade = document.getElementById('vGrade').value.trim();
+  const parentName = document.getElementById('vParentName').value.trim();
   const allergy = document.getElementById('vAllergy').value.trim() || '없음';
-  const school = document.getElementById('vSchool').value.trim();
-  const studentPhone = document.getElementById('vStudentPhone').value.trim();
-  let instagram = document.getElementById('vInstagram').value.trim();
-  if (instagram.startsWith('@')) instagram = instagram.slice(1);
-  const invitedBy = document.getElementById('vInvitedBy').value.trim();
+  const visitReason = document.getElementById('vReason').value.trim();
   const parentEmail = document.getElementById('vParentEmail').value.trim();
-  const parentPhone = document.getElementById('vParentPhone').value.trim();
   const err = document.getElementById('vError');
   err.classList.add('hidden');
-  if (!name) { err.textContent='이름을 입력해주세요 / Please enter name'; err.classList.remove('hidden'); return; }
-  if (!grade) { err.textContent='학년을 선택님주세요 / Please select grade'; err.classList.remove('hidden'); return; }
+
+  // Validation: English Name required, Grade required, Parent Name required
+  if (!englishName) {
+    err.textContent = 'Please enter English Name / 영문 이름을 입력해주세요';
+    err.classList.remove('hidden'); return;
+  }
+  if (!grade) {
+    err.textContent = 'Please select Grade / 학년을 선택해주세요';
+    err.classList.remove('hidden'); return;
+  }
+  if (!parentName) {
+    err.textContent = 'Please enter Parent Name / 부모 이름을 입력해주세요';
+    err.classList.remove('hidden'); return;
+  }
   if (parentEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parentEmail)) {
-    err.textContent = '부모님 이메일 형식을 확인해주세요 / Invalid parent email format'; err.classList.remove('hidden'); return;
+    err.textContent = 'Invalid Parent Email format / 부모 이메일 형식을 확인해주세요';
+    err.classList.remove('hidden'); return;
   }
 
+  // Primary name fallback: Korean if provided, else English
+  const name = koreanName || englishName;
+
   const btn = document.getElementById('vSubmit');
-  btn.disabled = true; const oldText = btn.textContent; btn.textContent = '등록 중... / Submitting...';
+  btn.disabled = true; const oldText = btn.textContent; btn.textContent = 'Submitting... / 등록 중...';
 
   // Compute fake DOB based on grade for backend dept assignment (visitor-checkin uses age to assign dept)
   const gradeNum = parseInt(grade) || 9;
@@ -394,11 +401,15 @@ async function submitVisitor() {
   const dobStr = fakeDOB.toISOString().slice(0,10);
 
   const visitorBody = {
-    name, nameEN, grade, allergy,
-    guardian: '(학생 본인)',
+    name,
+    nameEN: englishName,
+    grade,
+    allergy,
+    guardian: parentName,    // → Notion 보호자 (Guardian)
     phone: '',
     dob: dobStr,
-    school, studentPhone, instagram, invitedBy, parentEmail, parentPhone
+    parentEmail,             // → Notion 어머니 이메일 (Mother Email)
+    visitReason              // → Notion 방문 이유 (Visit Reason)
   };
   const cachedPw = sessionStorage.getItem('_kioskDirectorPw');
   if (cachedPw) visitorBody.directorPassword = cachedPw;
