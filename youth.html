@@ -279,22 +279,46 @@ async function checkInStudent(studentId) {
   // Optimistic UI
   checkedIds.add(studentId);
   renderCards();
+  const body = {
+    name: s.name,
+    department: s.department,
+    isNew: s.isVisitor === true,
+    hasAllergy: !!(s.allergy && s.allergy.trim() && s.allergy.trim() !== '없음'),
+    notes: '',
+    staff: '학생리더 (키오스크)',
+    studentId: s.id,
+    bypassLiability: true  // youth: liability handled separately at semester start
+  };
+  // Use cached director password if available (for non-Sunday testing)
+  const cachedPw = sessionStorage.getItem('_kioskDirectorPw');
+  if (cachedPw) body.directorPassword = cachedPw;
   try {
-    const r = await fetch('/api/checkin', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        name: s.name,
-        department: s.department,
-        isNew: s.isVisitor === true,
-        hasAllergy: !!(s.allergy && s.allergy.trim() && s.allergy.trim() !== '없음'),
-        notes: '',
-        staff: '학생리더 (키오스크)',
-        studentId: s.id,
-        bypassLiability: true  // youth: liability handled separately at semester start
-      })
+    let r = await fetch('/api/checkin', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
     });
-    const d = await r.json();
+    let d = await r.json();
+    // Handle non-Sunday director auth requirement
+    if (d.requiresDirectorAuth) {
+      sessionStorage.removeItem('_kioskDirectorPw');
+      const dpw = prompt('⚠️ 일요일 외 체크인 — 디렉터 비밀번호 / Non-Sunday — Director password:');
+      if (!dpw) {
+        checkedIds.delete(studentId); renderCards();
+        showToast('취소됨 / Cancelled', 'info');
+        return;
+      }
+      body.directorPassword = dpw;
+      r = await fetch('/api/checkin', {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+      });
+      d = await r.json();
+      if (d.requiresDirectorAuth) {
+        checkedIds.delete(studentId); renderCards();
+        showToast('비번 틀림 / Wrong password', 'error');
+        return;
+      }
+      // Cache for rest of session
+      sessionStorage.setItem('_kioskDirectorPw', dpw);
+    }
     if (!r.ok) throw new Error(d.error || '체크인 실패 / Check-in failed');
     showToast(s.name + ' 환영합니다! Welcome! 🎉', 'success');
   } catch(e) {
@@ -369,20 +393,39 @@ async function submitVisitor() {
   fakeDOB.setMonth(0); fakeDOB.setDate(15);
   const dobStr = fakeDOB.toISOString().slice(0,10);
 
+  const visitorBody = {
+    name, nameEN, grade, allergy,
+    guardian: '(학생 본인)',
+    phone: '',
+    dob: dobStr,
+    school, studentPhone, instagram, invitedBy, parentEmail, parentPhone
+  };
+  const cachedPw = sessionStorage.getItem('_kioskDirectorPw');
+  if (cachedPw) visitorBody.directorPassword = cachedPw;
   try {
-    const r = await fetch('/api/visitor-checkin', {
+    let r = await fetch('/api/visitor-checkin', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        name, nameEN, grade, allergy,
-        guardian: '(학생 본인)',
-        phone: '',
-        dob: dobStr,
-        school, studentPhone, instagram, invitedBy, parentEmail, parentPhone
-      })
+      body: JSON.stringify(visitorBody)
     });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || '등록 실패');
+    let d = await r.json();
+    // Handle non-Sunday director auth requirement
+    if (d.requiresDirectorAuth) {
+      sessionStorage.removeItem('_kioskDirectorPw');
+      const dpw = prompt('⚠️ 일요일 외 등록 — 디렉터 비밀번호 / Non-Sunday — Director password:');
+      if (!dpw) { btn.disabled = false; btn.textContent = oldText; return; }
+      visitorBody.directorPassword = dpw;
+      r = await fetch('/api/visitor-checkin', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(visitorBody)
+      });
+      d = await r.json();
+      if (d.requiresDirectorAuth) {
+        err.textContent = '비번 틀림 / Wrong password'; err.classList.remove('hidden');
+        btn.disabled = false; btn.textContent = oldText; return;
+      }
+      sessionStorage.setItem('_kioskDirectorPw', dpw);
+    }
+    if (!r.ok) throw new Error(d.error || '등록 실패 / Registration failed');
     if (d.duplicate) {
       err.textContent = '같은 이름 학생이 이미 있어요. 학생 리더 도움 받으세요. / Same name exists — ask leader for help.';
       err.classList.remove('hidden');
