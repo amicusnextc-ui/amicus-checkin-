@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
           return res.status(200).json({ results, created: results.filter(r=>r.status==="created").length, existing: results.filter(r=>r.status==="exists").length });
     }
     // NORMAL VISITOR CHECKIN
-    const{name,nameEN,dob,guardian,phone,allergy,notes,grade}=body;
+    const{name,nameEN,dob,guardian,phone,allergy,notes,grade,school,studentPhone,instagram,invitedBy,parentEmail,parentPhone}=body;
     if(!name||!dob)return res.status(400).json({error:"\uC774\uB984\uACFC \uC0DD\uB144\uC6D4\uC77C \uD544\uC218"});
     // Day-of-week gate: match /api/checkin behavior
     const nowGate = new Date();
@@ -89,12 +89,18 @@ module.exports = async (req, res) => {
                   "\uC601\uBB38\uC774\uB984 (Name EN)":{rich_text:[{text:{content:nameEN||""}}]},
                   "\uBD80\uC11C (Department)":{select:{name:dept}},
                   "\uBCF4\uD638\uC790 (Guardian)":{rich_text:[{text:{content:guardian||""}}]},
-                  "\uC5B4\uBA38\uB2C8 \uC5F0\uB77D\uCC98 (Mother Phone)":phone?{phone_number:phone}:{phone_number:null},
+                  "\uC5B4\uBA38\uB2C8 \uC5F0\uB77D\uCC98 (Mother Phone)":parentPhone?{phone_number:parentPhone}:(phone?{phone_number:phone}:{phone_number:null}),
+                  "\uC5B4\uBA38\uB2C8 \uC774\uBA54\uC77C (Mother Email)":parentEmail?{email:parentEmail}:{email:null},
+                  "\uC5F0\uB77D\uCC98 (Phone)":studentPhone?{phone_number:studentPhone}:{phone_number:null},
+                  "\uD559\uAD50 (School)":{rich_text:[{text:{content:school||""}}]},
+                  "Instagram":{rich_text:[{text:{content:instagram||""}}]},
+                  "\uCD08\uB300\uC790 (Invited By)":{rich_text:[{text:{content:invitedBy||""}}]},
                   "\uC54C\uB7EC\uC9C0 (Allergy)":{rich_text:[{text:{content:allergy||"\uC5C6\uC74C"}}]},
                   "\uD559\uB144 (Grade)":{rich_text:[{text:{content:grade||""}}]},
                   "\uD2B9\uC774\uC0AC\uD56D (Notes)":{rich_text:[{text:{content:notes||""}}]},
                   "\uBC29\uBB38\uC790 (Visitor)":{checkbox:true},
                   "\uC0C1\uD0DC (Status)":{select:{name:"\uD65C\uC131 (Active)"}},
+                  "\uBC29\uBB38 \uD69F\uC218 (Visit Count)":{number:1},
                   "\uB4F1\uB85D\uC77C (Registered)":{date:{start:today}},
                   "\uB9C8\uC9C0\uB9C9 \uCD9C\uC11D (Last Attended)":{date:{start:today}}
           }})});
