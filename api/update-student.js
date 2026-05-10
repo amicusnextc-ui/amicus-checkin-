@@ -206,6 +206,9 @@ module.exports = async (req, res) => {
           page_id: pageId,
           properties: {
             'Liability Form': { select: { name: '제출 완료' } },
+            // Option B: auto-save signer info to student page
+            ...(email ? { '어머니 이메일 (Mother Email)': { email: email } } : {}),
+            ...(guardianName ? { '보호자 (Guardian)': { rich_text: [{ text: { content: String(guardianName).slice(0, 200) } }] } } : {}),
             '특이사항 (Notes)': { rich_text: [{ text: { content: newNotes.slice(0, 1900) } }] }
           }
         });
