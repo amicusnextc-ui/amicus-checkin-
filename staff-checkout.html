@@ -94,12 +94,8 @@
 </footer>
 
 <script>
-// === STAFF NAME (optional, persisted in localStorage) ===
-let STAFF_NAME = localStorage.getItem('staffCheckoutName') || sessionStorage.getItem('sName') || '';
-if (!STAFF_NAME) {
-  STAFF_NAME = (prompt('간사 이름을 입력하세요 / Enter your staff name (e.g. 박명철):', '') || '').trim();
-  if (STAFF_NAME) localStorage.setItem('staffCheckoutName', STAFF_NAME);
-}
+// === STAFF NAME (optional — no prompt, just read if previously saved) ===
+const STAFF_NAME = localStorage.getItem('staffCheckoutName') || sessionStorage.getItem('sName') || '';
 document.getElementById('staffNameDisplay').textContent = STAFF_NAME ? '👤 ' + STAFF_NAME : '👤 간사';
 
 // === DATE LABEL ===
