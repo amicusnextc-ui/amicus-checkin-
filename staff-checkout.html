@@ -94,15 +94,13 @@
 </footer>
 
 <script>
-// === AUTH CHECK ===
-const STAFF_NAME = sessionStorage.getItem('sName') || '';
+// === STAFF NAME (optional, persisted in localStorage) ===
+let STAFF_NAME = localStorage.getItem('staffCheckoutName') || sessionStorage.getItem('sName') || '';
 if (!STAFF_NAME) {
-  // Not logged in — redirect to staff.html
-  if (confirm('간사 로그인이 필요합니다. 간사 페이지로 이동할까요?\nStaff login required. Go to staff page?')) {
-    location.href = '/staff.html';
-  }
+  STAFF_NAME = (prompt('간사 이름을 입력하세요 / Enter your staff name (e.g. 박명철):', '') || '').trim();
+  if (STAFF_NAME) localStorage.setItem('staffCheckoutName', STAFF_NAME);
 }
-document.getElementById('staffNameDisplay').textContent = STAFF_NAME ? '👤 ' + STAFF_NAME : '';
+document.getElementById('staffNameDisplay').textContent = STAFF_NAME ? '👤 ' + STAFF_NAME : '👤 간사';
 
 // === DATE LABEL ===
 const today = new Date();
