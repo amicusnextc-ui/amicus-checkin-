@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>간사 체크아웃 / Staff Checkout | 아미쿠스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+* { font-family: 'Noto Sans KR', Arial, sans-serif; }
+.student-card { transition: all .15s; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+.student-card:active { transform: scale(.95); }
+.student-card.checking-out { opacity: .4; pointer-events: none; }
+.allergy-badge { background: #ef4444; color: white; padding: 2px 6px; border-radius: 6px; font-size: 9px; font-weight: 800; letter-spacing: .5px; }
+@keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+.toast-anim { animation: slideUp .3s cubic-bezier(.32,.72,0,1); }
+@keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
+.pop { animation: pop .35s ease forwards; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen pb-20">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-10 bg-white/95 backdrop-blur shadow-sm border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+    <div class="flex items-center justify-between gap-3 mb-2">
+      <div class="min-w-0">
+        <h1 class="text-xl sm:text-2xl font-black text-gray-900 truncate">🙏 간사 체크아웃 <span class="text-indigo-600">/ Staff Checkout</span></h1>
+        <p class="text-xs sm:text-sm text-gray-500" id="dateLabel"></p>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <div class="text-2xl sm:text-3xl font-black text-orange-600 leading-none"><span id="pendingCount">0</span></div>
+        <div class="text-[10px] sm:text-xs text-gray-500 mt-1">대기중 / Pending</div>
+      </div>
+    </div>
+    <input id="searchBox" type="text" placeholder="🔍 이름 검색 / Search by name" class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-sm"/>
+  </div>
+</header>
+
+<!-- INSTRUCTIONS -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 mt-3">
+  <div class="bg-gradient-to-r from-indigo-100 to-purple-100 border border-indigo-200 rounded-2xl p-3 text-center text-xs sm:text-sm">
+    <p class="font-bold text-indigo-900">👇 부모님이 데리러 오시면 <strong>학생 카드를 탭</strong>하세요 / Tap student card when parent arrives</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto p-4 sm:p-6">
+  <div id="loading" class="text-center py-20">
+    <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3"></div>
+    <p class="text-gray-500 text-sm">불러오는 중... / Loading...</p>
+  </div>
+  <div id="empty" class="hidden text-center py-20">
+    <div class="text-6xl mb-3">✅</div>
+    <h2 class="text-xl font-black text-emerald-700 mb-1">모두 체크아웃 완료!</h2>
+    <p class="text-gray-500">All students have been checked out</p>
+  </div>
+  <div id="container"></div>
+</main>
+
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+    <div class="text-center mb-4">
+      <div class="text-5xl mb-2 pop inline-block">🙏</div>
+      <h2 class="text-xl font-black text-gray-900">체크아웃 확인</h2>
+      <p class="text-sm text-gray-500">Confirm checkout</p>
+    </div>
+    <div id="confirmInfo" class="bg-gray-50 rounded-xl p-4 mb-4 text-sm space-y-1.5"></div>
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-xs text-amber-800 flex items-start gap-2">
+      <span class="text-base">🏷️</span>
+      <span><strong>스티커 확인 필수 / Sticker check required</strong> — 부모님이 가지고 계신 스티커 번호와 일치하는지 확인해주세요 / Verify the sticker number matches</span>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeConfirm()" class="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition-colors">취소 / Cancel</button>
+      <button onclick="doCheckout()" id="confirmBtn" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold shadow-md hover:shadow-lg transition-all">체크아웃 / Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-emerald-500 text-white px-5 py-3 sm:px-7 sm:py-4 rounded-2xl shadow-2xl text-base sm:text-lg font-bold flex items-center gap-3 max-w-[90vw]">
+  <span id="toastIcon" class="text-2xl">✅</span>
+  <span id="toastMsg"></span>
+</div>
+
+<!-- FOOTER -->
+<footer class="text-center py-4 text-xs text-gray-400 fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-100">
+  <span id="staffNameDisplay" class="text-indigo-600 font-bold"></span> ·
+  <a href="/staff.html" class="hover:text-indigo-600 transition-colors">간사 모니터링 / Staff Monitor →</a> ·
+  <button onclick="manualRefresh()" class="hover:text-indigo-600">🔄 새로고침</button>
+</footer>
+
+<script>
+// === AUTH CHECK ===
+const STAFF_NAME = sessionStorage.getItem('sName') || '';
+if (!STAFF_NAME) {
+  // Not logged in — redirect to staff.html
+  if (confirm('간사 로그인이 필요합니다. 간사 페이지로 이동할까요?\nStaff login required. Go to staff page?')) {
+    location.href = '/staff.html';
+  }
+}
+document.getElementById('staffNameDisplay').textContent = STAFF_NAME ? '👤 ' + STAFF_NAME : '';
+
+// === DATE LABEL ===
+const today = new Date();
+const wkday = ['일','월','화','수','목','금','토'][today.getDay()];
+document.getElementById('dateLabel').textContent =
+  (today.getMonth()+1) + '/' + today.getDate() + '/' + (today.getFullYear()-2000) + ' (' + wkday + ')';
+
+// === DEPT ORDER + COLORS ===
+const DEPT_ORDER = ['유아부','유치부','유년부','초등부','중고등부'];
+const DEPT_COLORS = {
+  '유아부':   { bg: 'bg-blue-50',    border: 'border-blue-200',    text: 'text-blue-900',    avatar: 'bg-blue-500',    emoji: '👶' },
+  '유치부':   { bg: 'bg-green-50',   border: 'border-green-200',   text: 'text-green-900',   avatar: 'bg-green-500',   emoji: '🧒' },
+  '유년부':   { bg: 'bg-yellow-50',  border: 'border-yellow-200',  text: 'text-yellow-900',  avatar: 'bg-yellow-500',  emoji: '🦄' },
+  '초등부':   { bg: 'bg-orange-50',  border: 'border-orange-200',  text: 'text-orange-900',  avatar: 'bg-orange-500',  emoji: '⚽' },
+  '중고등부': { bg: 'bg-purple-50',  border: 'border-purple-200',  text: 'text-purple-900',  avatar: 'bg-purple-500',  emoji: '🎓' },
+};
+function deptKey(d) {
+  if (!d) return '기타';
+  for (const k of DEPT_ORDER) if (d.indexOf(k) === 0) return k;
+  return '기타';
+}
+
+// === STATE ===
+let allRecords = [];
+let pendingRecords = [];
+let _refreshTimer = null;
+let _currentRecord = null;
+
+// === LOAD ATTENDANCE ===
+async function load() {
+  try {
+    const r = await fetch('/api/attendance-today?password=3', { cache: 'no-store' });
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      throw new Error(d.error || '권한 오류');
+    }
+    const d = await r.json();
+    allRecords = d.records || [];
+    pendingRecords = allRecords.filter(rec => !rec.checkOut || !rec.checkOut.trim());
+    document.getElementById('loading').classList.add('hidden');
+    render();
+  } catch(e) {
+    document.getElementById('loading').innerHTML =
+      '<div class="text-red-500 font-bold">⚠️ 로딩 실패: ' + e.message + '</div>' +
+      '<button onclick="load()" class="mt-3 px-4 py-2 bg-indigo-600 text-white rounded-xl">다시 시도</button>';
+  }
+}
+
+// === RENDER ===
+function render() {
+  const filter = (document.getElementById('searchBox').value || '').trim().toLowerCase();
+  const filtered = filter
+    ? pendingRecords.filter(rec => (rec.name||'').toLowerCase().indexOf(filter) !== -1)
+    : pendingRecords;
+
+  document.getElementById('pendingCount').textContent = pendingRecords.length;
+
+  const container = document.getElementById('container');
+  const empty = document.getElementById('empty');
+
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    if (pendingRecords.length === 0) {
+      empty.classList.remove('hidden');
+    } else {
+      empty.classList.add('hidden');
+      container.innerHTML = '<div class="text-center py-12 text-gray-400 text-sm">검색 결과 없음 / No matches for "' + escapeHtml(filter) + '"</div>';
+    }
+    return;
+  }
+  empty.classList.add('hidden');
+
+  // Group by dept
+  const groups = {};
+  filtered.forEach(rec => {
+    const k = deptKey(rec.department);
+    if (!groups[k]) groups[k] = [];
+    groups[k].push(rec);
+  });
+
+  // Sort each group by check-in time
+  Object.keys(groups).forEach(k => {
+    groups[k].sort((a,b) => (a.checkIn||'').localeCompare(b.checkIn||''));
+  });
+
+  // Render in DEPT_ORDER
+  const order = DEPT_ORDER.concat(['기타']);
+  let html = '';
+  order.forEach(k => {
+    if (!groups[k] || groups[k].length === 0) return;
+    const c = DEPT_COLORS[k] || { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-900', avatar: 'bg-gray-500', emoji: '📋' };
+    html += `
+      <section class="mb-5">
+        <header class="flex items-center justify-between px-2 mb-2">
+          <h2 class="text-base sm:text-lg font-black ${c.text}">${c.emoji} ${escapeHtml(k)}</h2>
+          <span class="text-xs font-bold ${c.text} ${c.bg} px-3 py-1 rounded-full border ${c.border}">${groups[k].length}명 대기</span>
+        </header>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
+          ${groups[k].map(rec => cardHtml(rec, c)).join('')}
+        </div>
+      </section>`;
+  });
+  container.innerHTML = html;
+}
+
+function cardHtml(rec, c) {
+  const initials = (rec.name||'?').slice(0,2);
+  const allergyBadge = rec.hasAllergy
+    ? '<span class="allergy-badge inline-block mt-1">⚠️ ALLERGY</span>'
+    : '';
+  return `
+    <div class="student-card ${c.bg} border ${c.border} rounded-2xl p-3 text-center shadow-sm hover:shadow-lg"
+         data-rid="${rec.id}" onclick="openConfirm('${rec.id}')">
+      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full mx-auto mb-1.5 flex items-center justify-center text-lg sm:text-xl font-black text-white ${c.avatar}">
+        ${initials}
+      </div>
+      <div class="text-sm font-bold ${c.text} truncate">${escapeHtml(rec.name)}</div>
+      <div class="text-[10px] text-gray-500 mt-0.5">⏱️ ${escapeHtml(rec.checkIn||'?')} ${rec.checkIn ? '· ' + minsAgo(rec.checkIn) + '분' : ''}</div>
+      ${allergyBadge}
+    </div>`;
+}
+
+function minsAgo(timeStr) {
+  // timeStr like "10:30" — compute minutes since check-in
+  const m = (timeStr||'').match(/(\d{1,2}):(\d{2})/);
+  if (!m) return '';
+  const [_, hh, mm] = m;
+  const checkIn = new Date(); checkIn.setHours(parseInt(hh,10), parseInt(mm,10), 0, 0);
+  const diff = Math.max(0, Math.round((Date.now() - checkIn) / 60000));
+  return diff;
+}
+
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// === CONFIRM + CHECKOUT ===
+function openConfirm(recordId) {
+  const rec = pendingRecords.find(r => r.id === recordId);
+  if (!rec) return;
+  _currentRecord = rec;
+  const dept = (rec.department||'').split(' ')[0];
+  const allergyRow = rec.hasAllergy
+    ? '<div class="flex items-center gap-2 text-red-700 font-bold"><span class="allergy-badge">⚠️ 알러지</span><span class="text-xs">스태프에게 확인 필요</span></div>'
+    : '';
+  document.getElementById('confirmInfo').innerHTML =
+    '<div class="font-bold text-lg text-gray-900 text-center mb-2">' + escapeHtml(rec.name) + '</div>' +
+    '<div class="flex justify-between"><span class="text-gray-500">부서</span><span class="font-medium">' + escapeHtml(dept) + '</span></div>' +
+    '<div class="flex justify-between"><span class="text-gray-500">체크인</span><span class="font-medium">' + escapeHtml(rec.checkIn||'-') + '</span></div>' +
+    (rec.notes ? '<div class="flex justify-between"><span class="text-gray-500">메모</span><span class="font-medium text-xs">' + escapeHtml(rec.notes) + '</span></div>' : '') +
+    allergyRow;
+  document.getElementById('confirmModal').classList.remove('hidden');
+}
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.add('hidden');
+  _currentRecord = null;
+}
+async function doCheckout() {
+  if (!_currentRecord) return;
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = true;
+  const oldText = btn.textContent;
+  btn.textContent = '처리 중... / Processing...';
+  // Optimistic: gray out the card
+  const card = document.querySelector(`[data-rid="${_currentRecord.id}"]`);
+  if (card) card.classList.add('checking-out');
+  try {
+    const r = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ recordId: _currentRecord.id, studentName: _currentRecord.name, guardianConfirmed: true })
+    });
+    const d = await r.json();
+    if (!r.ok || !d.success) throw new Error(d.error || 'failed');
+    showToast(_currentRecord.name + ' 체크아웃 완료 ✓ ' + (d.checkOutTime||''), 'success');
+    // Remove from pending list locally
+    pendingRecords = pendingRecords.filter(rec => rec.id !== _currentRecord.id);
+    closeConfirm();
+    render();
+  } catch(e) {
+    if (card) card.classList.remove('checking-out');
+    showToast('실패 / Failed: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+}
+
+// === TOAST ===
+function showToast(msg, type) {
+  const toast = document.getElementById('toast');
+  const icon = document.getElementById('toastIcon');
+  const msgEl = document.getElementById('toastMsg');
+  msgEl.textContent = msg;
+  if (type === 'error') {
+    icon.textContent = '⚠️';
+    toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-40 bg-red-500 text-white px-5 py-3 sm:px-7 sm:py-4 rounded-2xl shadow-2xl text-base sm:text-lg font-bold flex items-center gap-3 max-w-[90vw] toast-anim';
+  } else {
+    icon.textContent = '✅';
+    toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-40 bg-emerald-500 text-white px-5 py-3 sm:px-7 sm:py-4 rounded-2xl shadow-2xl text-base sm:text-lg font-bold flex items-center gap-3 max-w-[90vw] toast-anim';
+  }
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+// === SEARCH ===
+document.getElementById('searchBox').addEventListener('input', render);
+
+// === MANUAL + AUTO REFRESH ===
+function manualRefresh() { load(); }
+function startAutoRefresh() {
+  clearInterval(_refreshTimer);
+  _refreshTimer = setInterval(load, 30000);
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) clearInterval(_refreshTimer);
+  else { load(); startAutoRefresh(); }
+});
+
+load();
+startAutoRefresh();
+</script>
+
+</body>
+</html>
