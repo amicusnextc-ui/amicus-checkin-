@@ -236,21 +236,27 @@ function renderCards() {
     const aChecked = checkedIds.has(a.id) ? 1 : 0;
     const bChecked = checkedIds.has(b.id) ? 1 : 0;
     if (aChecked !== bChecked) return aChecked - bChecked;
-    return (a.name || '').localeCompare(b.name || '', 'ko');
+    // Sort by English name (with Korean fallback) — students are English-speaking
+    const aPrimary = (a.nameEN || a.name || '').trim();
+    const bPrimary = (b.nameEN || b.name || '').trim();
+    return aPrimary.localeCompare(bPrimary, 'en');
   });
   const container = document.getElementById('cards');
   container.innerHTML = sorted.map(s => {
     const isChecked = checkedIds.has(s.id);
     const initials = getInitials(s);
     const color = getColor(s.id);
+    // English name primary, Korean secondary (since 중고등부 students are English-speaking)
+    const primaryName = (s.nameEN || s.name || '').trim();
+    const secondaryName = s.nameEN && s.name && s.nameEN.trim() !== s.name.trim() ? s.name.trim() : '';
     return `
       <div class="student-card ${isChecked?'checked-in':'bg-white shadow-md hover:shadow-xl tap-hint'} rounded-2xl p-4 text-center"
            data-id="${s.id}" onclick="checkInStudent('${s.id}')">
         <div class="avatar w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto mb-2 flex items-center justify-center text-xl sm:text-2xl font-black text-white ${color} ${isChecked?'check-pop':''}">
           ${isChecked?'<span class="text-3xl">✓</span>':initials}
         </div>
-        <div class="text-sm sm:text-base font-bold text-gray-900 truncate">${escapeHtml(s.name)}</div>
-        ${s.nameEN?`<div class="text-[10px] sm:text-xs text-gray-400 truncate">${escapeHtml(s.nameEN)}</div>`:''}
+        <div class="text-sm sm:text-base font-bold text-gray-900 truncate">${escapeHtml(primaryName)}</div>
+        ${secondaryName?`<div class="text-[10px] sm:text-xs text-gray-400 truncate">${escapeHtml(secondaryName)}</div>`:''}
         ${s.grade?`<div class="text-[10px] sm:text-xs text-gray-500 mt-0.5">${escapeHtml(s.grade)}</div>`:''}
         <div class="mt-2 text-xs ${isChecked?'text-gray-400 font-bold':'text-indigo-600 font-black'}">
           ${isChecked?'✓ 체크인 완료':'탭하기 / TAP'}
@@ -315,7 +321,8 @@ async function checkInStudent(studentId) {
       sessionStorage.setItem('_kioskDirectorPw', dpw);
     }
     if (!r.ok) throw new Error(d.error || '체크인 실패 / Check-in failed');
-    showToast(s.name + ' 환영합니다! Welcome! 🎉', 'success');
+    const greetName = (s.nameEN || s.name || '').trim();
+    showToast('Welcome ' + greetName + '! 환영합니다 🎉', 'success');
   } catch(e) {
     checkedIds.delete(studentId);
     renderCards();
@@ -444,7 +451,8 @@ async function submitVisitor() {
       return;
     }
     closeVisitorModal();
-    showToast(name + ' 환영합니다! Welcome! 🎉', 'success');
+    const greetName = (englishName || koreanName).trim();
+    showToast('Welcome ' + greetName + '! 환영합니다 🎉', 'success');
     await loadStudents();
   } catch(e) {
     err.textContent = e.message;
