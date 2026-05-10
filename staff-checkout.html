@@ -135,7 +135,11 @@ async function load() {
     }
     const d = await r.json();
     allRecords = d.records || [];
-    pendingRecords = allRecords.filter(rec => !rec.checkOut || !rec.checkOut.trim());
+    // Hide 중고등부 (Youth) — they self-depart, no formal parent pickup checkout
+    pendingRecords = allRecords.filter(rec =>
+      (!rec.checkOut || !rec.checkOut.trim()) &&
+      !(rec.department || '').startsWith('중고등부')
+    );
     document.getElementById('loading').classList.add('hidden');
     render();
   } catch(e) {
