@@ -529,19 +529,109 @@ function renderLiability() {
     if (myShort && !(s.department || '').includes(myShort)) return false;
     return true;
   });
+  window._liabilityList = list;
   const cnt = document.getElementById('liabilityCount');
   if (cnt) cnt.textContent = list.length ? `(${list.length}명)` : '';
   const el = document.getElementById('liabilityList');
   if (!el) return;
   if (list.length === 0) { el.innerHTML = '<div class="text-sm text-gray-600">모두 제출 완료! ✨</div>'; return; }
-  el.innerHTML = list.map(s => `
-    <div class="flex items-center justify-between p-2 bg-red-50 rounded-lg">
-      <div>
-        <div class="font-semibold text-sm">${s.name}</div>
-        <div class="text-xs text-gray-500">${(s.department||'').split(' ')[0]} · ${s.liabilityForm || '미제출'}</div>
+  const withEmail = list.filter(s => (s.fatherEmail||s.motherEmail||'').trim());
+  const noEmailList = list.filter(s => !(s.fatherEmail||s.motherEmail||'').trim());
+  const bulkBar = (ROLE === 'director') ? `
+    <div class="flex flex-wrap gap-2 mb-3 sticky top-0 bg-white py-2 border-b border-gray-100 z-10">
+      ${withEmail.length ? `<button onclick="bulkSendLiabilityInvites()" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700">📧 이메일 모두 발송 (${withEmail.length}명)</button>` : ''}
+      ${noEmailList.length ? `<button onclick="bulkCopyKakaoLinks()" class="px-3 py-1.5 rounded-lg bg-yellow-500 text-white text-xs font-bold hover:bg-yellow-600">📋 카톡 링크 일괄 복사 (${noEmailList.length}명)</button>` : ''}
+      ${list.length ? `<span class="text-xs text-gray-400 self-center">총 ${list.length}명 미제출</span>` : ''}
+    </div>` : '';
+  el.innerHTML = bulkBar + list.map(s => {
+    const email = (s.fatherEmail||s.motherEmail||'').trim();
+    const phone = (s.phone||s.fatherPhone||s.motherPhone||'').trim();
+    const dept = (s.department||'').split(' ')[0];
+    const grade = s.grade ? ' · ' + s.grade : '';
+    const status = s.liabilityForm || '미제출';
+    const safeName = (s.name||'').replace(/'/g, "\\'");
+    const btns = (ROLE === 'director') ? `
+      <div class="flex flex-wrap gap-1.5 mt-1.5">
+        ${email ? `<button onclick="sendLiabilityInvite('${s.id}', '${safeName}')" class="text-[11px] px-2 py-1 rounded bg-indigo-600 text-white font-semibold hover:bg-indigo-700">📧 발송</button>` : '<span class="text-[11px] text-orange-600 font-semibold">⚠ 이메일 없음</span>'}
+        <button onclick="copyKakaoLink('${s.id}', '${safeName}')" class="text-[11px] px-2 py-1 rounded bg-yellow-500 text-white font-semibold hover:bg-yellow-600">📋 카톡 복사</button>
+        <a href="/liability.html?admin=1&studentId=${s.id}&adminName=${encodeURIComponent(CURRENT_USER||'Director')}" target="_blank" class="text-[11px] px-2 py-1 rounded bg-purple-100 text-purple-700 font-semibold hover:bg-purple-200">✏️ 대리 작성</a>
+      </div>` : '';
+    return `
+    <div class="p-2.5 bg-red-50 rounded-lg" id="lia-row-${s.id}">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0 flex-1">
+          <div class="font-semibold text-sm">${escapeHtml(s.name)}${s.nameEN ? ' <span class="text-xs text-gray-400">'+escapeHtml(s.nameEN)+'</span>' : ''}</div>
+          <div class="text-xs text-gray-500">${escapeHtml(dept)}${escapeHtml(grade)} · <span class="text-red-600 font-semibold">${escapeHtml(status)}</span></div>
+          <div class="text-[11px] text-gray-500 mt-0.5">
+            ${email ? '✉️ '+escapeHtml(email) : '<span class="text-orange-600">⚠ 이메일 없음</span>'}
+            ${phone ? ' · 📞 '+escapeHtml(phone) : ''}
+          </div>
+        </div>
       </div>
-      ${s.phone ? `<a href="tel:${s.phone}" class="text-xs text-red-600">📞</a>` : ''}
-    </div>`).join('');
+      ${btns}
+    </div>`;
+  }).join('');
+}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function sendLiabilityInvite(pageId, name) {
+  if (!confirm(`${name} 부모님께 Liability Form 안내 이메일을 발송할까요?\nSend Liability invite email to ${name}'s parent?`)) return;
+  const row = document.getElementById('lia-row-'+pageId);
+  if (row) row.style.opacity = '0.5';
+  try {
+    const r = await fetch('/api/update-student?action=send-liability-invite', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ pageId })
+    });
+    const d = await r.json();
+    if (!r.ok || !d.success) throw new Error(d.error || 'failed');
+    if (d.sent) { alert('✓ 발송 완료: ' + name); }
+    else if (d.noEmail) { alert('⚠ 부모 이메일 없음 — 카톡 링크 복사 사용'); }
+    else { alert('⚠ 발송 실패. 다시 시도해주세요.'); }
+    if (row) row.style.opacity = '1';
+    // Refresh roster to show updated liability state
+    if (typeof loadAllRoster === 'function') loadAllRoster();
+  } catch(e) {
+    if (row) row.style.opacity = '1';
+    alert('실패: ' + e.message);
+  }
+}
+function copyKakaoLink(pageId, name) {
+  const link = location.origin + '/liability.html?studentId=' + pageId;
+  const msg = `[아미쿠스 교회] ${name} 학생의 Liability Form 작성을 부탁드립니다 🙏\n\n작성 링크 (5분 소요):\n${link}\n\n문의: amicusnextc@gmail.com`;
+  navigator.clipboard.writeText(msg).then(()=>{
+    alert('📋 카톡 메시지 복사됨\n부모님께 KakaoTalk으로 paste 해주세요.');
+  }).catch(()=>{
+    prompt('아래 메시지를 복사해서 KakaoTalk으로 보내세요:', msg);
+  });
+}
+async function bulkSendLiabilityInvites() {
+  const list = (window._liabilityList||[]).filter(s => (s.fatherEmail||s.motherEmail||'').trim());
+  if (!list.length) { alert('이메일 있는 학생이 없습니다.'); return; }
+  if (!confirm(`${list.length}명의 부모님께 Liability 안내 이메일을 일괄 발송할까요?\n(이메일 없는 학생은 제외됨)`)) return;
+  try {
+    const r = await fetch('/api/update-student?action=send-liability-invite', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ pageIds: list.map(s=>s.id) })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'failed');
+    alert(`✓ 발송 완료: ${d.sent}명\n⚠ 이메일 없음: ${d.noEmail}명\n❌ 실패: ${d.failed}명`);
+    if (typeof loadAllRoster === 'function') loadAllRoster();
+  } catch(e) { alert('실패: ' + e.message); }
+}
+function bulkCopyKakaoLinks() {
+  const list = (window._liabilityList||[]).filter(s => !(s.fatherEmail||s.motherEmail||'').trim());
+  if (!list.length) { alert('이메일 없는 학생이 없습니다.'); return; }
+  const lines = list.map(s => {
+    const link = location.origin + '/liability.html?studentId=' + s.id;
+    return `${s.name} (${(s.department||'').split(' ')[0]}):\n${link}`;
+  });
+  const msg = `[아미쿠스 교회] Liability Form 안내 링크 (${list.length}명):\n\n` + lines.join('\n\n') + `\n\n문의: amicusnextc@gmail.com`;
+  navigator.clipboard.writeText(msg).then(()=>{
+    alert(`📋 ${list.length}명 분 카톡 메시지 복사됨\n각 부모님께 개별 KakaoTalk 메시지로 보내주세요.`);
+  }).catch(()=>{
+    prompt('아래를 복사해서 사용:', msg);
+  });
 }
 
 /* =================== NEW VISITORS (THIS WEEK) =================== */
