@@ -270,12 +270,41 @@ async function doCheckout() {
   const card = document.querySelector(`[data-rid="${_currentRecord.id}"]`);
   if (card) card.classList.add('checking-out');
   try {
-    const r = await fetch('/api/checkout', {
+    const body = { recordId: _currentRecord.id, studentName: _currentRecord.name, guardianConfirmed: true };
+    // Use cached director password if available (for non-Sunday testing/use)
+    const cachedPw = sessionStorage.getItem('_kioskDirectorPw');
+    if (cachedPw) body.directorPassword = cachedPw;
+    let r = await fetch('/api/checkout', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ recordId: _currentRecord.id, studentName: _currentRecord.name, guardianConfirmed: true })
+      body: JSON.stringify(body)
     });
-    const d = await r.json();
+    let d = await r.json();
+    // Handle non-Sunday director auth requirement
+    if (d.requiresDirectorAuth) {
+      sessionStorage.removeItem('_kioskDirectorPw');
+      const dpw = prompt('⚠️ 일요일 외 체크아웃 — 디렉터 비밀번호 / Non-Sunday — Director password:');
+      if (!dpw) {
+        if (card) card.classList.remove('checking-out');
+        btn.disabled = false; btn.textContent = oldText;
+        showToast('취소됨 / Cancelled', 'error');
+        return;
+      }
+      body.directorPassword = dpw;
+      r = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+      });
+      d = await r.json();
+      if (d.requiresDirectorAuth) {
+        if (card) card.classList.remove('checking-out');
+        btn.disabled = false; btn.textContent = oldText;
+        showToast('비번 틀림 / Wrong password', 'error');
+        return;
+      }
+      sessionStorage.setItem('_kioskDirectorPw', dpw);
+    }
     if (!r.ok || !d.success) throw new Error(d.error || 'failed');
     showToast(_currentRecord.name + ' 체크아웃 완료 ✓ ' + (d.checkOutTime||''), 'success');
     // Remove from pending list locally
