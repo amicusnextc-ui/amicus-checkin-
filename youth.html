@@ -128,6 +128,11 @@
         </select>
       </div>
       <div>
+        <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">📞 Parent Phone / 부모 연락처</label>
+        <input id="vParentPhone" type="tel" placeholder="(213) 555-0123" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
+        <p class="text-[10px] text-gray-400 mt-1">For emergencies / 비상 연락용</p>
+      </div>
+      <div>
         <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">📧 Parent Email <span class="font-normal text-gray-400">(for registration link)</span> / 부모 이메일</label>
         <input id="vParentEmail" type="email" placeholder="parent@example.com" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-indigo-200 bg-indigo-50/50 focus:border-indigo-400 focus:outline-none text-base"/>
         <p class="text-[10px] text-indigo-600 mt-1">Used to send registration link / 정식 등록 안내 메일에 사용됩니다</p>
@@ -351,7 +356,7 @@ function showToast(msg, type) {
 
 // === VISITOR ===
 function openVisitorModal() {
-  ['vName','vNameEN','vGrade','vParentName','vAllergy','vReason','vParentEmail'].forEach(id => {
+  ['vName','vNameEN','vGrade','vParentName','vAllergy','vReason','vParentPhone','vParentEmail'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     if (el.tagName === 'SELECT') el.selectedIndex = 0;
@@ -371,6 +376,7 @@ async function submitVisitor() {
   const parentName = document.getElementById('vParentName').value.trim();
   const allergy = document.getElementById('vAllergy').value.trim() || '없음';
   const visitReason = document.getElementById('vReason').value.trim();
+  const parentPhone = document.getElementById('vParentPhone').value.trim();
   const parentEmail = document.getElementById('vParentEmail').value.trim();
   const err = document.getElementById('vError');
   err.classList.add('hidden');
@@ -415,6 +421,7 @@ async function submitVisitor() {
     guardian: parentName,    // → Notion 보호자 (Guardian)
     phone: '',
     dob: dobStr,
+    parentPhone,             // → Notion 어머니 연락처 (Mother Phone)
     parentEmail,             // → Notion 어머니 이메일 (Mother Email)
     visitReason              // → Notion 방문 이유 (Visit Reason)
   };
