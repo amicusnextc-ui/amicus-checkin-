@@ -138,6 +138,53 @@ module.exports = async (req, res) => {
       adminMode, adminName
     } = body;
 
+    // === SEND LIABILITY INVITE EMAILS (single or bulk, no pageId guard) ===
+    if (action === 'send-liability-invite') {
+      const pageIds = body.pageIds || (pageId ? [pageId] : []);
+      if (!pageIds.length) return res.status(400).json({ error: 'pageId or pageIds required' });
+      if (!process.env.RESEND_API_KEY) return res.status(500).json({ error: 'Resend not configured' });
+      const results = [];
+      for (const pid of pageIds) {
+        try {
+          const sp = await notion.pages.retrieve({ page_id: pid });
+          const props = sp.properties || {};
+          const t = (f) => (props[f]?.title?.[0]?.plain_text) || '';
+          const studentName = t('이름 (Name)');
+          const motherEmail = props['어머니 이메일 (Mother Email)']?.email;
+          const fatherEmail = props['아버지 이메일 (Father Email)']?.email;
+          const parentEmail = motherEmail || fatherEmail;
+          if (!parentEmail) { results.push({ pid, name: studentName, status: 'no-email' }); continue; }
+          const link = 'https://amicus-checkin.vercel.app/liability.html?studentId=' + pid;
+          const html = '<div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#111827;"><div style="text-align:center;padding:16px 0;border-bottom:1px solid #e5e7eb;"><h1 style="margin:0;font-size:22px;color:#4f46e5;">📋 Liability Form 작성 안내 / Action Required</h1><p style="margin:6px 0 0;font-size:13px;color:#6b7280;">Amicus Presbyterian Church · 교육부</p></div><p style="margin:20px 0 12px;font-size:15px;line-height:1.7;">안녕하세요, <strong>' + studentName + '</strong> 학생의 부모님께,<br/>Hello, parent of <strong>' + studentName + '</strong>:</p><p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#374151;">아미쿠스 교회 교육부 활동 참여를 위해 책임 동의서(Liability Form) 작성이 필요합니다. 약 5분 소요됩니다.<br/><br/>For your child to participate in Amicus Education Ministry programs, please complete the Liability Form. Takes about 5 minutes.</p><div style="text-align:center;margin:28px 0;"><a href="' + link + '" style="display:inline-block;background:linear-gradient(to right,#4f46e5,#7c3aed);color:white;padding:14px 32px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 12px rgba(79,70,229,0.3);">📝 작성하기 / Complete Form</a></div><p style="margin:16px 0 8px;font-size:13px;color:#6b7280;line-height:1.6;border-top:1px solid #e5e7eb;padding-top:16px;">문의 / Contact: amicusnextc@gmail.com<br/>🏛️ Amicus Presbyterian Church</p></div>';
+          const rr = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'Amicus Church <noreply@amicuschurch.com>',
+              to: [parentEmail],
+              bcc: [BCC_EMAIL],
+              subject: '[아미쿠스 교회] ' + studentName + ' - Liability Form 작성 안내',
+              html,
+              reply_to: 'amicusnextc@gmail.com'
+            })
+          });
+          if (rr.ok) {
+            await notion.pages.update({ page_id: pid, properties: { 'Liability Form': { select: { name: '확인 필요' } } } }).catch(()=>{});
+            results.push({ pid, name: studentName, status: 'sent', email: parentEmail });
+          } else {
+            const errd = await rr.json().catch(()=>({}));
+            results.push({ pid, name: studentName, status: 'failed', error: errd.message });
+          }
+        } catch(e) {
+          results.push({ pid, status: 'error', error: e.message });
+        }
+      }
+      const sent = results.filter(r=>r.status==='sent').length;
+      const noEmail = results.filter(r=>r.status==='no-email').length;
+      const failed = results.length - sent - noEmail;
+      return res.json({ success: true, sent, noEmail, failed, results });
+    }
+
     if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
 
     if (action === 'liability') {
