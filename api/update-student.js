@@ -187,6 +187,44 @@ module.exports = async (req, res) => {
 
     if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
 
+    // === AUTO-CLOSE pending checkouts (cron / admin) — Gap #1 ===
+    if (action === 'auto-close') {
+      if (body.password !== process.env.DIRECTOR_PASSWORD) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      const TZ_AUTO = 'America/Los_Angeles';
+      const todayLA = new Intl.DateTimeFormat('en-CA', { timeZone: TZ_AUTO, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+      const targetDate = body.date || todayLA;
+      const ATT_DB = process.env.NOTION_ATTENDANCE_DB_ID || '89b6c47f85a842968493ce28ad93f8de';
+      const nh = { 'Authorization': 'Bearer ' + process.env.NOTION_TOKEN, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' };
+      const qRes = await fetch('https://api.notion.com/v1/databases/' + ATT_DB + '/query', {
+        method: 'POST', headers: nh,
+        body: JSON.stringify({
+          filter: {
+            and: [
+              { property: '\uc8fc\uc77c \ub0a0\uc9dc (Date)', date: { equals: targetDate } },
+              { property: '\uccb4\ud06c\uc544\uc6c3 \uc2dc\uac04 (Check-out)', rich_text: { is_empty: true } }
+            ]
+          },
+          page_size: 100
+        })
+      });
+      const qd = await qRes.json();
+      if (!qRes.ok) return res.status(500).json({ error: 'Query failed: ' + (qd.message || 'unknown') });
+      const pending = qd.results || [];
+      const results = [];
+      for (const rec of pending) {
+        const name = rec.properties['\uc774\ub984 (Name)']?.title?.[0]?.plain_text || '?';
+        const uRes = await fetch('https://api.notion.com/v1/pages/' + rec.id, {
+          method: 'PATCH', headers: nh,
+          body: JSON.stringify({ properties: { '\uccb4\ud06c\uc544\uc6c3 \uc2dc\uac04 (Check-out)': { rich_text: [{ text: { content: 'AUTO' } }] } } })
+        });
+        const ud = await uRes.json();
+        results.push({ id: rec.id, name, ok: uRes.ok, error: uRes.ok ? null : ud.message });
+      }
+      return res.json({ success: true, date: targetDate, total: pending.length, closed: results.filter(r=>r.ok).length, results });
+    }
+
     if (action === 'liability') {
       const ts = timestamp || new Date().toISOString();
       var noteLine = 'Signed by ' + (guardianName||'') + ' on ' + ts + (signature ? ' | Sig: '+signature : '');
