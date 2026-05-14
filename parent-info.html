@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>학부모 정보 입력 / Parent Info | 아미쿠스 교육부</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+* { font-family: 'Noto Sans KR', Arial, sans-serif; }
+.field-filled { background-color: #f0fdf4; border-color: #10b981; }
+.field-empty { background-color: #fef2f2; border-color: #fca5a5; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn .3s ease-out; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen pb-20">
+
+<header class="bg-white shadow-sm border-b border-gray-100">
+  <div class="max-w-2xl mx-auto px-4 py-5">
+    <h1 class="text-xl sm:text-2xl font-black text-gray-900">📝 학부모 정보 입력</h1>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">Parent Information Form · Amicus Presbyterian Church</p>
+  </div>
+</header>
+
+<main class="max-w-2xl mx-auto px-4 py-6">
+
+<!-- LOADING -->
+<div id="loadingSection" class="text-center py-20">
+  <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3"></div>
+  <p class="text-gray-500 text-sm">학생 정보 불러오는 중...</p>
+</div>
+
+<!-- ERROR -->
+<div id="errorSection" class="hidden bg-white rounded-2xl shadow-md p-8 text-center fade-in">
+  <div class="text-5xl mb-3">⚠️</div>
+  <h2 id="errTitle" class="text-lg font-bold text-gray-900 mb-2">잘못된 링크</h2>
+  <p id="errMsg" class="text-sm text-gray-600 mb-4">학생 정보를 찾을 수 없습니다. 이메일/카톡의 정확한 링크를 사용해주세요.</p>
+  <p class="text-xs text-gray-400">문의: amicusnextc@gmail.com</p>
+</div>
+
+<!-- FORM -->
+<form id="formSection" class="hidden space-y-5 fade-in" onsubmit="return handleSubmit(event)">
+
+  <!-- Student summary card -->
+  <div class="bg-white rounded-2xl shadow-md p-5 border border-indigo-100">
+    <div class="flex items-center gap-3 mb-3">
+      <div id="studentAvatar" class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-lg">?</div>
+      <div class="flex-1 min-w-0">
+        <h2 id="studentName" class="text-lg font-bold text-gray-900 truncate"></h2>
+        <p class="text-xs text-gray-500"><span id="studentDept"></span> · <span id="studentAmc"></span></p>
+      </div>
+    </div>
+    <p class="text-xs text-gray-500 bg-gray-50 rounded-lg p-2.5">아래 정보를 채워주세요. <strong class="text-emerald-700">초록</strong>=입력 완료, <strong class="text-red-600">빨강</strong>=미입력. 비어있는 곳만 채우셔도 됩니다.</p>
+  </div>
+
+  <!-- Student info section -->
+  <section class="bg-white rounded-2xl shadow-md p-5">
+    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">👤 학생 정보 <span class="text-xs text-gray-400 font-normal">Student Info</span></h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1">영문 이름 / Name (English)</label>
+        <input id="f_nameEN" type="text" placeholder="예: John Kim" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1">학년 / Grade</label>
+        <input id="f_grade" type="text" placeholder="예: 5th grade" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-bold text-gray-600 mb-1">학교 / School</label>
+        <input id="f_school" type="text" placeholder="예: Olympian High School" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-bold text-gray-600 mb-1">⚠️ 알러지 / Allergies <span class="text-gray-400 font-normal">(없으면 "없음")</span></label>
+        <input id="f_allergy" type="text" placeholder="예: 땅콩, 우유 / 없음" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mother section -->
+  <section class="bg-white rounded-2xl shadow-md p-5">
+    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">👩 어머니 / Mother</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1">이름 / Name</label>
+        <input id="f_motherName" type="text" placeholder="예: 김민지" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1">연락처 / Phone</label>
+        <input id="f_motherPhone" type="tel" placeholder="858-555-1234" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-bold text-gray-600 mb-1">이메일 / Email <span class="text-red-400">*</span></label>
+        <input id="f_motherEmail" type="email" placeholder="mom@example.com" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- Father section -->
+  <section class="bg-white rounded-2xl shadow-md p-5">
+    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">👨 아버지 / Father</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1">이름 / Name</label>
+        <input id="f_fatherName" type="text" placeholder="예: 김철수" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1">연락처 / Phone</label>
+        <input id="f_fatherPhone" type="tel" placeholder="858-555-5678" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-bold text-gray-600 mb-1">이메일 / Email</label>
+        <input id="f_fatherEmail" type="email" placeholder="dad@example.com" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- Address + Emergency -->
+  <section class="bg-white rounded-2xl shadow-md p-5">
+    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">🏠 주소 + 비상연락처</h3>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1">집주소 / Home Address</label>
+        <input id="f_address" type="text" placeholder="예: 12345 Some St, San Diego, CA 92128" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1">비상연락처 / Emergency Contact <span class="text-gray-400 font-normal">(부모님 외)</span></label>
+        <input id="f_emergency" type="tel" placeholder="858-555-9999 (가족/친척)" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- Submit -->
+  <div class="sticky bottom-4 z-10">
+    <button id="submitBtn" type="submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black shadow-xl hover:shadow-2xl transition-all text-base">
+      💾 정보 저장하기 / Save Information
+    </button>
+  </div>
+
+  <p id="formError" class="hidden text-center text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded-xl p-3"></p>
+
+</form>
+
+<!-- SUCCESS -->
+<div id="successSection" class="hidden bg-white rounded-2xl shadow-md p-8 text-center fade-in">
+  <div class="text-6xl mb-3">🎉</div>
+  <h2 class="text-xl font-black text-gray-900 mb-2">감사합니다!</h2>
+  <p class="text-sm text-gray-600 mb-4">정보가 저장되었습니다. 교육부에서 확인 후 학생 카드에 반영됩니다.</p>
+  <p class="text-sm text-gray-600 mb-6">Information saved successfully.</p>
+  <a href="https://www.amicuschurch.com/" class="inline-block px-6 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-bold hover:bg-gray-200 transition-colors">교회 홈페이지로 / Church Home →</a>
+</div>
+
+</main>
+
+<footer class="text-center py-4 text-xs text-gray-400">
+  🏛️ 아미쿠스 장로교회 교육부 · Amicus Presbyterian Church
+</footer>
+
+<script>
+var _currentStudent = null;
+
+function getQueryParam(name) {
+  var m = window.location.search.match(new RegExp('[?&]' + name + '=([^&]+)'));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+function setField(id, value) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (value) {
+    el.value = value;
+    el.classList.add('field-filled');
+  } else {
+    el.classList.add('field-empty');
+  }
+  // On user input, switch class
+  el.addEventListener('input', function() {
+    el.classList.remove('field-empty');
+    if (el.value.trim()) el.classList.add('field-filled');
+    else el.classList.remove('field-filled');
+  });
+}
+
+async function loadStudent() {
+  var presetId = getQueryParam('studentId') || getQueryParam('id');
+  if (!presetId) {
+    showError('잘못된 링크', '학생 ID가 없습니다. 이메일/카톡의 정확한 링크를 사용해주세요.');
+    return;
+  }
+  try {
+    var r = await fetch('/api/roster?password=3', { cache: 'no-store' });
+    if (!r.ok) throw new Error('학생 정보 조회 실패');
+    var d = await r.json();
+    var students = d.students || [];
+    // Match by Notion UUID or AMC code
+    var s = students.find(function(x) {
+      return x.id === presetId || x.studentId === presetId;
+    });
+    if (!s) {
+      showError('학생을 찾을 수 없습니다', '입력하신 학생 ID(' + presetId + ')에 해당하는 학생이 없습니다.');
+      return;
+    }
+    _currentStudent = s;
+    populateForm(s);
+  } catch(e) {
+    showError('오류 발생', e.message);
+  }
+}
+
+function showError(title, msg) {
+  document.getElementById('loadingSection').classList.add('hidden');
+  document.getElementById('formSection').classList.add('hidden');
+  document.getElementById('errTitle').textContent = title;
+  document.getElementById('errMsg').textContent = msg;
+  document.getElementById('errorSection').classList.remove('hidden');
+}
+
+function populateForm(s) {
+  document.getElementById('loadingSection').classList.add('hidden');
+  document.getElementById('formSection').classList.remove('hidden');
+
+  // Header summary
+  document.getElementById('studentName').textContent = s.name + (s.nameEN && s.nameEN !== s.name ? ' (' + s.nameEN + ')' : '');
+  document.getElementById('studentDept').textContent = (s.department || '').split(' ')[0];
+  document.getElementById('studentAmc').textContent = s.studentId || '-';
+  document.getElementById('studentAvatar').textContent = (s.name || '?').slice(0, 1);
+
+  // Pre-fill form fields
+  setField('f_nameEN', s.nameEN || '');
+  setField('f_grade', s.grade || '');
+  setField('f_school', s.school || '');
+  setField('f_allergy', s.allergy || '');
+  setField('f_motherName', s.motherName || '');
+  setField('f_motherPhone', s.motherPhone || '');
+  setField('f_motherEmail', s.motherEmail || '');
+  setField('f_fatherName', s.fatherName || '');
+  setField('f_fatherPhone', s.fatherPhone || '');
+  setField('f_fatherEmail', s.fatherEmail || '');
+  setField('f_address', s.address || '');
+  setField('f_emergency', '');  // not in roster API
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  if (!_currentStudent) return false;
+
+  var motherEmail = document.getElementById('f_motherEmail').value.trim();
+  if (!motherEmail) {
+    showFormError('어머니 이메일은 필수입니다.');
+    return false;
+  }
+
+  var payload = {
+    action: 'parent-info',
+    studentId: _currentStudent.id,
+    fields: {
+      nameEN: document.getElementById('f_nameEN').value.trim(),
+      grade: document.getElementById('f_grade').value.trim(),
+      school: document.getElementById('f_school').value.trim(),
+      allergy: document.getElementById('f_allergy').value.trim(),
+      motherName: document.getElementById('f_motherName').value.trim(),
+      motherPhone: document.getElementById('f_motherPhone').value.trim(),
+      motherEmail: motherEmail,
+      fatherName: document.getElementById('f_fatherName').value.trim(),
+      fatherPhone: document.getElementById('f_fatherPhone').value.trim(),
+      fatherEmail: document.getElementById('f_fatherEmail').value.trim(),
+      address: document.getElementById('f_address').value.trim(),
+      emergency: document.getElementById('f_emergency').value.trim()
+    }
+  };
+
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ 저장 중... / Saving...';
+  document.getElementById('formError').classList.add('hidden');
+
+  try {
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function() { controller.abort(); }, 15000);
+    var r = await fetch('/api/update-student', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    var d = await r.json();
+    if (!r.ok || !d.success) throw new Error(d.error || '저장 실패');
+
+    // Success
+    document.getElementById('formSection').classList.add('hidden');
+    document.getElementById('successSection').classList.remove('hidden');
+    window.scrollTo(0, 0);
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '💾 정보 저장하기 / Save Information';
+    var msg = e.name === 'AbortError' ? '서버 응답이 늦습니다. 다시 시도해주세요.' : ('저장 실패: ' + e.message);
+    showFormError(msg);
+  }
+
+  return false;
+}
+
+function showFormError(msg) {
+  var el = document.getElementById('formError');
+  el.textContent = '⚠️ ' + msg;
+  el.classList.remove('hidden');
+  window.scrollTo({ top: el.offsetTop - 100, behavior: 'smooth' });
+}
+
+// Init
+window.addEventListener('DOMContentLoaded', loadStudent);
+</script>
+
+</body>
+</html>
