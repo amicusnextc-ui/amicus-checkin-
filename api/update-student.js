@@ -223,6 +223,52 @@ module.exports = async (req, res) => {
       return res.json({ success: true, date: targetDate, total: pending.length, closed: results.filter(r=>r.ok).length, results });
     }
 
+    // === PARENT-INFO FORM (parent fills missing info via shared link) — Gap #4 followup ===
+    if (action === 'parent-info') {
+      const sId = body.studentId;
+      const fields = body.fields || {};
+      if (!sId) return res.status(400).json({ error: 'studentId required' });
+      const STUDENT_DB_PI = process.env.NOTION_STUDENT_DB_ID || '107828732f784c39bcb0136a4397c758';
+      const piHeaders = { 'Authorization': 'Bearer ' + process.env.NOTION_TOKEN, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' };
+      // Resolve pageId: accept Notion UUID directly, or look up by AMC code in title
+      let targetPageId = sId;
+      if (sId.length < 30) {
+        // Looks like AMC-XXX — query by 고유번호 (ID) field
+        const qRes = await fetch('https://api.notion.com/v1/databases/' + STUDENT_DB_PI + '/query', {
+          method: 'POST', headers: piHeaders,
+          body: JSON.stringify({ filter: { property: '\uace0\uc720\ubc88\ud638 (ID)', unique_id: { equals: parseInt(String(sId).replace(/[^0-9]/g, '')) } }, page_size: 1 })
+        });
+        const qd = await qRes.json();
+        if (!qd.results || !qd.results[0]) return res.status(404).json({ error: 'Student not found by AMC code: ' + sId });
+        targetPageId = qd.results[0].id;
+      }
+      // Build properties — only include non-empty fields
+      const props = {};
+      if (fields.nameEN) props['\uc601\ubb38\uc774\ub984 (Name EN)'] = { rich_text: [{ text: { content: fields.nameEN } }] };
+      if (fields.grade) props['\ud559\ub144 (Grade)'] = { rich_text: [{ text: { content: fields.grade } }] };
+      if (fields.school) props['\ud559\uad50 (School)'] = { rich_text: [{ text: { content: fields.school } }] };
+      if (fields.allergy) props['\uc54c\ub7ec\uc9c0 (Allergy)'] = { rich_text: [{ text: { content: fields.allergy } }] };
+      if (fields.motherName) props['\uc5b4\uba38\ub2c8 \uc774\ub984 (Mother Name)'] = { rich_text: [{ text: { content: fields.motherName } }] };
+      if (fields.motherPhone) props['\uc5b4\uba38\ub2c8 \uc5f0\ub77d\ucc98 (Mother Phone)'] = { phone_number: fields.motherPhone };
+      if (fields.motherEmail) props['\uc5b4\uba38\ub2c8 \uc774\uba54\uc77c (Mother Email)'] = { email: fields.motherEmail };
+      if (fields.fatherName) props['\uc544\ubc84\uc9c0 \uc774\ub984 (Father Name)'] = { rich_text: [{ text: { content: fields.fatherName } }] };
+      if (fields.fatherPhone) props['\uc544\ubc84\uc9c0 \uc5f0\ub77d\ucc98 (Father Phone)'] = { phone_number: fields.fatherPhone };
+      if (fields.fatherEmail) props['\uc544\ubc84\uc9c0 \uc774\uba54\uc77c (Father Email)'] = { email: fields.fatherEmail };
+      if (fields.address) props['\uc9d1\uc8fc\uc18c (Address)'] = { rich_text: [{ text: { content: fields.address } }] };
+      if (fields.emergency) props['\ube44\uc0c1\uc5f0\ub77d\ucc98 (Emergency)'] = { phone_number: fields.emergency };
+      // Build guardian string if mother/father names provided
+      const guardianParts = [fields.fatherName, fields.motherName].filter(Boolean);
+      if (guardianParts.length > 0) props['\ubcf4\ud638\uc790 (Guardian)'] = { rich_text: [{ text: { content: guardianParts.join('/') } }] };
+      if (Object.keys(props).length === 0) return res.status(400).json({ error: 'No fields to update' });
+      const uRes = await fetch('https://api.notion.com/v1/pages/' + targetPageId, {
+        method: 'PATCH', headers: piHeaders,
+        body: JSON.stringify({ properties: props })
+      });
+      const ud = await uRes.json();
+      if (!uRes.ok) return res.status(500).json({ error: 'Update failed: ' + (ud.message || 'unknown') });
+      return res.json({ success: true, studentId: targetPageId, updatedFields: Object.keys(props).length });
+    }
+
     if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
 
     if (action === 'liability') {
