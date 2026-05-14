@@ -116,7 +116,8 @@ module.exports = async (req, res) => {
                   "\uCCB4\uD06C\uC778 \uC2DC\uAC04 (Check-in)":{rich_text:[{text:{content:timeStr}}]},
                   "\uBC29\uBB38\uC790 (Visitor)":{checkbox:true},
                   "\uC54C\uB7EC\uC9C0 \uC54C\uB9BC (Allergy Alert)":{checkbox:hasAllergy},
-                  "\uD2B9\uC774\uC0AC\uD56D (Notes)":{rich_text:[{text:{content:notes||""}}]}
+                  "\uD2B9\uC774\uC0AC\uD56D (Notes)":{rich_text:[{text:{content:notes||""}}]},
+                  ...(String(dept||"").indexOf("\uC911\uACE0\uB4F1\uBD80") === 0 ? { "\uCCB4\uD06C\uC544\uC6C3 \uC2DC\uAC04 (Check-out)": { rich_text: [{ text: { content: "AUTO" } }] } } : {})
           }})});
           const ad=await ar.json();if(!ar.ok)return res.status(500).json({error:ad.message});
           return res.status(200).json({ok:true,studentId:sd.id,pageId:ad.id,department:dept,checkInTime:timeStr,ageMonths});
