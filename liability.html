@@ -603,8 +603,12 @@ async function submitLiability(){
   if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ warn('liabEmail'); alert('올바른 이메일 주소를 입력해주세요'); return; }
   if(!signature){ warn('liabSignature'); return; }
   if(!agreed){ alert('위 내용에 동의해주세요 (체크박스)'); return; }
-  if((guardian2 && !signature2) || (!guardian2 && signature2)){
-    alert('보호자 2 정보를 완성해주세요 (이름과 서명 모두 입력 또는 둘 다 비우기)');
+  // Guardian 2 is optional — if name without signature, silently treat as no guardian 2
+  if(guardian2 && !signature2){
+    guardian2 = ''; // clear pre-filled name if parent didn't sign for them
+  }
+  if(!guardian2 && signature2){
+    alert('두 번째 보호자 이름을 입력해주세요 (또는 서명 칸을 비우셔도 됩니다)');
     return;
   }
 
