@@ -1013,6 +1013,51 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
   ROLE = savedRole; CURRENT_USER = savedUser;
   showApp();
 }
+
+// ===== PARENT-INFO LINK GENERATOR (added 5/14) =====
+// Generates a parent-info.html link for a student so director can send via KakaoTalk/email
+(function(){
+  async function _pickStudent() {
+    const r = await fetch('/api/roster?password=3', { cache: 'no-store' });
+    const d = await r.json();
+    return (d.students || []).sort((a,b)=> (a.studentId||'').localeCompare(b.studentId||''));
+  }
+  window.copyParentInfoLink = async function(studentIdArg, studentNameArg) {
+    let studentId = studentIdArg, studentName = studentNameArg;
+    if (!studentId) {
+      const code = prompt('학생 AMC 코드 (예: AMC-25) 또는 이름:');
+      if (!code) return;
+      const students = await _pickStudent();
+      const s = students.find(x => x.studentId === code.toUpperCase() || x.name === code || x.nameEN === code);
+      if (!s) { alert('학생을 찾을 수 없습니다: ' + code); return; }
+      studentId = s.studentId;
+      studentName = s.name;
+    }
+    const link = 'https://amicus-checkin.vercel.app/parent-info.html?studentId=' + encodeURIComponent(studentId);
+    const msg = '안녕하세요 ' + (studentName || '학생') + ' 학부모님,\n\n' +
+      '아미쿠스 교회 교육부입니다. 학생 정보 업데이트를 위해 아래 링크에서 정보를 입력해주세요. 비어있는 항목만 채우셔도 됩니다.\n\n' +
+      link + '\n\n감사합니다 🙏';
+    try {
+      await navigator.clipboard.writeText(msg);
+      alert('✅ 카톡 메시지 + 링크가 복사되었습니다!\n\n학부모에게 카톡으로 붙여넣기 해주세요.');
+    } catch(e) {
+      prompt('아래 메시지를 복사해서 카톡으로 보내주세요:', msg);
+    }
+  };
+  // Add floating button to bottom-right (always accessible)
+  function _addFloatingBtn() {
+    if (document.getElementById('parentInfoFloatBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'parentInfoFloatBtn';
+    btn.innerHTML = '📨 정보 링크';
+    btn.title = '학부모에게 정보 입력 링크 보내기';
+    btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:1000;padding:10px 16px;border-radius:24px;background:linear-gradient(to right,#4f46e5,#7c3aed);color:white;font-weight:700;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.2);border:none;cursor:pointer;';
+    btn.onclick = function(){ window.copyParentInfoLink(); };
+    document.body.appendChild(btn);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _addFloatingBtn);
+  else _addFloatingBtn();
+})();
 </script>
 </body>
 </html>
