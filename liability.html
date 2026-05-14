@@ -725,7 +725,7 @@ window.addEventListener('DOMContentLoaded', function(){
     document.querySelector('main').insertBefore(loading, document.querySelector('main').firstChild);
     fetch('/api/roster',{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
       var students = d.students || [];
-      var s = students.find(function(x){return x.id === presetId;});
+      var s = students.find(function(x){return x.id === presetId || x.studentId === presetId;});
       loading.remove();
       if(s){
         window._sMap = window._sMap || {};
