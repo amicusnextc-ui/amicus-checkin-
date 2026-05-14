@@ -1,0 +1,30 @@
+# Auto-close pending checkouts every Sunday 6pm PT (Mon 01:00 UTC)
+# Sets checkOut='AUTO' for any 주일 출석 record where 체크아웃 시간 is empty
+# Prevents data pollution from forgotten manual checkouts (Gap #1)
+name: Auto-close pending checkouts
+
+on:
+  schedule:
+    - cron: '0 1 * * 1'  # Mon 01:00 UTC = Sun 6pm PDT / 5pm PST
+  workflow_dispatch:      # Allow manual trigger from Actions tab
+    inputs:
+      date:
+        description: 'Date YYYY-MM-DD (blank = today LA)'
+        required: false
+
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /api/update-student?action=auto-close
+        run: |
+          DATE='${{ inputs.date }}'
+          BODY="{\"action\":\"auto-close\",\"password\":\"${{ secrets.DIRECTOR_PASSWORD }}\""
+          if [ -n "$DATE" ]; then BODY="$BODY,\"date\":\"$DATE\""; fi
+          BODY="$BODY}"
+          curl -sS -X POST https://amicus-checkin.vercel.app/api/update-student \
+            -H 'Content-Type: application/json' \
+            -d "$BODY" | tee /tmp/result.json
+          echo ''
+          # Exit non-zero if response shows error
+          grep -q '"success":true' /tmp/result.json || { echo 'FAILED'; cat /tmp/result.json; exit 1; }
