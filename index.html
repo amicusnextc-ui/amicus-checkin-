@@ -211,7 +211,7 @@ gmp-place-autocomplete { display: block; width: 100%; }
     </div>
     <div class="flex gap-2">
       <button onclick="closeSuccess()" class="flex-1 py-3.5 rounded-2xl text-gray-600 bg-gray-100 font-semibold text-sm hover:bg-gray-200 transition-colors">닫기</button>
-      <button onclick="printTag()" id="printBtn" class="hidden flex-1 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition-colors">태그 인쇄 🖨️</button>
+      <button onclick="printTag(); this.innerHTML='🔄 다시 인쇄';" id="printBtn" class="hidden flex-1 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition-colors">🖨️ 라벨 인쇄</button>
     </div><div id="countdownBanner" class="hidden mt-3 text-center"><p class="text-xs text-gray-400 font-medium"><span id="countdownNum">10</span>&#xCD08; &#xB4A4;&#xC5D0; &#xBA54;&#xC778;&#xD654;&#xBA74;&#xC73C;&#xB85C; &#xB3CC;&#xC544;&#xAC11;&#xB2C8;&#xB2E4;</p><div class="mt-1 w-full bg-gray-100 rounded-full h-1"><div id="countdownBar" style="width:100%;transition:width 1s linear" class="bg-indigo-400 h-1 rounded-full"></div></div></div>
 
   </div>
@@ -1120,7 +1120,7 @@ document.getElementById("visitorModal").addEventListener("click",function(e){if(
     </div>
     <div class="px-6 pb-5 pt-3 border-t border-gray-100 flex-shrink-0 space-y-2">
       <button id="infoSaveBtn" onclick="saveInfoAndContinue()" class="w-full py-3 rounded-2xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">💾 저장하고 체크인</button>
-      <button id="infoSkipBtn" onclick="skipInfoAndContinue()" class="hidden w-full py-2.5 rounded-2xl bg-amber-100 text-amber-800 text-sm font-bold hover:bg-amber-200 transition-colors border border-amber-300">⏭️ 일단 체크인 (다음 주에 업데이트)</button>
+      <button id="infoSkipBtn" onclick="skipInfoAndContinue()" class="w-full py-2.5 rounded-2xl bg-amber-100 text-amber-800 text-sm font-bold hover:bg-amber-200 transition-colors border border-amber-300">⏭️ 나중에 / Later</button>
       <button onclick="closeInfoPopup()" class="w-full py-2 text-gray-500 text-xs hover:text-gray-700">취소 (체크인 취소)</button>
     </div>
   </div>
@@ -1257,6 +1257,39 @@ async function cwoDo(btn){
     new MutationObserver(fixCoBtn).observe(results, {childList:true, subtree:true});
   }
   setInterval(fixCoBtn, 600);
+})();
+</script>
+<!-- ===== STUCK-SAVE SAFETY NET (5/9 added) ===== -->
+<script>
+(function(){
+  // Detects when "저장 중 / Saving" UI is stuck >12s and offers recovery
+  var savingSince = 0;
+  function findSavingNode(){
+    // Look for visible buttons or overlays with saving text — only buttons we control
+    var nodes = document.querySelectorAll('button[disabled], .saving, [data-saving="true"]');
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (n.offsetParent === null) continue;
+      var t = (n.textContent || '').trim();
+      if (/저장 중|Saving|처리 중|Processing/.test(t)) return n;
+    }
+    return null;
+  }
+  setInterval(function(){
+    var node = findSavingNode();
+    if (!node) { savingSince = 0; return; }
+    if (!savingSince) { savingSince = Date.now(); return; }
+    if (Date.now() - savingSince > 12000 && !window._stuckPromptShown) {
+      window._stuckPromptShown = true;
+      var msg = '⚠️ 저장이 12초 이상 걸리고 있어요.\n\n다음을 시도해주세요:\n1) Notion에서 학생 출석/방문자 항목 확인 (이미 저장됐을 수 있음)\n2) 화면 새로고침 후 다시 시도\n\n[확인]을 누르면 화면을 새로고침합니다.\n[취소]를 누르면 기다림 계속.';
+      if (confirm(msg)) {
+        location.reload();
+      } else {
+        savingSince = Date.now(); // reset, give another 12s
+        setTimeout(function(){ window._stuckPromptShown = false; }, 12000);
+      }
+    }
+  }, 2000);
 })();
 </script>
 <!-- ===== END CHECKOUT BUTTON FIX v2 ===== -->
