@@ -244,7 +244,9 @@ module.exports = async (req, res) => {
           page_id: pageId,
           properties: {
             'Liability Form': { select: { name: '제출 완료' } },
-            // Option B: auto-save signer info to student page
+            // Option B: auto-save signer info + Gap #4: 정식 등록 시 방문자 → 정회원 자동 전환
+            '\ubc29\ubb38\uc790 (Visitor)': { checkbox: false },
+            '\uc815\ud68c\uc6d0 \uc804\ud658\uc77c (Converted Date)': { date: { start: new Date().toISOString().slice(0,10) } },
             ...(email ? { '어머니 이메일 (Mother Email)': { email: email } } : {}),
             ...(guardianName ? { '보호자 (Guardian)': { rich_text: [{ text: { content: String(guardianName).slice(0, 200) } }] } } : {}),
             '특이사항 (Notes)': { rich_text: [{ text: { content: newNotes.slice(0, 1900) } }] }
