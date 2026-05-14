@@ -152,6 +152,11 @@ module.exports = async (req, res) => {
     if (staffField) props['\uac04\uc0ac (Staff)'] = { rich_text: [{ text: { content: staffField } }] };
     var finalNotes = (req.body.bypassLiability ? '[LIABILITY BYPASS] ' : '') + (notes || ''); if (finalNotes) props['특이사항 (Notes)'] = { rich_text: [{ text: { content: finalNotes } }] };
 
+    // Auto-set checkOut for 중고등부 — they have no formal checkout flow (self-depart)
+    if (department && (department.indexOf('중고등부') === 0 || department.indexOf('Middle/High') !== -1 || department.indexOf('Youth') !== -1)) {
+      props['체크아웃 시간 (Check-out)'] = { rich_text: [{ text: { content: 'AUTO' } }] };
+    }
+
     const createRes = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
       headers: {
