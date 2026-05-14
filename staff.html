@@ -105,7 +105,45 @@ tbody tr:hover { background:#fafafa; }
       </div>
     </div>
   </nav>
-  <div class="max-w-6xl mx-auto px-4 py-6">
+  <!-- LIVE attendance ticker (Gap #3) — visible across all tabs during service -->
+<div id="liveTicker" class="hidden sticky top-[56px] z-30 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md">
+  <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between text-xs sm:text-sm">
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-green-300 animate-pulse"></span>
+      <span class="font-bold">LIVE 출석</span>
+      <span id="tickerDate" class="hidden sm:inline opacity-80"></span>
+    </div>
+    <div class="flex items-center gap-3 sm:gap-5 font-bold">
+      <span>👥 <span id="tickerAttended">0</span> / <span id="tickerTotal">0</span></span>
+      <span class="text-yellow-200">⏳ <span id="tickerAbsent">0</span>명</span>
+      <span class="hidden sm:inline text-pink-200">🆕 <span id="tickerVisitor">0</span></span>
+    </div>
+    <button onclick="toggleLiveTicker()" class="text-white/70 hover:text-white text-xs" title="숨기기">✕</button>
+  </div>
+</div>
+<script>
+(function(){
+  // Show LIVE ticker on Sunday, or when user explicitly enabled it
+  function refreshLiveTicker(){
+    var dow = new Date().toLocaleString("en-US",{timeZone:"America/Los_Angeles",weekday:"short"});
+    var force = localStorage.getItem("liveTickerForce") === "1";
+    if (dow !== "Sun" && !force) { document.getElementById("liveTicker").classList.add("hidden"); return; }
+    fetch("/api/weekly-summary?password=3167",{cache:"no-store"}).then(r=>r.json()).then(d=>{
+      if (!d || !d.total) return;
+      document.getElementById("tickerAttended").textContent = d.total.attended || 0;
+      document.getElementById("tickerTotal").textContent = d.total.total || 0;
+      document.getElementById("tickerAbsent").textContent = d.total.absent || 0;
+      document.getElementById("tickerVisitor").textContent = d.total.visitors || 0;
+      if (d.sundayStr) document.getElementById("tickerDate").textContent = d.sundayStr;
+      document.getElementById("liveTicker").classList.remove("hidden");
+    }).catch(function(){});
+  }
+  window.toggleLiveTicker = function(){ document.getElementById("liveTicker").classList.add("hidden"); localStorage.setItem("liveTickerForce","0"); };
+  refreshLiveTicker();
+  setInterval(refreshLiveTicker, 30000);
+})();
+</script>
+<div class="max-w-6xl mx-auto px-4 py-6">
     <div id="attendanceTab" class="fade-in">
       <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
         <div class="stat-card" style="--c1:#6366f1;--c2:#8b5cf6"><p class="text-xs opacity-75 mb-1">전체</p><p id="statTotal" class="text-2xl font-bold">—</p></div>
