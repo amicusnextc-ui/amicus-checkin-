@@ -119,17 +119,13 @@
 
   <!-- Address + Emergency -->
   <section class="bg-white rounded-2xl shadow-md p-5">
-    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">🏠 주소 + 비상연락처</h3>
+    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">🏠 주소</h3>
     <div class="space-y-3">
       <div>
         <label class="block text-xs font-bold text-gray-600 mb-1">집주소 / Home Address</label>
         <input id="f_address" type="text" placeholder="예: 12345 Some St, San Diego, CA 92128" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
       </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 mb-1">비상연락처 / Emergency Contact <span class="text-gray-400 font-normal">(부모님 외)</span></label>
-        <input id="f_emergency" type="tel" placeholder="858-555-9999 (가족/친척)" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
-    </div>
+          </div>
   </section>
 
   <!-- Submit -->
@@ -239,7 +235,6 @@ function populateForm(s) {
   setField('f_fatherPhone', s.fatherPhone || '');
   setField('f_fatherEmail', s.fatherEmail || '');
   setField('f_address', s.address || '');
-  setField('f_emergency', '');  // not in roster API
 }
 
 async function handleSubmit(e) {
@@ -266,8 +261,7 @@ async function handleSubmit(e) {
       fatherName: document.getElementById('f_fatherName').value.trim(),
       fatherPhone: document.getElementById('f_fatherPhone').value.trim(),
       fatherEmail: document.getElementById('f_fatherEmail').value.trim(),
-      address: document.getElementById('f_address').value.trim(),
-      emergency: document.getElementById('f_emergency').value.trim()
+      address: document.getElementById('f_address').value.trim()
     }
   };
 
