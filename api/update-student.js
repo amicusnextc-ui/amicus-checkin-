@@ -185,8 +185,6 @@ module.exports = async (req, res) => {
       return res.json({ success: true, sent, noEmail, failed, results });
     }
 
-    if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
-
     // === AUTO-CLOSE pending checkouts (cron / admin) — Gap #1 ===
     if (action === 'auto-close') {
       if (body.password !== process.env.DIRECTOR_PASSWORD) {
@@ -224,6 +222,8 @@ module.exports = async (req, res) => {
       }
       return res.json({ success: true, date: targetDate, total: pending.length, closed: results.filter(r=>r.ok).length, results });
     }
+
+    if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
 
     if (action === 'liability') {
       const ts = timestamp || new Date().toISOString();
