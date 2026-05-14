@@ -586,7 +586,10 @@ function closeLiabilityModal(){
   }
   // Regular mode: show intro back to allow new search
   var intro = document.getElementById('introSection');
-  if(intro) intro.classList.remove('hidden');
+  // Only show intro back if success isn't displayed (don't show search after successful submit)
+  const successEl = document.getElementById('successSection');
+  const successVisible = successEl && !successEl.classList.contains('hidden');
+  if(intro && !successVisible) intro.classList.remove('hidden');
 }
 
 // ===== SUBMIT =====
