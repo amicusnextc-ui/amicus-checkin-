@@ -726,6 +726,14 @@ window.addEventListener('DOMContentLoaded', function(){
       if(s){
         window._sMap = window._sMap || {};
         window._sMap[presetId] = s;
+        // If already submitted, show informational alert before opening form
+        if (s.liabilityForm === '제출 완료') {
+          var ok = confirm('✅ ' + s.name + ' 학생은 이미 Liability Form을 제출했습니다.\n\n재작성이 필요한 경우만 "확인"을 눌러주세요.\n수정사항이 없으시면 "취소"를 눌러 나가실 수 있습니다.');
+          if (!ok) {
+            document.querySelector('main').innerHTML = '<div class="text-center py-20"><div class="text-6xl mb-4">✅</div><h2 class="text-xl font-black text-gray-900 mb-2">이미 제출된 Liability Form입니다</h2><p class="text-gray-500 text-sm mb-6">다시 작성하실 필요 없습니다. 감사합니다 🙏</p><a href="https://www.amicuschurch.com/" class="inline-block px-6 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-bold hover:bg-gray-200">교회 홈페이지로 →</a></div>';
+            return;
+          }
+        }
         startSign(presetId);
       } else {
         document.getElementById('introSection').classList.remove('hidden');
