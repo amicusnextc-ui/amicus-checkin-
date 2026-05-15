@@ -56,6 +56,13 @@
     <p class="text-xs text-gray-500 bg-gray-50 rounded-lg p-2.5">아래 정보를 채워주세요. <strong class="text-emerald-700">초록</strong>=입력 완료, <strong class="text-red-600">빨강</strong>=미입력. 비어있는 곳만 채우셔도 됩니다.</p>
   </div>
 
+  <!-- Already-submitted banner (shown when all fields filled) -->
+  <div id="alreadyFilledBanner" class="hidden bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 text-center">
+    <div class="text-3xl mb-2">✅</div>
+    <p class="font-bold text-emerald-800 text-sm mb-1">이미 작성 완료된 정보입니다</p>
+    <p class="text-xs text-emerald-700">수정사항이 없으시면 그냥 닫으셔도 됩니다.<br/>변경 사항이 있으시면 아래에서 수정 후 저장해주세요.</p>
+  </div>
+
   <!-- Student info section -->
   <section class="bg-white rounded-2xl shadow-md p-5">
     <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">👤 학생 정보 <span class="text-xs text-gray-400 font-normal">Student Info</span></h3>
@@ -235,6 +242,12 @@ function populateForm(s) {
   setField('f_fatherPhone', s.fatherPhone || '');
   setField('f_fatherEmail', s.fatherEmail || '');
   setField('f_address', s.address || '');
+
+  // Check if all required fields are pre-filled — show 'already submitted' banner if so
+  var allFilled = ['f_nameEN','f_grade','f_school','f_allergy','f_motherName','f_motherPhone','f_motherEmail','f_fatherName','f_fatherPhone','f_fatherEmail','f_address'].every(function(id){ var el = document.getElementById(id); return el && el.value.trim(); });
+  if (allFilled) {
+    document.getElementById('alreadyFilledBanner').classList.remove('hidden');
+  }
 }
 
 async function handleSubmit(e) {
