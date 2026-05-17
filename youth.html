@@ -484,5 +484,46 @@ loadStudents();
 startAutoRefresh();
 </script>
 
+<!-- ===== RE-PRINT LABEL FOR CHECKED-IN CARDS (5/14 added) =====
+     Adds 🖨️ button to checked-in (grey) student cards for label re-print -->
+<script>
+(function(){
+  function openReprint(amc) {
+    if (!amc) return;
+    window.open('/index.html?reprint=' + encodeURIComponent(amc), '_blank');
+  }
+  window.reprintLabel = openReprint;
+
+  function injectReprintIcons() {
+    // Find student cards with AMC codes
+    var cards = document.querySelectorAll('[data-amc], .student-card, [class*="check"], .opacity-50, .opacity-60');
+    cards.forEach(function(card){
+      if (card.dataset.reprintInjected === '1') return;
+      var amc = card.dataset.amc || (card.textContent.match(/AMC-\\d+/) || [])[0];
+      if (!amc) return;
+      // Only add to "checked-in" cards (greyed out or have specific class)
+      var isCheckedIn = card.classList.contains('checked-in') || card.classList.contains('opacity-50') || card.classList.contains('opacity-60') || /\\bdisabled\\b/.test(card.className);
+      // Add button — small floating icon top-right
+      var btn = document.createElement('button');
+      btn.innerHTML = '🖨️';
+      btn.title = '라벨 재인쇄 / Re-print';
+      btn.style.cssText = 'position:absolute;top:4px;right:4px;width:28px;height:28px;font-size:14px;background:rgba(255,255,255,0.95);border:1px solid #c7d2fe;border-radius:50%;cursor:pointer;z-index:5;box-shadow:0 1px 3px rgba(0,0,0,.1);';
+      btn.onclick = function(e){ e.stopPropagation(); e.preventDefault(); openReprint(amc); };
+      // Ensure parent is positioned
+      var cs = window.getComputedStyle(card);
+      if (cs.position === 'static') card.style.position = 'relative';
+      card.appendChild(btn);
+      card.dataset.reprintInjected = '1';
+    });
+  }
+
+  setInterval(injectReprintIcons, 2000);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectReprintIcons);
+  } else {
+    setTimeout(injectReprintIcons, 1000);
+  }
+})();
+</script>
 </body>
 </html>
