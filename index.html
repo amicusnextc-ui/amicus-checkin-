@@ -1408,6 +1408,51 @@ async function cwoDo(btn){
   }, 2000);
 })();
 </script>
+<!-- ===== REPRINT BUTTON ON CHECKED-IN CARDS (5/14 added) =====
+     이미 체크인된 학생 카드에서 라벨 재인쇄 가능하게 -->
+<script>
+(function(){
+  function injectReprintButtons() {
+    var checkoutBtns = document.querySelectorAll('button[data-cwofix="1"][data-sid]');
+    checkoutBtns.forEach(function(btn){
+      if (btn.dataset.reprintInjected === '1') return;
+      var sid = btn.dataset.sid;
+      var safeName = btn.dataset.name || '';
+      if (!sid) return;
+      // Create reprint button
+      var rp = document.createElement('button');
+      rp.dataset.reprintFor = sid;
+      rp.innerHTML = '🖨️ 다시 인쇄 / Re-print Label';
+      rp.style.cssText = 'width:100%;margin-top:8px;background:#eef2ff;color:#4f46e5;border:1px solid #c7d2fe;padding:12px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;';
+      rp.onclick = function(e){
+        e.stopPropagation(); e.preventDefault();
+        // Fetch student by Notion id, build tag, print
+        rp.disabled = true; rp.innerHTML = '⏳ 준비 중...';
+        fetch('/api/roster?password=3', { cache: 'no-store' }).then(function(r){return r.json();}).then(function(d){
+          var s = (d.students || []).find(function(x){ return x.id === sid; });
+          if (!s) { alert('학생 정보 찾을 수 없음'); rp.disabled = false; rp.innerHTML = '🖨️ 다시 인쇄 / Re-print Label'; return; }
+          fetch('/api/check-status?name=' + encodeURIComponent(s.name), { cache: 'no-store' }).then(function(r){return r.json();}).then(function(cs){
+            var time = (cs && cs.checkInTime) || 'AM 10:30';
+            try { buildTag(s, time); setTimeout(function(){ printTag(); rp.disabled = false; rp.innerHTML = '🔄 다시 인쇄 (한 번 더)'; }, 400); }
+            catch(err){ alert('재인쇄 실패: ' + err.message); rp.disabled = false; rp.innerHTML = '🖨️ 다시 인쇄 / Re-print Label'; }
+          });
+        });
+      };
+      // Insert AFTER the checkout button (sibling)
+      if (btn.parentNode) btn.parentNode.appendChild(rp);
+      btn.dataset.reprintInjected = '1';
+    });
+  }
+  // Run periodically (cards re-render dynamically)
+  setInterval(injectReprintButtons, 1500);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectReprintButtons);
+  } else {
+    setTimeout(injectReprintButtons, 500);
+  }
+})();
+</script>
+
 <!-- ===== END CHECKOUT BUTTON FIX v2 ===== -->
 </body>
 </html>
