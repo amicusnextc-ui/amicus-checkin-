@@ -211,7 +211,7 @@ gmp-place-autocomplete { display: block; width: 100%; }
     </div>
     <div class="flex gap-2">
       <button onclick="closeSuccess()" class="flex-1 py-3.5 rounded-2xl text-gray-600 bg-gray-100 font-semibold text-sm hover:bg-gray-200 transition-colors">닫기</button>
-      <button onclick="printTag(); this.innerHTML='🔄 다시 인쇄';" id="printBtn" class="hidden flex-1 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition-colors">🖨️ 라벨 인쇄</button>
+      <button onclick="printTag(); this.innerHTML='🔄 다시 인쇄'; if(window.deferAutoReset) window.deferAutoReset(15000);" id="printBtn" class="hidden flex-1 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition-colors">🖨️ 라벨 인쇄</button>
     </div><div id="countdownBanner" class="hidden mt-3 text-center"><p class="text-xs text-gray-400 font-medium"><span id="countdownNum">10</span>&#xCD08; &#xB4A4;&#xC5D0; &#xBA54;&#xC778;&#xD654;&#xBA74;&#xC73C;&#xB85C; &#xB3CC;&#xC544;&#xAC11;&#xB2C8;&#xB2E4;</p><div class="mt-1 w-full bg-gray-100 rounded-full h-1"><div id="countdownBar" style="width:100%;transition:width 1s linear" class="bg-indigo-400 h-1 rounded-full"></div></div></div>
 
   </div>
@@ -1307,6 +1307,71 @@ async function cwoDo(btn){
   } else {
     attemptReprint(15);
   }
+})();
+</script>
+
+<!-- ===== AUTO-RESET AFTER CHECK-IN SUCCESS (5/14 added) =====
+     체크인 성공 후 5초 후 자동으로 메인 화면 리셋
+     이전 학생 이름이 검색 input에 남는 프라이버시 버그 fix -->
+<script>
+(function(){
+  var AUTO_RESET_MS = 5000;
+  var resetTimer = null;
+
+  function clearAllInputs() {
+    ['d0','d1','d2','d3','nameInput'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el && el.tagName === 'INPUT') { el.value = ''; }
+    });
+    // Clear search result containers if they exist
+    ['searchResults','familyCard','studentCard','results','phoneResults','nameResults'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el && el.innerHTML !== undefined) { el.innerHTML = ''; el.classList && el.classList.add('hidden'); }
+    });
+    // Clear sessionStorage hints (any cached search state)
+    try { sessionStorage.removeItem('_lastSearch'); sessionStorage.removeItem('_currentStudent'); } catch(e){}
+  }
+
+  function fullReset() {
+    clearAllInputs();
+    try { if (typeof closeSuccess === 'function') closeSuccess(); } catch(e){}
+    try { if (typeof goHome === 'function') goHome(); } catch(e){}
+    resetTimer = null;
+  }
+
+  function startAutoReset() {
+    if (resetTimer) clearTimeout(resetTimer);
+    console.log('Auto-reset in 5s after check-in success');
+    resetTimer = setTimeout(fullReset, AUTO_RESET_MS);
+  }
+
+  function stopAutoReset() {
+    if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+  }
+
+  // Watch #success element for becoming visible
+  function watchSuccess() {
+    var el = document.getElementById('success');
+    if (!el) return setTimeout(watchSuccess, 500);
+    var obs = new MutationObserver(function(){
+      var visible = !el.classList.contains('hidden') && el.offsetParent !== null;
+      if (visible) startAutoReset();
+      else stopAutoReset();
+    });
+    obs.observe(el, { attributes: true, attributeFilter: ['class','style'] });
+    if (!el.classList.contains('hidden') && el.offsetParent !== null) startAutoReset();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watchSuccess);
+  else watchSuccess();
+
+  // Expose for printTag to defer (user reprinting needs more time)
+  window.deferAutoReset = function(ms) {
+    if (resetTimer) clearTimeout(resetTimer);
+    resetTimer = setTimeout(fullReset, ms || 15000);
+    console.log('Auto-reset deferred by ' + ((ms || 15000)/1000) + 's');
+  };
+  window.cancelAutoReset = stopAutoReset;
 })();
 </script>
 
