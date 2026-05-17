@@ -1708,6 +1708,49 @@ function cwShowIfReady(){if(window._dept||window._staffName||window._role){var b
 setTimeout(cwShowIfReady,2000);
 </script>
 <!-- ============== END CHECKOUT PANEL ============== -->
+<!-- ===== RE-PRINT LABEL BUTTONS (5/14 added) =====
+     Auto-injects 🖨️ button into 오늘 출석 table rows that have an AMC code -->
+<script>
+(function(){
+  function openReprint(amc) {
+    if (!amc) return;
+    window.open('/index.html?reprint=' + encodeURIComponent(amc), '_blank');
+  }
+  window.reprintLabel = openReprint;
+
+  function injectReprintButtons() {
+    // Find attendance table rows that contain AMC codes
+    var rows = document.querySelectorAll('table tbody tr');
+    rows.forEach(function(tr){
+      if (tr.dataset.reprintInjected === '1') return;
+      var text = (tr.textContent || '');
+      // Match AMC-XXX pattern in text
+      var m = text.match(/AMC-\\d+/);
+      if (!m) return;
+      var amc = m[0];
+      // Find last visible cell (status column) and append button
+      var cells = tr.querySelectorAll('td');
+      if (cells.length === 0) return;
+      var lastCell = cells[cells.length - 1];
+      var btn = document.createElement('button');
+      btn.innerHTML = '🖨️';
+      btn.title = '라벨 재인쇄 / Re-print label';
+      btn.style.cssText = 'margin-left:6px;padding:2px 6px;font-size:12px;background:#eef2ff;color:#4f46e5;border:1px solid #c7d2fe;border-radius:6px;cursor:pointer;';
+      btn.onclick = function(e){ e.stopPropagation(); openReprint(amc); };
+      lastCell.appendChild(btn);
+      tr.dataset.reprintInjected = '1';
+    });
+  }
+
+  // Run periodically (table re-renders dynamically)
+  setInterval(injectReprintButtons, 2000);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectReprintButtons);
+  } else {
+    setTimeout(injectReprintButtons, 1000);
+  }
+})();
+</script>
 </body>
 </html>
 
