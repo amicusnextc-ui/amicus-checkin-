@@ -1375,6 +1375,85 @@ async function cwoDo(btn){
 })();
 </script>
 
+<!-- ===== PRE-CHECKIN FRESH FETCH (5/14 added) =====
+     체크인 직전 학생 데이터 fresh fetch → stale cache로 인한 잘못된 "정보 부족" 팝업 방지 -->
+<script>
+(function(){
+  var freshCache = {};
+  var processed = new WeakSet();
+  var FRESH_TTL_MS = 5000;
+
+  // Monkey-patch checkInfoMissing to use fresh cache if available
+  setTimeout(function patchChecker(){
+    if (typeof window.checkInfoMissing !== 'function') {
+      return setTimeout(patchChecker, 500);
+    }
+    var orig = window.checkInfoMissing;
+    window.checkInfoMissing = function(s) {
+      if (s && s.id && freshCache[s.id] && (Date.now() - freshCache[s.id]._ts < FRESH_TTL_MS)) {
+        s = freshCache[s.id];
+      }
+      return orig.call(this, s);
+    };
+    console.log('[FreshFetch] checkInfoMissing patched');
+  }, 1000);
+
+  // Intercept 체크인 button clicks
+  document.addEventListener('click', async function(e){
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    if (processed.has(btn)) return;
+    var txt = (btn.textContent || '').trim();
+    // Match check-in button text (not checkout, not print)
+    if (!/^\\s*체크인|^\\s*Check\\s*In/i.test(txt)) return;
+    if (/체크아웃|Check\\s*Out|인쇄|Print|Re-?print/i.test(txt)) return;
+
+    // Find student id from card or button
+    var sid = btn.dataset.sid || btn.getAttribute('data-sid');
+    if (!sid) {
+      var card = btn.closest('[data-sid]');
+      if (card) sid = card.dataset.sid || card.getAttribute('data-sid');
+    }
+    if (!sid) return; // no id, let click proceed normally
+
+    // Block original click in capture phase
+    e.stopImmediatePropagation();
+    e.preventDefault();
+
+    var origHTML = btn.innerHTML;
+    btn.innerHTML = '⏳ 확인 중... / Checking...';
+    btn.disabled = true;
+
+    try {
+      var r = await fetch('/api/roster?password=3', { cache: 'no-store' });
+      var d = await r.json();
+      var fresh = (d.students || []).find(function(x){ return x.id === sid; });
+      if (fresh) {
+        fresh._ts = Date.now();
+        freshCache[sid] = fresh;
+        // Update common memory candidates
+        ['_allStudents','_roster','_students','allStudents','roster','students'].forEach(function(k){
+          if (Array.isArray(window[k])) {
+            var i = window[k].findIndex(function(x){ return x.id === sid; });
+            if (i >= 0) window[k][i] = fresh;
+          }
+        });
+        if (window._currentStudent && window._currentStudent.id === sid) window._currentStudent = fresh;
+        console.log('[FreshFetch] updated for ' + sid);
+      }
+    } catch(err) {
+      console.warn('[FreshFetch] failed, using cache:', err);
+    }
+
+    btn.innerHTML = origHTML;
+    btn.disabled = false;
+    processed.add(btn);
+    // Re-fire click — capture handler will skip due to processed flag
+    setTimeout(function(){ btn.click(); }, 0);
+  }, true); // capture phase
+})();
+</script>
+
 <!-- ===== STUCK-SAVE SAFETY NET (5/9 added) ===== -->
 <script>
 (function(){
