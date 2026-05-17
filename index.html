@@ -1259,6 +1259,57 @@ async function cwoDo(btn){
   setInterval(fixCoBtn, 600);
 })();
 </script>
+<!-- ===== RE-PRINT LABEL HANDLER (5/14 added) =====
+     Triggered by ?reprint=AMC-XXX URL param.
+     Fetches student, calls buildTag + printTag.
+     Used by staff.html / youth.html "다시 인쇄" buttons. -->
+<script>
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  var reprintId = params.get('reprint');
+  if (!reprintId) return;
+
+  function attemptReprint(retries) {
+    if (typeof buildTag !== 'function' || typeof printTag !== 'function') {
+      if (retries > 0) return setTimeout(function(){ attemptReprint(retries - 1); }, 400);
+      alert('재인쇄 기능 로드 실패. 페이지를 새로고침해주세요.');
+      return;
+    }
+    fetch('/api/roster?password=3', { cache: 'no-store' }).then(function(r){ return r.json(); }).then(function(d){
+      var students = d.students || [];
+      var s = students.find(function(x){ return x.studentId === reprintId; });
+      if (!s) { alert('학생을 찾을 수 없습니다: ' + reprintId); return; }
+      fetch('/api/check-status?name=' + encodeURIComponent(s.name), { cache: 'no-store' }).then(function(r){ return r.json(); }).then(function(cs){
+        var time = (cs && cs.checkInTime) || 'AM 10:30';
+        try { buildTag(s, time); } catch(e) { console.error('buildTag failed:', e); alert('재인쇄 준비 실패: ' + e.message); return; }
+        // Hide search/welcome UI, show success preview with print button
+        try {
+          var sc = document.getElementById('successCard');
+          if (sc) sc.classList.remove('hidden');
+          var ws = document.getElementById('welcomeSection');
+          if (ws) ws.classList.add('hidden');
+          var pb = document.getElementById('printBtn');
+          if (pb) pb.classList.remove('hidden');
+        } catch(e){}
+        // Trigger print after short delay
+        setTimeout(function(){ printTag(); }, 600);
+      }).catch(function(e){
+        // Fall back without check time
+        try { buildTag(s, 'AM 10:30'); setTimeout(function(){ printTag(); }, 600); } catch(err){ alert('재인쇄 실패: ' + err.message); }
+      });
+    }).catch(function(e){
+      alert('학생 정보 조회 실패: ' + e.message);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ attemptReprint(15); });
+  } else {
+    attemptReprint(15);
+  }
+})();
+</script>
+
 <!-- ===== STUCK-SAVE SAFETY NET (5/9 added) ===== -->
 <script>
 (function(){
