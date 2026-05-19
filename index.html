@@ -1624,6 +1624,43 @@ async function cwoDo(btn){
   setInterval(update,60000);
 })();
 </script>
+
+<!-- ROBUST REPRINT BUTTON INJECTOR -->
+<script>
+(function(){
+  function inject(){
+    var btns=document.querySelectorAll("button");
+    btns.forEach(function(btn){
+      var txt=(btn.textContent||"").trim();
+      var isCheckout=txt.indexOf("체크아웃")>=0||/Check\s*Out/i.test(txt);
+      if(!isCheckout)return;
+      var parent=btn.parentElement;
+      if(!parent)return;
+      if(parent.querySelector("[data-rpr-btn]"))return;
+      // Find AMC ID in card text
+      var card=btn.closest("[class*=rounded]")||parent.parentElement||parent;
+      var cardText=card?card.textContent:"";
+      var m=cardText.match(/AMC[-\s]?(\d+)/);
+      if(!m)return;
+      var amc="AMC-"+m[1];
+      var r=document.createElement("button");
+      r.setAttribute("data-rpr-btn","1");
+      r.type="button";
+      r.innerHTML="🖨️ 다시 인쇄 / Re-print";
+      r.className="mt-2 w-full px-3 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold text-sm transition-colors";
+      r.onclick=function(e){e.preventDefault();e.stopPropagation();window.location.href="/?reprint="+amc;};
+      if(btn.nextSibling){btn.parentNode.insertBefore(r,btn.nextSibling);}
+      else{btn.parentNode.appendChild(r);}
+    });
+  }
+  setTimeout(inject,800);
+  setInterval(inject,1500);
+  if(window.MutationObserver){
+    var mo=new MutationObserver(function(){inject();});
+    setTimeout(function(){if(document.body)mo.observe(document.body,{childList:true,subtree:true});},1500);
+  }
+})();
+</script>
 </body>
 </html>
 
