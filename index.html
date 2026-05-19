@@ -1692,6 +1692,31 @@ async function cwoDo(btn){
   }
 })();
 </script>
+
+<!-- REPRINT AFTERPRINT FIX -->
+<script>
+(function(){
+  // When URL has ?reprint=, override auto-reset to use afterprint event
+  if(location.search.indexOf("reprint=")<0)return;
+  console.log("[REPRINT AFTERPRINT FIX] active");
+  // Block existing auto-reset for 10 minutes
+  setTimeout(function(){
+    if(typeof window.deferAutoReset==="function"){
+      window.deferAutoReset(600000);
+      console.log("[REPRINT AFTERPRINT FIX] deferred auto-reset 10min");
+    }
+  },200);
+  var done=false;
+  function redirect(){
+    if(done)return; done=true;
+    console.log("[REPRINT AFTERPRINT FIX] redirecting");
+    setTimeout(function(){window.location.href="/";},1500);
+  }
+  window.addEventListener("afterprint",redirect);
+  // Backup: if afterprint never fires, redirect after 2 minutes
+  setTimeout(redirect,120000);
+})();
+</script>
 </body>
 </html>
 
