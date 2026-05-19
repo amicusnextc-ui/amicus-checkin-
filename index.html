@@ -1609,7 +1609,7 @@ async function cwoDo(btn){
     var cntEl=document.getElementById("pendingCount");
     if(!el||!cntEl)return;
     // Only show on Sunday (day 0)
-    if(new Date().getDay()!==0){el.classList.add("hidden");return;}
+    var _force=location.search.indexOf("showBadge=1")>=0;if(new Date().getDay()!==0 && !_force){el.classList.add("hidden");return;}
     fetch("/api/attendance-today?password=3&_t="+Date.now(),{cache:"no-store"})
       .then(function(r){return r.json();})
       .then(function(d){
