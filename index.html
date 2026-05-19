@@ -1594,6 +1594,36 @@ async function cwoDo(btn){
   setTimeout(wrap,800);
 })();
 </script>
+
+<!-- PENDING CHECKOUT BADGE (Phase 1) -->
+<div id="pendingBadge" class="hidden fixed top-3 right-3 z-40 bg-amber-50 border-2 border-amber-400 rounded-2xl px-4 py-3 cursor-pointer shadow-lg hover:bg-amber-100 transition-colors" onclick="window.open('/staff-checkout.html','_blank')">
+  <div class="text-xs text-amber-700 font-bold">⏳ 체크아웃 대기</div>
+  <div class="text-2xl font-black text-amber-800"><span id="pendingCount">0</span>명</div>
+  <div class="text-[10px] text-amber-600">클릭 → 정리</div>
+</div>
+<script>
+// PENDING CHECKOUT BADGE - polls /api/attendance-today every 60s, only Sunday
+(function(){
+  function update(){
+    var el=document.getElementById("pendingBadge");
+    var cntEl=document.getElementById("pendingCount");
+    if(!el||!cntEl)return;
+    // Only show on Sunday (day 0)
+    if(new Date().getDay()!==0){el.classList.add("hidden");return;}
+    fetch("/api/attendance-today?password=3&_t="+Date.now(),{cache:"no-store"})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var records=d.records||[];
+        var pending=records.filter(function(x){return x.checkIn && !x.checkOut;}).length;
+        if(pending>0){cntEl.textContent=pending;el.classList.remove("hidden");}
+        else{el.classList.add("hidden");}
+      })
+      .catch(function(e){console.error("[pendingBadge]",e);});
+  }
+  setTimeout(update,2000);
+  setInterval(update,60000);
+})();
+</script>
 </body>
 </html>
 
