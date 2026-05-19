@@ -1553,6 +1553,47 @@ async function cwoDo(btn){
   setTimeout(patch,500);
 })();
 </script>
+
+<script>
+// EMERGENCY DOACTION WRAPPER - fresh-fetch _student before Liability/info checks
+// Parents submit forms but kiosk cache stale -> popup keeps showing
+(function(){
+  var tries=0;
+  function wrap(){
+    tries++;
+    if(typeof window.doAction!=="function"){
+      if(tries<40)setTimeout(wrap,300);
+      return;
+    }
+    if(window._doActionWrapped) return;
+    window._doActionWrapped=true;
+    var orig=window.doAction;
+    window.doAction=async function(){
+      try{
+        if(window._student && (window._student.id || window._student.studentId)){
+          var r=await fetch("/api/roster?password=3&_t="+Date.now(),{cache:"no-store"});
+          if(r.ok){
+            var d=await r.json();
+            var list=d.students||[];
+            var sid=window._student.id, amc=window._student.studentId;
+            var fresh=null;
+            for(var i=0;i<list.length;i++){
+              if(list[i].id===sid || list[i].studentId===amc){fresh=list[i];break;}
+            }
+            if(fresh){
+              Object.keys(fresh).forEach(function(k){window._student[k]=fresh[k];});
+              console.log("[EMERGENCY DOACTION WRAPPER] refreshed",window._student.name,"liab:",window._student.liabilityForm);
+            }
+          }
+        }
+      }catch(e){console.error("[EMERGENCY DOACTION WRAPPER] fetch fail",e);}
+      return orig.apply(this,arguments);
+    };
+    console.log("[EMERGENCY DOACTION WRAPPER] installed try "+tries);
+  }
+  setTimeout(wrap,800);
+})();
+</script>
 </body>
 </html>
 
