@@ -1693,28 +1693,34 @@ async function cwoDo(btn){
 })();
 </script>
 
-<!-- REPRINT AFTERPRINT FIX -->
+<!-- REPRINT AFTERPRINT FIX v2 (override goHome/closeSuccess until afterprint) -->
 <script>
 (function(){
-  // When URL has ?reprint=, override auto-reset to use afterprint event
   if(location.search.indexOf("reprint=")<0)return;
-  console.log("[REPRINT AFTERPRINT FIX] active");
-  // Block existing auto-reset for 10 minutes
-  setTimeout(function(){
-    if(typeof window.deferAutoReset==="function"){
-      window.deferAutoReset(600000);
-      console.log("[REPRINT AFTERPRINT FIX] deferred auto-reset 10min");
-    }
-  },200);
+  console.log("[REPRINT FIX v2] active");
+  var ORIG={};
+  var blocked=true;
+  function block(name){
+    Object.defineProperty(window,name,{
+      configurable:true,
+      get:function(){return blocked?function(){console.log("[REPRINT FIX v2] blocked "+name);}:(ORIG[name]||function(){});},
+      set:function(v){ORIG[name]=v;}
+    });
+  }
+  block("goHome");
+  block("closeSuccess");
+  // Also block deferAutoReset usage by triggering it ourselves
+  setTimeout(function(){if(typeof ORIG.deferAutoReset==="function")ORIG.deferAutoReset(600000);else if(typeof window.deferAutoReset==="function")window.deferAutoReset(600000);},300);
   var done=false;
-  function redirect(){
+  function release(){
     if(done)return; done=true;
-    console.log("[REPRINT AFTERPRINT FIX] redirecting");
+    console.log("[REPRINT FIX v2] release & redirect");
+    blocked=false;
     setTimeout(function(){window.location.href="/";},1500);
   }
-  window.addEventListener("afterprint",redirect);
-  // Backup: if afterprint never fires, redirect after 2 minutes
-  setTimeout(redirect,120000);
+  window.addEventListener("afterprint",release);
+  // Safety net: 3 min max wait
+  setTimeout(release,180000);
 })();
 </script>
 </body>
