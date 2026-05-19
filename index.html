@@ -1625,7 +1625,7 @@ async function cwoDo(btn){
 })();
 </script>
 
-<!-- ROBUST REPRINT BUTTON INJECTOR v3 (parent walk-up) -->
+<!-- ROBUST REPRINT BUTTON INJECTOR v4 (inline print) -->
 <script>
 (function(){
   var CHECK_KOR="체크아웃";
@@ -1642,6 +1642,24 @@ async function cwoDo(btn){
       el=el.parentElement;
     }
     return null;
+  }
+  async function doReprint(amc){
+    console.log("[Reprint v4] starting for "+amc);
+    var student=null;
+    try{
+      var r=await fetch("/api/roster?password=3&_t="+Date.now(),{cache:"no-store"});
+      var d=await r.json();
+      var list=d.students||[];
+      for(var i=0;i<list.length;i++){
+        if(list[i].studentId===amc || list[i].id===amc){student=list[i];break;}
+      }
+    }catch(e){console.error("[Reprint v4] fetch fail",e);}
+    if(!student){alert("학생 정보를 찾을 수 없습니다 ("+amc+")");return;}
+    try{
+      if(typeof window.buildTag==="function"){window.buildTag(student);}
+      if(typeof window.printTag==="function"){window.printTag();console.log("[Reprint v4] printTag fired");}
+      else{console.warn("[Reprint v4] printTag missing, falling back to URL");window.location.href="/?reprint="+amc;}
+    }catch(e){console.error("[Reprint v4] print fail",e);alert("프린트 실패: "+e.message);}
   }
   function inject(){
     var btns=document.querySelectorAll("button");
@@ -1660,17 +1678,17 @@ async function cwoDo(btn){
       var amc="AMC-"+m[1];
       var r=document.createElement("button");
       r.setAttribute("data-rpr-btn","1");
+      r.setAttribute("data-amc",amc);
       r.type="button";
       r.innerHTML="🖨️ 다시 인쇄 / Re-print";
       r.className="mt-2 w-full px-3 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold text-sm transition-colors border border-amber-300";
-      r.onclick=function(e){e.preventDefault();e.stopPropagation();window.location.href="/?reprint="+amc;};
+      r.onclick=function(e){e.preventDefault();e.stopPropagation();doReprint(amc);};
       if(btn.nextSibling){btn.parentNode.insertBefore(r,btn.nextSibling);}
       else{btn.parentNode.appendChild(r);}
     });
   }
   function cleanup(){
     document.querySelectorAll("[data-rpr-btn]").forEach(function(r){
-      // Find a sibling checkout button - if not, remove
       var parent=r.parentElement;
       if(!parent){r.remove();return;}
       var siblings=parent.querySelectorAll("button");
