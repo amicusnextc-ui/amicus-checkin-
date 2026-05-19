@@ -1625,30 +1625,38 @@ async function cwoDo(btn){
 })();
 </script>
 
-<!-- ROBUST REPRINT BUTTON INJECTOR v2 (only on actual student cards) -->
+<!-- ROBUST REPRINT BUTTON INJECTOR v3 (parent walk-up) -->
 <script>
 (function(){
+  var CHECK_KOR="체크아웃";
+  var CHECKEDIN_KOR="체크인됨";
+  var ENTERED_KOR="입실";
   function isVisible(el){return !!el && el.offsetParent !== null && !el.classList.contains("hidden");}
+  function findStudentCard(btn){
+    var el=btn.parentElement;
+    while(el && el!==document.body){
+      var t=el.textContent||"";
+      var hasAmc=/AMC[-\s]?\d+/.test(t);
+      var hasCheck=t.indexOf(CHECKEDIN_KOR)>=0 || t.indexOf(ENTERED_KOR)>=0 || /[AP]M\s*\d{1,2}:\d{2}/.test(t);
+      if(hasAmc && hasCheck) return el;
+      el=el.parentElement;
+    }
+    return null;
+  }
   function inject(){
     var btns=document.querySelectorAll("button");
     btns.forEach(function(btn){
       var txt=(btn.textContent||"").trim();
-      // Strict: must contain checkout text
-      var isCheckout=txt.indexOf("체크아웃")>=0||/Check\s*Out/i.test(txt);
-      if(!isCheckout)return;
+      var isCheckoutBtn=txt.indexOf(CHECK_KOR)>=0||/Check\s*Out/i.test(txt);
+      if(!isCheckoutBtn)return;
       if(!isVisible(btn))return;
       var parent=btn.parentElement;
       if(!parent)return;
       if(parent.querySelector("[data-rpr-btn]"))return;
-      // Find the card and verify it has BOTH AMC ID and check-in marker
-      var card=btn.closest("[class*=rounded]");
+      var card=findStudentCard(btn);
       if(!card)return;
-      var cardText=card.textContent||"";
-      var hasAmc=/AMC[-\s]?(\d+)/.test(cardText);
-      // Must have check-in evidence: "체크인됨" OR "입실" OR time pattern like "PM 03:04"
-      var hasCheckIn=cardText.indexOf("체크인됨")>=0||cardText.indexOf("입실")>=0||/[AP]M\s*\d{1,2}:\d{2}/.test(cardText);
-      if(!hasAmc||!hasCheckIn)return;
-      var m=cardText.match(/AMC[-\s]?(\d+)/);
+      var m=card.textContent.match(/AMC[-\s]?(\d+)/);
+      if(!m)return;
       var amc="AMC-"+m[1];
       var r=document.createElement("button");
       r.setAttribute("data-rpr-btn","1");
@@ -1661,17 +1669,23 @@ async function cwoDo(btn){
     });
   }
   function cleanup(){
-    // Remove orphaned reprint buttons (parent no longer has AMC+checkin)
     document.querySelectorAll("[data-rpr-btn]").forEach(function(r){
-      var card=r.closest("[class*=rounded]");
-      var txt=card?card.textContent:"";
-      var ok=/AMC[-\s]?\d+/.test(txt)&&(txt.indexOf("체크인됨")>=0||txt.indexOf("입실")>=0||/[AP]M\s*\d{1,2}:\d{2}/.test(txt));
-      if(!ok)r.remove();
+      // Find a sibling checkout button - if not, remove
+      var parent=r.parentElement;
+      if(!parent){r.remove();return;}
+      var siblings=parent.querySelectorAll("button");
+      var hasCheckoutSibling=false;
+      for(var i=0;i<siblings.length;i++){
+        if(siblings[i]===r)continue;
+        var st=(siblings[i].textContent||"").trim();
+        if(st.indexOf(CHECK_KOR)>=0||/Check\s*Out/i.test(st)){hasCheckoutSibling=true;break;}
+      }
+      if(!hasCheckoutSibling){r.remove();}
     });
   }
   function tick(){cleanup();inject();}
   setTimeout(tick,800);
-  setInterval(tick,1500);
+  setInterval(tick,1200);
   if(window.MutationObserver){
     var mo=new MutationObserver(tick);
     setTimeout(function(){if(document.body)mo.observe(document.body,{childList:true,subtree:true});},1500);
