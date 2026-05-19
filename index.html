@@ -1741,6 +1741,29 @@ async function cwoDo(btn){
   setTimeout(release,180000);
 })();
 </script>
+
+<!-- PRINTTAG URL CLEANUP -->
+<script>
+(function(){
+  function wrap(){
+    if(typeof window.printTag!=="function"){setTimeout(wrap,200);return;}
+    if(window._printTagWrapped)return;
+    window._printTagWrapped=true;
+    var orig=window.printTag;
+    window.printTag=function(){
+      var r;
+      try{r=orig.apply(this,arguments);}finally{
+        if(location.search.indexOf("reprint=")>=0){
+          try{history.replaceState({},"",location.pathname+(location.hash||""));console.log("[printTag cleanup] URL cleaned");}catch(e){}
+        }
+      }
+      return r;
+    };
+    console.log("[printTag cleanup] wrapped");
+  }
+  setTimeout(wrap,500);
+})();
+</script>
 </body>
 </html>
 
