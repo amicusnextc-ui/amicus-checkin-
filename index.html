@@ -1778,6 +1778,33 @@ async function cwoDo(btn){
   setTimeout(wrap,500);
 })();
 </script>
+
+<!-- KIOSK 30S IDLE TIMER -->
+<script>
+(function(){
+  var IDLE_MS=30000;
+  var timer=null;
+  function reset(){
+    if(timer)clearTimeout(timer);
+    timer=setTimeout(function(){
+      console.log("[idle 30s] returning to main");
+      // Already on home? skip
+      if(location.pathname==="/" && !location.search && !location.hash){
+        // Check if a real student card is showing
+        var hasCard=document.body.textContent.indexOf("AMC-")>=0;
+        if(!hasCard){reset();return;}
+      }
+      if(typeof window.goHome==="function"){try{window.goHome();return;}catch(e){}}
+      window.location.href="/";
+    },IDLE_MS);
+  }
+  ["mousemove","mousedown","keydown","touchstart","scroll","click"].forEach(function(ev){
+    window.addEventListener(ev,reset,{passive:true});
+  });
+  reset();
+  console.log("[idle 30s] timer started");
+})();
+</script>
 </body>
 </html>
 
