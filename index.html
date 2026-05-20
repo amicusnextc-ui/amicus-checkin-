@@ -1,6 +1,28 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script>
+/* REPRINT REFRESH GUARD - prevents repeat print on page refresh */
+(function(){
+  try{
+    var params=new URLSearchParams(location.search);
+    var amc=params.get("reprint");
+    if(!amc)return;
+    var key="rprcon_"+amc;
+    if(sessionStorage.getItem(key)){
+      // Already consumed this reprint URL in this session - strip params to stop refresh-replay
+      var rest=Array.from(params.entries()).filter(function(e){return e[0]!=="reprint";});
+      var newSearch=rest.length?("?"+rest.map(function(e){return e[0]+"="+encodeURIComponent(e[1]);}).join("&")):"";
+      history.replaceState({},"",location.pathname+newSearch+(location.hash||""));
+      console.log("[reprint guard] consumed key found - URL stripped");
+    }else{
+      sessionStorage.setItem(key,Date.now());
+      console.log("[reprint guard] first run - marked consumed");
+    }
+  }catch(e){console.error("[reprint guard]",e);}
+})();
+</script>
+
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>아미쿠스 교육부 | 출석 체크</title>
