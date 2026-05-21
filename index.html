@@ -1805,6 +1805,69 @@ async function cwoDo(btn){
   console.log("[idle 30s] timer started");
 })();
 </script>
+
+<!-- CHECKOUT MODE: HIDE NON-CHECKED-IN CARDS -->
+<script>
+(function(){
+  var CHECKIN_KOR="체크인";
+  var CHECKOUT_KOR="체크아웃";
+  function isCheckoutMode(){
+    // window._action set by mode toggle
+    if(window._action==="checkout")return true;
+    // Fallback: check active tab via DOM (highlighted Check Out tab)
+    // Look for top mode badge text
+    var modeBadge=document.querySelector("[class*=indigo-100],[class*=purple-100]");
+    if(modeBadge && /Check\s*Out/i.test(modeBadge.textContent)){return true;}
+    return false;
+  }
+  function processCards(){
+    if(!isCheckoutMode())return;
+    var btns=document.querySelectorAll("button");
+    btns.forEach(function(btn){
+      var txt=(btn.textContent||"").trim();
+      // Only target student-card "체크인 / Check In" action buttons
+      var hasCheckin=txt.indexOf(CHECKIN_KOR)===0 || /^Check\s*In/i.test(txt);
+      var hasCheckout=txt.indexOf(CHECKOUT_KOR)>=0 || /Check\s*Out/i.test(txt);
+      if(!hasCheckin || hasCheckout)return;
+      // Find the student card
+      var card=btn.parentElement;
+      var depth=0;
+      while(card && depth<6){
+        var t=card.textContent||"";
+        if(/AMC[-\s]?\d+/.test(t)){break;}
+        card=card.parentElement; depth++;
+      }
+      if(!card || !/AMC[-\s]?\d+/.test(card.textContent||""))return;
+      // Mark card as "not checked in - hidden on checkout"
+      if(card.dataset.cohide==="1")return;
+      card.dataset.cohide="1";
+      card.style.display="none";
+      // Show "not checked in" message inline
+      var msg=document.createElement("div");
+      msg.setAttribute("data-cohide-msg","1");
+      msg.className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center text-gray-600";
+      msg.innerHTML="⚠️ <strong>체크인되어 있지 않은 학생입니다.</strong><br/><span class=\"text-sm\">체크아웃은 체크인된 학생만 가능해요 · Not checked in yet</span>";
+      card.parentNode.insertBefore(msg, card);
+      console.log("[checkout hide] card hidden - not checked in");
+    });
+  }
+  function cleanup(){
+    // If switched back to checkin mode, restore hidden cards
+    if(!isCheckoutMode()){
+      document.querySelectorAll("[data-cohide='1']").forEach(function(c){c.style.display="";c.dataset.cohide="";});
+      document.querySelectorAll("[data-cohide-msg='1']").forEach(function(m){m.remove();});
+    }
+  }
+  function tick(){cleanup();processCards();}
+  setTimeout(tick,1000);
+  setInterval(tick,800);
+  if(window.MutationObserver){
+    var mo=new MutationObserver(tick);
+    setTimeout(function(){if(document.body)mo.observe(document.body,{childList:true,subtree:true});},1500);
+  }
+  console.log("[checkout hide] active");
+})();
+</script>
 </body>
 </html>
 
