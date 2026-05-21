@@ -23,8 +23,11 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { studentName, studentId, recordId } = req.body || {};
-    if (!studentName && !recordId) return res.status(400).json({ error: 'Missing studentName or recordId' });
+    const body = req.body || {};
+    const studentName = body.studentName || body.name;
+    const studentId = body.studentId;
+    const recordId = body.recordId || body.pageId;
+    if (!studentName && !recordId) return res.status(400).json({ error: 'Missing studentName/name or recordId/pageId', received: Object.keys(body) });
 
     const serviceSunday = getServiceSunday();
     if (!serviceSunday) {
