@@ -1851,6 +1851,42 @@ async function cwoDo(btn){
   setTimeout(wrap,800);
 })();
 </script>
+
+<!-- CHECKOUT DIRECTOR AUTH WRAPPER -->
+<script>
+(function(){
+  if(window._checkoutAuthWrapped)return;
+  window._checkoutAuthWrapped=true;
+  var origFetch=window.fetch;
+  window.fetch=async function(input,init){
+    var url=typeof input==="string"?input:(input&&input.url)||"";
+    if(url.indexOf("/api/checkout")<0)return origFetch.apply(this,arguments);
+    // Inject cached director password into checkout body
+    var cached=sessionStorage.getItem("_kioskDirPw")||"";
+    var body={};
+    try{if(init&&init.body)body=JSON.parse(init.body);}catch(e){}
+    if(cached && !body.directorPassword)body.directorPassword=cached;
+    var newInit=Object.assign({},init||{},{body:JSON.stringify(body)});
+    var resp=await origFetch.call(this,input,newInit);
+    if(resp.status===403){
+      var clone=resp.clone();
+      var data=await clone.json().catch(function(){return null;});
+      if(data && data.requiresDirectorAuth){
+        var pw=window.prompt("디렉터 비번호를 입력하세요 (Director PW):");
+        if(pw){
+          sessionStorage.setItem("_kioskDirPw",pw);
+          body.directorPassword=pw;
+          var retryInit=Object.assign({},init||{},{body:JSON.stringify(body)});
+          console.log("[checkout auth] retrying with director PW");
+          return origFetch.call(this,input,retryInit);
+        }
+      }
+    }
+    return resp;
+  };
+  console.log("[checkout auth] wrapper installed");
+})();
+</script>
 </body>
 </html>
 
