@@ -484,5 +484,58 @@ loadStudents();
 startAutoRefresh();
 </script>
 
+
+<!-- YOUTH CHECKIN TOAST NOTIFICATIONS -->
+<style>
+#yt_toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-200%);z-index:9999;padding:14px 24px;border-radius:16px;font-weight:800;font-size:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:90vw;text-align:center;}
+#yt_toast.show{transform:translateX(-50%) translateY(0);}
+#yt_toast.success{background:#10b981;color:#fff;}
+#yt_toast.error{background:#ef4444;color:#fff;}
+</style>
+<div id="yt_toast"></div>
+<script>
+(function(){
+  function showToast(msg,type){
+    var el=document.getElementById("yt_toast");
+    if(!el)return;
+    el.textContent=msg;
+    el.className=type==="error"?"error show":"success show";
+    setTimeout(function(){el.classList.remove("show");},type==="error"?5000:3500);
+  }
+  window.ytShowToast=showToast;
+  // Wrap fetch to detect /api/checkin and /api/visitor-checkin success/failure
+  var origFetch=window.fetch;
+  window.fetch=async function(input,init){
+    var url=typeof input==="string"?input:(input&&input.url)||"";
+    var isCheckin=url.indexOf("/api/checkin")>=0||url.indexOf("/api/visitor-checkin")>=0;
+    var isCancel=false;
+    if(isCheckin && init && init.body){
+      try{var b=JSON.parse(init.body);if(b.action==="cancel")isCancel=true;}catch(e){}
+    }
+    if(!isCheckin || isCancel) return origFetch.apply(this,arguments);
+    try{
+      var resp=await origFetch.apply(this,arguments);
+      var clone=resp.clone();
+      var data=await clone.json().catch(function(){return null;});
+      if(resp.ok && data && data.success){
+        showToast("✅ 체크인 저장 완료!","success");
+        console.log("[checkin toast] success",data);
+      }else if(data && data.requiresDirectorAuth){
+        // not error - prompts for director auth
+      }else{
+        var msg=(data&&data.error)||("HTTP "+resp.status);
+        showToast("❌ 체크인 실패: "+msg+" — 다시 시도해주세요","error");
+        console.error("[checkin toast] fail",resp.status,data);
+      }
+      return resp;
+    }catch(e){
+      showToast("❌ 네트워크 에러: "+e.message+" — 다시 시도","error");
+      console.error("[checkin toast] network",e);
+      throw e;
+    }
+  };
+  console.log("[checkin toast] active");
+})();
+</script>
 </body>
 </html>
