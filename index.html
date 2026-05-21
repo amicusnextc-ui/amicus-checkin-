@@ -1806,7 +1806,7 @@ async function cwoDo(btn){
 })();
 </script>
 
-<!-- CHECKOUT MODE: TOAST + CLEAR (v2) -->
+<!-- CHECKOUT MODE: TOAST + CLEAR (v3) -->
 <style>
 #coTry_toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-200%);z-index:9999;padding:14px 24px;border-radius:16px;font-weight:800;font-size:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:90vw;text-align:center;background:#f59e0b;color:#fff;}
 #coTry_toast.show{transform:translateX(-50%) translateY(0);}
@@ -1820,7 +1820,10 @@ async function cwoDo(btn){
     el.classList.add("show");
     setTimeout(function(){el.classList.remove("show");},2500);
   }
-  // Wrap loadStatus to detect not-checked-in on checkout mode
+  function successVisible(){
+    var s=document.getElementById("success");
+    return s && !s.classList.contains("hidden");
+  }
   function wrap(){
     if(typeof window.loadStatus!=="function"){setTimeout(wrap,300);return;}
     if(window._loadStatusWrapped)return;
@@ -1829,24 +1832,24 @@ async function cwoDo(btn){
     var origFetch=window.fetch;
     window.loadStatus=function(s){
       try{
-        if(window._action==="checkout" && s && s.name){
+        if(window._action==="checkout" && s && s.name && !successVisible()){
           origFetch("/api/check-status?name="+encodeURIComponent(s.name)).then(function(r){return r.json();}).then(function(data){
-            // If not checked in today (no checkInTime), bounce back
-            if(!data.checkedInToday && !data.checkedOutToday){
-              showCoToast();
-              // Clear AMC digit inputs and go home
-              setTimeout(function(){
-                ["co0","co1","co2","d0","d1","d2","d3","nameInput"].forEach(function(id){var i=document.getElementById(id);if(i){i.value="";}});
-                if(typeof window.goHome==="function"){try{window.goHome();}catch(e){}}
-              },1500);
-              return;
-            }
+            // Re-check success modal AFTER fetch returns (in case checkout completed during fetch)
+            if(successVisible())return;
+            // Skip if already checked out or in (active record exists)
+            if(data.checkedInToday || data.checkedOutToday)return;
+            showCoToast();
+            setTimeout(function(){
+              if(successVisible())return;
+              ["co0","co1","co2","d0","d1","d2","d3","nameInput"].forEach(function(id){var i=document.getElementById(id);if(i){i.value="";}});
+              if(typeof window.goHome==="function"){try{if(!successVisible())window.goHome();}catch(e){}}
+            },1500);
           }).catch(function(e){});
         }
-      }catch(e){console.error("[co-toast]",e);}
+      }catch(e){console.error("[co-toast v3]",e);}
       return orig.apply(this,arguments);
     };
-    console.log("[co-toast] installed");
+    console.log("[co-toast v3] installed");
   }
   setTimeout(wrap,800);
 })();
