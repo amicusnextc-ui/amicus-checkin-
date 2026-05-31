@@ -1751,6 +1751,35 @@ setTimeout(cwShowIfReady,2000);
   }
 })();
 </script>
+
+<!-- STAFF DEPT FILTER: only show same-dept students in attendance -->
+<script>
+(function(){
+  var origFetch=window.fetch;
+  window.fetch=async function(input,init){
+    var url=typeof input==="string"?input:(input&&input.url)||"";
+    if(url.indexOf("/api/attendance-today")<0)return origFetch.apply(this,arguments);
+    var resp=await origFetch.apply(this,arguments);
+    try{
+      var staffDept=(localStorage.getItem("staffDept")||"").trim();
+      if(!staffDept)return resp;
+      var shortDept=staffDept.split(" ")[0];
+      var clone=resp.clone();
+      var data=await clone.json().catch(function(){return null;});
+      if(!data||!data.records)return resp;
+      var orig=data.records.length;
+      data.records=data.records.filter(function(r){
+        var d=(r.department||"").split(" ")[0];
+        return d===shortDept;
+      });
+      data.total=data.records.length;
+      console.log("[staff dept filter] "+staffDept+": "+data.records.length+"/"+orig);
+      return new Response(JSON.stringify(data),{status:resp.status,statusText:resp.statusText,headers:resp.headers});
+    }catch(e){console.error("[staff dept filter]",e);return resp;}
+  };
+  console.log("[staff dept filter] installed");
+})();
+</script>
 </body>
 </html>
 
