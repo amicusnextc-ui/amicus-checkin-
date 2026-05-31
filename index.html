@@ -1844,6 +1844,90 @@ async function cwoDo(btn){
   console.log("[checkout auth] wrapper installed");
 })();
 </script>
+
+<!-- CWO PANEL OVERRIDE v2 (filter visitors, one-click checkout, auto-refresh) -->
+<script>
+(function(){
+  function waitReady(){
+    if(typeof window.cwoLoad!=="function"){setTimeout(waitReady,300);return;}
+    if(window._cwoOverridden)return;
+    window._cwoOverridden=true;
+    var origCwoLoad=window.cwoLoad;
+    var rosterSet=null;
+    async function getRoster(){
+      if(rosterSet)return rosterSet;
+      try{
+        var r=await fetch("/api/roster?password=3&_t="+Date.now(),{cache:"no-store"});
+        var d=await r.json();
+        var names={};
+        (d.students||[]).forEach(function(s){if(s.name)names[s.name.trim()]=true;});
+        rosterSet=names;
+        return names;
+      }catch(e){return {};}
+    }
+    window.cwoLoad=async function(filter){
+      var results=document.getElementById("cwoResults");
+      var status=document.getElementById("cwoStatus");
+      if(!results)return;
+      results.innerHTML='<div style="padding:20px;text-align:center;color:#666;font-size:13px;">로딩 중…</div>';
+      try{
+        var [resp,roster]=await Promise.all([
+          fetch("/api/attendance-today?password=3&_t="+Date.now(),{cache:"no-store"}),
+          getRoster()
+        ]);
+        var data=await resp.json();
+        var recs=(data.records||[]).filter(function(r){
+          if(!r.checkIn || r.checkOut)return false;
+          if(!r.name)return false;
+          if(!roster[r.name.trim()])return false;
+          if(filter && filter.trim()){
+            var n=r.name.toLowerCase();
+            var f=filter.toLowerCase().trim();
+            if(n.indexOf(f)<0)return false;
+          }
+          return true;
+        });
+        if(recs.length===0){
+          results.innerHTML='<div style="padding:20px;text-align:center;color:#666;font-size:13px;">체크아웃 할 학생이 없습니다</div>';
+          if(status)status.textContent="0명";
+          return;
+        }
+        results.innerHTML=recs.slice(0,40).map(function(r){
+          var safeName=(r.name||"").replace(/"/g,"&quot;");
+          var dept=(r.department||"").split(" ")[0];
+          return '<button onclick="cwoDoCheckout(\''+(r.id||'')+'\', \''+safeName+'\')" style="display:block;width:100%;padding:14px 16px;margin-bottom:8px;border:2px solid #10b981;border-radius:12px;background:#fff;text-align:left;cursor:pointer;font-size:15px;font-weight:700;color:#065f46;transition:all .15s;">👋 '+r.name+' <span style="font-size:11px;color:#666;font-weight:normal;">랷 '+dept+' 랷 '+(r.checkIn||"")+'</span></button>';
+        }).join("");
+        if(status)status.textContent=recs.length+"명 체크아웃 대기"+(recs.length>40?" (40명 표시)":"");
+      }catch(e){
+        results.innerHTML='<div style="padding:20px;color:#dc2626;font-size:13px;">로드 실패: '+e.message+'</div>';
+      }
+    };
+    // Define cwoDoCheckout helper
+    window.cwoDoCheckout=async function(recordId,name){
+      var btn=event && event.target;
+      if(btn){btn.disabled=true;btn.style.opacity="0.5";btn.textContent="체크아웃 중…";}
+      try{
+        var body={pageId:recordId,recordId:recordId,studentName:name,name:name,guardianConfirmed:true};
+        var r=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+        var d=await r.json();
+        if(d.requiresDirectorAuth){
+          var pw=prompt("디렉터 비번호 (Director PW):");
+          if(pw){sessionStorage.setItem("_kioskDirPw",pw);body.directorPassword=pw;r=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});d=await r.json();}
+        }
+        if(!r.ok||!d.success)throw new Error(d.error||"실패");
+        // Auto-refresh list
+        rosterSet=null;
+        await window.cwoLoad("");
+      }catch(e){
+        alert("체크아웃 실패: "+e.message);
+        if(btn){btn.disabled=false;btn.style.opacity="";btn.textContent="👋 "+name;}
+      }
+    };
+    console.log("[cwo override] installed");
+  }
+  setTimeout(waitReady,800);
+})();
+</script>
 </body>
 </html>
 
