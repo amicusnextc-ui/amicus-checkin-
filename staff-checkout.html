@@ -352,5 +352,67 @@ load();
 startAutoRefresh();
 </script>
 
+
+<!-- STAFF-CO OVERRIDE: one-click checkout (no modal) + visitor filter -->
+<script>
+(function(){
+  var rosterSet=null;
+  async function getRoster(){
+    if(rosterSet)return rosterSet;
+    try{
+      var r=await fetch("/api/roster?password=3&_t="+Date.now(),{cache:"no-store"});
+      var d=await r.json();
+      var names={};
+      (d.students||[]).forEach(function(s){if(s.name)names[s.name.trim()]=true;});
+      rosterSet=names;
+      return names;
+    }catch(e){return null;}
+  }
+  function waitReady(){
+    if(typeof window.openConfirm!=="function" || typeof window.doCheckout!=="function"){setTimeout(waitReady,300);return;}
+    if(window._staffCoOverridden)return;
+    window._staffCoOverridden=true;
+    // Override openConfirm to skip modal and directly call doCheckout
+    var origOpenConfirm=window.openConfirm;
+    window.openConfirm=function(recordId){
+      var pending=window.pendingRecords||[];
+      var rec=pending.find(function(r){return r.id===recordId;});
+      if(!rec)return;
+      window._currentRecord=rec;
+      console.log("[staff-co override] one-click checkout for",rec.name);
+      // Skip modal — go straight to doCheckout
+      try{ window.doCheckout(); }catch(e){console.error("[staff-co]",e);}
+    };
+    // Wrap render to filter visitors (post-load)
+    var origLoad=window.load||window.loadPending||null;
+    // Just monkey-patch the array filter at render time via MutationObserver style
+    // Easier: wrap window.fetch for /api/attendance-today
+    var origFetch=window.fetch;
+    window.fetch=async function(input,init){
+      var url=typeof input==="string"?input:(input&&input.url)||"";
+      if(url.indexOf("/api/attendance-today")<0)return origFetch.apply(this,arguments);
+      var resp=await origFetch.apply(this,arguments);
+      try{
+        var clone=resp.clone();
+        var data=await clone.json().catch(function(){return null;});
+        if(!data)return resp;
+        var roster=await getRoster();
+        if(!roster)return resp;
+        var filtered=(data.records||[]).filter(function(r){
+          // Keep only if checked in, not out, and name in roster
+          if(!r.checkIn||r.checkOut)return false;
+          if(!r.name)return false;
+          return roster[r.name.trim()]===true;
+        });
+        data.records=filtered;
+        // Build new Response with filtered data
+        return new Response(JSON.stringify(data),{status:resp.status,statusText:resp.statusText,headers:resp.headers});
+      }catch(e){console.error("[staff-co filter]",e);return resp;}
+    };
+    console.log("[staff-co override] installed");
+  }
+  setTimeout(waitReady,500);
+})();
+</script>
 </body>
 </html>
