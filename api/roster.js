@@ -32,6 +32,7 @@ module.exports = async (req, res) => {
     and: [
       { property: '방문자 (Visitor)', checkbox: { equals: false } },
       { property: '상태 (Status)', select: { equals: '활성 (Active)' } },
+      { property: '부서 (Department)', select: { does_not_equal: '졸업' } },
     ]
   };
   if (dept) filter.and.push({ property: '부서 (Department)', select: { equals: dept } });
