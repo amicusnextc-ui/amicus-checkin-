@@ -1780,6 +1780,117 @@ setTimeout(cwShowIfReady,2000);
   console.log("[staff dept filter] installed");
 })();
 </script>
+
+<script>
+/* ATTENDANCE COLUMN TOOLTIPS — show student names on hover/click of 출석/결석/방문자 cells */
+(function(){
+  if(window.__attendanceTooltipsInjected) return;
+  window.__attendanceTooltipsInjected = true;
+  var DEPTS = ['유아부','유치부','유년부','초등부','중고등부'];
+  var COL_TYPES = ['출석','결석','방문자'];
+  
+  function getDeptKey(d){ return (d||'').split(' ')[0]; }
+  
+  var cachedRoster = null, cachedAtt = null, cacheTime = 0;
+  async function getData(){
+    if(cachedRoster && Date.now()-cacheTime < 15000) return {students: cachedRoster, records: cachedAtt};
+    try {
+      var [r1, r2] = await Promise.all([
+        fetch('/api/roster?password=3&_t='+Date.now(), {cache:'no-store'}),
+        fetch('/api/attendance-today?password=3&_t='+Date.now(), {cache:'no-store'})
+      ]);
+      var d1 = await r1.json(), d2 = await r2.json();
+      cachedRoster = d1.students || [];
+      cachedAtt = d2.records || [];
+      cacheTime = Date.now();
+      return {students: cachedRoster, records: cachedAtt};
+    } catch(e) { return {students:[], records:[]}; }
+  }
+  
+  async function computeNames(dept, type){
+    var data = await getData();
+    var deptKey = getDeptKey(dept);
+    var attRecords = data.records.filter(function(r){ return getDeptKey(r.department) === deptKey; });
+    var attNames = {};
+    attRecords.forEach(function(r){ if(r.name && !r.name.startsWith('🗑️')) attNames[r.name.trim()] = true; });
+    
+    if(type === '출석'){
+      return data.students.filter(function(s){
+        return getDeptKey(s.department) === deptKey && attNames[s.name.trim()];
+      }).map(function(s){ return s.name; });
+    } else if(type === '결석'){
+      return data.students.filter(function(s){
+        return getDeptKey(s.department) === deptKey && !attNames[s.name.trim()];
+      }).map(function(s){ return s.name; });
+    } else if(type === '방문자'){
+      var rosterByName = {};
+      data.students.forEach(function(s){ rosterByName[s.name.trim()] = s; });
+      // 방문자 = attendance records where roster shows visitor=YES OR name not in roster
+      return attRecords.filter(function(r){
+        var s = rosterByName[r.name.trim()];
+        return r.isNew === true || (s && s.guardian === undefined ? false : false) || !s;
+      }).map(function(r){ return r.name; });
+    }
+    return [];
+  }
+  
+  function showTooltip(target, type, names){
+    document.querySelectorAll('.__attTip').forEach(function(el){ el.remove(); });
+    var div = document.createElement('div');
+    div.className = '__attTip';
+    div.style.cssText = 'position:fixed;z-index:99999;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:10px 12px;font-size:13px;max-width:280px;max-height:300px;overflow-y:auto;color:#333;line-height:1.6;';
+    var header = '<div style="font-weight:600;color:#666;margin-bottom:6px;font-size:12px;">'+type+' ('+names.length+'명)</div>';
+    var body = names.length ? names.join(', ') : '없음';
+    div.innerHTML = header + '<div>'+body+'</div>';
+    document.body.appendChild(div);
+    var rect = target.getBoundingClientRect();
+    var left = Math.max(10, Math.min(rect.left, window.innerWidth - 300));
+    var top = rect.bottom + 4;
+    if(top + 200 > window.innerHeight) top = rect.top - 210;
+    div.style.left = left + 'px';
+    div.style.top = top + 'px';
+    setTimeout(function(){
+      var dismiss = function(e){ if(!div.contains(e.target)){ div.remove(); document.removeEventListener('click', dismiss); } };
+      document.addEventListener('click', dismiss);
+    }, 0);
+  }
+  
+  function attach(){
+    var rows = document.querySelectorAll('tr');
+    rows.forEach(function(row){
+      if(row.__attAttached) return;
+      var cells = row.cells;
+      if(!cells || cells.length < 4) return;
+      var deptCell = cells[0];
+      var deptText = deptCell ? deptCell.textContent.trim() : '';
+      var matched = null;
+      DEPTS.forEach(function(d){ if(deptText.indexOf(d)>=0) matched = d; });
+      if(!matched) return;
+      row.__attAttached = true;
+      
+      // Cells 1=출석, 2=결석, 3=방문자
+      [[1,'출석'],[2,'결석'],[3,'방문자']].forEach(function(spec){
+        var idx = spec[0], type = spec[1];
+        var cell = cells[idx];
+        if(!cell) return;
+        cell.style.cursor = 'pointer';
+        cell.style.textDecoration = 'underline dotted';
+        cell.title = matched + ' ' + type + ' 명단 보기';
+        cell.addEventListener('click', async function(e){
+          e.stopPropagation();
+          var names = await computeNames(matched, type);
+          showTooltip(cell, matched+' '+type, names);
+        });
+      });
+    });
+  }
+  
+  setTimeout(attach, 500);
+  setTimeout(attach, 1500);
+  setTimeout(attach, 3000);
+  new MutationObserver(function(){ attach(); }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 </body>
 </html>
 
