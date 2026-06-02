@@ -1059,5 +1059,92 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
   else _addFloatingBtn();
 })();
 </script>
+
+<script>
+/* ATTENDANCE COLUMN TOOLTIPS v2 — shared with staff.html */
+(function(){
+  if(window.__attTipV2) return;
+  window.__attTipV2 = true;
+  var DEPTS = ['유아부','유치부','유년부','초등부','중고등부'];
+  var H = { OUT:'출석', ABS:'결석', VIS:'방문자', CHK:'체크인' };
+  var cached = null, ct = 0;
+  async function getData(){
+    if(cached && Date.now()-ct<30000) return cached;
+    try{
+      var r = await fetch('/api/weekly-summary?password=3&_t='+Date.now(), {cache:'no-store'});
+      cached = await r.json(); ct = Date.now(); return cached;
+    }catch(e){ return null; }
+  }
+  function dKey(d){ return (d||'').split(' ')[0]; }
+  function findColIdx(row, names){
+    var t = row.closest('table'); if(!t) return -1;
+    var hr = t.querySelector('thead tr') || t.rows[0];
+    if(!hr) return -1;
+    for(var i=0;i<hr.cells.length;i++){
+      var ct = hr.cells[i].textContent.trim();
+      for(var j=0;j<names.length;j++) if(ct.indexOf(names[j])>=0) return i;
+    }
+    return -1;
+  }
+  async function getNames(dept, type){
+    var d = await getData(); if(!d) return [];
+    var k = dKey(dept);
+    var row = (d.rows||[]).find(function(r){ return dKey(r.short)===k || dKey(r.dept)===k; });
+    if(type === H.OUT || type === H.CHK) return row ? (row.attendedNames||[]) : [];
+    if(type === H.VIS) return row ? (row.visitorNames||[]) : [];
+    if(type === H.ABS) return (d.absentList||[]).filter(function(a){ return dKey(a.dept)===k; }).map(function(a){ return a.name; });
+    return [];
+  }
+  function showTip(target, dept, type, names){
+    document.querySelectorAll('.__attTipV2').forEach(function(e){ e.remove(); });
+    var div = document.createElement('div');
+    div.className = '__attTipV2';
+    div.style.cssText = 'position:fixed;z-index:99999;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:10px 12px;font-size:13px;max-width:300px;max-height:320px;overflow-y:auto;color:#333;line-height:1.6;';
+    div.innerHTML = '<div style="font-weight:600;color:#666;margin-bottom:6px;font-size:12px;">'+dept+' '+type+' ('+names.length+'명)</div><div>'+(names.length ? names.join(', ') : '없음')+'</div>';
+    document.body.appendChild(div);
+    var r = target.getBoundingClientRect();
+    var left = Math.max(10, Math.min(r.left, window.innerWidth - 320));
+    var top = r.bottom + 4;
+    if(top + 200 > window.innerHeight) top = r.top - 210;
+    div.style.left = left + 'px'; div.style.top = top + 'px';
+    setTimeout(function(){
+      var dm = function(e){ if(!div.contains(e.target)){ div.remove(); document.removeEventListener('click', dm); } };
+      document.addEventListener('click', dm);
+    }, 0);
+  }
+  function attach(){
+    document.querySelectorAll('tr').forEach(function(row){
+      if(row.__attV2done) return;
+      var cells = row.cells;
+      if(!cells || cells.length < 3) return;
+      var dt = cells[0] ? cells[0].textContent.trim() : '';
+      var matched = null;
+      for(var i=0;i<DEPTS.length;i++) if(dt.indexOf(DEPTS[i])>=0){ matched = DEPTS[i]; break; }
+      if(!matched) return;
+      var outIdx = findColIdx(row, [H.OUT, H.CHK]);
+      var absIdx = findColIdx(row, [H.ABS]);
+      var visIdx = findColIdx(row, [H.VIS]);
+      row.__attV2done = true;
+      [[outIdx, H.OUT],[absIdx, H.ABS],[visIdx, H.VIS]].forEach(function(spec){
+        var idx = spec[0], type = spec[1];
+        if(idx < 0 || !cells[idx]) return;
+        var cell = cells[idx];
+        cell.style.cursor = 'pointer';
+        cell.style.textDecoration = 'underline dotted';
+        cell.title = matched+' '+type+' 보기';
+        cell.addEventListener('click', async function(e){
+          e.stopPropagation();
+          var ns = await getNames(matched, type);
+          showTip(cell, matched, type, ns);
+        });
+      });
+    });
+  }
+  setTimeout(attach, 500);
+  setTimeout(attach, 1500);
+  setTimeout(attach, 3000);
+  new MutationObserver(function(){ attach(); }).observe(document.body, {childList:true, subtree:true});
+})();
+</script>
 </body>
 </html>
