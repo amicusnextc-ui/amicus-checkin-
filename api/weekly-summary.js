@@ -94,8 +94,9 @@ module.exports = async (req, res) => {
       const dept = p.properties["부서 (Department)"]?.select?.name || "";
       const isNew = p.properties["방문자 (Visitor)"]?.checkbox || false;
       if (!ds[dept]) ds[dept] = { attended: 0, visitors: 0, total: 0 };
-      if (isNew) ds[dept].visitors++;
-      else ds[dept].attended++;
+      const _nm = p.properties["이름 (Name)"]?.title?.[0]?.plain_text || "";
+      if (isNew) { ds[dept].visitors++; (ds[dept].visitorNames = ds[dept].visitorNames || []).push(_nm); }
+      else { ds[dept].attended++; (ds[dept].attendedNames = ds[dept].attendedNames || []).push(_nm); }
     });
 
     // Absent list — use lastAttended date on student record for absence detection
@@ -161,6 +162,8 @@ module.exports = async (req, res) => {
           short: d.split(" ")[0],
           attended: st.attended,
           visitors: st.visitors,
+          attendedNames: st.attendedNames || [],
+          visitorNames: st.visitorNames || [],
           absent: Math.max(0, st.total - st.attended),
           total: st.total
         };
@@ -171,7 +174,7 @@ module.exports = async (req, res) => {
       a.absent += r.absent; a.total += r.total; return a;
     }, { attended:0, visitors:0, absent:0, total:0 });
 
-    const rows = depts.map(d => ({ dept:d.dept, short:d.short, checkin:d.attended, visitor:d.visitors, absent:d.absent, total:d.total }));
+    const rows = depts.map(d => ({ dept:d.dept, short:d.short, checkin:d.attended, visitor:d.visitors, attendedNames:d.attendedNames, visitorNames:d.visitorNames, absent:d.absent, total:d.total }));
     const grand = { checkin:total.attended, visitor:total.visitors, absent:total.absent, total:total.total };
 
     let saved = false;
