@@ -1275,5 +1275,62 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
   };
 })();
 </script>
+
+<script>
+/* MEMBER-ONLY RATE — 출석률 column = (출석 - 방문자) / 총원 */
+(function(){
+  if(window.__memberRateFixInjected) return;
+  window.__memberRateFixInjected = true;
+  var DEPTS = ['유아부','유치부','유년부','초등부','중고등부'];
+  
+  function fixRow(row){
+    if(row.__rateFixed) return;
+    var cells = row.cells;
+    if(!cells || cells.length < 4) return;
+    var deptText = cells[0] ? cells[0].textContent.trim() : '';
+    var matched = false;
+    for(var i=0;i<DEPTS.length;i++) if(deptText.indexOf(DEPTS[i])>=0){ matched = true; break; }
+    if(!matched) return;
+    
+    // Find column indices by header
+    var table = row.closest('table');
+    var hr = table.querySelector('thead tr') || table.rows[0];
+    if(!hr) return;
+    var idxOut = -1, idxVis = -1, idxTotal = -1, idxRate = -1;
+    for(var j=0;j<hr.cells.length;j++){
+      var ht = hr.cells[j].textContent.trim();
+      if(ht === '출석') idxOut = j;
+      else if(ht === '방문자') idxVis = j;
+      else if(ht.indexOf('총')>=0) idxTotal = j;
+      else if(ht.indexOf('출석률')>=0) idxRate = j;
+    }
+    if(idxOut<0 || idxVis<0 || idxTotal<0 || idxRate<0) return;
+    
+    var checkinCombined = parseInt(cells[idxOut].textContent.replace(/\D/g, ''), 10) || 0;
+    var visitor = parseInt(cells[idxVis].textContent.replace(/\D/g, ''), 10) || 0;
+    var total = parseInt(cells[idxTotal].textContent.replace(/\D/g, ''), 10) || 0;
+    var memberCheckin = Math.max(0, checkinCombined - visitor);
+    if(total === 0) return;
+    var pct = Math.round(memberCheckin / total * 100);
+    
+    // Update rate cell — preserve element structure if possible
+    var rateCell = cells[idxRate];
+    // Try to find inner text node or span
+    var inner = rateCell.querySelector('span, div, b');
+    if(inner) inner.textContent = pct + '%';
+    else rateCell.textContent = pct + '%';
+    row.__rateFixed = true;
+  }
+  
+  function attach(){
+    document.querySelectorAll('tr').forEach(fixRow);
+  }
+  
+  setTimeout(attach, 600);
+  setTimeout(attach, 1500);
+  setTimeout(attach, 3000);
+  new MutationObserver(function(){ attach(); }).observe(document.body, {childList:true, subtree:true, characterData:true});
+})();
+</script>
 </body>
 </html>
