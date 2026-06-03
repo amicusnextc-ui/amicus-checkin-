@@ -1146,5 +1146,94 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
   new MutationObserver(function(){ attach(); }).observe(document.body, {childList:true, subtree:true});
 })();
 </script>
+
+<script>
+/* AUDIT BUTTON — director.html — reconcile roster.lastAttended vs attendance log */
+(function(){
+  if(window.__auditTabInjected) return;
+  window.__auditTabInjected = true;
+  
+  function makeBtn(){
+    if(document.getElementById('__auditFloatBtn')) return;
+    var btn = document.createElement('button');
+    btn.id = '__auditFloatBtn';
+    btn.textContent = '🔍 Audit';
+    btn.style.cssText = 'position:fixed;bottom:80px;right:20px;background:#7c3aed;color:#fff;border:none;border-radius:50px;padding:12px 20px;font-size:14px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.2);cursor:pointer;z-index:9000;';
+    btn.onclick = openAudit;
+    document.body.appendChild(btn);
+  }
+  
+  async function openAudit(){
+    document.querySelectorAll('.__auditModal').forEach(function(e){ e.remove(); });
+    var m = document.createElement('div');
+    m.className = '__auditModal';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99000;display:flex;align-items:center;justify-content:center;padding:20px;';
+    m.innerHTML = '<div style="background:#fff;border-radius:12px;max-width:820px;width:100%;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;"><div style="padding:18px 22px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;"><h3 style="margin:0;color:#111;">출석 데이터 감사</h3><button id="__auditClose" style="border:none;background:none;font-size:26px;cursor:pointer;color:#666;line-height:1;">\u00D7</button></div><div id="__auditBody" style="padding:20px;overflow-y:auto;flex:1;"><p style="color:#666;">검사 중...</p></div></div>';
+    document.body.appendChild(m);
+    m.querySelector('#__auditClose').onclick = function(){ m.remove(); };
+    m.onclick = function(e){ if(e.target === m) m.remove(); };
+    
+    var body = m.querySelector('#__auditBody');
+    try{
+      var promises = [
+        fetch('/api/roster?password=3&_t='+Date.now(), {cache:'no-store'}),
+        fetch('/api/weekly-summary?password=3&_t='+Date.now(), {cache:'no-store'})
+      ];
+      var responses = await Promise.all(promises);
+      var roster = await responses[0].json();
+      var week = await responses[1].json();
+      
+      var students = roster.students || [];
+      var rows = week.rows || [];
+      var sundayISO = week.sundayISO;
+      var attendedByDept = {};
+      var visitorsByDept = {};
+      rows.forEach(function(r){
+        attendedByDept[r.short] = (r.attendedNames || []);
+        visitorsByDept[r.short] = (r.visitorNames || []);
+      });
+      
+      var deptKey = function(d){ return (d||'').split(' ')[0]; };
+      var issues = [];
+      students.forEach(function(s){
+        var d = deptKey(s.department);
+        var atts = attendedByDept[d] || [];
+        var visits = visitorsByDept[d] || [];
+        var inLog = atts.indexOf(s.name.trim()) >= 0 || visits.indexOf(s.name.trim()) >= 0;
+        var rosterToday = s.lastAttended === sundayISO;
+        
+        if(rosterToday && !inLog){
+          issues.push({ name: s.name, dept: d, type: '로스터는 ✅ 그러나 record 없음' });
+        } else if(!rosterToday && inLog){
+          issues.push({ name: s.name, dept: d, type: 'record는 ✅ 그러나 로스터 stale' });
+        }
+      });
+      
+      var html = '<p style="color:#666;font-size:13px;">\uD83D\uDCC5 Sunday: ' + sundayISO + ' \u2502 학생 총 ' + students.length + '명</p>';
+      
+      if(issues.length === 0){
+        html += '<div style="background:#d1fae5;color:#065f46;padding:14px 18px;border-radius:8px;font-weight:600;margin-top:12px;">\u2705 모두 정상 – 문제 없음</div>';
+      } else {
+        html += '<div style="background:#fef3c7;color:#92400e;padding:12px 18px;border-radius:8px;font-weight:600;margin-top:12px;margin-bottom:14px;">\u26A0 ' + issues.length + '\uAC74 이상 감지</div>';
+        html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        html += '<thead><tr style="background:#f3f4f6;"><th style="padding:8px;text-align:left;">이름</th><th style="padding:8px;text-align:left;">부서</th><th style="padding:8px;text-align:left;">상태</th></tr></thead><tbody>';
+        issues.forEach(function(i){
+          html += '<tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">'+i.name+'</td><td style="padding:8px;">'+i.dept+'</td><td style="padding:8px;color:#92400e;font-size:12px;">'+i.type+'</td></tr>';
+        });
+        html += '</tbody></table>';
+      }
+      body.innerHTML = html;
+    }catch(e){
+      body.innerHTML = '<p style="color:#dc2626;">\u274C 검사 실패: ' + (e.message || e) + '</p>';
+    }
+  }
+  
+  if(document.readyState === 'complete' || document.readyState === 'interactive'){
+    setTimeout(makeBtn, 500);
+  } else {
+    document.addEventListener('DOMContentLoaded', makeBtn);
+  }
+})();
+</script>
 </body>
 </html>
