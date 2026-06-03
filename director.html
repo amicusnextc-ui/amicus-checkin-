@@ -1235,5 +1235,45 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
   }
 })();
 </script>
+
+<script>
+/* OPTION A — combine visitors into 출석 count in /api/weekly-summary response */
+(function(){
+  if(window.__optAInjected) return;
+  window.__optAInjected = true;
+  var origFetch = window.fetch;
+  window.fetch = async function(input, init){
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    if(url.indexOf('/api/weekly-summary') < 0) return origFetch.apply(this, arguments);
+    var resp = await origFetch.apply(this, arguments);
+    var clone = resp.clone();
+    try{
+      var data = await clone.json();
+      // Mutate per-dept rows
+      (data.rows || []).forEach(function(r){
+        if(typeof r.checkin === 'number' && typeof r.visitor === 'number'){
+          r.checkin = r.checkin + r.visitor;
+        }
+      });
+      (data.depts || []).forEach(function(d){
+        if(typeof d.attended === 'number' && typeof d.visitors === 'number'){
+          d.attended = d.attended + d.visitors;
+        }
+      });
+      // Mutate grand totals
+      if(data.grand && typeof data.grand.checkin === 'number' && typeof data.grand.visitor === 'number'){
+        data.grand.checkin = data.grand.checkin + data.grand.visitor;
+      }
+      if(data.total && typeof data.total.attended === 'number' && typeof data.total.visitors === 'number'){
+        data.total.attended = data.total.attended + data.total.visitors;
+      }
+      var newBody = JSON.stringify(data);
+      return new Response(newBody, { status: resp.status, statusText: resp.statusText, headers: resp.headers });
+    }catch(e){
+      return resp;
+    }
+  };
+})();
+</script>
 </body>
 </html>
