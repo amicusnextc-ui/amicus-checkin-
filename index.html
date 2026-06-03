@@ -1928,6 +1928,53 @@ async function cwoDo(btn){
   setTimeout(waitReady,800);
 })();
 </script>
+
+<script>
+/* INDEX TOAST — show check-in/out save success/failure (prevent silent fails) */
+(function(){
+  if(window.__indexToastInjected) return;
+  window.__indexToastInjected = true;
+  
+  function showToast(msg, kind){
+    var t = document.createElement('div');
+    var bg = kind === 'error' ? '#dc2626' : (kind === 'warn' ? '#f59e0b' : '#10b981');
+    t.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:'+bg+';color:#fff;padding:14px 22px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2);font-size:15px;font-weight:600;z-index:99999;animation:toastIn .2s;';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){
+      t.style.transition = 'opacity .3s';
+      t.style.opacity = '0';
+      setTimeout(function(){ t.remove(); }, 300);
+    }, kind === 'error' ? 5500 : 3500);
+  }
+  
+  var origFetch = window.fetch;
+  window.fetch = async function(input, init){
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    var isCheckin = url.indexOf('/api/checkin') >= 0 || url.indexOf('/api/visitor-checkin') >= 0;
+    var isCheckout = url.indexOf('/api/checkout') >= 0;
+    if(!isCheckin && !isCheckout) return origFetch.apply(this, arguments);
+    
+    try{
+      var resp = await origFetch.apply(this, arguments);
+      var clone = resp.clone();
+      try{
+        var data = await clone.json();
+        if(resp.ok && data && (data.success || data.ok || (data.error == null))){
+          showToast(isCheckin ? '✅ 체크인 저장 완료' : '✅ 체크아웃 저장 완료', 'success');
+        } else if(!data || !data.requiresDirectorAuth){
+          var msg = (data && data.error) ? ('❌ 저장 실패 — 다시 시도: ' + data.error) : '❌ 저장 실패 — 다시 시도';
+          showToast(msg, 'error');
+        }
+      }catch(_){ /* not JSON, ignore */ }
+      return resp;
+    }catch(e){
+      showToast('❌ 저장 실패 — 다시 시도: ' + (e.message || 'network'), 'error');
+      throw e;
+    }
+  };
+})();
+</script>
 </body>
 </html>
 
