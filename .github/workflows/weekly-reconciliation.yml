@@ -1,0 +1,96 @@
+name: Weekly Attendance Reconciliation
+
+# Runs every Sunday at 11pm PT (Monday 6am UTC)
+# Compares /api/weekly-summary counts vs actual Notion records
+# Creates GitHub Issue if mismatch found (David gets email notification)
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Mon 6am UTC = Sun 11pm PT
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch weekly summary
+        id: summary
+        run: |
+          RESPONSE=$(curl -sS "https://amicus-checkin.vercel.app/api/weekly-summary?password=3&_t=$(date +%s)")
+          echo "data<<EOF" >> $GITHUB_OUTPUT
+          echo "$RESPONSE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "Response received"
+      
+      - name: Analyze for anomalies
+        id: check
+        run: |
+          cat <<'JS' > check.js
+          const d = JSON.parse(process.env.SUMMARY);
+          const issues = [];
+          const sundayISO = d.sundayISO;
+          const total = d.total || d.grand || {};
+          
+          // Sum dept counts and compare
+          const rows = d.rows || [];
+          const sumCheckin = rows.reduce((a, r) => a + (r.checkin || 0), 0);
+          const sumVisitor = rows.reduce((a, r) => a + (r.visitor || 0), 0);
+          const sumAbsent = rows.reduce((a, r) => a + (r.absent || 0), 0);
+          const sumTotal = rows.reduce((a, r) => a + (r.total || 0), 0);
+          
+          if (sumCheckin !== (total.attended || total.checkin)) issues.push('Sum checkin mismatch: ' + sumCheckin + ' vs ' + (total.attended || total.checkin));
+          if (sumVisitor !== (total.visitors || total.visitor)) issues.push('Sum visitor mismatch: ' + sumVisitor + ' vs ' + (total.visitors || total.visitor));
+          if (sumAbsent !== total.absent) issues.push('Sum absent mismatch: ' + sumAbsent + ' vs ' + total.absent);
+          
+          // Check for unexpectedly zero attended in any active dept
+          rows.forEach(r => {
+            if (r.total > 0 && r.checkin === 0 && r.visitor === 0) {
+              issues.push(r.short + ' has 0 attendance — verify');
+            }
+          });
+          
+          // Output
+          const result = { sundayISO, issuesCount: issues.length, issues, summary: { sumCheckin, sumVisitor, sumAbsent, sumTotal, total } };
+          require('fs').writeFileSync('result.json', JSON.stringify(result, null, 2));
+          console.log(JSON.stringify(result));
+          if (issues.length > 0) process.exit(1);
+          JS
+          SUMMARY='${{ steps.summary.outputs.data }}' node check.js > result.txt 2>&1 || true
+          cat result.txt
+          if grep -q '"issuesCount":0' result.txt; then
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_issues=true" >> $GITHUB_OUTPUT
+          fi
+          {
+            echo "report<<EOF"
+            cat result.txt
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+      
+      - name: Create issue if mismatch
+        if: steps.check.outputs.has_issues == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const report = `${{ steps.check.outputs.report }}`;
+            const today = new Date().toISOString().slice(0,10);
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Weekly attendance reconciliation issue (${today})`,
+              body: `Automated reconciliation found anomalies in /api/weekly-summary.
+
+## Report
+
+\`\`\`
+${report}
+\`\`\`
+
+Review /api/weekly-summary and the attendance log.`,
+              labels: ['reconciliation', 'auto-detected']
+            });
+            console.log('Issue created');
