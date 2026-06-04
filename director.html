@@ -1513,5 +1513,142 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
   });
 })();
 </script>
+
+<script>
+/* SUNDAY WRAP-UP STATUS — show 5 dept report status, manual remind button */
+(function(){
+  if(window.__sundayWrapInjected) return;
+  window.__sundayWrapInjected = true;
+  var DEPTS = ['유아부','유치부','유년부','초등부','중고등부'];
+  
+  function getServiceSundayISO(){
+    var now = new Date();
+    var laDate = new Date(now.toLocaleString('en-US', {timeZone:'America/Los_Angeles'}));
+    var day = laDate.getDay();
+    var d = new Date(laDate);
+    if(day !== 0) d.setDate(d.getDate() - day);
+    return d.toISOString().slice(0,10);
+  }
+  
+  function formatMD(iso){
+    var p = iso.split('-');
+    return parseInt(p[1],10) + '/' + parseInt(p[2],10);
+  }
+  
+  async function loadStatus(){
+    try{
+      // Try multiple endpoints
+      var r = await fetch('/api/leader-summary?password=3&_t='+Date.now(), {cache:'no-store'});
+      if(!r.ok) r = await fetch('/api/requests?password=3&_t='+Date.now(), {cache:'no-store'});
+      if(!r.ok) return null;
+      return await r.json();
+    }catch(e){ return null; }
+  }
+  
+  function renderWidget(data){
+    var existing = document.getElementById('__sundayWrap');
+    if(existing) existing.remove();
+    
+    var sundayISO = getServiceSundayISO();
+    var sundayMD = formatMD(sundayISO);
+    var requests = (data && (data.requests || data.activeRequests || data.completedRequests || data)) || [];
+    if(!Array.isArray(requests)) requests = (data && data.activeRequests || []).concat(data && data.completedRequests || []);
+    
+    // For each dept, check if any request from this Sunday with 특이사항/마무리 keyword
+    var statusByDept = {};
+    DEPTS.forEach(function(d){ statusByDept[d] = null; });
+    
+    requests.forEach(function(req){
+      var content = (req.content || req.text || req.message || '').toString();
+      var dept = (req.department || req.dept || '').toString();
+      var staff = (req.staff || req.author || req.createdBy || '').toString();
+      var time = req.createdAt || req.time || req.timestamp || '';
+      var category = (req.category || req.type || '').toString();
+      
+      // Match by content containing sunday date pattern OR explicit "마무리" / "특이사항"
+      var hasSundayRef = content.indexOf(sundayMD) >= 0 || content.indexOf(sundayISO) >= 0;
+      var hasWrapKeyword = content.indexOf('특이사항') >= 0 || content.indexOf('\uB9C8\uBB34\uB9AC') >= 0 || category.indexOf('\uB9C8\uBB34\uB9AC') >= 0;
+      
+      if(hasSundayRef || hasWrapKeyword){
+        DEPTS.forEach(function(d){
+          if(dept.indexOf(d) >= 0){
+            if(!statusByDept[d] || new Date(time) > new Date(statusByDept[d].time)){
+              statusByDept[d] = { content: content.slice(0, 60), staff: staff, time: time };
+            }
+          }
+        });
+      }
+    });
+    
+    // Create widget
+    var widget = document.createElement('div');
+    widget.id = '__sundayWrap';
+    widget.style.cssText = 'background:#fff;border-radius:12px;padding:18px 22px;margin:18px 0;box-shadow:0 2px 8px rgba(0,0,0,0.06);';
+    
+    var html = '<h3 style="margin:0 0 12px;font-size:16px;color:#111;">🗓️ 주일 마무리 현황 <span style="font-size:13px;color:#888;font-weight:500;">— ' + sundayMD + '</span></h3>';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+    html += '<thead><tr style="background:#f9fafb;border-bottom:2px solid #e5e7eb;"><th style="padding:8px;text-align:left;color:#666;">부서</th><th style="padding:8px;text-align:left;color:#666;">상태</th><th style="padding:8px;text-align:left;color:#666;">간사</th><th style="padding:8px;text-align:left;color:#666;">특이사항</th><th style="padding:8px;text-align:center;color:#666;">📧 리마인드</th></tr></thead><tbody>';
+    
+    DEPTS.forEach(function(d){
+      var s = statusByDept[d];
+      var ok = !!s;
+      var bgClr = ok ? '#f0fdf4' : '#fef2f2';
+      var statusTxt = ok ? '✅ 작성됨' : '⏳ 미작성';
+      var statusClr = ok ? '#16a34a' : '#dc2626';
+      var staffName = ok ? s.staff : '—';
+      var contentTxt = ok ? (s.content || '없음') : '—';
+      html += '<tr style="border-bottom:1px solid #f3f4f6;background:' + bgClr + ';">';
+      html += '<td style="padding:10px 8px;font-weight:600;">' + d + '</td>';
+      html += '<td style="padding:10px 8px;color:' + statusClr + ';font-weight:600;">' + statusTxt + '</td>';
+      html += '<td style="padding:10px 8px;color:#666;">' + staffName + '</td>';
+      html += '<td style="padding:10px 8px;color:#666;font-size:12px;">' + contentTxt + '</td>';
+      html += '<td style="padding:10px 8px;text-align:center;">';
+      if(!ok){
+        html += '<button data-dept="' + d + '" class="__remindBtn" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;">📧 리마인드</button>';
+      } else {
+        html += '<span style="color:#16a34a;">✓</span>';
+      }
+      html += '</td></tr>';
+    });
+    
+    html += '</tbody></table>';
+    widget.innerHTML = html;
+    
+    // Insert after dashboard top cards or 부서별 집계
+    var anchor = document.querySelector('#sundayWrapAnchor') 
+              || document.querySelector('table')?.closest('div, section')
+              || document.body.firstElementChild;
+    if(anchor && anchor.parentElement){
+      anchor.parentElement.insertBefore(widget, anchor.nextElementSibling);
+    } else {
+      document.body.appendChild(widget);
+    }
+    
+    // Attach remind handlers
+    widget.querySelectorAll('.__remindBtn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var dept = btn.getAttribute('data-dept');
+        if(confirm(dept + ' \uAC04\uC0AC\uC5D0\uAC8C \uB9AC\uB9C8\uC778\uB4DC \uC774\uBA54\uC77C \uBC1C\uC1A1?')){
+          // Future: call /api/send-reminder?dept=...
+          alert(dept + ' \uB9AC\uB9C8\uC778\uB4DC \uBC1C\uC1A1 \uC608\uC815 (cron \uB610\uB294 manual)');
+          btn.style.opacity = '0.5';
+          btn.textContent = '\uBC1C\uC1A1\uB428';
+          btn.disabled = true;
+        }
+      });
+    });
+  }
+  
+  async function refresh(){
+    var data = await loadStatus();
+    renderWidget(data);
+  }
+  
+  setTimeout(refresh, 800);
+  setTimeout(refresh, 3000);
+  // Re-render every 5min
+  setInterval(refresh, 300000);
+})();
+</script>
 </body>
 </html>
