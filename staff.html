@@ -2024,6 +2024,47 @@ setTimeout(cwShowIfReady,2000);
   new MutationObserver(function(){ attach(); }).observe(document.body, {childList:true, subtree:true, characterData:true});
 })();
 </script>
+
+<script>
+(function(){
+  if(window.__liveHeaderInjected) return;
+  window.__liveHeaderInjected = true;
+  function inject(){
+    if(document.getElementById('__liveHeader')) return;
+    var labels = document.querySelectorAll('div, p, span, label, h3, h4');
+    var checkinLabel = null;
+    labels.forEach(function(l){
+      if(checkinLabel) return;
+      if(l.textContent.trim() === '체크인' && l.children.length === 0) checkinLabel = l;
+    });
+    if(!checkinLabel) return;
+    var card = checkinLabel.parentElement;
+    while(card && card.parentElement){
+      var siblings = card.parentElement.children;
+      if(siblings.length >= 3 && siblings.length <= 6){
+        var matchCount = 0;
+        for(var i=0;i<siblings.length;i++){
+          var t = siblings[i].textContent.trim();
+          if(/전체|체크인|\u{CCB4}\u{D06C}\u{C544}\u{C6C3}|\u{BC29}\u{BB38}\u{C790}/.test(t)) matchCount++;
+        }
+        if(matchCount >= 3) break;
+      }
+      card = card.parentElement;
+    }
+    if(!card) return;
+    var container = card.parentElement;
+    if(!container) return;
+    var hdr = document.createElement('div');
+    hdr.id = '__liveHeader';
+    hdr.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#333;margin:14px 0 8px 4px;';
+    hdr.innerHTML = '📍 오늘 (실시간)<span style="display:inline-flex;align-items:center;gap:4px;background:#10b981;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">●LIVE</span>';
+    container.parentElement.insertBefore(hdr, container);
+  }
+  setTimeout(inject, 500);
+  setTimeout(inject, 1500);
+  new MutationObserver(function(){ inject(); }).observe(document.body, {childList:true, subtree:true});
+})();
+</script>
 </body>
 </html>
 
