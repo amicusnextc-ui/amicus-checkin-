@@ -1317,8 +1317,8 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
     var rateCell = cells[idxRate];
     // Try to find inner text node or span
     var inner = rateCell.querySelector('span, div, b');
-    if(inner) inner.textContent = pct + '%';
-    else rateCell.textContent = pct + '%';
+    if(inner) inner.textContent = pct + '% (' + memberCheckin + '/' + total + ')';
+    else rateCell.textContent = pct + '% (' + memberCheckin + '/' + total + ')';
     row.__rateFixed = true;
   }
   
