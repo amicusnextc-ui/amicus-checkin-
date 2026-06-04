@@ -1940,8 +1940,8 @@ setTimeout(cwShowIfReady,2000);
     var pct = Math.round(memberCheckin / total * 100);
     var rateCell = cells[idxRate];
     var inner = rateCell.querySelector('span, div, b');
-    if(inner) inner.textContent = pct + '%';
-    else rateCell.textContent = pct + '%';
+    if(inner) inner.textContent = pct + '% (' + memberCheckin + '/' + total + ')';
+    else rateCell.textContent = pct + '% (' + memberCheckin + '/' + total + ')';
     row.__rateFixed = true;
   }
   function attach(){ document.querySelectorAll('tr').forEach(fixRow); }
