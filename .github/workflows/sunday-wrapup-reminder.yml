@@ -21,7 +21,15 @@ jobs:
           cat <<'JS' > check.js
           const REQUESTS_DB = 'd25f9fdaeeb748ac97ffda2f68f776bb';
           const DEPTS = ['\uC720\uC544\uBD80', '\uC720\uCE58\uBD80', '\uC720\uB144\uBD80', '\uCD08\uB4F1\uBD80', '\uC911\uACE0\uB4F1\uBD80'];
-          const SCHIEF_EMAIL = 'amicusnextc@gmail.com';
+          const EMAILS = {
+            director: 'amicusnextc@gmail.com',
+            buJang: 'gunnixe@gmail.com',
+            wiWonJang: 'Drjameschoi@hotmail.com',
+            deptStaff: {
+              '\uC720\uC544\uBD80': 'wise0331@gmail.com'
+              // TODO: add other dept staff emails
+            }
+          };
           
           function getServiceSundayISO(){
             const now = new Date();
@@ -99,7 +107,7 @@ jobs:
               },
               body: JSON.stringify({
                 from: 'noreply@amicuschurch.com',
-                to: SCHIEF_EMAIL,
+                to: [EMAILS.director, EMAILS.buJang, EMAILS.wiWonJang, ...missing.map(d => EMAILS.deptStaff[d]).filter(Boolean)],
                 subject: subject,
                 html: html
               })
