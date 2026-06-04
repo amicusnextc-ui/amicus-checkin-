@@ -2109,6 +2109,282 @@ setTimeout(cwShowIfReady,2000);
   });
 })();
 </script>
+
+<script>
+/* 🗓️ 주일 마무리 TAB — Option 1 unified for all roles */
+(function(){
+  if(window.__wrapupTabInjected) return;
+  window.__wrapupTabInjected = true;
+  
+  var DEPTS = ['유아부','유치부','유년부','초등부','중고등부'];
+  
+  function getServiceSundayISO(){
+    var now = new Date();
+    var laDate = new Date(now.toLocaleString('en-US', {timeZone:'America/Los_Angeles'}));
+    var day = laDate.getDay();
+    var d = new Date(laDate);
+    if(day !== 0) d.setDate(d.getDate() - day);
+    return d.toISOString().slice(0,10);
+  }
+  function formatMD(iso){
+    var p = iso.split('-');
+    return parseInt(p[1],10) + '/' + parseInt(p[2],10);
+  }
+  function deptKey(d){ return (d||'').split(' ')[0]; }
+  
+  function getCurrentRole(){
+    // Heuristic: check localStorage/page state
+    var role = (localStorage.getItem('staffRole') || '').toLowerCase();
+    var name = localStorage.getItem('staffName') || '';
+    var dept = localStorage.getItem('staffDept') || '';
+    var ldr = role.indexOf('\uBD80\uC7A5') >= 0 || role.indexOf('\uC704\uC6D0\uC7A5') >= 0 || role.indexOf('\uB514\uB809\uD130') >= 0 || dept === 'ALL' || dept === '';
+    return { isLeader: ldr, name: name, dept: dept };
+  }
+  
+  // Auto-complete detection
+  function isAutoCompleteContent(content){
+    var t = (content||'').trim().toLowerCase().replace(/[\s]/g,'');
+    var patterns = ['\uC5C6\uC74C','\uD2B9\uC774\uC0AC\uD56D\uC5C6\uC74C','\uC774\uC0C1\uC5C6\uC74C','x','-','0',''];
+    return patterns.some(function(p){ return t === p || (p && t.indexOf(p) >= 0 && t.length < 30); });
+  }
+  
+  // Build nav button + section
+  function buildTab(){
+    if(document.getElementById('__wrapupNav')) return;
+    
+    // Find existing tab navigation
+    var navContainer = null;
+    var navBtns = document.querySelectorAll('button, a');
+    navBtns.forEach(function(b){
+      if(navContainer) return;
+      var t = b.textContent.trim();
+      if(t === '\uBA85\uB2E8' || t.indexOf('\uBA85\uB2E8') >= 0){
+        // Found 명단 nav button
+        navContainer = b.parentElement;
+      }
+    });
+    if(!navContainer) return;
+    
+    // Add new nav button
+    var newNav = document.createElement('button');
+    newNav.id = '__wrapupNav';
+    newNav.textContent = '🗓️ 주일 마무리';
+    var refBtn = navContainer.querySelector('button, a');
+    if(refBtn){
+      newNav.className = refBtn.className;
+      newNav.style.cssText = (refBtn.getAttribute('style') || '') + ';margin-left:4px;';
+    } else {
+      newNav.style.cssText = 'padding:8px 14px;border-radius:8px;border:none;background:#f3e8ff;color:#7c3aed;font-weight:600;font-size:14px;cursor:pointer;margin-left:4px;';
+    }
+    navContainer.appendChild(newNav);
+    
+    // Create section (hidden initially)
+    var sec = document.createElement('section');
+    sec.id = '__wrapupSection';
+    sec.style.cssText = 'display:none;max-width:1200px;margin:20px auto;padding:0 16px;';
+    sec.innerHTML = '<h2 style="margin:18px 0 12px;font-size:20px;color:#111;">🗓️ 주일 마무리 보고</h2><div id="__wrapupContent">\uB85C\uB529 \uC911...</div>';
+    // Insert after navContainer's parent
+    (navContainer.closest('header, nav, .container, div') || navContainer.parentElement).parentElement.appendChild(sec);
+    
+    newNav.addEventListener('click', function(){
+      // Hide all other sections
+      document.querySelectorAll('section, main > div, [data-tab]').forEach(function(s){
+        if(s.id !== '__wrapupSection' && s.style && s.tagName !== 'NAV') s.style.display = 'none';
+      });
+      sec.style.display = 'block';
+      loadAndRender();
+    });
+  }
+  
+  async function fetchRequests(){
+    var endpoints = ['/api/leader-summary?password=3&_t='+Date.now(),
+                     '/api/requests?password=3&_t='+Date.now()];
+    for(var i=0;i<endpoints.length;i++){
+      try{
+        var r = await fetch(endpoints[i], {cache:'no-store'});
+        if(!r.ok) continue;
+        var d = await r.json();
+        return d;
+      }catch(e){}
+    }
+    return null;
+  }
+  
+  function isWrapupRequest(req, sundayISO, sundayMD){
+    var category = (req.category || req.type || '').toString();
+    var content = (req.content || req.text || req.message || '').toString();
+    if(category.indexOf('\u{1F5D3}') >= 0 || category.indexOf('\uB9C8\uBB34\uB9AC') >= 0) return true;
+    if(content.indexOf('\uD2B9\uC774\uC0AC\uD56D') >= 0 && (content.indexOf(sundayMD) >= 0 || content.indexOf(sundayISO) >= 0)) return true;
+    return false;
+  }
+  
+  async function loadAndRender(){
+    var data = await fetchRequests();
+    var role = getCurrentRole();
+    var content = document.getElementById('__wrapupContent');
+    if(!data){
+      content.innerHTML = '<p style="color:#dc2626;">\uB370\uC774\uD130 \uB85C\uB4DC \uC2E4\uD328</p>';
+      return;
+    }
+    var requests = data.requests || data.activeRequests || data.completedRequests || (Array.isArray(data)?data:[]);
+    if(!Array.isArray(requests)){
+      requests = (data.activeRequests || []).concat(data.completedRequests || []);
+    }
+    var sundayISO = getServiceSundayISO();
+    var sundayMD = formatMD(sundayISO);
+    
+    // Filter wrapups
+    var wrapups = requests.filter(function(r){ return isWrapupRequest(r, sundayISO, sundayMD); });
+    
+    // Group by dept (this week)
+    var thisWeek = {};
+    DEPTS.forEach(function(d){ thisWeek[d] = null; });
+    wrapups.forEach(function(req){
+      var dept = (req.department || req.dept || '').toString();
+      var time = req.createdAt || req.time || req.timestamp || '';
+      // Match dept
+      DEPTS.forEach(function(d){
+        if(dept.indexOf(d) >= 0){
+          // Use latest
+          if(!thisWeek[d] || new Date(time) > new Date(thisWeek[d].createdAt || 0)){
+            thisWeek[d] = req;
+          }
+        }
+      });
+    });
+    
+    // Render
+    var html = '';
+    // Write form (간사 only — but show for all to be safe; just pre-fills their dept)
+    if(!role.isLeader && role.dept){
+      html += renderWriteForm(role, sundayMD, thisWeek[deptKey(role.dept)]);
+    }
+    
+    // Status table (visible to all)
+    html += '<h3 style="margin:20px 0 10px;font-size:16px;color:#444;">이번 주 (' + sundayMD + ') ' + (role.isLeader ? '전부' : '나의 부서') + '</h3>';
+    html += renderStatusTable(thisWeek, role);
+    
+    content.innerHTML = html;
+    
+    // Wire submit
+    var form = document.getElementById('__wrapupForm');
+    if(form){
+      form.addEventListener('submit', async function(e){
+        e.preventDefault();
+        await submitWrapup(role, sundayISO);
+      });
+    }
+    document.querySelectorAll('.__quickNone').forEach(function(b){
+      b.addEventListener('click', function(){
+        document.getElementById('__wrapupContent_input').value = '없음';
+      });
+    });
+  }
+  
+  function renderWriteForm(role, sundayMD, existing){
+    var status = existing ? 'submitted' : 'pending';
+    var html = '<div style="background:#fff;border-radius:12px;padding:18px 22px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><h3 style="margin:0;font-size:16px;color:#111;">' + role.dept + ' — ' + sundayMD + ' 📝 보고 작성</h3>';
+    if(existing){
+      html += '<span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;">✅ 자동완료</span>';
+    }
+    html += '</div>';
+    if(existing){
+      html += '<p style="color:#666;font-size:13px;margin:8px 0 0;">\uC774\uBC88 \uC8FC \uC774\uBBF8 \uC81C\uCD9C\uB428: "' + (existing.content||'').slice(0,80) + '"</p>';
+    } else {
+      html += '<form id="__wrapupForm">';
+      html += '<textarea id="__wrapupContent_input" rows="3" placeholder="특이사항을 입력하세요. 없으면 "없음" 입력" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>';
+      html += '<div style="display:flex;gap:8px;margin-top:10px;align-items:center;">';
+      html += '<button type="button" class="__quickNone" style="background:#e5e7eb;color:#374151;border:none;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;font-weight:600;">⚡ 없음</button>';
+      html += '<button type="submit" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:14px;cursor:pointer;font-weight:600;margin-left:auto;">제출</button>';
+      html += '</div>';
+      html += '</form>';
+    }
+    html += '</div>';
+    return html;
+  }
+  
+  function renderStatusTable(thisWeek, role){
+    var html = '<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);font-size:13px;">';
+    html += '<thead><tr style="background:#f9fafb;border-bottom:2px solid #e5e7eb;">';
+    html += '<th style="padding:10px 12px;text-align:left;color:#666;">부서</th>';
+    html += '<th style="padding:10px 12px;text-align:left;color:#666;">상태</th>';
+    html += '<th style="padding:10px 12px;text-align:left;color:#666;">간사</th>';
+    html += '<th style="padding:10px 12px;text-align:left;color:#666;">특이사항</th>';
+    if(role.isLeader) html += '<th style="padding:10px 12px;text-align:center;color:#666;">\uC561\uC158</th>';
+    html += '</tr></thead><tbody>';
+    
+    var rowsToShow = role.isLeader ? DEPTS : [deptKey(role.dept)];
+    rowsToShow.forEach(function(d){
+      var req = thisWeek[d];
+      var status, statusClr, bgClr, action;
+      if(!req){
+        status = '⏳ 미작성'; statusClr = '#dc2626'; bgClr = '#fef2f2';
+        action = '<button class="__remindBtn" data-dept="'+d+'" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;">📧 리마인드</button>';
+      } else {
+        var content = req.content || '';
+        var autoOk = isAutoCompleteContent(content);
+        if(autoOk){
+          status = '✅ 자동완료'; statusClr = '#16a34a'; bgClr = '#f0fdf4';
+          action = '<span style="color:#16a34a;">✓</span>';
+        } else if(req.status === '\uC644\uB8CC' || req.status === 'completed'){
+          status = '✅ 확인됨'; statusClr = '#2563eb'; bgClr = '#eff6ff';
+          action = '<span style="color:#2563eb;">✓</span>';
+        } else {
+          status = '⚠️ 대기'; statusClr = '#d97706'; bgClr = '#fffbeb';
+          action = '<button class="__confirmBtn" data-id="'+(req.id||req.pageId||'')+'" style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;">✓ 확인</button>';
+        }
+      }
+      var staffName = req ? (req.staff||req.author||req.createdBy||'-') : '-';
+      var preview = req ? (req.content||'').slice(0,60) : '-';
+      html += '<tr style="border-bottom:1px solid #f3f4f6;background:'+bgClr+';">';
+      html += '<td style="padding:10px 12px;font-weight:600;">'+d+'</td>';
+      html += '<td style="padding:10px 12px;color:'+statusClr+';font-weight:600;">'+status+'</td>';
+      html += '<td style="padding:10px 12px;color:#666;">'+staffName+'</td>';
+      html += '<td style="padding:10px 12px;color:#666;font-size:12px;">'+preview+'</td>';
+      if(role.isLeader) html += '<td style="padding:10px 12px;text-align:center;">'+action+'</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    return html;
+  }
+  
+  async function submitWrapup(role, sundayISO){
+    var content = document.getElementById('__wrapupContent_input').value.trim();
+    if(!content){ alert('특이사항을 입력하세요. 없으면 "없음" 입력'); return; }
+    var autoComplete = isAutoCompleteContent(content);
+    
+    try{
+      var resp = await fetch('/api/requests', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          category: '🗓️ 주일 마무리',
+          content: sundayISO + ' ' + role.dept + ' ' + (autoComplete ? '특이사항 없음' : content),
+          department: role.dept,
+          staff: role.name,
+          status: autoComplete ? '\uC644\uB8CC' : '\uB300\uAE30',
+          autoCompleted: autoComplete,
+          password: '3'
+        })
+      });
+      var data = await resp.json();
+      if(resp.ok){
+        alert('\u2705 \uC81C\uCD9C \uC644\uB8CC');
+        loadAndRender();
+      } else {
+        alert('\u274C \uC81C\uCD9C \uC2E4\uD328: ' + (data.error || 'unknown'));
+      }
+    }catch(e){
+      alert('\u274C \uB124\uD2B8\uC6CC\uD06C \uC624\uB958');
+    }
+  }
+  
+  setTimeout(buildTab, 600);
+  setTimeout(buildTab, 2000);
+  new MutationObserver(function(){ buildTab(); }).observe(document.body, {childList:true, subtree:true});
+})();
+</script>
 </body>
 </html>
 
