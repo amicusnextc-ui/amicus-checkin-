@@ -1469,5 +1469,49 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
   new MutationObserver(function(){ inject(); }).observe(document.body, {childList:true, subtree:true});
 })();
 </script>
+
+<script>
+/* SMART POLL — A+B */
+(function(){
+  if(window.__smartPollInjected) return;
+  window.__smartPollInjected = true;
+  function isSundayService(){
+    var now = new Date();
+    var laStr = now.toLocaleString('en-US', {timeZone:'America/Los_Angeles', weekday:'short', hour:'numeric', hour12:false});
+    var isSun = laStr.indexOf('Sun') >= 0;
+    var hour = parseInt(laStr.split(',').pop().trim().split(':')[0], 10);
+    if(isNaN(hour)) hour = 12;
+    var inHours = hour >= 9 && hour < 21;
+    return isSun && inHours;
+  }
+  function wrapRefresh(){
+    if(typeof window.refreshLiveTicker !== 'function') return false;
+    if(window.refreshLiveTicker.__smartWrapped) return true;
+    var orig = window.refreshLiveTicker;
+    var skipCount = 0;
+    var wrapped = function(){
+      if(document.hidden) return;
+      if(!isSundayService()){
+        skipCount++;
+        if(skipCount % 10 !== 0) return;
+      }
+      return orig.apply(this, arguments);
+    };
+    wrapped.__smartWrapped = true;
+    window.refreshLiveTicker = wrapped;
+    return true;
+  }
+  var tries = 0;
+  var waitTimer = setInterval(function(){
+    if(wrapRefresh() || tries > 40){ clearInterval(waitTimer); }
+    tries++;
+  }, 250);
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden && typeof window.refreshLiveTicker === 'function'){
+      try { window.refreshLiveTicker(); } catch(e) {}
+    }
+  });
+})();
+</script>
 </body>
 </html>
