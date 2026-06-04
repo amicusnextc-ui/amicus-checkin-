@@ -1239,7 +1239,7 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
 <script>
 /* OPTION A — combine visitors into 출석 count in /api/weekly-summary response */
 (function(){
-  if(window.__optAInjected) return;
+  if(window.__optAInjected || true) return; // DISABLED — DOM script handles it
   window.__optAInjected = true;
   var origFetch = window.fetch;
   window.fetch = async function(input, init){
@@ -1279,7 +1279,7 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
 <script>
 /* MEMBER-ONLY RATE — 출석률 column = (출석 - 방문자) / 총원 */
 (function(){
-  if(window.__memberRateFixInjected) return;
+  if(window.__memberRateFixInjected || true) return; // DISABLED
   window.__memberRateFixInjected = true;
   var DEPTS = ['유아부','유치부','유년부','초등부','중고등부'];
   
