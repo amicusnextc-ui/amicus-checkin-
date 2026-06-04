@@ -1332,5 +1332,119 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
   new MutationObserver(function(){ attach(); }).observe(document.body, {childList:true, subtree:true, characterData:true});
 })();
 </script>
+
+<script>
+/* CELL FIX V2 — 출석 cell = members + visitor + grand 출석 card updated */
+(function(){
+  if(window.__optAcellFixV2) return;
+  window.__optAcellFixV2 = true;
+  var DEPTS = ['유아부','유치부','유년부','초등부','중고등부'];
+  
+  function fixRow(row){
+    if(row.__cellFixV2done) return;
+    var cells = row.cells;
+    if(!cells || cells.length < 4) return;
+    var deptText = cells[0] ? cells[0].textContent.trim() : '';
+    var matched = false;
+    for(var i=0;i<DEPTS.length;i++) if(deptText.indexOf(DEPTS[i])>=0){ matched = true; break; }
+    if(!matched) return;
+    var table = row.closest('table');
+    var hr = table.querySelector('thead tr') || table.rows[0];
+    if(!hr) return;
+    var idxOut = -1, idxVis = -1, idxTotal = -1, idxRate = -1;
+    for(var j=0;j<hr.cells.length;j++){
+      var ht = hr.cells[j].textContent.trim();
+      if(ht === '출석') idxOut = j;
+      else if(ht === '방문자') idxVis = j;
+      else if(ht.indexOf('총')>=0) idxTotal = j;
+      else if(ht.indexOf('출석률')>=0) idxRate = j;
+    }
+    if(idxOut<0 || idxVis<0 || idxTotal<0 || idxRate<0) return;
+    
+    var outCell = cells[idxOut];
+    var visCell = cells[idxVis];
+    var totCell = cells[idxTotal];
+    var rateCell = cells[idxRate];
+    
+    var memberCheckin = parseInt(outCell.textContent.replace(/\D/g, ''), 10) || 0;
+    var visitor = parseInt(visCell.textContent.replace(/\D/g, ''), 10) || 0;
+    var total = parseInt(totCell.textContent.replace(/\D/g, ''), 10) || 0;
+    var combined = memberCheckin + visitor;
+    if(total === 0) return;
+    var pct = Math.round(memberCheckin / total * 100);
+    
+    // Update 출석 cell to combined
+    var outInner = outCell.querySelector('span, div, b, a');
+    if(outInner) outInner.textContent = combined;
+    else outCell.textContent = combined;
+    
+    // Update 출석률 cell to fraction format
+    var rateInner = rateCell.querySelector('span, div, b');
+    var rateText = pct + '% (' + memberCheckin + '/' + total + ')';
+    if(rateInner) rateInner.textContent = rateText;
+    else rateCell.textContent = rateText;
+    
+    row.__cellFixV2done = true;
+  }
+  
+  function fixTopCards(){
+    // Find top stat cards by their label text. Update 출석 card to be sum + visitor.
+    // Find all elements containing exactly 출석 label
+    var labels = document.querySelectorAll('div, p, span, label, h3, h4');
+    var done = false;
+    labels.forEach(function(el){
+      if(done) return;
+      if(el.textContent.trim() === '출석' && el.children.length === 0){
+        // find sibling number
+        var parent = el.parentElement;
+        if(!parent || parent.__cardFixed) return;
+        var num = parent.querySelector('[data-summary-attended], .big, .stat, h1, h2, .text-2xl, .text-3xl, .text-4xl');
+        if(!num){
+          // find biggest text in parent
+          var children = [...parent.querySelectorAll('*')];
+          children.forEach(function(c){
+            if(c === el) return;
+            var t = c.textContent.trim();
+            if(/^\d+$/.test(t)) num = c;
+          });
+        }
+        if(num && /^\d+$/.test(num.textContent.trim())){
+          // Find the 방문자 card by similar logic and add
+          var visLabel = [...labels].find(function(l){ return l.textContent.trim() === '방문자' && l.children.length === 0; });
+          if(visLabel){
+            var visParent = visLabel.parentElement;
+            var visNum = null;
+            var visChildren = [...visParent.querySelectorAll('*')];
+            visChildren.forEach(function(c){
+              if(c === visLabel) return;
+              var t = c.textContent.trim();
+              if(/^\d+$/.test(t)) visNum = c;
+            });
+            if(visNum){
+              var v = parseInt(num.textContent, 10);
+              var vv = parseInt(visNum.textContent, 10);
+              if(!isNaN(v) && !isNaN(vv)){
+                num.textContent = (v + vv);
+                parent.__cardFixed = true;
+                done = true;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  function attach(){
+    document.querySelectorAll('tr').forEach(fixRow);
+    fixTopCards();
+  }
+  
+  setTimeout(attach, 800);
+  setTimeout(attach, 2000);
+  setTimeout(attach, 4000);
+  new MutationObserver(function(){ attach(); }).observe(document.body, {childList:true, subtree:true, characterData:true});
+})();
+</script>
 </body>
 </html>
