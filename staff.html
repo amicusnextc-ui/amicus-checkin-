@@ -1951,6 +1951,79 @@ setTimeout(cwShowIfReady,2000);
   new MutationObserver(function(){ attach(); }).observe(document.body, {childList:true, subtree:true, characterData:true});
 })();
 </script>
+
+<script>
+(function(){
+  if(window.__optAcellFixV2) return;
+  window.__optAcellFixV2 = true;
+  var DEPTS = ['유아부','유치부','유년부','초등부','중고등부'];
+  function fixRow(row){
+    if(row.__cellFixV2done) return;
+    var cells = row.cells;
+    if(!cells || cells.length < 4) return;
+    var deptText = cells[0] ? cells[0].textContent.trim() : '';
+    var matched = false;
+    for(var i=0;i<DEPTS.length;i++) if(deptText.indexOf(DEPTS[i])>=0){ matched = true; break; }
+    if(!matched) return;
+    var table = row.closest('table');
+    var hr = table.querySelector('thead tr') || table.rows[0];
+    if(!hr) return;
+    var idxOut = -1, idxVis = -1, idxTotal = -1, idxRate = -1;
+    for(var j=0;j<hr.cells.length;j++){
+      var ht = hr.cells[j].textContent.trim();
+      if(ht === '출석') idxOut = j;
+      else if(ht === '방문자') idxVis = j;
+      else if(ht.indexOf('총')>=0) idxTotal = j;
+      else if(ht.indexOf('출석률')>=0) idxRate = j;
+    }
+    if(idxOut<0 || idxVis<0 || idxTotal<0 || idxRate<0) return;
+    var outCell = cells[idxOut], visCell = cells[idxVis], totCell = cells[idxTotal], rateCell = cells[idxRate];
+    var memberCheckin = parseInt(outCell.textContent.replace(/\D/g, ''), 10) || 0;
+    var visitor = parseInt(visCell.textContent.replace(/\D/g, ''), 10) || 0;
+    var total = parseInt(totCell.textContent.replace(/\D/g, ''), 10) || 0;
+    var combined = memberCheckin + visitor;
+    if(total === 0) return;
+    var pct = Math.round(memberCheckin / total * 100);
+    var outInner = outCell.querySelector('span, div, b, a');
+    if(outInner) outInner.textContent = combined; else outCell.textContent = combined;
+    var rateInner = rateCell.querySelector('span, div, b');
+    var rateText = pct + '% (' + memberCheckin + '/' + total + ')';
+    if(rateInner) rateInner.textContent = rateText; else rateCell.textContent = rateText;
+    row.__cellFixV2done = true;
+  }
+  function fixTopCards(){
+    var labels = document.querySelectorAll('div, p, span, label, h3, h4');
+    var done = false;
+    labels.forEach(function(el){
+      if(done) return;
+      if(el.textContent.trim() === '출석' && el.children.length === 0){
+        var parent = el.parentElement;
+        if(!parent || parent.__cardFixed) return;
+        var num = null;
+        var children = [...parent.querySelectorAll('*')];
+        children.forEach(function(c){ if(c === el) return; var t = c.textContent.trim(); if(/^\d+$/.test(t)) num = c; });
+        if(num){
+          var visLabel = [...labels].find(function(l){ return l.textContent.trim() === '방문자' && l.children.length === 0; });
+          if(visLabel){
+            var visParent = visLabel.parentElement;
+            var visNum = null;
+            [...visParent.querySelectorAll('*')].forEach(function(c){ if(c === visLabel) return; var t = c.textContent.trim(); if(/^\d+$/.test(t)) visNum = c; });
+            if(visNum){
+              var v = parseInt(num.textContent, 10), vv = parseInt(visNum.textContent, 10);
+              if(!isNaN(v) && !isNaN(vv)){ num.textContent = (v + vv); parent.__cardFixed = true; done = true; }
+            }
+          }
+        }
+      }
+    });
+  }
+  function attach(){ document.querySelectorAll('tr').forEach(fixRow); fixTopCards(); }
+  setTimeout(attach, 800);
+  setTimeout(attach, 2000);
+  setTimeout(attach, 4000);
+  new MutationObserver(function(){ attach(); }).observe(document.body, {childList:true, subtree:true, characterData:true});
+})();
+</script>
 </body>
 </html>
 
