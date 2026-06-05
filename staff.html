@@ -2206,7 +2206,7 @@ setTimeout(cwShowIfReady,2000);
         '<td style="padding:10px;border-bottom:1px solid #f3f4f6;">'+action+'</td></tr>';
     }).join("");
     var formHTML = "";
-    if(!role.isLeader){
+    if(role.dept){
       var mySub = findSubmission(reqs, role.dept, sun.short);
       if(!mySub){
         formHTML = '<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid #e5e7eb;">'+
@@ -2220,7 +2220,7 @@ setTimeout(cwShowIfReady,2000);
         formHTML = '<div style="background:#d1fae5;border-radius:12px;padding:14px;margin-bottom:20px;color:#065f46;border:1px solid #6ee7b7;">✅ '+sun.short+' 마무리 보고 제출 완료: "'+(mySub.content || "").slice(0, 80)+'"</div>';
       }
     }
-    var titleHTML = '<h2 style="font-size:20px;margin-bottom:16px;color:#111827;">'+CAL+' '+sun.short+' · '+(role.isLeader ? "전체 부서 마무리 현황" : "나의 마무리")+'</h2>';
+    var titleHTML = '<h2 style="font-size:20px;margin-bottom:16px;color:#111827;">'+CAL+' '+sun.short+' · '+(role.isLeader ? "내 부서 + 전체 현황" : "나의 마무리")+'</h2>';
     var tableHTML = '<table style="width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);">'+
       '<thead style="background:#f9fafb;"><tr><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">부서</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">상태</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">간사</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">내용</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">액션</th></tr></thead><tbody>'+rows+'</tbody></table>';
     document.getElementById("__wrapupContent").innerHTML = titleHTML + formHTML + tableHTML;
