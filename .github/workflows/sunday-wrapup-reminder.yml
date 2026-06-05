@@ -1,8 +1,7 @@
 name: Sunday Wrap-up Reminder
 
 # Runs every Monday at 9am PT (Monday 4pm UTC)
-# Checks if any dept missed submitting weekly wrap-up note
-# Sends reminder email via Resend to missing dept staff
+# Per-dept personalized reminders. Detects 🗓️ title OR M/D date prefix content.
 
 on:
   schedule:
@@ -19,107 +18,164 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: |
           cat <<'JS' > check.js
+          const NOTION_TOKEN = process.env.NOTION_TOKEN;
+          const RESEND_API_KEY = process.env.RESEND_API_KEY;
           const REQUESTS_DB = 'd25f9fdaeeb748ac97ffda2f68f776bb';
-          const DEPTS = ['\uC720\uC544\uBD80', '\uC720\uCE58\uBD80', '\uC720\uB144\uBD80', '\uCD08\uB4F1\uBD80', '\uC911\uACE0\uB4F1\uBD80'];
-          const EMAILS = {
-            director: 'amicusnextc@gmail.com',
-            buJang: 'amicusnextc+test-bujang@gmail.com',
-            wiWonJang: 'amicusnextc+test-wiwon@gmail.com',
-            deptStaff: {
-              '\uC720\uC544\uBD80': 'amicusnextc+test-yua@gmail.com',
-              '\uC720\uCE58\uBD80': 'amicusnextc+test-yuchi@gmail.com',
-              '\uC720\uB144\uBD80': 'amicusnextc+test-younyeon@gmail.com',
-              '\uCD08\uB4F1\uBD80': 'amicusnextc+test-chodeng@gmail.com',
-              '\uC911\uACE0\uB4F1\uBD80': 'amicusnextc@gmail.com'
-              // TODO: add other dept staff emails
-            }
+          
+          const DEPTS = {
+            '유아부': { staff: '이지혜', email: 'amicusnextc+test-yua@gmail.com' },
+            '유치부': { staff: '김향숙', email: 'amicusnextc+test-yuchi@gmail.com' },
+            '유년부': { staff: '박은혜', email: 'amicusnextc+test-younyeon@gmail.com' },
+            '초등부': { staff: '백진주', email: 'amicusnextc+test-chodeng@gmail.com' },
+            '중고등부': { staff: '박명철', email: 'amicusnextc@gmail.com' }
           };
           
-          function getServiceSundayISO(){
-            const now = new Date();
-            const laOffset = -8 * 60; // PT roughly UTC-8 (ignore DST nuance for cron)
-            const la = new Date(now.getTime() + laOffset * 60 * 1000);
-            const day = la.getUTCDay();
-            const d = new Date(la);
-            if(day !== 0) d.setUTCDate(d.getUTCDate() - day);
-            return d.toISOString().slice(0, 10);
+          const LEADERS = {
+            director: 'amicusnextc@gmail.com',
+            buJang: 'amicusnextc+test-bujang@gmail.com',
+            wiWonJang: 'amicusnextc+test-wiwon@gmail.com'
+          };
+          
+          const WRAPUP_TITLE = '🗓️ 주일 마무리';
+          
+          function getSunday() {
+            const d = new Date();
+            d.setDate(d.getDate() - d.getDay());
+            return {
+              iso: d.toISOString().slice(0, 10),
+              short: (d.getMonth() + 1) + '/' + d.getDate(),
+              month: d.getMonth() + 1,
+              day: d.getDate()
+            };
           }
           
-          (async () => {
-            const sundayISO = getServiceSundayISO();
-            console.log('Checking Sunday:', sundayISO);
-            const [mm, dd] = sundayISO.slice(5).split('-');
-            const sundayMD = parseInt(mm,10) + '/' + parseInt(dd,10);
+          function isWrapupSubmission(req, sundayShort) {
+            if (req.title === WRAPUP_TITLE) return true;
+            if ((req.content || '').indexOf(sundayShort) === 0) return true;
+            return false;
+          }
+          
+          function getDept(req) {
+            const d = req.department || '';
+            for (const name of Object.keys(DEPTS)) {
+              if (d.indexOf(name) === 0) return name;
+            }
+            return null;
+          }
+          
+          async function main() {
+            const sunday = getSunday();
+            console.log('Checking Sunday:', sunday.iso);
             
-            // Query Notion requests DB
-            const queryRes = await fetch('https://api.notion.com/v1/databases/' + REQUESTS_DB + '/query', {
+            const r = await fetch('https://api.notion.com/v1/databases/' + REQUESTS_DB + '/query', {
               method: 'POST',
               headers: {
-                'Authorization': 'Bearer ' + process.env.NOTION_TOKEN,
+                'Authorization': 'Bearer ' + NOTION_TOKEN,
                 'Notion-Version': '2022-06-28',
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify({
-                filter: {
-                  timestamp: 'created_time',
-                  created_time: { on_or_after: sundayISO + 'T00:00:00.000Z' }
-                },
-                page_size: 50
-              })
+              body: JSON.stringify({ page_size: 100 })
             });
-            
-            if(!queryRes.ok){
-              console.error('Notion query failed:', await queryRes.text());
+            if (!r.ok) {
+              console.error('Notion query failed:', await r.text());
               process.exit(1);
             }
+            const data = await r.json();
             
-            const data = await queryRes.json();
-            const submittedDepts = new Set();
-            
-            (data.results || []).forEach(page => {
-              const props = page.properties || {};
-              const content = (props['\uB0B4\uC6A9']?.rich_text?.[0]?.plain_text || '') 
-                            + ' ' + (props['title']?.title?.[0]?.plain_text || '');
-              const dept = (props['\uBD80\uC11C']?.select?.name || props['\uBD80\uC11C']?.rich_text?.[0]?.plain_text || '').trim();
-              
-              // Check if any dept name + sundayMD reference in content
-              DEPTS.forEach(d => {
-                if(dept.indexOf(d) >= 0 && (content.indexOf(sundayMD) >= 0 || content.indexOf(sundayISO) >= 0 || content.indexOf('\uD2B9\uC774\uC0AC\uD56D') >= 0)){
-                  submittedDepts.add(d);
-                }
-              });
+            const reqs = (data.results || []).map(p => {
+              const props = p.properties || {};
+              const titleProp = props['제목 (Title)'];
+              const contentProp = props['요청 내용 (Content)'];
+              const requesterProp = props['요청자 (Requester)'];
+              const deptProp = props['부서 (Department)'];
+              const statusProp = props['상태 (Status)'];
+              return {
+                id: p.id,
+                title: (titleProp && titleProp.title && titleProp.title[0] && titleProp.title[0].plain_text) || '',
+                content: (contentProp && contentProp.rich_text && contentProp.rich_text[0] && contentProp.rich_text[0].plain_text) || '',
+                requester: (requesterProp && requesterProp.rich_text && requesterProp.rich_text[0] && requesterProp.rich_text[0].plain_text) || '',
+                department: (deptProp && deptProp.select && deptProp.select.name) || '',
+                status: (statusProp && statusProp.select && statusProp.select.name) || ''
+              };
             });
             
-            const missing = DEPTS.filter(d => !submittedDepts.has(d));
-            console.log('Submitted:', [...submittedDepts]);
+            const submittedDepts = new Set();
+            reqs.forEach(req => {
+              if (isWrapupSubmission(req, sunday.short)) {
+                const dept = getDept(req);
+                if (dept) submittedDepts.add(dept);
+              }
+            });
+            
+            const submittedArr = [...submittedDepts];
+            const missing = Object.keys(DEPTS).filter(d => !submittedDepts.has(d));
+            
+            console.log('Submitted:', submittedArr);
             console.log('Missing:', missing);
             
-            if(missing.length === 0){
-              console.log('All depts submitted. No reminders.');
+            if (missing.length === 0) {
+              console.log('All depts submitted. No emails sent.');
               return;
             }
             
-            // Send reminder email via Resend
-            const subject = '[Amicus-checkin] ' + sundayMD + ' \uD2B9\uC774\uC0AC\uD56D \uC5C5\uB370\uC774\uD2B8 \uBC14\uB78D\uB2C8\uB2E4.';
-            const html = '<p>' + missing.join(', ') + ' \uBD80\uC11C \uAC04\uC0AC\uB2D8\uAED8</p><p>' + sundayMD + ' \uC8FC\uC77C\uC5D0 \uB300\uD55C \uD2B9\uC774\uC0AC\uD56D \uC785\uB825\uC774 \uC544\uC9C1 \uC5C6\uC2B5\uB2C8\uB2E4.</p><p>staff.html \uC5D0\uC11C \uAC04\uC0AC \uC694\uCCAD\uC73C\uB85C \uB0A8\uACA8\uC8FC\uC138\uC694. (\uD2B9\uC774\uC0AC\uD56D \uC5C6\uC744 \uACBD\uC6B0 "\uC5C6\uC74C"\uC73C\uB85C\uB3C4 OK)</p>';
+            // Individual personalized email per missing dept (no CC — privacy)
+            for (const dept of missing) {
+              const info = DEPTS[dept];
+              const subject = '[Amicus-checkin] ' + sunday.short + ' ' + dept + ' 주일 마무리 보고 부탁드립니다 🗓️';
+              const html = '<div style="font-family:-apple-system,Segoe UI,Helvetica,sans-serif;color:#111827;max-width:560px;margin:0 auto;padding:20px;">' +
+                '<h2 style="color:#6366f1;font-size:20px;margin:0 0 16px 0;">🗓️ ' + dept + ' 마무리 - ' + sunday.short + '</h2>' +
+                '<p style="font-size:15px;line-height:1.6;color:#374151;"><strong>' + info.staff + ' 간사님 안녕하세요!</strong><br><br>' +
+                sunday.month + '월 ' + sunday.day + '일 주일에 대한 마무리 보고가 아직 등록되지 않았습니다.</p>' +
+                '<div style="background:#f3f4f6;border-left:4px solid #6366f1;border-radius:8px;padding:14px;margin:20px 0;">' +
+                '<p style="margin:0;font-size:14px;color:#374151;">📝 <strong>staff.html → 🗓️ 주일 마무리 탭</strong>에서 작성해주세요.<br>' +
+                '특이사항이 없으면 <strong>[⚡ 없음]</strong> 버튼 클릭 OK!</p></div>' +
+                '<p style="font-size:14px;color:#6b7280;">🔗 <a href="https://amicus-checkin.vercel.app/staff.html" style="color:#6366f1;">amicus-checkin.vercel.app/staff.html</a></p>' +
+                '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">' +
+                '<p style="font-size:12px;color:#9ca3af;text-align:center;">Amicus Presbyterian Church · 교육부<br>이 메일은 자동 발송되었습니다.</p></div>';
+              
+              const emailRes = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + RESEND_API_KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  from: 'Amicus 교육부 <noreply@amicuschurch.com>',
+                  to: [info.email],
+                  subject: subject,
+                  html: html
+                })
+              });
+              const status = emailRes.status;
+              const body = await emailRes.json().catch(() => ({}));
+              console.log('Sent to ' + dept + ' (' + info.staff + ', ' + info.email + '): ' + status, body.id || body.message || '');
+              await new Promise(r => setTimeout(r, 500));  // rate limit
+            }
             
-            const emailRes = await fetch('https://api.resend.com/emails', {
+            // Also send summary to leaders (director, buJang, wiWonJang)
+            const summarySubject = '[Amicus-checkin] ' + sunday.short + ' 주일 마무리 상태 요약';
+            const submittedListHtml = submittedArr.length === 0 ? '없음' : submittedArr.map(d => '✅ ' + d).join('<br>');
+            const missingListHtml = missing.map(d => '⏳ ' + d + ' (' + DEPTS[d].staff + ' 간사)').join('<br>');
+            const summaryHtml = '<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:20px;color:#111827;">' +
+              '<h2 style="color:#6366f1;">🗓️ ' + sunday.short + ' 주일 마무리 상태</h2>' +
+              '<div style="background:#d1fae5;border-radius:8px;padding:12px;margin:12px 0;"><strong>제출 완료 (' + submittedArr.length + '):</strong><br>' + submittedListHtml + '</div>' +
+              '<div style="background:#fef3c7;border-radius:8px;padding:12px;margin:12px 0;"><strong>미제출 (' + missing.length + '):</strong><br>' + missingListHtml + '</div>' +
+              '<p style="font-size:13px;color:#6b7280;">미제출 간사들에게 개별 리마인드 이메일을 발송했습니다.</p></div>';
+            
+            const summaryRes = await fetch('https://api.resend.com/emails', {
               method: 'POST',
-              headers: {
-                'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
-                'Content-Type': 'application/json'
-              },
+              headers: { 'Authorization': 'Bearer ' + RESEND_API_KEY, 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                from: 'noreply@amicuschurch.com',
-                to: [EMAILS.director, EMAILS.buJang, EMAILS.wiWonJang, ...missing.map(d => EMAILS.deptStaff[d]).filter(Boolean)],
-                subject: subject,
-                html: html
+                from: 'Amicus 교육부 <noreply@amicuschurch.com>',
+                to: [LEADERS.director, LEADERS.buJang, LEADERS.wiWonJang],
+                subject: summarySubject,
+                html: summaryHtml
               })
             });
-            
-            const emailJson = await emailRes.json();
-            console.log('Email send:', emailRes.status, emailJson);
-            if(!emailRes.ok) process.exit(1);
-          })().catch(e => { console.error(e); process.exit(1); });
+            const sumBody = await summaryRes.json().catch(() => ({}));
+            console.log('Summary sent to leaders: ' + summaryRes.status, sumBody.id || sumBody.message || '');
+          }
+          
+          main().catch(e => {
+            console.error('Error:', e.message);
+            process.exit(1);
+          });
           JS
           node check.js
