@@ -23,13 +23,13 @@ jobs:
           const DEPTS = ['\uC720\uC544\uBD80', '\uC720\uCE58\uBD80', '\uC720\uB144\uBD80', '\uCD08\uB4F1\uBD80', '\uC911\uACE0\uB4F1\uBD80'];
           const EMAILS = {
             director: 'amicusnextc@gmail.com',
-            buJang: 'gunnixe@gmail.com',
-            wiWonJang: 'Drjameschoi@hotmail.com',
+            buJang: 'amicusnextc+test-bujang@gmail.com',
+            wiWonJang: 'amicusnextc+test-wiwon@gmail.com',
             deptStaff: {
-              '\uC720\uC544\uBD80': 'wise0331@gmail.com',
-              '\uC720\uCE58\uBD80': 'flower5425@gmail.com',
-              '\uC720\uB144\uBD80': '86eunhye@gmail.com',
-              '\uCD08\uB4F1\uBD80': 'jinjoopearl19@gmail.com',
+              '\uC720\uC544\uBD80': 'amicusnextc+test-yua@gmail.com',
+              '\uC720\uCE58\uBD80': 'amicusnextc+test-yuchi@gmail.com',
+              '\uC720\uB144\uBD80': 'amicusnextc+test-younyeon@gmail.com',
+              '\uCD08\uB4F1\uBD80': 'amicusnextc+test-chodeng@gmail.com',
               '\uC911\uACE0\uB4F1\uBD80': 'amicusnextc@gmail.com'
               // TODO: add other dept staff emails
             }
