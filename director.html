@@ -1536,9 +1536,11 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
     return t.indexOf('없음')>=0 || t === '-' || t === '.';
   }
   function findSubmission(reqs, dept, sundayShort){
+    if(!dept) return null;
     for(var i=0;i<reqs.length;i++){
       var r = reqs[i];
-      if((r.department || '').indexOf(dept) !== 0) continue;
+      var rDeptShort = (r.department || '').split(' ')[0].trim();
+      if(rDeptShort !== dept) continue;
       var content = r.content || '';
       if(r.title === WRAPUP_TITLE || content.indexOf(sundayShort) === 0) return r;
     }
