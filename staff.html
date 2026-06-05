@@ -2124,11 +2124,12 @@ setTimeout(cwShowIfReady,2000);
   ];
   var WRAPUP_TITLE = CAL + " 주일 마무리";
   function getRole(){
-    var name = (localStorage.getItem("staffName") || "").trim();
-    var dept = ((localStorage.getItem("staffDept") || "").split(" ")[0] || "").trim();
+    function getVal(k){ try{ return sessionStorage.getItem(k) || localStorage.getItem(k) || ""; } catch(e){ return ""; } }
+    var name = getVal("staffName").trim();
+    var dept = (getVal("staffDept").split(" ")[0] || "").trim();
     var leaders = ["박명철","이강희","최재원"];
     var isLeader = leaders.indexOf(name) >= 0;
-    try{console.log("[wrapup-tab] role:", JSON.stringify({name:name,dept:dept,isLeader:isLeader}));}catch(e){}
+    try{console.log("[wrapup-tab] role:", JSON.stringify({name:name,dept:dept,isLeader:isLeader,from:sessionStorage.getItem("staffName")?"session":"local"}));}catch(e){}
     return {name: name, dept: dept, isLeader: isLeader};
   }
   function currentSunday(){
