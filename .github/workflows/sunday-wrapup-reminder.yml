@@ -26,7 +26,11 @@ jobs:
             buJang: 'gunnixe@gmail.com',
             wiWonJang: 'Drjameschoi@hotmail.com',
             deptStaff: {
-              '\uC720\uC544\uBD80': 'wise0331@gmail.com'
+              '\uC720\uC544\uBD80': 'wise0331@gmail.com',
+              '\uC720\uCE58\uBD80': 'flower5425@gmail.com',
+              '\uC720\uB144\uBD80': '86eunhye@gmail.com',
+              '\uCD08\uB4F1\uBD80': 'jinjoopearl19@gmail.com',
+              '\uC911\uACE0\uB4F1\uBD80': 'amicusnextc@gmail.com'
               // TODO: add other dept staff emails
             }
           };
