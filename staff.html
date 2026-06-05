@@ -2111,278 +2111,146 @@ setTimeout(cwShowIfReady,2000);
 </script>
 
 <script>
-/* 🗓️ 주일 마무리 TAB v2 — proper tab integration with existing tab-btn pattern */
+/* 🗓️ 주일 마무리 TAB v3 — correct API endpoint */
 (function(){
   if(window.__wrapupTabInjected) return;
   window.__wrapupTabInjected = true;
-  
-  var DEPTS = ['유아부','유치부','유년부','초등부','중고등부'];
-  
-  function getSundayISO(){
-    var now = new Date();
-    var laDate = new Date(now.toLocaleString('en-US', {timeZone:'America/Los_Angeles'}));
-    var day = laDate.getDay();
-    var d = new Date(laDate);
-    if(day !== 0) d.setDate(d.getDate() - day);
-    return d.toISOString().slice(0,10);
+  var CAL = "🗓️";
+  var DEPTS = [
+    {name:"유아부", full:"유아부 (Infant)"},
+    {name:"유치부", full:"유치부 (Preschool)"},
+    {name:"유년부", full:"유년부 (Elementary Jr)"},
+    {name:"초등부", full:"초등부 (Elementary)"},
+    {name:"중고등부", full:"중고등부 (Youth)"}
+  ];
+  var WRAPUP_TITLE = CAL + " 주일 마무리";
+  function getRole(){
+    var name = localStorage.getItem("staffName") || "";
+    var dept = (localStorage.getItem("staffDept") || "").split(" ")[0];
+    var leaders = ["박명철","이강희","최재원"];
+    return {name: name, dept: dept, isLeader: leaders.indexOf(name) >= 0};
   }
-  function formatMD(iso){ var p = iso.split('-'); return parseInt(p[1],10) + '/' + parseInt(p[2],10); }
-  function deptKey(d){ return (d||'').split(' ')[0]; }
-  
-  function getCurrentRole(){
-    var role = (localStorage.getItem('staffRole') || '').toLowerCase();
-    var name = localStorage.getItem('staffName') || '';
-    var dept = localStorage.getItem('staffDept') || '';
-    var isLeader = role.indexOf('\uBD80\uC7A5') >= 0 || role.indexOf('\uC704\uC6D0\uC7A5') >= 0 || role.indexOf('\uB514\uB809\uD130') >= 0;
-    return { isLeader: isLeader, name: name, dept: dept };
+  function currentSunday(){
+    var d = new Date(); d.setDate(d.getDate() - d.getDay());
+    return {iso: d.toISOString().slice(0,10), short: (d.getMonth()+1)+"/"+d.getDate()};
   }
-  
-  function isAutoCompleteContent(content){
-    var t = (content||'').trim().toLowerCase().replace(/[\s]/g,'');
-    var patterns = ['\uC5C6\uC74C','\uD2B9\uC774\uC0AC\uD56D\uC5C6\uC74C','\uC774\uC0C1\uC5C6\uC74C','x','-','0',''];
-    return patterns.some(function(p){ return t === p || (p.length >= 2 && t.indexOf(p) >= 0 && t.length < 30); });
+  function isAutoCompleteContent(c){
+    if(!c) return false; var t = c.replace(/\s/g,"");
+    return t.indexOf("없음")>=0 || t === "-" || t === ".";
   }
-  
-  function buildTab(){
-    // Skip if already built
-    if(document.getElementById('tabWrapup')) return;
-    
-    // Find existing tab buttons
-    var tabAtt = document.getElementById('tabAttendance');
-    if(!tabAtt) return;
-    var navParent = tabAtt.parentElement;
-    if(!navParent) return;
-    
-    // Find reference tab to insert after (after Requests)
-    var refTab = document.getElementById('tabRequests') || document.getElementById('tabAbsentees') || tabAtt;
-    
-    // Create new tab button matching existing style
-    var newBtn = document.createElement('button');
-    newBtn.id = 'tabWrapup';
-    newBtn.className = 'tab-btn';
-    newBtn.textContent = '🗓️ 주일 마무리';
-    refTab.parentNode.insertBefore(newBtn, refTab.nextSibling);
-    
-    // Create content section
-    var sec = document.createElement('div');
-    sec.id = 'wrapupTab';
-    sec.className = 'hidden fade-in';
-    sec.innerHTML = '<div id="__wrapupContent" style="padding:0;">\uB85C\uB4DC \uC911...</div>';
-    
-    // Insert after existing tab content
-    var lastTab = document.getElementById('absenteesTab') || document.getElementById('requestsTab') || document.getElementById('rosterTab') || document.getElementById('attendanceTab');
-    if(lastTab && lastTab.parentNode){
-      lastTab.parentNode.insertBefore(sec, lastTab.nextSibling);
-    }
-    
-    // Wire click — replicate existing tab switching
-    newBtn.addEventListener('click', function(){
-      // Remove active from all tab-btn
-      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
-      newBtn.classList.add('active');
-      // Hide all tab content
-      ['attendanceTab','rosterTab','requestsTab','absenteesTab','wrapupTab'].forEach(function(id){
-        var el = document.getElementById(id);
-        if(el){ el.classList.add('hidden'); }
-      });
-      sec.classList.remove('hidden');
-      loadAndRender();
-    });
-    
-    // Also intercept other tab clicks to hide wrapup
-    ['tabAttendance','tabRoster','tabRequests','tabAbsentees'].forEach(function(id){
-      var btn = document.getElementById(id);
-      if(btn && !btn.__wrapupHookAdded){
-        btn.__wrapupHookAdded = true;
-        btn.addEventListener('click', function(){ sec.classList.add('hidden'); });
-      }
-    });
-  }
-  
-  async function fetchRequests(){
-    var endpoints = [
-      '/api/leader-summary?password=3&_t=' + Date.now(),
-      '/api/requests?password=3&_t=' + Date.now()
-    ];
-    for(var i=0;i<endpoints.length;i++){
-      try{
-        var r = await fetch(endpoints[i], {cache:'no-store'});
-        if(!r.ok) continue;
-        var d = await r.json();
-        return d;
-      }catch(e){}
+  function findSubmission(reqs, dept, sundayShort){
+    for(var i=0;i<reqs.length;i++){
+      var r = reqs[i];
+      if((r.department || "").indexOf(dept) !== 0) continue;
+      var content = r.content || "";
+      if(r.title === WRAPUP_TITLE || content.indexOf(sundayShort) === 0) return r;
     }
     return null;
   }
-  
-  function isWrapup(req, sundayISO, sundayMD){
-    var category = (req.category || req.type || '').toString();
-    var content = (req.content || req.text || req.message || '').toString();
-    if(category.indexOf('\uB9C8\uBB34\uB9AC') >= 0 || category.indexOf('\u{1F5D3}') >= 0) return true;
-    if(content.indexOf('\uD2B9\uC774\uC0AC\uD56D') >= 0) return true;
-    return false;
-  }
-  
-  async function loadAndRender(){
-    var data = await fetchRequests();
-    var content = document.getElementById('__wrapupContent');
-    var role = getCurrentRole();
-    var sundayISO = getSundayISO();
-    var sundayMD = formatMD(sundayISO);
-    
-    if(!data){
-      content.innerHTML = '<p style="color:#dc2626;padding:18px;">데이터 로드 실패</p>';
-      return;
-    }
-    
-    var requests = data.requests || data.activeRequests || data.completedRequests || (Array.isArray(data)?data:[]);
-    if(!Array.isArray(requests)){
-      requests = (data.activeRequests || []).concat(data.completedRequests || []);
-    }
-    
-    var wrapups = requests.filter(function(r){ return isWrapup(r, sundayISO, sundayMD); });
-    var thisWeek = {};
-    DEPTS.forEach(function(d){ thisWeek[d] = null; });
-    wrapups.forEach(function(req){
-      var dept = (req.department || req.dept || '').toString();
-      var time = req.createdAt || req.time || req.timestamp || '';
-      DEPTS.forEach(function(d){
-        if(dept.indexOf(d) >= 0){
-          if(!thisWeek[d] || new Date(time) > new Date(thisWeek[d].createdAt || thisWeek[d].time || 0)){
-            thisWeek[d] = req;
-          }
-        }
+  function buildTab(){
+    if(document.getElementById("tabWrapup")) return;
+    var tabAtt = document.getElementById("tabAttendance");
+    if(!tabAtt) return;
+    var refTab = document.getElementById("tabRequests") || tabAtt;
+    var newBtn = document.createElement("button");
+    newBtn.id = "tabWrapup"; newBtn.className = "tab-btn";
+    newBtn.textContent = CAL + " 주일 마무리";
+    refTab.parentNode.insertBefore(newBtn, refTab.nextSibling);
+    var sec = document.createElement("div");
+    sec.id = "wrapupTab"; sec.className = "hidden fade-in";
+    sec.style.padding = "20px";
+    sec.innerHTML = "<div id=\"__wrapupContent\">로딩 중...</div>";
+    var lastTab = document.getElementById("absenteesTab") || document.getElementById("requestsTab") || tabAtt;
+    lastTab.parentNode.insertBefore(sec, lastTab.nextSibling);
+    newBtn.addEventListener("click", function(){
+      document.querySelectorAll(".tab-btn").forEach(function(b){ b.classList.remove("active"); });
+      newBtn.classList.add("active");
+      ["attendanceTab","rosterTab","requestsTab","absenteesTab","wrapupTab"].forEach(function(id){
+        var el = document.getElementById(id); if(el) el.classList.add("hidden");
       });
+      sec.classList.remove("hidden");
+      loadAndRender();
     });
-    
-    var html = '<div style="padding:18px;">';
-    
-    if(!role.isLeader && role.dept){
-      var myDept = deptKey(role.dept);
-      html += renderWriteForm(role, sundayMD, thisWeek[myDept], myDept);
-    }
-    
-    html += '<h3 style="margin:18px 0 10px;font-size:16px;color:#374151;">' + sundayMD + ' ' + (role.isLeader ? '전부 부서' : '나의 부서') + ' </h3>';
-    html += renderStatusTable(thisWeek, role);
-    html += '</div>';
-    
-    content.innerHTML = html;
-    
-    var form = document.getElementById('__wrapupForm');
-    if(form){
-      form.addEventListener('submit', async function(e){
-        e.preventDefault();
-        await submitWrapup(role, sundayISO);
-      });
-    }
-    document.querySelectorAll('.__quickNone').forEach(function(b){
-      b.addEventListener('click', function(){
-        var inp = document.getElementById('__wrapupContent_input');
-        if(inp){ inp.value = '없음'; }
-      });
-    });
-  }
-  
-  function renderWriteForm(role, sundayMD, existing, myDept){
-    var html = '<div style="background:#fff;border-radius:12px;padding:18px 22px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
-    html += '<h3 style="margin:0;font-size:16px;color:#111;">' + myDept + ' — ' + sundayMD + ' 📝 보고 작성</h3>';
-    if(existing){
-      html += '<span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;">✅ 자동완료</span>';
-    }
-    html += '</div>';
-    if(existing){
-      html += '<p style="color:#666;font-size:13px;margin:0;">\uC774\uBC88 \uC8FC \uC81C\uCD9C\uB428: "' + (existing.content||'').slice(0,80) + '"</p>';
-    } else {
-      html += '<form id="__wrapupForm">';
-      html += '<textarea id="__wrapupContent_input" rows="3" placeholder="\uD2B9\uC774\uC0AC\uD56D\uC744 \uC785\uB825\uD558\uC138\uC694. \uC5C6\uC73C\uBA74 \u0022\uC5C6\uC74C\u0022 \uC785\uB825" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>';
-      html += '<div style="display:flex;gap:8px;margin-top:10px;align-items:center;">';
-      html += '<button type="button" class="__quickNone" style="background:#e5e7eb;color:#374151;border:none;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;font-weight:600;">⚡ 없음</button>';
-      html += '<button type="submit" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:14px;cursor:pointer;font-weight:600;margin-left:auto;">제출</button>';
-      html += '</div></form>';
-    }
-    html += '</div>';
-    return html;
-  }
-  
-  function renderStatusTable(thisWeek, role){
-    var html = '<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.05);font-size:13px;">';
-    html += '<thead><tr style="background:#f9fafb;border-bottom:2px solid #e5e7eb;">';
-    html += '<th style="padding:10px 12px;text-align:left;color:#666;">부서</th>';
-    html += '<th style="padding:10px 12px;text-align:left;color:#666;">상태</th>';
-    html += '<th style="padding:10px 12px;text-align:left;color:#666;">간사</th>';
-    html += '<th style="padding:10px 12px;text-align:left;color:#666;">특이사항</th>';
-    if(role.isLeader) html += '<th style="padding:10px 12px;text-align:center;color:#666;">\uC561\uC158</th>';
-    html += '</tr></thead><tbody>';
-    
-    var rowsToShow = role.isLeader ? DEPTS : [deptKey(role.dept)];
-    rowsToShow.forEach(function(d){
-      var req = thisWeek[d];
-      var status, statusClr, bgClr, action;
-      if(!req){
-        status = '⏳ 미작성'; statusClr = '#dc2626'; bgClr = '#fef2f2';
-        action = '<button class="__remindBtn" data-dept="' + d + '" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;">📧 리마인드</button>';
-      } else {
-        var c = req.content || '';
-        var autoOk = isAutoCompleteContent(c);
-        var st = (req.status || '').toString();
-        if(autoOk || st === '\uC644\uB8CC' || st === 'completed'){
-          status = '✅ 자동완료'; statusClr = '#16a34a'; bgClr = '#f0fdf4';
-          action = '<span style="color:#16a34a;">✓</span>';
-        } else {
-          status = '⚠️ 대기'; statusClr = '#d97706'; bgClr = '#fffbeb';
-          action = '<button class="__confirmBtn" data-id="' + (req.id||req.pageId||'') + '" style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;">✓ 확인</button>';
-        }
+    ["tabAttendance","tabRoster","tabRequests","tabAbsentees"].forEach(function(id){
+      var btn = document.getElementById(id);
+      if(btn && !btn.__wrapupHookAdded){
+        btn.__wrapupHookAdded = true;
+        btn.addEventListener("click", function(){ sec.classList.add("hidden"); });
       }
-      var staffName = req ? (req.staff||req.author||req.createdBy||'-') : '-';
-      var preview = req ? (req.content||'').slice(0,60) : '-';
-      html += '<tr style="border-bottom:1px solid #f3f4f6;background:' + bgClr + ';">';
-      html += '<td style="padding:10px 12px;font-weight:600;">' + d + '</td>';
-      html += '<td style="padding:10px 12px;color:' + statusClr + ';font-weight:600;">' + status + '</td>';
-      html += '<td style="padding:10px 12px;color:#666;">' + staffName + '</td>';
-      html += '<td style="padding:10px 12px;color:#666;font-size:12px;">' + preview + '</td>';
-      if(role.isLeader) html += '<td style="padding:10px 12px;text-align:center;">' + action + '</td>';
-      html += '</tr>';
     });
-    html += '</tbody></table>';
-    return html;
   }
-  
-  async function submitWrapup(role, sundayISO){
-    var inp = document.getElementById('__wrapupContent_input');
-    var content = inp ? inp.value.trim() : '';
-    if(!content){ alert('\uD2B9\uC774\uC0AC\uD56D\uC744 \uC785\uB825\uD558\uC138\uC694'); return; }
-    var autoComplete = isAutoCompleteContent(content);
-    try{
-      var resp = await fetch('/api/requests', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          category: '🗓️ 주일 마무리',
-          content: sundayISO + ' ' + role.dept + ' ' + (autoComplete ? '특이사항 없음' : content),
-          department: role.dept,
-          staff: role.name,
-          status: autoComplete ? '\uC644\uB8CC' : '\uB300\uAE30',
-          autoCompleted: autoComplete,
-          password: '3'
-        })
-      });
-      if(resp.ok){
-        alert('\u2705 \uC81C\uCD9C \uC644\uB8CC');
-        loadAndRender();
-      } else {
-        var err = await resp.text();
-        alert('\u274C \uC81C\uCD9C \uC2E4\uD328: ' + err);
+  function renderStatus(reqs){
+    var role = getRole(); var sun = currentSunday();
+    var depts = role.isLeader ? DEPTS : DEPTS.filter(function(d){ return d.name === role.dept; });
+    var rows = depts.map(function(d){
+      var sub = findSubmission(reqs, d.name, sun.short);
+      var status, color;
+      if(!sub){ status = "⏳ 미작성"; color = "#999"; }
+      else if(isAutoCompleteContent(sub.content)){ status = "✅ 자동완료"; color = "#10b981"; }
+      else if(sub.status === "완료"){ status = "✅ 확인됨"; color = "#10b981"; }
+      else { status = "⚠️ 대기"; color = "#f59e0b"; }
+      var contentShort = sub ? (sub.content || "").slice(0, 60) : "-";
+      var requester = sub ? (sub.requester || "-") : "-";
+      var action = "-";
+      if(role.isLeader){
+        if(!sub) action = '<button class="wuRem" data-dept="'+d.name+'" style="background:#f59e0b;color:white;border:none;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">📧 리마인드</button>';
+        else if(status.indexOf("대기")>=0) action = '<button class="wuAck" data-id="'+sub.id+'" style="background:#10b981;color:white;border:none;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">✓ 확인</button>';
       }
-    }catch(e){
-      alert('\u274C \uB124\uD2B8\uC6CC\uD06C \uC624\uB958: ' + e.message);
+      return '<tr><td style="padding:10px;border-bottom:1px solid #f3f4f6;">'+d.name+'</td>'+
+        '<td style="padding:10px;border-bottom:1px solid #f3f4f6;color:'+color+';font-weight:600;">'+status+'</td>'+
+        '<td style="padding:10px;border-bottom:1px solid #f3f4f6;">'+requester+'</td>'+
+        '<td style="padding:10px;border-bottom:1px solid #f3f4f6;font-size:13px;color:#374151;">'+contentShort+'</td>'+
+        '<td style="padding:10px;border-bottom:1px solid #f3f4f6;">'+action+'</td></tr>';
+    }).join("");
+    var formHTML = "";
+    if(!role.isLeader){
+      var mySub = findSubmission(reqs, role.dept, sun.short);
+      if(!mySub){
+        formHTML = '<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid #e5e7eb;">'+
+          '<div style="font-weight:600;margin-bottom:10px;color:#111827;">📝 '+role.dept+' · '+sun.short+' 마무리 보고 작성</div>'+
+          '<textarea id="wrapupMsg" placeholder="이번 주 특이사항을 입력하세요 (없으면 [⚡ 없음] 클릭)" style="width:100%;min-height:80px;border:1px solid #d1d5db;border-radius:8px;padding:10px;font-size:14px;box-sizing:border-box;"></textarea>'+
+          '<div style="display:flex;gap:8px;margin-top:10px;">'+
+          '<button id="wrapupNone" style="flex:1;background:#10b981;color:white;border:none;padding:12px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;">⚡ 없음 (자동완료)</button>'+
+          '<button id="wrapupSubmit" style="flex:2;background:#6366f1;color:white;border:none;padding:12px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;">제출</button>'+
+          '</div></div>';
+      } else {
+        formHTML = '<div style="background:#d1fae5;border-radius:12px;padding:14px;margin-bottom:20px;color:#065f46;border:1px solid #6ee7b7;">✅ '+sun.short+' 마무리 보고 제출 완료: "'+(mySub.content || "").slice(0, 80)+'"</div>';
+      }
     }
+    var titleHTML = '<h2 style="font-size:20px;margin-bottom:16px;color:#111827;">'+CAL+' '+sun.short+' · '+(role.isLeader ? "전체 부서 마무리 현황" : "나의 마무리")+'</h2>';
+    var tableHTML = '<table style="width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);">'+
+      '<thead style="background:#f9fafb;"><tr><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">부서</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">상태</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">간사</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">내용</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">액션</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    document.getElementById("__wrapupContent").innerHTML = titleHTML + formHTML + tableHTML;
+    var btnNone = document.getElementById("wrapupNone");
+    var btnSubmit = document.getElementById("wrapupSubmit");
+    var msgEl = document.getElementById("wrapupMsg");
+    if(btnNone) btnNone.addEventListener("click", function(){ submitWrapup("없음"); });
+    if(btnSubmit) btnSubmit.addEventListener("click", function(){ submitWrapup((msgEl.value||"").trim()); });
+    document.querySelectorAll(".wuRem").forEach(function(b){ b.addEventListener("click", function(){ alert("📧 리마인드 이메일은 매주 월요일 9시 cron으로 자동 발송됩니다.\n수동 발송 요청: " + b.dataset.dept); }); });
+    document.querySelectorAll(".wuAck").forEach(function(b){ b.addEventListener("click", function(){ alert("✅ 확인 완료 업데이트는 Phase 2에서 구현 예정"); }); });
   }
-  
-  setTimeout(buildTab, 500);
-  setTimeout(buildTab, 1500);
-  setTimeout(buildTab, 3000);
-  new MutationObserver(function(){ buildTab(); }).observe(document.body, {childList:true, subtree:true});
+  function submitWrapup(msg){
+    if(!msg){ alert("내용을 입력하세요"); return; }
+    var role = getRole(); var sun = currentSunday();
+    var deptObj = DEPTS.find(function(d){ return d.name === role.dept; });
+    var body = { title: WRAPUP_TITLE, content: sun.short + ". " + role.dept + " " + msg, requester: role.name, department: deptObj ? deptObj.full : role.dept };
+    fetch("/api/attendance?type=requests", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) })
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if(j && j.success){ alert("✅ 제출 완료"); loadAndRender(); } else { alert("❌ 제출 실패"); } })
+      .catch(function(e){ alert("❌ 제출 실패: " + e.message); });
+  }
+  function loadAndRender(){
+    var el = document.getElementById("__wrapupContent");
+    if(!el) return;
+    el.innerHTML = '<div style="color:#6b7280;padding:20px;text-align:center;">⏳ 로딩 중...</div>';
+    fetch("/api/attendance?type=requests")
+      .then(function(r){ return r.json(); })
+      .then(function(j){ var arr = (j && j.requests) || []; renderStatus(arr); })
+      .catch(function(e){ el.innerHTML = '<div style="color:#dc2626;padding:20px;">❌ 데이터 로드 실패: '+(e.message||"unknown")+'</div>'; });
+  }
+  function init(){ buildTab(); if(!document.getElementById("tabWrapup")) setTimeout(init, 500); }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
 })();
 </script>
 </body>
