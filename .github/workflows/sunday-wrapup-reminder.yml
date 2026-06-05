@@ -23,17 +23,17 @@ jobs:
           const REQUESTS_DB = 'd25f9fdaeeb748ac97ffda2f68f776bb';
           
           const DEPTS = {
-            '유아부': { staff: '이지혜', email: 'amicusnextc+test-yua@gmail.com' },
-            '유치부': { staff: '김향숙', email: 'amicusnextc+test-yuchi@gmail.com' },
-            '유년부': { staff: '박은혜', email: 'amicusnextc+test-younyeon@gmail.com' },
-            '초등부': { staff: '백진주', email: 'amicusnextc+test-chodeng@gmail.com' },
+            '유아부': { staff: '이지혜', email: 'wise0331@gmail.com' },
+            '유치부': { staff: '김향숙', email: 'flower5425@gmail.com' },
+            '유년부': { staff: '박은혜', email: '86eunhye@gmail.com' },
+            '초등부': { staff: '백진주', email: 'jinjoopearl19@gmail.com' },
             '중고등부': { staff: '박명철', email: 'amicusnextc@gmail.com' }
           };
           
           const LEADERS = {
             director: 'amicusnextc@gmail.com',
-            buJang: 'amicusnextc+test-bujang@gmail.com',
-            wiWonJang: 'amicusnextc+test-wiwon@gmail.com'
+            buJang: 'gunnixe@gmail.com',
+            wiWonJang: 'Drjameschoi@hotmail.com'
           };
           
           const WRAPUP_TITLE = '🗓️ 주일 마무리';
