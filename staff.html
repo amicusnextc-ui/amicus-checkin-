@@ -2135,13 +2135,11 @@ setTimeout(cwShowIfReady,2000);
     if(nameEl){
       // v5: direct siblings + direct parent children only
       var sib = nameEl.nextElementSibling;
-      while(sib && !dept){
+      if(sib){
         var t = (sib.textContent || "").trim();
         for(var i=0;i<deptKws.length;i++){
           if(t === deptKws[i] || t.indexOf(deptKws[i]) === 0){ dept = deptKws[i]; break; }
-        }
-        sib = sib.nextElementSibling;
-      }
+        }      }
       if(!dept && nameEl.parentElement){
         var ch = nameEl.parentElement.children;
         for(var j=0;j<ch.length && !dept;j++){
