@@ -27,14 +27,17 @@ function cleanName(raw) {
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const { dept } = req.query;
+  const { dept, includeVisitors } = req.query;
   const filter = {
     and: [
-      { property: '방문자 (Visitor)', checkbox: { equals: false } },
       { property: '상태 (Status)', select: { equals: '활성 (Active)' } },
       { property: '부서 (Department)', select: { does_not_equal: '졸업' } },
     ]
   };
+  // includeVisitors=true → include 방문자=YES (for staff name lookups). Default excludes visitors so dashboard counts stay accurate.
+  if (!includeVisitors || includeVisitors === 'false') {
+    filter.and.unshift({ property: '방문자 (Visitor)', checkbox: { equals: false } });
+  }
   if (dept) filter.and.push({ property: '부서 (Department)', select: { equals: dept } });
 
   try {
