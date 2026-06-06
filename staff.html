@@ -1392,6 +1392,14 @@ async function saveReqNote() {
 var _absentees = [];
 var _currentAbsentee = null;
 
+function _absenteeTier(lastAttendedISO){
+  if(!lastAttendedISO) return {weeks: 999, label:'장기 미참여', cls:'bg-red-100 text-red-700 border border-red-300', icon:'⚫'};
+  var ms = Date.now() - new Date(lastAttendedISO).getTime();
+  var weeks = Math.max(0, Math.floor(ms / (7*24*60*60*1000)));
+  if(weeks >= 8) return {weeks: weeks, label: weeks+'주 결석', cls:'bg-red-100 text-red-700 border border-red-300', icon:'🔴'};
+  if(weeks >= 4) return {weeks: weeks, label: weeks+'주 결석', cls:'bg-orange-100 text-orange-700 border border-orange-300', icon:'🟠'};
+  return {weeks: weeks, label: weeks+'주 결석', cls:'bg-yellow-100 text-yellow-700 border border-yellow-300', icon:'🟡'};
+}
 async function loadAbsentees() {
   var list = document.getElementById('absenteesList') || document.getElementById('ldrAbsentBody');
   if (!list) return;
@@ -1448,6 +1456,8 @@ async function loadAbsentees() {
       + _absentees.map(function(a, idx) {
         var contacted = a.contacted === '연락함';
         var lastDate = a.lastAttended ? new Date(a.lastAttended).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '기록 없음';
+        var _tier = _absenteeTier(a.lastAttended);
+        var tierBadge = '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + _tier.cls + '">' + _tier.icon + ' ' + _tier.label + '</span>';
         var reasonHtml = (contacted && a.reason)
           ? '<div class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-lg mt-1">💬 ' + a.reason + (a.staff ? ' · ' + a.staff : '') + '</div>'
           : '';
@@ -1461,6 +1471,7 @@ async function loadAbsentees() {
           + '<span class="font-semibold text-gray-900">' + a.name + '</span>'
           + '<span class="text-xs text-gray-400">' + a.department + '</span>'
           + (a.grade ? '<span class="text-xs text-gray-400">' + a.grade + '</span>' : '')
+          + tierBadge
           + '</div>'
           + '<div class="text-xs text-orange-500 mt-0.5">마지막 출석: ' + lastDate + '</div>'
           + reasonHtml
