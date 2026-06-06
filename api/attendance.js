@@ -17,6 +17,21 @@ function getServiceSunday() {
   return s.toISOString().split('T')[0];
 }
 
+// Reference week for absentee contact logs — always returns a Sunday date.
+// On Saturdays (when getServiceSunday returns null), use the most recent past Sunday
+// so contact-log lookups and POSTs stay consistent across the week.
+function getReferenceWeek() {
+  const now = new Date();
+  const laDate = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit' }).format(now);
+  const [yr,mo,dy] = laDate.split('-').map(Number);
+  const laDay = new Date(Date.UTC(yr, mo-1, dy));
+  const dow = laDay.getUTCDay();
+  const s = new Date(laDay);
+  // dow=0(Sun)→0d back, 1(Mon)→1d, ... 6(Sat)→6d back (last Sunday)
+  s.setUTCDate(laDay.getUTCDate() - dow);
+  return s.toISOString().split('T')[0];
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
@@ -69,25 +84,26 @@ module.exports = async (req, res) => {
       if (req.method === 'GET') {
         const dept = req.query.department;
         const ss = getServiceSunday();
+        const refWeek = getReferenceWeek(); // always defined (Sat→last Sunday)
         let filter = { property: '상태 (Status)', select: { equals: '활성 (Active)' } };
         if (dept && dept !== 'all') filter = { and: [filter, { property: '부서 (Department)', select: { equals: dept } }] };
         const students = await notion.databases.query({ database_id: STUDENT_DB, filter, page_size: 100 });
-        const ago = ss ? new Date(ss) : new Date();
+        const ago = new Date(refWeek);
         ago.setUTCDate(ago.getUTCDate() - 14);
         const cutoff = ago.toISOString().split('T')[0];
         const absentees = students.results.filter(p => { const last = p.properties['마지막 출석 (Last Attended)']?.date?.start; return !last || last <= cutoff; })
           .map(p => { const pr = p.properties; return { id: p.id, name: pr['이름 (Name)']?.title?.[0]?.text?.content || '', department: pr['부서 (Department)']?.select?.name || '', grade: pr['학년 (Grade)']?.rich_text?.[0]?.text?.content || '', lastAttended: pr['마지막 출석 (Last Attended)']?.date?.start || null }; });
         const cm = {};
-        if (ss) {
-          const recs = await notion.databases.query({ database_id: ABSENTEES_DB, filter: { property: '주간 기준일 (Week)', date: { equals: ss } }, page_size: 100 });
-          recs.results.forEach(p => { const name = p.properties['학생 이름 (Student)']?.title?.[0]?.text?.content; if (name) cm[name] = { contacted: p.properties['연락 여부 (Contacted)']?.select?.name || '미연락', reason: p.properties['연락 사유 / 메모 (Reason)']?.rich_text?.[0]?.text?.content || '', staff: p.properties['연락한 간사 (Staff)']?.rich_text?.[0]?.text?.content || '', recordId: p.id }; });
-        }
+        // Use refWeek so Saturday lookups still surface this week's 연락함 records
+        const recs = await notion.databases.query({ database_id: ABSENTEES_DB, filter: { property: '주간 기준일 (Week)', date: { equals: refWeek } }, page_size: 100 });
+        recs.results.forEach(p => { const name = p.properties['학생 이름 (Student)']?.title?.[0]?.text?.content; if (name) cm[name] = { contacted: p.properties['연락 여부 (Contacted)']?.select?.name || '미연락', reason: p.properties['연락 사유 / 메모 (Reason)']?.rich_text?.[0]?.text?.content || '', staff: p.properties['연락한 간사 (Staff)']?.rich_text?.[0]?.text?.content || '', recordId: p.id }; });
         const result = absentees.map(a => ({ ...a, ...(cm[a.name] || { contacted: '미연락' }) }));
-        return res.json({ success: true, absentees: result, serviceSunday: ss, count: result.length });
+        return res.json({ success: true, absentees: result, serviceSunday: ss, referenceWeek: refWeek, count: result.length });
       }
       if (req.method === 'POST') {
         const { studentName, department, grade, lastAttended, reason, staffName, recordId } = req.body;
         const ss = getServiceSunday();
+        const refWeek = getReferenceWeek();
         const today = new Date().toISOString().split('T')[0];
         if (recordId) {
           await notion.pages.update({ page_id: recordId, properties: {
@@ -107,7 +123,7 @@ module.exports = async (req, res) => {
           '연락일 (Contact Date)': { date: { start: today } }
         };
         if (lastAttended) props['마지막 출석 (Last Attended)'] = { date: { start: lastAttended } };
-        if (ss) props['주간 기준일 (Week)'] = { date: { start: ss } };
+        props['주간 기준일 (Week)'] = { date: { start: refWeek } };
         const p = await notion.pages.create({ parent: { database_id: ABSENTEES_DB }, properties: props });
         return res.json({ success: true, id: p.id, action: 'created' });
       }
