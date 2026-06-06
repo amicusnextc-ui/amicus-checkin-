@@ -2187,6 +2187,7 @@ setTimeout(cwShowIfReady,2000);
     var sec = document.createElement("div");
     sec.id = "wrapupTab"; sec.className = "hidden fade-in";
     sec.style.padding = "20px";
+    sec.style.display = "none"; // v5: default hidden via inline style
     sec.innerHTML = "<div id=\"__wrapupContent\">로딩 중...</div>";
     var lastTab = document.getElementById("absenteesTab") || document.getElementById("requestsTab") || tabAtt;
     lastTab.parentNode.insertBefore(sec, lastTab.nextSibling);
@@ -2196,14 +2197,14 @@ setTimeout(cwShowIfReady,2000);
       ["attendanceTab","rosterTab","requestsTab","absenteesTab","wrapupTab"].forEach(function(id){
         var el = document.getElementById(id); if(el) el.classList.add("hidden");
       });
-      sec.classList.remove("hidden");
+      sec.style.display = "block"; sec.classList.remove("hidden");
       loadAndRender();
     });
     ["tabAttendance","tabRoster","tabRequests","tabAbsentees"].forEach(function(id){
       var btn = document.getElementById(id);
       if(btn && !btn.__wrapupHookAdded){
         btn.__wrapupHookAdded = true;
-        btn.addEventListener("click", function(){ sec.classList.add("hidden"); });
+        btn.addEventListener("click", function(){ sec.style.display = "none"; sec.classList.add("hidden"); });
       }
     });
   }
