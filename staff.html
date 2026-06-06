@@ -2124,9 +2124,27 @@ setTimeout(cwShowIfReady,2000);
   ];
   var WRAPUP_TITLE = CAL + " 주일 마무리";
   function getRole(){
+    // v4: Read from DOM (dashName/leaderDashName) since staff.html doesn't persist user state
     function getVal(k){ try{ return sessionStorage.getItem(k) || localStorage.getItem(k) || ""; } catch(e){ return ""; } }
-    var name = getVal("staffName").trim();
-    var dept = (getVal("staffDept").split(" ")[0] || "").trim();
+    var nameEl = document.getElementById("dashName") || document.getElementById("leaderDashName");
+    var name = nameEl ? (nameEl.textContent || "").replace(/전도사님|간사님|님/g, "").trim() : "";
+    if(!name) name = getVal("staffName").trim();
+    // Find dept from DOM — look for sibling/child element with dept name
+    var deptKws = ["유아부","유치부","유년부","초등부","중고등부"];
+    var dept = "";
+    if(nameEl){
+      var container = nameEl.parentElement;
+      if(container){
+        container.querySelectorAll("*").forEach(function(s){
+          if(dept) return;
+          var t = (s.textContent || "").trim();
+          for(var i=0;i<deptKws.length;i++){
+            if(t === deptKws[i]){ dept = deptKws[i]; return; }
+          }
+        });
+      }
+    }
+    if(!dept) dept = (getVal("staffDept").split(" ")[0] || "").trim();
     var leaders = ["박명철","이강희","최재원"];
     var isLeader = leaders.indexOf(name) >= 0;
     try{console.log("[wrapup-tab] role:", JSON.stringify({name:name,dept:dept,isLeader:isLeader,from:sessionStorage.getItem("staffName")?"session":"local"}));}catch(e){}
