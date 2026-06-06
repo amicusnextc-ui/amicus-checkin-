@@ -2210,7 +2210,7 @@ setTimeout(cwShowIfReady,2000);
   }
   function renderStatus(reqs){
     var role = getRole(); var sun = currentSunday();
-    var depts = role.isLeader ? DEPTS : DEPTS.filter(function(d){ return d.name === role.dept; });
+    var depts = DEPTS.filter(function(d){ return d.name === role.dept; });
     var rows = depts.map(function(d){
       var sub = findSubmission(reqs, d.name, sun.short);
       var status, color;
@@ -2221,10 +2221,6 @@ setTimeout(cwShowIfReady,2000);
       var contentShort = sub ? (sub.content || "").slice(0, 60) : "-";
       var requester = sub ? (sub.requester || "-") : "-";
       var action = "-";
-      if(role.isLeader){
-        if(!sub) action = '<button class="wuRem" data-dept="'+d.name+'" style="background:#f59e0b;color:white;border:none;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">📧 리마인드</button>';
-        else if(status.indexOf("대기")>=0) action = '<button class="wuAck" data-id="'+sub.id+'" style="background:#10b981;color:white;border:none;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">✓ 확인</button>';
-      }
       return '<tr><td style="padding:10px;border-bottom:1px solid #f3f4f6;">'+d.name+'</td>'+
         '<td style="padding:10px;border-bottom:1px solid #f3f4f6;color:'+color+';font-weight:600;">'+status+'</td>'+
         '<td style="padding:10px;border-bottom:1px solid #f3f4f6;">'+requester+'</td>'+
@@ -2246,7 +2242,7 @@ setTimeout(cwShowIfReady,2000);
         formHTML = '<div style="background:#d1fae5;border-radius:12px;padding:14px;margin-bottom:20px;color:#065f46;border:1px solid #6ee7b7;">✅ '+sun.short+' 마무리 보고 제출 완료: "'+(mySub.content || "").slice(0, 80)+'"</div>';
       }
     }
-    var titleHTML = '<h2 style="font-size:20px;margin-bottom:16px;color:#111827;">'+CAL+' '+sun.short+' · '+(role.isLeader ? "내 부서 + 전체 현황" : "나의 마무리")+'</h2>';
+    var titleHTML = '<h2 style="font-size:20px;margin-bottom:16px;color:#111827;">'+CAL+' '+sun.short+' · '+"나의 마무리"+'</h2>';
     var tableHTML = '<table style="width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);">'+
       '<thead style="background:#f9fafb;"><tr><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">부서</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">상태</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">간사</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">내용</th><th style="padding:12px;text-align:left;font-size:13px;color:#6b7280;font-weight:600;">액션</th></tr></thead><tbody>'+rows+'</tbody></table>';
     document.getElementById("__wrapupContent").innerHTML = titleHTML + formHTML + tableHTML;
