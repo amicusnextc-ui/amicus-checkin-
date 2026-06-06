@@ -2130,18 +2130,24 @@ setTimeout(cwShowIfReady,2000);
     var name = nameEl ? (nameEl.textContent || "").replace(/전도사님|간사님|님/g, "").trim() : "";
     if(!name) name = getVal("staffName").trim();
     // Find dept from DOM — look for sibling/child element with dept name
-    var deptKws = ["유아부","유치부","유년부","초등부","중고등부"];
+        var deptKws = ["유아부","유치부","유년부","초등부","중고등부"];
     var dept = "";
     if(nameEl){
-      var container = nameEl.parentElement;
-      if(container){
-        container.querySelectorAll("*").forEach(function(s){
-          if(dept) return;
-          var t = (s.textContent || "").trim();
-          for(var i=0;i<deptKws.length;i++){
-            if(t === deptKws[i]){ dept = deptKws[i]; return; }
-          }
-        });
+      // v5: direct siblings + direct parent children only
+      var sib = nameEl.nextElementSibling;
+      while(sib && !dept){
+        var t = (sib.textContent || "").trim();
+        for(var i=0;i<deptKws.length;i++){
+          if(t === deptKws[i] || t.indexOf(deptKws[i]) === 0){ dept = deptKws[i]; break; }
+        }
+        sib = sib.nextElementSibling;
+      }
+      if(!dept && nameEl.parentElement){
+        var ch = nameEl.parentElement.children;
+        for(var j=0;j<ch.length && !dept;j++){
+          var pt = (ch[j].textContent || "").trim();
+          for(var k=0;k<deptKws.length;k++){ if(pt === deptKws[k]){ dept = deptKws[k]; break; } }
+        }
       }
     }
     if(!dept) dept = (getVal("staffDept").split(" ")[0] || "").trim();
