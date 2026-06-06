@@ -1410,7 +1410,7 @@ async function loadAbsentees() {
     _absentees = d.absentees || [];
     // Strict client-side filter: only show absentees matching user's dept (safety net for banner)
     if (__deptShort) {
-      _absentees = _absentees.filter(function(a){ return (a.dept||a.department||'').indexOf(__deptShort) >= 0; });
+      _absentees = _absentees.filter(function(a){ if(a.visitor===true||a.visitor==='YES'||a.visitor==='__YES__'||a['방문자']==='__YES__'||a.isVisitor) return false; return (a.dept||a.department||'').indexOf(__deptShort) >= 0; });
     } else if (!isLeader && __deptFull) {
       _absentees = _absentees.filter(function(a){ return (a.dept||a.department||'') === __deptFull; });
     }
