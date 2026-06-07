@@ -2314,6 +2314,27 @@ setTimeout(cwShowIfReady,2000);
   function init(){ buildTab(); if(!document.getElementById("tabWrapup")) setTimeout(init, 500); }
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
+  // v4: Reset wrap-up on login state change (account switch fix — task #239)
+  // Wraps doLogin/doLogout/doLeaderLogin to clear stale content + re-render if visible.
+  function resetWrapup(){
+    var el = document.getElementById("__wrapupContent");
+    if(el) el.innerHTML = '<div style="color:#6b7280;padding:20px;text-align:center;">⏳ 로딩 중...</div>';
+    var sec = document.getElementById("wrapupTab");
+    if(sec && sec.style.display === "block") { try{ loadAndRender(); }catch(e){} }
+  }
+  window.__wrapupReset = resetWrapup;
+  function wrapFn(name){
+    var orig = window[name];
+    if(typeof orig !== "function" || orig.__wrapupWrapped) return;
+    var wrapped = function(){ var r = orig.apply(this, arguments); try{ setTimeout(resetWrapup, 100); }catch(e){} return r; };
+    wrapped.__wrapupWrapped = true;
+    window[name] = wrapped;
+  }
+  function hookLoginFns(){
+    wrapFn("doLogin"); wrapFn("doLogout"); wrapFn("doLeaderLogin"); wrapFn("doLeaderLogout");
+    if(!(window.doLogin && window.doLogin.__wrapupWrapped)) setTimeout(hookLoginFns, 500);
+  }
+  hookLoginFns();
 })();
 </script>
 </body>
