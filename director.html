@@ -685,6 +685,14 @@ async function loadRequests() {
     const r = await fetch('/api/attendance?type=requests&department=all');
     const d = await r.json();
     let reqs = d.requests || [];
+    // Exclude 주일 마무리 entries — they belong to the 주일 마무리 현황 widget only
+    reqs = reqs.filter(r => {
+      const t = r.title || '';
+      const c = r.content || '';
+      if (t.indexOf('주일 마무리') >= 0) return false;
+      if (/^\d{1,2}\/\d{1,2}[.\s]/.test(c)) return false; // legacy "M/D." prefix
+      return true;
+    });
     // Filter by leader's dept (match on department string)
     if (myShort) reqs = reqs.filter(r => (r.department||'').includes(myShort));
     // Split: pending (not 완료) vs completed (완료, last 7 days in archive)
