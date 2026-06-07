@@ -1,0 +1,144 @@
+name: Weekly Liability Reminder
+
+# Runs every Saturday at 9am PT (Saturday 4pm UTC)
+# Surfaces students with non-제출 Liability + sends reminders to parents with emails
+# Sends summary to director for manual follow-up of students without parent emails
+
+on:
+  schedule:
+    - cron: '0 16 * * 6'  # Sat 4pm UTC = Sat 9am PT
+  workflow_dispatch:
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Liability + send reminders
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: |
+          cat <<'JS' > check.js
+          const NOTION_TOKEN = process.env.NOTION_TOKEN;
+          const RESEND_API_KEY = process.env.RESEND_API_KEY;
+          const STUDENT_DB = '107828732f784c39bcb0136a4397c758';
+          const DIRECTOR_EMAIL = 'amicusnextc@gmail.com';
+          const LIABILITY_URL = 'https://amicus-checkin.vercel.app/liability.html';
+          
+          async function notionQuery() {
+            const all = [];
+            let cursor;
+            do {
+              const r = await fetch('https://api.notion.com/v1/databases/' + STUDENT_DB + '/query', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + NOTION_TOKEN, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filter: { and: [
+                  { property: '상태 (Status)', select: { equals: '활성 (Active)' } },
+                  { property: '부서 (Department)', select: { does_not_equal: '졸업' } }
+                ]}, page_size: 100, start_cursor: cursor })
+              });
+              if (!r.ok) { console.error('Notion query failed:', await r.text()); process.exit(1); }
+              const d = await r.json();
+              all.push(...d.results);
+              cursor = d.has_more ? d.next_cursor : null;
+            } while (cursor);
+            return all;
+          }
+          
+          function getProp(p, key, kind) {
+            const v = p.properties[key];
+            if (!v) return null;
+            if (kind === 'title') return v.title?.[0]?.plain_text || '';
+            if (kind === 'rich_text') return v.rich_text?.[0]?.plain_text || '';
+            if (kind === 'select') return v.select?.name || null;
+            if (kind === 'checkbox') return v.checkbox;
+            if (kind === 'email') return v.email || null;
+            if (kind === 'phone_number') return v.phone_number || null;
+            if (kind === 'unique_id') { const n = v.unique_id?.number; return n ? 'AMC-' + String(n).padStart(3, '0') : null; }
+            return null;
+          }
+          
+          async function sendEmail(to, subject, html) {
+            const r = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + RESEND_API_KEY, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ from: 'Amicus 교육부 <noreply@amicuschurch.com>', to: [to], subject, html })
+            });
+            const b = await r.json().catch(() => ({}));
+            return { ok: r.ok, status: r.status, body: b };
+          }
+          
+          function parentReminderHtml(name, amc, status) {
+            const link = LIABILITY_URL + '?studentId=' + amc;
+            const statusLabel = status === '미제출' ? '미제출' : status === '재작성 필요' ? '재작성 필요' : status === '확인 필요' ? '확인 필요' : '미완료';
+            return '<div style="font-family:-apple-system,Segoe UI,sans-serif;color:#111827;max-width:560px;margin:0 auto;padding:20px;">' +
+              '<h2 style="color:#6366f1;margin:0 0 16px 0;">📝 ' + name + ' 학생의 안전 동의서 (' + statusLabel + ')</h2>' +
+              '<p style="font-size:15px;line-height:1.6;">아미쿠스 교회 교육부입니다.<br><br>' + name + ' 학생의 <strong>안전 동의서(Liability Form) 상태가 "' + statusLabel + '"</strong>로 되어 있습니다. 아래 링크 클릭하시면 작성 페이지가 열립니다 (간단합니다, 2분 소요).</p>' +
+              '<div style="background:#eef2ff;border-left:4px solid #6366f1;border-radius:8px;padding:14px;margin:20px 0;text-align:center;">' +
+              '<a href="' + link + '" style="display:inline-block;background:#6366f1;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">📝 안전 동의서 작성하기</a></div>' +
+              '<p style="font-size:14px;color:#6b7280;">또는 링크 복사: <a href="' + link + '" style="color:#6366f1;">' + link + '</a></p>' +
+              '<hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">' +
+              '<p style="font-size:12px;color:#9ca3af;text-align:center;">Amicus Presbyterian Church · 교육부<br>이 메일은 자동 발송되었습니다.</p></div>';
+          }
+          
+          function directorSummaryHtml(emailed, manual) {
+            const eList = emailed.length === 0 ? '없음' : emailed.map(s => '✅ ' + s.name + ' (' + s.amc + ', ' + s.dept + ', ' + s.status + ') → ' + s.email).join('<br>');
+            const mList = manual.length === 0 ? '없음' : manual.map(s => '⏳ ' + s.name + ' (' + s.amc + ', ' + s.dept + ', ' + s.status + ')' + (s.phone ? ' · 📞 ' + s.phone : ' · 부모 정보 없음')).join('<br>');
+            return '<div style="font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#111827;">' +
+              '<h2 style="color:#6366f1;">📝 주간 Liability 상태 요약</h2>' +
+              '<div style="background:#d1fae5;border-radius:8px;padding:12px;margin:12px 0;"><strong>자동 이메일 발송됨 (' + emailed.length + '):</strong><br>' + eList + '</div>' +
+              '<div style="background:#fef3c7;border-radius:8px;padding:12px;margin:12px 0;"><strong>수동 연락 필요 (' + manual.length + ') — 부모 이메일 없음:</strong><br>' + mList + '</div>' +
+              '<p style="font-size:13px;color:#6b7280;">개별 Liability 링크: https://amicus-checkin.vercel.app/liability.html?studentId=AMC-XXX</p></div>';
+          }
+          
+          async function main() {
+            const pages = await notionQuery();
+            console.log('Total active students:', pages.length);
+            
+            const NOT_DONE = new Set(['미제출','재작성 필요','확인 필요']);
+            const emailed = [];
+            const manual = [];
+            
+            for (const p of pages) {
+              const liability = getProp(p, 'Liability Form', 'select');
+              if (liability === '제출 완료') continue;
+              if (liability && !NOT_DONE.has(liability)) continue;  // skip unknown statuses
+              // For null Liability, treat as 미제출
+              const status = liability || '미제출';
+              const name = getProp(p, '이름 (Name)', 'title');
+              const amc = getProp(p, '고유번호 (ID)', 'unique_id');
+              const dept = getProp(p, '부서 (Department)', 'select') || '';
+              const isVisitor = getProp(p, '방문자 (Visitor)', 'checkbox');
+              // Skip visitors — they handle Liability at first member check-in
+              if (isVisitor) continue;
+              const fEmail = getProp(p, '아버지 이메일 (Father Email)', 'email');
+              const mEmail = getProp(p, '어머니 이메일 (Mother Email)', 'email');
+              const fPhone = getProp(p, '아버지 연락처 (Father Phone)', 'phone_number');
+              const mPhone = getProp(p, '어머니 연락처 (Mother Phone)', 'phone_number');
+              const email = fEmail || mEmail;
+              const phone = fPhone || mPhone;
+              
+              if (email && amc) {
+                const r = await sendEmail(email, '[Amicus 교육부] ' + name + ' 학생 안전 동의서 작성 부탁드립니다', parentReminderHtml(name, amc, status));
+                console.log('Email ' + name + ' (' + amc + ') → ' + email + ': ' + r.status);
+                emailed.push({ name, amc, dept: dept.split(' ')[0], status, email });
+                await new Promise(r => setTimeout(r, 500));
+              } else {
+                manual.push({ name, amc, dept: dept.split(' ')[0], status, phone });
+              }
+            }
+            
+            // Send director summary
+            if (emailed.length + manual.length > 0) {
+              const r = await sendEmail(DIRECTOR_EMAIL, '[Amicus-checkin] 주간 Liability 상태 요약 (' + (emailed.length + manual.length) + '명 미완료)', directorSummaryHtml(emailed, manual));
+              console.log('Summary → ' + DIRECTOR_EMAIL + ': ' + r.status);
+            } else {
+              console.log('All students have completed Liability. No emails sent.');
+            }
+            
+            console.log('Done. Emailed:', emailed.length, 'Manual:', manual.length);
+          }
+          
+          main().catch(e => { console.error('Error:', e.message); process.exit(1); });
+          JS
+          node check.js
