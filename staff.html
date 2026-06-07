@@ -1455,7 +1455,17 @@ async function loadAbsentees() {
     list.innerHTML = '<div class="divide-y divide-gray-50">'
       + _absentees.map(function(a, idx) {
         var contacted = a.contacted === '연락함';
-        var lastDate = a.lastAttended ? new Date(a.lastAttended).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : '기록 없음';
+        var lastDate = '기록 없음';
+        if (a.lastAttended) {
+          // Parse YYYY-MM-DD as local date (not UTC) to avoid timezone day-shift
+          var _parts = (a.lastAttended || '').split('-');
+          if (_parts.length === 3) {
+            var _ld = new Date(Number(_parts[0]), Number(_parts[1])-1, Number(_parts[2]));
+            lastDate = _ld.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+          } else {
+            lastDate = a.lastAttended;
+          }
+        }
         var _tier = _absenteeTier(a.lastAttended);
         var tierBadge = '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + _tier.cls + '">' + _tier.icon + ' ' + _tier.label + '</span>';
         var reasonHtml = (contacted && a.reason)
