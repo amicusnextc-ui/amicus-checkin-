@@ -1585,7 +1585,28 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
       '<th style="padding:10px;text-align:right;font-size:12px;color:#6b7280;">리마인드</th>'+
       '</tr></thead><tbody>'+rows+'</tbody></table>';
     container.querySelectorAll('.wuRem').forEach(function(b){
-      b.addEventListener('click', function(){ alert(CAL+' 리마인드 이메일은 매주 월요일 9시 cron으로 자동 발송됩니다.\n수동 발송 요청: '+b.dataset.dept); });
+      b.addEventListener('click', async function(){
+        var dept = b.dataset.dept;
+        if (!confirm('📧 ' + dept + ' 간사에게 마무리 리마인드 이메일을 지금 발송할까요?')) return;
+        var orig = b.textContent;
+        b.disabled = true; b.textContent = '⏳ 발송 중...';
+        try {
+          var r = await fetch('/api/attendance?type=wrapup-reminder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dept: dept })
+          });
+          var d = await r.json();
+          if (d.success) {
+            b.textContent = '✅ 발송됨';
+            b.style.background = '#10b981';
+            alert('✅ ' + dept + ' ' + d.staff + ' 간사 (' + d.sentTo + ')에게 리마인드 이메일 발송 완료!');
+          } else { throw new Error(d.error || 'failed'); }
+        } catch (e) {
+          b.disabled = false; b.textContent = orig;
+          alert('❌ 발송 실패: ' + e.message);
+        }
+      });
     });
   }
   function ensureContainer(){
