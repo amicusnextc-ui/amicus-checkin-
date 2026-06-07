@@ -192,6 +192,30 @@ module.exports = async (req, res) => {
       if (!emailRes.ok) return res.status(500).json({ error: 'Resend failed', detail: body });
       return res.json({ success: true, dept, sentTo: info.email, staff: info.staff, emailId: body.id });
     }
+    // ATTENDANCE FIX (director-only attendance record corrections)
+    if (type === 'attendance-fix') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+      const { action, recordId } = req.body || {};
+      if (!action || !recordId) return res.status(400).json({ error: 'action and recordId required' });
+      if (action === 'delete') {
+        const rec = await notion.pages.retrieve({ page_id: recordId });
+        const curName = rec.properties['이름 (Name)']?.title?.[0]?.text?.content || '';
+        const newName = curName.startsWith('🗑️') ? curName : '🗑️ ' + curName;
+        await notion.pages.update({ page_id: recordId, properties: {
+          '이름 (Name)': { title: [{ text: { content: newName } }] }
+        }});
+        return res.json({ success: true, action: 'deleted', recordId, newName });
+      }
+      if (action === 'force-checkout') {
+        const now = new Date();
+        const t = new Intl.DateTimeFormat('en-US', { timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit', hour12: true }).format(now);
+        await notion.pages.update({ page_id: recordId, properties: {
+          '체크아웃 시간 (Check-out)': { rich_text: [{ text: { content: t } }] }
+        }});
+        return res.json({ success: true, action: 'force-checkout', recordId, checkOutTime: t });
+      }
+      return res.status(400).json({ error: 'Unknown action: ' + action });
+    }
     return res.status(400).json({ error: 'Unknown type' });
   } catch(e) {
     console.error('staff-ops error:', e.message);
