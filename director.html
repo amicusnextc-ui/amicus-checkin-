@@ -1760,5 +1760,112 @@ async function adminForceCheckout(rid, name){
   if(btn) btn.addEventListener('click', function(){ setTimeout(adminLoadToday, 200); });
 })();
 </script>
+<script>
+/* 📋 정보 보완 필요 banner + per-row badge v1 — director.html (Task #249) */
+(function(){
+  if(window.__directorIncompleteInjected) return;
+  window.__directorIncompleteInjected = true;
+  function validEmail(e){ return /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(String(e||"").trim()); }
+  function validPhone(p){ var d=String(p||"").replace(/[^\d]/g,""); return d.length>=10; }
+  function getIssues(s){
+    if(!s) return [];
+    if(s.isVisitor) return [];
+    var iss = [];
+    if(!s.dob) iss.push({type:"missing",label:"생일"});
+    if(!s.grade) iss.push({type:"missing",label:"학년"});
+    var hasParentName = (s.fatherName||"").trim() || (s.motherName||"").trim() || (s.guardian||"").trim();
+    if(!hasParentName) iss.push({type:"missing",label:"부모 이름"});
+    var hasParentPhone = (s.fatherPhone||"").trim() || (s.motherPhone||"").trim() || (s.phone||"").trim();
+    if(!hasParentPhone) iss.push({type:"missing",label:"부모 연락처"});
+    if(!(s.address||"").trim()) iss.push({type:"missing",label:"주소"});
+    if(s.liabilityForm==="미제출" || !s.liabilityForm || s.liabilityForm==="재작성 필요" || s.liabilityForm==="확인 필요") iss.push({type:"missing",label:"Liability"});
+    if(!(s.allergy||"").trim()) iss.push({type:"missing",label:"알러지"});
+    if(s.photo !== "촬영 완료") iss.push({type:"missing",label:"사진"});
+    if(!(s.baptized||"").trim()) iss.push({type:"missing",label:"세례"});
+    if((s.fatherEmail||"").trim() && !validEmail(s.fatherEmail)) iss.push({type:"invalid",label:"아빠 이메일"});
+    if((s.motherEmail||"").trim() && !validEmail(s.motherEmail)) iss.push({type:"invalid",label:"엄마 이메일"});
+    if((s.fatherPhone||"").trim() && !validPhone(s.fatherPhone)) iss.push({type:"invalid",label:"아빠 전화"});
+    if((s.motherPhone||"").trim() && !validPhone(s.motherPhone)) iss.push({type:"invalid",label:"엄마 전화"});
+    return iss;
+  }
+  window.__getStudentIssuesDirector = getIssues;
+  function buildBanner(){
+    if(document.getElementById("__directorIncompleteBanner")) return true;
+    var table = document.getElementById("rosterTable");
+    if(!table) return false;
+    var banner = document.createElement("div");
+    banner.id = "__directorIncompleteBanner";
+    banner.style.cssText = "margin-bottom:12px;padding:14px 16px;background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;display:none;";
+    banner.innerHTML = '<div id="__directorIncompleteText" style="font-size:13px;color:#92400e;font-weight:600;"></div>';
+    table.parentNode.insertBefore(banner, table);
+    return true;
+  }
+  function updateBanner(){
+    var banner = document.getElementById("__directorIncompleteBanner");
+    var text = document.getElementById("__directorIncompleteText");
+    if(!banner || !text) return;
+    var list = window.__filtered || [];
+    if(!list.length){ banner.style.display = "none"; return; }
+    var byDept = {};
+    var totalIssues = 0, totalStudents = 0;
+    list.forEach(function(s){
+      var iss = getIssues(s);
+      if(iss.length === 0) return;
+      totalStudents++;
+      totalIssues += iss.length;
+      var d = (s.department||"").split(" ")[0] || "기타";
+      byDept[d] = (byDept[d]||0) + 1;
+    });
+    if(totalStudents === 0){ banner.style.display = "none"; return; }
+    banner.style.display = "block";
+    var deptParts = Object.keys(byDept).map(function(k){ return k + " " + byDept[k] + "명"; }).join(" · ");
+    text.innerHTML = "⚠️ 정보 보완 필요 학생 <b>" + totalStudents + "명</b> (총 " + totalIssues + "건) &nbsp;<span style=\"font-weight:400\">— 부서별: " + deptParts + "</span>";
+  }
+  function addBadgesToRows(){
+    var table = document.getElementById("rosterTable");
+    if(!table || !window.__filtered) return;
+    var rows = table.querySelectorAll("tbody tr");
+    rows.forEach(function(tr, i){
+      var s = window.__filtered[i];
+      if(!s) return;
+      var iss = getIssues(s);
+      if(iss.length === 0) return;
+      var firstCell = tr.querySelector("td");
+      if(!firstCell || firstCell.querySelector(".__issueBadge")) return;
+      var labels = iss.slice(0,4).map(function(x){
+        var color = x.type === "invalid" ? "#dc2626" : "#92400e";
+        var bg = x.type === "invalid" ? "#fee2e2" : "#fef3c7";
+        return '<span style="background:'+bg+';color:'+color+';padding:1px 6px;border-radius:6px;margin-right:2px;font-size:10px;font-weight:600;">'+(x.type==="invalid"?"⚠":"·")+" "+x.label+'</span>';
+      }).join("");
+      var more = iss.length > 4 ? '<span style="color:#9ca3af;font-size:10px;">+'+(iss.length-4)+'</span>' : "";
+      var badge = document.createElement("div");
+      badge.className = "__issueBadge";
+      badge.style.cssText = "margin-top:4px;line-height:1.6;";
+      badge.innerHTML = labels + more;
+      firstCell.appendChild(badge);
+      tr.style.borderLeft = "3px solid #f59e0b";
+    });
+  }
+  function hookRoster(){
+    if(typeof window.renderRoster !== "function" || window.renderRoster.__directorHooked){
+      setTimeout(hookRoster, 500);
+      return;
+    }
+    if(!buildBanner()){ setTimeout(hookRoster, 500); return; }
+    var orig = window.renderRoster;
+    var wrapped = function(){
+      var r = orig.apply(this, arguments);
+      try{ updateBanner(); }catch(e){}
+      try{ setTimeout(addBadgesToRows, 50); }catch(e){}
+      return r;
+    };
+    wrapped.__directorHooked = true;
+    window.renderRoster = wrapped;
+    try{ updateBanner(); setTimeout(addBadgesToRows, 100); }catch(e){}
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", hookRoster);
+  else hookRoster();
+})();
+</script>
 </body>
 </html>
