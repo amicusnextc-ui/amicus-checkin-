@@ -1,0 +1,154 @@
+name: yearly-grade-advancement
+on:
+  schedule:
+    # Aug 15 at 09:00 PT (= 16:00 UTC, fall PST/PDT difference negligible at this date)
+    - cron: '0 16 15 8 *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry-run mode (no Notion writes, email only)'
+        type: boolean
+        default: true
+      send_email:
+        description: 'Send director summary email'
+        type: boolean
+        default: true
+
+jobs:
+  advance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run grade advancement
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_STUDENT_DB_ID: ${{ secrets.NOTION_STUDENT_DB_ID }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          SEND_EMAIL: ${{ inputs.send_email || 'true' }}
+        run: |
+          cat > advance.js << 'JS'
+          const STUDENT_DB = process.env.NOTION_STUDENT_DB_ID || '107828732f784c39bcb0136a4397c758';
+          const DRY = String(process.env.DRY_RUN).toLowerCase() === 'true';
+          const SEND = String(process.env.SEND_EMAIL).toLowerCase() === 'true';
+          const HEADERS = { 'Authorization': 'Bearer ' + process.env.NOTION_TOKEN, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' };
+          const DIRECTOR_EMAIL = 'amicusnextc@gmail.com';
+
+          // Grade advancement map (grade STRING -> next grade STRING)
+          const GRADE_NEXT = {
+            'Pre-K': 'K', 'Pre-K / Toddler': 'Pre-K', 'PreK': 'K',
+            'K': '1st grade', 'Kindergarten': '1st grade',
+            '1st grade': '2nd grade', '2nd grade': '3rd grade', '3rd grade': '4th grade',
+            '4th grade': '5th grade', '5th grade': '6th grade', '6th grade': '7th grade',
+            '7th grade': '8th grade', '8th grade': '9th grade', '9th grade': '10th grade',
+            '10th grade': '11th grade', '11th grade': '12th grade',
+            '12th grade': '졸업'
+          };
+
+          // New grade -> dept mapping
+          function gradeToDept(g) {
+            if(!g || g === '졸업') return '졸업';
+            if(/Pre-?K|Toddler/i.test(g)) return '유치부 (Preschool)';
+            if(/^K$|Kindergarten/i.test(g)) return '유년부 (Elementary Jr)';
+            const m = g.match(/^(\d+)/);
+            if(!m) return null;
+            const n = parseInt(m[1]);
+            if(n >= 1 && n <= 2) return '유년부 (Elementary Jr)';
+            if(n >= 3 && n <= 5) return '초등부 (Elementary)';
+            if(n >= 6 && n <= 12) return '중고등부 (Middle/High)';
+            return null;
+          }
+
+          async function queryAll() {
+            const out = [];
+            let cursor = undefined;
+            for(let i=0; i<20; i++) {
+              const r = await fetch('https://api.notion.com/v1/databases/' + STUDENT_DB + '/query', {
+                method:'POST', headers:HEADERS,
+                body: JSON.stringify({
+                  filter: { property: '상태 (Status)', select: { equals: '활성 (Active)' } },
+                  page_size: 100,
+                  start_cursor: cursor
+                })
+              });
+              const d = await r.json();
+              (d.results||[]).forEach(p => out.push(p));
+              if(!d.has_more) break;
+              cursor = d.next_cursor;
+            }
+            return out;
+          }
+
+          function getProps(p) {
+            const props = p.properties;
+            const title = (props['이름 (Name)']?.title?.[0]?.plain_text) || '';
+            const grade = (props['학년 (Grade)']?.rich_text?.[0]?.plain_text) || '';
+            const dept  = (props['부서 (Department)']?.select?.name) || '';
+            const isVisitor = !!props['방문자 (Visitor)']?.checkbox;
+            return { id: p.id, name: title, grade, dept, isVisitor };
+          }
+
+          async function update(pageId, newGrade, newDept, becameGraduate) {
+            if(DRY) return { dry: true };
+            const props = {
+              '학년 (Grade)': { rich_text: [{ text: { content: newGrade || '' } }] }
+            };
+            if(newDept) props['부서 (Department)'] = { select: { name: newDept } };
+            if(becameGraduate) props['상태 (Status)'] = { select: { name: '비활성 (Inactive)' } };
+            const r = await fetch('https://api.notion.com/v1/pages/' + pageId, {
+              method:'PATCH', headers: HEADERS, body: JSON.stringify({ properties: props })
+            });
+            const d = await r.json();
+            return { ok: r.ok, status: r.status, body: d };
+          }
+
+          async function sendEmail(html, subj) {
+            if(!SEND || !process.env.RESEND_API_KEY) return { skipped:true };
+            const r = await fetch('https://api.resend.com/emails', {
+              method:'POST',
+              headers: { 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type':'application/json' },
+              body: JSON.stringify({ from: 'Amicus Church <noreply@amicuschurch.com>', to: [DIRECTOR_EMAIL], subject: subj, html })
+            });
+            return { ok: r.ok, status: r.status };
+          }
+
+          (async () => {
+            console.log('Mode:', DRY ? 'DRY-RUN' : 'LIVE');
+            const pages = await queryAll();
+            console.log('Active students:', pages.length);
+            const advanced = [], graduated = [], skipped = [], failed = [];
+            for(const p of pages) {
+              const s = getProps(p);
+              if(s.isVisitor) { skipped.push({...s, reason:'visitor'}); continue; }
+              if(!s.grade) { skipped.push({...s, reason:'no-grade'}); continue; }
+              const nextGrade = GRADE_NEXT[s.grade];
+              if(!nextGrade) { skipped.push({...s, reason:'no-mapping:'+s.grade}); continue; }
+              const isGrad = nextGrade === '졸업';
+              const nextDept = gradeToDept(nextGrade);
+              const deptChanged = nextDept && nextDept !== s.dept;
+              try {
+                const res = await update(s.id, isGrad ? '' : nextGrade, isGrad ? '졸업' : (deptChanged ? nextDept : null), isGrad);
+                if(res.ok || res.dry) {
+                  if(isGrad) graduated.push({...s, fromGrade: s.grade});
+                  else advanced.push({...s, fromGrade: s.grade, toGrade: nextGrade, deptChanged, newDept: deptChanged ? nextDept : s.dept});
+                } else { failed.push({...s, err: JSON.stringify(res.body).slice(0,200) }); }
+              } catch(e) { failed.push({...s, err: e.message}); }
+              if(!DRY) await new Promise(r => setTimeout(r, 100)); // rate-limit
+            }
+            console.log('Advanced:', advanced.length, 'Graduated:', graduated.length, 'Skipped:', skipped.length, 'Failed:', failed.length);
+            // Email summary
+            const advRows = advanced.map(s => '<tr><td>'+s.name+'</td><td>'+s.fromGrade+' → '+s.toGrade+'</td><td>'+(s.deptChanged?'<b style="color:#dc2626">'+s.dept+' → '+s.newDept+'</b>':s.newDept)+'</td></tr>').join('');
+            const gradRows = graduated.map(s => '<tr><td>'+s.name+'</td><td>'+s.fromGrade+'</td><td>'+s.dept+' → 졸업</td></tr>').join('');
+            const skipRows = skipped.map(s => '<tr><td>'+s.name+'</td><td>'+s.dept+'/'+s.grade+'</td><td>'+s.reason+'</td></tr>').join('');
+            const html = '<div style="font-family:sans-serif;max-width:720px;margin:0 auto;padding:20px;">'+
+              '<h2>🎓 학년 자동 진급 ' + (DRY?'(DRY-RUN — 변경 없음)':'완료') + '</h2>'+
+              '<p>총 활성 학생: <b>'+pages.length+'</b>명 · 진급: <b>'+advanced.length+'</b> · 졸업: <b>'+graduated.length+'</b> · 건너뜀: '+skipped.length+' · 실패: '+failed.length+'</p>'+
+              (graduated.length ? '<h3>🎓 졸업 ('+graduated.length+'명)</h3><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:13px;"><thead><tr><th>이름</th><th>학년</th><th>변경</th></tr></thead><tbody>'+gradRows+'</tbody></table>' : '')+
+              (advanced.length ? '<h3>📈 진급 ('+advanced.length+'명)</h3><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:13px;"><thead><tr><th>이름</th><th>학년 변경</th><th>부서</th></tr></thead><tbody>'+advRows+'</tbody></table>' : '')+
+              (skipped.length ? '<h3>⏭️ 건너뜀 ('+skipped.length+'명) — 학년 없음/방문자/Pre-K(수동 검토)</h3><details><summary>보기</summary><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:13px;"><thead><tr><th>이름</th><th>현재</th><th>이유</th></tr></thead><tbody>'+skipRows+'</tbody></table></details>' : '')+
+              (failed.length ? '<h3 style="color:#dc2626">❌ 실패 ('+failed.length+'명)</h3>' : '')+
+              '<p style="font-size:12px;color:#9ca3af;margin-top:24px;">Amicus 교육부 · '+(DRY?'DRY-RUN':'LIVE')+' · 매년 8/15 자동 실행. 수동 실행은 Actions 탭에서 가능.</p></div>';
+            const er = await sendEmail(html, '[Amicus 교육부] 학년 자동 진급 ' + (DRY?'(DRY-RUN)':'완료') + ' — ' + advanced.length + '명 진급, ' + graduated.length + '명 졸업');
+            console.log('Email sent:', JSON.stringify(er));
+          })();
+          JS
+          node advance.js
