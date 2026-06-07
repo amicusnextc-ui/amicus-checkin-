@@ -79,6 +79,19 @@
         <label class="block text-xs font-bold text-gray-600 mb-1">학교 / School</label>
         <input id="f_school" type="text" required placeholder="예: Olympian High School" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
       </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1">생년월일 / Date of Birth</label>
+        <input id="f_dob" type="date" required class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-600 mb-1">세례 여부 / Baptized</label>
+        <select id="f_baptized" required class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors bg-white">
+          <option value="">선택해주세요 / Select</option>
+          <option value="세례">세례 받음 / Baptized</option>
+          <option value="안 받음">아직 안 받음 / Not yet</option>
+          <option value="모름">모름 / Don't know</option>
+        </select>
+      </div>
       <div class="sm:col-span-2">
         <label class="block text-xs font-bold text-gray-600 mb-1">⚠️ 알러지 / Allergies <span class="text-gray-400 font-normal">(없으면 "없음")</span></label>
         <input id="f_allergy" type="text" required placeholder="예: 땅콩, 우유 / 없음" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
@@ -234,6 +247,8 @@ function populateForm(s) {
   setField('f_nameEN', s.nameEN || '');
   setField('f_grade', s.grade || '');
   setField('f_school', s.school || '');
+  setField('f_dob', s.dob || '');
+  setField('f_baptized', s.baptized || '');
   setField('f_allergy', s.allergy || '');
   setField('f_motherName', s.motherName || '');
   setField('f_motherPhone', s.motherPhone || '');
@@ -244,7 +259,7 @@ function populateForm(s) {
   setField('f_address', s.address || '');
 
   // Check if all required fields are pre-filled — show 'already submitted' banner if so
-  var allFilled = ['f_nameEN','f_grade','f_school','f_allergy','f_motherName','f_motherPhone','f_motherEmail','f_fatherName','f_fatherPhone','f_fatherEmail','f_address'].every(function(id){ var el = document.getElementById(id); return el && el.value.trim(); });
+  var allFilled = ['f_nameEN','f_grade','f_school','f_dob','f_baptized','f_allergy','f_motherName','f_motherPhone','f_motherEmail','f_fatherName','f_fatherPhone','f_fatherEmail','f_address'].every(function(id){ var el = document.getElementById(id); return el && el.value.trim(); });
   if (allFilled) {
     document.getElementById('alreadyFilledBanner').classList.remove('hidden');
   }
@@ -259,6 +274,8 @@ async function handleSubmit(e) {
     { id: 'f_nameEN', label: '영문 이름' },
     { id: 'f_grade', label: '학년' },
     { id: 'f_school', label: '학교' },
+    { id: 'f_dob', label: '생년월일' },
+    { id: 'f_baptized', label: '세례 여부' },
     { id: 'f_allergy', label: '알러지 (없으면 "없음" 입력)' },
     { id: 'f_motherName', label: '어머니 이름' },
     { id: 'f_motherPhone', label: '어머니 연락처' },
@@ -297,6 +314,8 @@ async function handleSubmit(e) {
       nameEN: document.getElementById('f_nameEN').value.trim(),
       grade: document.getElementById('f_grade').value.trim(),
       school: document.getElementById('f_school').value.trim(),
+      dob: document.getElementById('f_dob').value.trim(),
+      baptized: document.getElementById('f_baptized').value,
       allergy: document.getElementById('f_allergy').value.trim(),
       motherName: document.getElementById('f_motherName').value.trim(),
       motherPhone: document.getElementById('f_motherPhone').value.trim(),
