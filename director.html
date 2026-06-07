@@ -845,11 +845,25 @@ function renderDashboard() {
   renderLongAbsent();
 }
 
+function getRefWeekISO() {
+  var now = new Date();
+  var la = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year:'numeric', month:'2-digit', day:'2-digit' }).format(now);
+  var parts = la.split('-').map(Number);
+  var laDay = new Date(Date.UTC(parts[0], parts[1]-1, parts[2]));
+  var dow = laDay.getUTCDay();
+  var sun = new Date(laDay);
+  sun.setUTCDate(laDay.getUTCDate() - dow);
+  return sun.toISOString().slice(0, 10);
+}
+
 function weeksSince(dateStr) {
+  // Anchor: most recent past Sunday (matches staff.html / api refWeek). weeksSince >= 2 means lastAttended ≤ refWeek - 14 days.
   if (!dateStr) return Infinity;
-  const d = new Date(dateStr);
-  if (isNaN(d)) return Infinity;
-  return Math.floor((Date.now() - d.getTime()) / (7*24*3600*1000));
+  var last = new Date(dateStr);
+  if (isNaN(last)) return Infinity;
+  var anchor = new Date(getRefWeekISO());
+  var diffDays = Math.floor((anchor.getTime() - last.getTime()) / (24*3600*1000));
+  return Math.floor(diffDays / 7);
 }
 
 function renderLongAbsent() {
