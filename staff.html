@@ -2242,7 +2242,7 @@ setTimeout(cwShowIfReady,2000);
       var btn = document.getElementById(id);
       if(btn && !btn.__wrapupHookAdded){
         btn.__wrapupHookAdded = true;
-        btn.addEventListener("click", function(){ sec.style.display = "none"; sec.classList.add("hidden"); });
+        btn.addEventListener("click", function(){ sec.style.display = "none"; sec.classList.add("hidden"); newBtn.classList.remove("active"); });
       }
     });
   }
