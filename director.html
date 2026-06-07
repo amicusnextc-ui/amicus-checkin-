@@ -105,6 +105,7 @@
       <button class="tab-btn active" data-view="dashboard">📊 대시보드</button>
       <button class="tab-btn" data-view="registry">📋 명단</button>
       <button class="tab-btn" data-view="requests">📨 간사 요청 <span id="reqBadge" class="hidden ml-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span></button>
+      <button class="tab-btn" data-view="wrapup">🗓️ 주일 마무리</button>
       <button class="tab-btn" data-view="team">👥 팀</button>
       <button class="tab-btn" data-view="liability" id="liabilityTabBtn">📧 Liability 이메일</button>
       <button class="tab-btn" data-view="tools" id="toolsTabBtn">🔧 관리 도구</button>
@@ -214,6 +215,14 @@
     </section>
 
     <!-- =========== TEAM =========== -->
+    <section id="view-wrapup" class="view fade-in hidden">
+      <div class="card p-6">
+        <h2 id="wrapupTabHeading" class="text-xl font-bold text-gray-900 mb-4">🗓️ 주일 마무리 현황</h2>
+        <p class="text-xs text-gray-500 mb-4">매주 부서별 주일 마무리 보고 현황입니다. 미작성 부서에 ↪︎ 리마인드 이메일을 발송할 수 있습니다.</p>
+        <div id="wrapupTabContent">⏳ 로딩 중...</div>
+      </div>
+    </section>
+
     <section id="view-team" class="view fade-in hidden">
       <h2 class="text-xl font-bold text-gray-900 mb-4">교육부 팀</h2>
 
@@ -443,6 +452,9 @@ document.querySelectorAll('#appScreen header .tab-btn').forEach(b => {
     if (b.dataset.view === 'liability' && !_liabilityLoaded) {
       _liabilityLoaded = true;
       loadLiabilityHistory();
+    }
+    if (b.dataset.view === 'wrapup' && typeof window.__wrapupReload === 'function') {
+      window.__wrapupReload();
     }
   };
 });
@@ -1620,39 +1632,30 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
     });
   }
   function ensureContainer(){
-    if(document.getElementById('wrapupWidgetContent')) return;
-    // Look for any existing 주일 마무리 widget heading
-    var headings = document.querySelectorAll('h2, h3');
-    var anchor = null;
-    for(var i=0;i<headings.length;i++){
-      if((headings[i].textContent || '').indexOf('주일 마무리 현황') >= 0){ anchor = headings[i]; break; }
+    var tabContent = document.getElementById('wrapupTabContent');
+    if(tabContent){
+      var existing = document.getElementById('wrapupWidgetContent');
+      if(existing && existing.parentNode !== tabContent){ existing.parentNode.removeChild(existing); }
+      if(!document.getElementById('wrapupWidgetContent')){
+        var heading = document.getElementById('wrapupTabHeading');
+        if(heading) heading.textContent = CAL + ' 주일 마무리 현황 — ' + currentSunday().short;
+        tabContent.innerHTML = '<div id="wrapupWidgetContent">⏳ 로딩 중...</div>';
+      }
+      return;
     }
-    if(!anchor){
-      // Create section after dept summary table
-      var card = document.createElement('div');
-      card.style.cssText = 'background:white;border-radius:14px;padding:20px;margin-top:20px;box-shadow:0 1px 3px rgba(0,0,0,0.05);';
-      card.innerHTML = '<h3 style="font-size:16px;font-weight:600;margin-bottom:12px;color:#111827;">'+CAL+' 주일 마무리 현황 — '+currentSunday().short+'</h3><div id="wrapupWidgetContent">⏳ 로딩 중...</div>';
-      var deptTable = document.querySelector('table');
-      if(deptTable && deptTable.parentNode){
-        var parent = deptTable.closest('div[class*="card"]') || deptTable.parentNode;
-        parent.parentNode.insertBefore(card, parent.nextSibling);
-      } else {
-        document.body.appendChild(card);
-      }
+    if(document.getElementById('wrapupWidgetContent')) return;
+    var card = document.createElement('div');
+    card.style.cssText = 'background:white;border-radius:14px;padding:20px;margin-top:20px;box-shadow:0 1px 3px rgba(0,0,0,0.05);';
+    card.innerHTML = '<h3 style="font-size:16px;font-weight:600;margin-bottom:12px;color:#111827;">'+CAL+' 주일 마무리 현황 — '+currentSunday().short+'</h3><div id="wrapupWidgetContent">⏳ 로딩 중...</div>';
+    var deptTable = document.querySelector('table');
+    if(deptTable && deptTable.parentNode){
+      var parent = deptTable.closest('div[class*="card"]') || deptTable.parentNode;
+      parent.parentNode.insertBefore(card, parent.nextSibling);
     } else {
-      // Replace existing widget's content area
-      var existing = anchor.parentNode.querySelector('[id*="wrapup"]') || anchor.nextElementSibling;
-      if(existing){
-        existing.id = 'wrapupWidgetContent';
-        existing.innerHTML = '⏳ 로딩 중...';
-      } else {
-        var div = document.createElement('div');
-        div.id = 'wrapupWidgetContent';
-        div.innerHTML = '⏳ 로딩 중...';
-        anchor.parentNode.appendChild(div);
-      }
+      document.body.appendChild(card);
     }
   }
+  window.__wrapupReload = function(){ load(); };
   function load(){
     ensureContainer();
     fetch('/api/attendance?type=requests')
