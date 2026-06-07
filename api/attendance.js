@@ -94,9 +94,10 @@ module.exports = async (req, res) => {
         const absentees = students.results.filter(p => { const last = p.properties['마지막 출석 (Last Attended)']?.date?.start; return !last || last <= cutoff; })
           .map(p => { const pr = p.properties; return { id: p.id, name: pr['이름 (Name)']?.title?.[0]?.text?.content || '', department: pr['부서 (Department)']?.select?.name || '', grade: pr['학년 (Grade)']?.rich_text?.[0]?.text?.content || '', lastAttended: pr['마지막 출석 (Last Attended)']?.date?.start || null }; });
         const cm = {};
-        // Notion's date-equals filter has propagation lag for recently-edited dates,
-        // so we use on_or_after refWeek then filter in app code by exact match.
-        const recs = await notion.databases.query({ database_id: ABSENTEES_DB, filter: { property: '주간 기준일 (Week)', date: { on_or_after: refWeek } }, sorts: [{ property: '연락일 (Contact Date)', direction: 'descending' }], page_size: 100 });
+        // Notion date filter index lags badly on recently-edited values (some records
+        // don't surface even with on_or_after). Bypass entirely: pull recent records by
+        // created_time and filter in app code.
+        const recs = await notion.databases.query({ database_id: ABSENTEES_DB, sorts: [{ timestamp: 'created_time', direction: 'descending' }], page_size: 100 });
         recs.results.forEach(p => {
           const wk = p.properties['주간 기준일 (Week)']?.date?.start;
           if (wk !== refWeek) return;
