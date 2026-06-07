@@ -85,8 +85,14 @@ module.exports = async (req, res) => {
         const dept = req.query.department;
         const ss = getServiceSunday();
         const refWeek = getReferenceWeek(); // always defined (Sat→last Sunday)
-        let filter = { property: '상태 (Status)', select: { equals: '활성 (Active)' } };
-        if (dept && dept !== 'all') filter = { and: [filter, { property: '부서 (Department)', select: { equals: dept } }] };
+        // Exclude visitors: visitors don't go in 연락 명단 (David policy)
+        let andClauses = [
+          { property: '상태 (Status)', select: { equals: '활성 (Active)' } },
+          { property: '방문자 (Visitor)', checkbox: { equals: false } },
+          { property: '부서 (Department)', select: { does_not_equal: '졸업' } }
+        ];
+        if (dept && dept !== 'all') andClauses.push({ property: '부서 (Department)', select: { equals: dept } });
+        let filter = { and: andClauses };
         const students = await notion.databases.query({ database_id: STUDENT_DB, filter, page_size: 100 });
         const ago = new Date(refWeek);
         ago.setUTCDate(ago.getUTCDate() - 14);
