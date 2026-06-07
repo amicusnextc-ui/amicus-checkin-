@@ -1867,5 +1867,66 @@ async function adminForceCheckout(rid, name){
   else hookRoster();
 })();
 </script>
+
+<script>
+/* 🎯 역할 미션 배너 + 도움말 v1 — director.html (Task #253) */
+(function(){
+  if(window.__roleMissionDirInjected) return;
+  window.__roleMissionDirInjected = true;
+  function getMission(role){
+    if(role === "director") return "교육부 운영 + Liability/정보 발송 + 시스템 관리";
+    var name = window.CURRENT_USER || "";
+    if(name === "최재원") return "전체 교육부 조율 + 종합 보고서";
+    return "부서 운영 + 결석자 연락 + 간사 지원";
+  }
+  function getHelpActions(role){
+    if(role === "director"){
+      return [
+        "📊 대시보드 — 전체 부서 출석률 모니터링",
+        "📋 명단 → 정보 보완 배너에서 미입력 학생 확인",
+        "📨 Liability 이메일 일괄 발송",
+        "📋 정보 링크 발송 — 부모에게 카톡으로 보내기",
+        "🔧 관리 도구 → 출석 정정/시스템 점검"
+      ];
+    }
+    return [
+      "📊 부서 대시보드 모니터링",
+      "📋 명단 → 정보 보완 배너 확인",
+      "📞 2주 이상 결석자 연락 점검",
+      "📥 간사 요청 처리",
+      "🗓️ 주일 마무리 확인"
+    ];
+  }
+  function inject(){
+    if(document.querySelector(".__directorRolePanel")) return;
+    var whoami = document.getElementById("whoami");
+    if(!whoami || !whoami.textContent) return;
+    var role = (typeof window.ROLE === "string") ? window.ROLE : "director";
+    var mission = getMission(role);
+    var actions = getHelpActions(role);
+    var parent = whoami.parentNode;
+    var wrap = document.createElement("div");
+    wrap.className = "__directorRolePanel";
+    wrap.style.cssText = "margin-top:2px;font-size:11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;";
+    wrap.innerHTML = '<span>🎯 <span style="color:#4f46e5;font-weight:600;">' + mission + '</span></span><button id="__roleHelpBtn" style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:2px 8px;font-size:11px;color:#6b7280;cursor:pointer;">❓ 도움말</button>';
+    parent.parentNode.appendChild(wrap);
+    var panel = document.createElement("div");
+    panel.style.cssText = "display:none;position:fixed;top:80px;right:24px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.1);z-index:9999;max-width:360px;font-size:13px;line-height:1.6;color:#374151;";
+    panel.innerHTML = '<div style="font-weight:700;margin-bottom:8px;color:#111827;">📖 주요 액션</div><ul style="list-style:none;padding:0;margin:0;">' + actions.map(function(a){return '<li style="padding:4px 0;">' + a + '</li>';}).join("") + '</ul><div style="margin-top:12px;padding-top:8px;border-top:1px solid #f3f4f6;font-size:11px;color:#9ca3af;">📘 더 자세한 가이드는 컬쳐북/트레이닝 문서 참조</div>';
+    document.body.appendChild(panel);
+    var btn = document.getElementById("__roleHelpBtn");
+    if(btn){
+      btn.addEventListener("click", function(e){ e.stopPropagation(); panel.style.display = panel.style.display === "block" ? "none" : "block"; });
+      document.addEventListener("click", function(e){ if(!panel.contains(e.target) && e.target !== btn) panel.style.display = "none"; });
+    }
+  }
+  function loop(){
+    try{ inject(); }catch(e){}
+    setTimeout(loop, 2000);
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", loop);
+  else loop();
+})();
+</script>
 </body>
 </html>
