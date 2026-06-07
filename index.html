@@ -1606,23 +1606,8 @@ async function cwoDo(btn){
 <!-- ===== END CHECKOUT BUTTON FIX v2 ===== -->
 
 <script>
-// EMERGENCY DISABLE checkInfoMissing - parents submitted info but popup keeps showing
-// Temporary bypass until field mismatch diagnosed (2026-05-17)
-(function(){
-  var tries=0;
-  function patch(){
-    tries++;
-    try{
-      if(typeof checkInfoMissing==="function"){
-        window.checkInfoMissing=function(){return false;};
-        console.log("[EMERGENCY DISABLE checkInfoMissing] patched, try "+tries);
-        return;
-      }
-    }catch(e){}
-    if(tries<30)setTimeout(patch,300);
-  }
-  setTimeout(patch,500);
-})();
+// Task #141: Emergency disable removed (search-student now returns fatherEmail/motherEmail/school/address)
+// checkInfoMissing works correctly via the original fields now.
 </script>
 
 <script>
