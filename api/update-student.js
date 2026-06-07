@@ -271,6 +271,84 @@ module.exports = async (req, res) => {
 
     if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
 
+    if (action === 'parent-register') {
+      const crypto = require('crypto');
+      const SECRET = process.env.REGISTER_TOKEN_SECRET || 'amicus-default-secret-change-me';
+      function genToken(sid){ return crypto.createHmac('sha256', SECRET).update(String(sid)).digest('hex').slice(0, 16); }
+      const sidRaw = req.query.student || req.body?.student || '';
+      const tokenIn = req.query.token || req.body?.token || '';
+      if (!sidRaw) return res.status(400).json({ error: 'student required' });
+      let resolvedPageId = null, resolvedAmc = '';
+      const amcMatch = String(sidRaw).match(/^AMC-(\d+)$/i);
+      if (amcMatch) {
+        const num = parseInt(amcMatch[1], 10);
+        const STUDENT_DB = process.env.NOTION_STUDENT_DB_ID || '107828732f784c39bcb0136a4397c758';
+        const q = await notion.databases.query({ database_id: STUDENT_DB, filter: { property: '고유번호 (ID)', unique_id: { equals: num } }, page_size: 1 });
+        if (q.results[0]) { resolvedPageId = q.results[0].id; resolvedAmc = sidRaw.toUpperCase(); }
+      } else {
+        try {
+          const p = await notion.pages.retrieve({ page_id: sidRaw });
+          resolvedPageId = p.id;
+          const idn = p.properties['고유번호 (ID)']?.unique_id?.number;
+          resolvedAmc = idn ? 'AMC-' + String(idn).padStart(3, '0') : '';
+        } catch(e) {}
+      }
+      if (!resolvedPageId) return res.status(404).json({ error: 'Student not found' });
+      const expected = genToken(resolvedAmc);
+      if (tokenIn !== expected) return res.status(403).json({ error: 'Invalid or expired token' });
+      const page = await notion.pages.retrieve({ page_id: resolvedPageId });
+      const props = page.properties;
+      const rt = (k) => props[k]?.rich_text?.[0]?.plain_text || '';
+      const sel = (k) => props[k]?.select?.name || '';
+      if (req.method === 'GET' || req.query.mode === 'lookup') {
+        return res.json({
+          studentId: resolvedAmc,
+          name: props['이름 (Name)']?.title?.[0]?.plain_text || '',
+          nameEN: rt('영문이름 (Name EN)'),
+          grade: rt('학년 (Grade)'),
+          dept: sel('부서 (Department)'),
+          allergy: rt('알러지 (Allergy)') || '없음',
+          parentName: rt('아버지 이름 (Father Name)') || rt('어머니 이름 (Mother Name)') || rt('보호자 (Guardian)') || '',
+          parentEmail: (props['아버지 이메일 (Father Email)']?.email) || (props['어머니 이메일 (Mother Email)']?.email) || '',
+          parentPhone: (props['아버지 연락처 (Father Phone)']?.phone_number) || (props['어머니 연락처 (Mother Phone)']?.phone_number) || ''
+        });
+      }
+      const { parentName, parentEmail, parentPhone, emergencyName, emergencyPhone, address, signature, submittedDate } = req.body || {};
+      if (!parentName || !parentEmail || !parentPhone) return res.status(400).json({ error: 'parentName, parentEmail, parentPhone required' });
+      if (!signature || signature.trim().length < 2) return res.status(400).json({ error: 'signature required' });
+      const ts = new Date().toISOString();
+      const curNotes = (page.properties['특이사항 (Notes)']?.rich_text || []).map(b => b.plain_text || '').join('');
+      const appendPrefix = curNotes ? curNotes + '\n' : '';
+      const regLine = '[REGISTER ' + ts.slice(0,10) + '] Parent: ' + parentName + ' | Email: ' + parentEmail + ' | Phone: ' + parentPhone + (emergencyName ? ' | Emergency: ' + emergencyName + ' (' + (emergencyPhone||'') + ')' : '') + ' | Sig: ' + signature;
+      const newNotes = appendPrefix + regLine;
+      await notion.pages.update({
+        page_id: resolvedPageId,
+        properties: {
+          '아버지 이름 (Father Name)': { rich_text: [{ text: { content: parentName.slice(0, 200) } }] },
+          '아버지 이메일 (Father Email)': { email: parentEmail },
+          '아버지 연락처 (Father Phone)': { phone_number: parentPhone },
+          ...(emergencyPhone ? { '비상연락처 (Emergency)': { phone_number: emergencyPhone } } : {}),
+          ...(address ? { '집주소 (Address)': { rich_text: [{ text: { content: String(address).slice(0, 300) } }] } } : {}),
+          '방문자 (Visitor)': { checkbox: false },
+          '정회원 전환일 (Converted Date)': { date: { start: ts.slice(0, 10) } },
+          'Liability Form': { select: { name: '제출 완료' } },
+          '특이사항 (Notes)': { rich_text: [{ text: { content: newNotes.slice(0, 1900) } }] }
+        }
+      });
+      return res.json({ success: true, studentId: resolvedAmc, action: 'registered' });
+    }
+    
+    if (action === 'gen-register-link') {
+      const crypto = require('crypto');
+      const SECRET = process.env.REGISTER_TOKEN_SECRET || 'amicus-default-secret-change-me';
+      function genToken(sid){ return crypto.createHmac('sha256', SECRET).update(String(sid)).digest('hex').slice(0, 16); }
+      const sid = req.query.student || req.body?.student || '';
+      if (!/^AMC-\d+$/i.test(sid)) return res.status(400).json({ error: 'student=AMC-XXX required' });
+      const token = genToken(sid.toUpperCase());
+      const base = 'https://amicus-checkin.vercel.app/register.html';
+      return res.json({ studentId: sid.toUpperCase(), token, link: base + '?student=' + sid.toUpperCase() + '&token=' + token });
+    }
+    
     if (action === 'liability') {
       const ts = timestamp || new Date().toISOString();
       var noteLine = 'Signed by ' + (guardianName||'') + ' on ' + ts + (signature ? ' | Sig: '+signature : '');
