@@ -2339,6 +2339,99 @@ setTimeout(cwShowIfReady,2000);
 </script>
 
 <script>
+/* 🎯 역할 미션 배너 + 도움말 v1 — staff.html (Task #253) */
+(function(){
+  if(window.__roleMissionInjected) return;
+  window.__roleMissionInjected = true;
+  function getMission(name, dept, isLeader, leaderRole){
+    if(isLeader){
+      if(leaderRole === "디렉터") return "교육부 운영 + Liability/정보 발송 + 시스템 관리";
+      if(leaderRole === "위원장") return "전체 교육부 조율 + 종합 보고서";
+      return "부서 운영 + 결석자 연락 + 간사 지원";
+    }
+    var deptShort = (dept||"").split(" ")[0] || "";
+    return deptShort + " 출석 관리 + 학생 정보 보완 + 주일 마무리";
+  }
+  function getHelpActions(isLeader, leaderRole){
+    if(isLeader){
+      if(leaderRole === "디렉터"){
+        return [
+          "📊 대시보드 — 전체 부서 출석률 모니터링",
+          "📋 명단 → 정보 보완 배너에서 미입력 학생 확인",
+          "📨 Liability 이메일 일괄 발송 (디렉터 portal)",
+          "📋 정보 링크 발송 — 부모에게 카톡으로 보내기",
+          "🔧 관리 도구 → 출석 정정/시스템 점검"
+        ];
+      }
+      return [
+        "📊 부서 대시보드 모니터링 (출석률, 결석자)",
+        "📋 명단 → 정보 보완 배너에서 부서 학생 확인",
+        "📞 2주 이상 결석자 연락 점검",
+        "📥 간사 요청 처리",
+        "🗓️ 주일 마무리 확인"
+      ];
+    }
+    return [
+      "✅ 출석 체크인/체크아웃 관리",
+      "📋 명단 → 정보 보완 배너 → 보기 → 수정",
+      "🗓️ 주일 마무리 작성 (자정 전까지)",
+      "📞 2주 이상 결석자 연락",
+      "📥 디렉터에게 요청 보내기"
+    ];
+  }
+  function buildPanel(targetEl, mission, actions, scopeClass){
+    if(targetEl.querySelector("." + scopeClass)) return;
+    var wrap = document.createElement("div");
+    wrap.className = scopeClass;
+    wrap.style.cssText = "margin-top:4px;font-size:11px;color:#6b7280;display:flex;align-items:center;gap:8px;flex-wrap:wrap;";
+    var missionSpan = document.createElement("span");
+    missionSpan.innerHTML = '🎯 <span style="color:#4f46e5;font-weight:600;">' + mission + '</span>';
+    var helpBtn = document.createElement("button");
+    helpBtn.textContent = "❓ 도움말";
+    helpBtn.style.cssText = "background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:2px 8px;font-size:11px;color:#6b7280;cursor:pointer;";
+    var helpPanel = document.createElement("div");
+    helpPanel.style.cssText = "display:none;position:fixed;top:60px;right:16px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.1);z-index:9999;max-width:340px;font-size:13px;line-height:1.6;color:#374151;";
+    helpPanel.innerHTML = '<div style="font-weight:700;margin-bottom:8px;color:#111827;">📖 주요 액션</div><ul style="list-style:none;padding:0;margin:0;">' + actions.map(function(a){return '<li style="padding:4px 0;">' + a + '</li>';}).join("") + '</ul><div style="margin-top:12px;padding-top:8px;border-top:1px solid #f3f4f6;font-size:11px;color:#9ca3af;">📘 더 자세한 가이드는 컬쳐북/트레이닝 문서 참조</div>';
+    helpBtn.addEventListener("click", function(e){ e.stopPropagation(); helpPanel.style.display = helpPanel.style.display === "block" ? "none" : "block"; });
+    document.addEventListener("click", function(e){ if(!helpPanel.contains(e.target) && e.target !== helpBtn) helpPanel.style.display = "none"; });
+    wrap.appendChild(missionSpan);
+    wrap.appendChild(helpBtn);
+    targetEl.appendChild(wrap);
+    document.body.appendChild(helpPanel);
+  }
+  function inject(){
+    var dashName = document.getElementById("dashName");
+    var dashDept = document.getElementById("dashDept");
+    var leaderDashName = document.getElementById("leaderDashName");
+    if(dashName && dashDept && dashDept.textContent){
+      var staffName = (dashName.textContent||"").trim();
+      var dept = (dashDept.textContent||"").trim();
+      if(staffName && dept){
+        var mission = getMission(staffName, dept, false);
+        var actions = getHelpActions(false);
+        var parent = dashName.parentNode;
+        buildPanel(parent, mission, actions, "__staffRolePanel");
+      }
+    }
+    if(leaderDashName && leaderDashName.textContent){
+      var leaderName = (leaderDashName.textContent||"").trim();
+      var role = leaderName.indexOf("디렉터") >= 0 ? "디렉터" : (leaderName.indexOf("위원장") >= 0 ? "위원장" : "부장");
+      var mission = getMission(leaderName, "", true, role);
+      var actions = getHelpActions(true, role);
+      var parent = leaderDashName.parentNode;
+      buildPanel(parent, mission, actions, "__leaderRolePanel");
+    }
+  }
+  function loop(){
+    try{ inject(); }catch(e){}
+    setTimeout(loop, 2000);
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", loop);
+  else loop();
+})();
+</script>
+
+<script>
 /* 📋 정보 보완 필요 배너 + 필터 v1 — Task #241 */
 (function(){
   if(window.__incompleteBannerInjected) return;
