@@ -668,7 +668,7 @@ async function loadRoster(){
   var tbody=document.getElementById("rosterTable");if(!tbody)return;
   tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:40px;color:#9ca3af'>로딩 중...</td></tr>";
   try{
-    var dept=window._dept||"",url="/api/roster?includeVisitors=true"+(dept?"&dept="+encodeURIComponent(dept):"");
+    var dept=window._dept||"",url="/api/roster"+(dept?"?dept="+encodeURIComponent(dept):"");
     var res=await fetch(url),data=await res.json();
     _allStudents=data.students||[];
     document.getElementById("rosterCount").textContent=_allStudents.length+"명";
