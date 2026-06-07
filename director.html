@@ -619,7 +619,8 @@ async function sendLiabilityInvite(pageId, name) {
 }
 function copyKakaoLink(pageId, name) {
   const link = location.origin + '/liability.html?studentId=' + pageId;
-  const msg = `[아미쿠스 교회] ${name} 학생의 Liability Form 작성을 부탁드립니다 🙏\n\n작성 링크 (5분 소요):\n${link}\n\n문의: amicusnextc@gmail.com`;
+  const infoLink = location.origin + '/parent-info.html?studentId=' + pageId;
+  const msg = `[아미쿠스 교회] ${name} 학생의 안전 동의서 + 정보 입력 부탁드립니다 🙏\n\n1️⃣ 안전 동의서 (5분):\n${link}\n\n2️⃣ 학생 정보 입력 (5분):\n${infoLink}\n\n문의: amicusnextc@gmail.com`;
   navigator.clipboard.writeText(msg).then(()=>{
     alert('📋 카톡 메시지 복사됨\n부모님께 KakaoTalk으로 paste 해주세요.');
   }).catch(()=>{
@@ -646,9 +647,10 @@ function bulkCopyKakaoLinks() {
   if (!list.length) { alert('이메일 없는 학생이 없습니다.'); return; }
   const lines = list.map(s => {
     const link = location.origin + '/liability.html?studentId=' + s.id;
-    return `${s.name} (${(s.department||'').split(' ')[0]}):\n${link}`;
+    const infoLink = location.origin + '/parent-info.html?studentId=' + s.id;
+    return `${s.name} (${(s.department||'').split(' ')[0]}):\n1️⃣ 안전 동의서: ${link}\n2️⃣ 정보 입력: ${infoLink}`;
   });
-  const msg = `[아미쿠스 교회] Liability Form 안내 링크 (${list.length}명):\n\n` + lines.join('\n\n') + `\n\n문의: amicusnextc@gmail.com`;
+  const msg = `[아미쿠스 교회] 안전 동의서 + 정보 입력 링크 (${list.length}명):\n\n` + lines.join('\n\n') + `\n\n문의: amicusnextc@gmail.com`;
   navigator.clipboard.writeText(msg).then(()=>{
     alert(`📋 ${list.length}명 분 카톡 메시지 복사됨\n각 부모님께 개별 KakaoTalk 메시지로 보내주세요.`);
   }).catch(()=>{
