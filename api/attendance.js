@@ -94,9 +94,22 @@ module.exports = async (req, res) => {
         const absentees = students.results.filter(p => { const last = p.properties['마지막 출석 (Last Attended)']?.date?.start; return !last || last <= cutoff; })
           .map(p => { const pr = p.properties; return { id: p.id, name: pr['이름 (Name)']?.title?.[0]?.text?.content || '', department: pr['부서 (Department)']?.select?.name || '', grade: pr['학년 (Grade)']?.rich_text?.[0]?.text?.content || '', lastAttended: pr['마지막 출석 (Last Attended)']?.date?.start || null }; });
         const cm = {};
-        // Use refWeek so Saturday lookups still surface this week's 연락함 records
-        const recs = await notion.databases.query({ database_id: ABSENTEES_DB, filter: { property: '주간 기준일 (Week)', date: { equals: refWeek } }, page_size: 100 });
-        recs.results.forEach(p => { const name = p.properties['학생 이름 (Student)']?.title?.[0]?.text?.content; if (name) cm[name] = { contacted: p.properties['연락 여부 (Contacted)']?.select?.name || '미연락', reason: p.properties['연락 사유 / 메모 (Reason)']?.rich_text?.[0]?.text?.content || '', staff: p.properties['연락한 간사 (Staff)']?.rich_text?.[0]?.text?.content || '', recordId: p.id }; });
+        // Notion's date-equals filter has propagation lag for recently-edited dates,
+        // so we use on_or_after refWeek then filter in app code by exact match.
+        const recs = await notion.databases.query({ database_id: ABSENTEES_DB, filter: { property: '주간 기준일 (Week)', date: { on_or_after: refWeek } }, sorts: [{ property: '연락일 (Contact Date)', direction: 'descending' }], page_size: 100 });
+        recs.results.forEach(p => {
+          const wk = p.properties['주간 기준일 (Week)']?.date?.start;
+          if (wk !== refWeek) return;
+          const name = p.properties['학생 이름 (Student)']?.title?.[0]?.text?.content;
+          if (name && !cm[name]) {
+            cm[name] = {
+              contacted: p.properties['연락 여부 (Contacted)']?.select?.name || '미연락',
+              reason: p.properties['연락 사유 / 메모 (Reason)']?.rich_text?.[0]?.text?.content || '',
+              staff: p.properties['연락한 간사 (Staff)']?.rich_text?.[0]?.text?.content || '',
+              recordId: p.id
+            };
+          }
+        });
         const result = absentees.map(a => ({ ...a, ...(cm[a.name] || { contacted: '미연락' }) }));
         return res.json({ success: true, absentees: result, serviceSunday: ss, referenceWeek: refWeek, count: result.length });
       }
