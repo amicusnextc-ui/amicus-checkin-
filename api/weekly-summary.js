@@ -99,11 +99,11 @@ module.exports = async (req, res) => {
       else { ds[dept].attended++; (ds[dept].attendedNames = ds[dept].attendedNames || []).push(_nm); }
     });
 
-    // Absent list — use lastAttended date on student record for absence detection
+    // Absent list — "이번 주 결석" = 이번 일요일 출석 안 한 사람 (Task #265)
     const absentList = [];
     allStu.forEach(p => {
       const lastAttended = p.properties["마지막 출석 (Last Attended)"]?.date?.start || null;
-      const isAbsent = !lastAttended || lastAttended < twoWeeksAgoStr;
+      const isAbsent = !lastAttended || lastAttended < sundayISO;
       if (isAbsent) {
         const dept = p.properties["부서 (Department)"]?.select?.name || "";
         const nameArr = p.properties["이름 (Name)"]?.title || [];
