@@ -4,11 +4,13 @@ const TIMEZONE = "America/Los_Angeles";
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   if (req.method !== "GET") return res.status(405).end();
-  const { password } = req.query;
+  const { password, dept } = req.query;
   if (!password || password !== process.env.ADMIN_PASSWORD) {
     return res.status(401).json({ error: "auth failed" });
   }
   const today = new Date().toLocaleDateString("sv-SE", { timeZone: TIMEZONE });
+  // Dept filter — staff sees only own dept (Task #257). Leaders/director pass no dept = see all.
+  const deptShort = dept ? String(dept).split(" ")[0].trim() : "";
   try {
     let allResults = [], start_cursor;
     do {
@@ -39,6 +41,8 @@ module.exports = async (req, res) => {
       hasAllergy: p.properties["\uC54C\uB7EC\uC9C0 \uC54C\uB9BC (Allergy Alert)"]?.checkbox || false,
       notes: p.properties["\uD2B9\uC774\uC0AC\uD56D (Notes)"]?.rich_text?.[0]?.plain_text || "",
     }));
-    return res.status(200).json({ records, date: today, total: records.length });
+    // Filter by dept short-name — leaders pass no dept => all records
+    const filtered = deptShort ? records.filter(r => (r.department||"").indexOf(deptShort) >= 0) : records;
+    return res.status(200).json({ records: filtered, date: today, total: filtered.length, dept: deptShort });
   } catch(e) { return res.status(500).json({ error: e.message }); }
 };
