@@ -928,7 +928,7 @@ function renderRoster() {
         const attColor = weeks >= 2 ? 'text-red-600 font-semibold' : 'text-gray-600';
         return `<tr onclick="showDetail(${i})" class="cursor-pointer">
           <td>
-            <div class="font-semibold"><a href="/parent-info.html?studentId=${s.id}" target="_blank" onclick="event.stopPropagation()" style="color:#4f46e5;text-decoration:none;padding:2px 6px;border-radius:6px;display:inline-block;transition:background 0.15s" onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='transparent'" title="정보 카드 열기 (새 탭)">${s.name} <span style="font-size:10px;opacity:0.6">📋</span></a>${s.isBirthdayMonth ? ' 🎂' : ''}</div>
+            <div class="font-semibold"><a href="/parent-info.html?studentId=${s.id}" onclick="event.stopPropagation()" style="color:#4f46e5;text-decoration:none;padding:2px 6px;border-radius:6px;display:inline-block;transition:background 0.15s" onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='transparent'" title="정보 카드 열기">${s.name} <span style="font-size:10px;opacity:0.6">📋</span></a>${s.isBirthdayMonth ? ' 🎂' : ''}</div>
             ${s.nameEN ? `<div class="text-xs text-gray-500">${s.nameEN}</div>` : ''}
           </td>
           <td><span class="stat-pill ${DEPT_COLOR[s.department]||'dept-gray'}">${(s.department||'').split(' ')[0]}</span></td>
