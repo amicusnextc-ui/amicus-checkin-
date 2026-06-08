@@ -1588,7 +1588,9 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
       var rDeptShort = (r.department || '').split(' ')[0].trim();
       if(rDeptShort !== dept) continue;
       var content = r.content || '';
-      if(r.title === WRAPUP_TITLE || content.indexOf(sundayShort) === 0) return r;
+      // Require date match — title alone caused last week's wrap-ups to leak (Task #255)
+      var dateMatch = content.match(/^(\d+\/\d+)/);
+      if(dateMatch && dateMatch[1] === sundayShort) return r;
     }
     return null;
   }
