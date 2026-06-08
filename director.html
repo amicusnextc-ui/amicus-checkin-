@@ -928,7 +928,7 @@ function renderRoster() {
         const attColor = weeks >= 2 ? 'text-red-600 font-semibold' : 'text-gray-600';
         return `<tr onclick="showDetail(${i})" class="cursor-pointer">
           <td>
-            <div class="font-semibold text-gray-900">${s.name}${s.isBirthdayMonth ? ' 🎂' : ''}</div>
+            <div class="font-semibold text-gray-900"><a href="/parent-info.html?studentId=${s.id}" target="_blank" onclick="event.stopPropagation()" style="color:inherit;text-decoration:none;border-bottom:1px dashed #6366f1" title="정보 카드 열기 (새 탭)">${s.name}</a>${s.isBirthdayMonth ? ' 🎂' : ''}</div>
             ${s.nameEN ? `<div class="text-xs text-gray-500">${s.nameEN}</div>` : ''}
           </td>
           <td><span class="stat-pill ${DEPT_COLOR[s.department]||'dept-gray'}">${(s.department||'').split(' ')[0]}</span></td>
