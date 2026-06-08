@@ -2523,8 +2523,14 @@ setTimeout(cwShowIfReady,2000);
       if(!firstCell) return;
       var nameDiv = firstCell.querySelector("div");
       if(!nameDiv) return;
-      var name = (nameDiv.textContent||"").trim();
-      var s = window._allStudents.find(function(x){ return (x.name||"").trim() === name; });
+      // Find student by parsing parent-info link studentId (icon-proof — Task #260)
+      var link = firstCell.querySelector("a[href*=\"parent-info.html\"]");
+      var s = null;
+      if(link){
+        var m = (link.getAttribute("href")||"").match(/studentId=([^&]+)/);
+        if(m){ var sid = decodeURIComponent(m[1]); s = window._allStudents.find(function(x){ return x.id === sid; }); }
+      }
+      if(!s){ var nameText = (nameDiv.textContent||"").trim().replace(/📋$/, "").trim(); s = window._allStudents.find(function(x){ return (x.name||"").trim() === nameText; }); }
       if(!s) return;
       // Always add allergy status indicator (visible at a glance)
       if(!firstCell.querySelector(".__allergyTag")){
