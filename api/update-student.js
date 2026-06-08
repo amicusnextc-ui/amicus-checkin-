@@ -105,6 +105,8 @@ module.exports = async (req, res) => {
         const props = p.properties || {};
         const rt = (f) => (props[f] && props[f].rich_text && props[f].rich_text[0] && props[f].rich_text[0].plain_text) || '';
         const title = (props['제출 제목'] && props['제출 제목'].title && props['제출 제목'].title[0] && props['제출 제목'].title[0].plain_text) || '';
+        // Task #263: hide test records marked with 🗑️ or containing "test"
+        if (title && (title.indexOf('🗑️') >= 0 || /\btest\b/i.test(title) || /테스트/.test(title))) return null;
         return {
           id: p.id,
           title,
@@ -119,7 +121,7 @@ module.exports = async (req, res) => {
           createdAt: p.created_time
         };
       });
-      return res.status(200).json({ submissions, count: submissions.length, days });
+      const filtered = submissions.filter(x => x !== null); return res.status(200).json({ submissions: filtered, count: filtered.length, days });
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
