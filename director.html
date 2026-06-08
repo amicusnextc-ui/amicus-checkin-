@@ -164,6 +164,11 @@
         <div id="liabilityList" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-400 text-sm">불러오는 중…</div></div>
       </div>
 
+      <div class="card p-5 mt-6">
+        <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">📋 정보 입력 필요 <span id="infoNeededCount" class="text-sm text-gray-500 font-normal"></span></h3>
+        <div id="infoNeededList" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-400 text-sm">불러오는 중…</div></div>
+      </div>
+
       <div class="card p-5 mt-6" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe); border:1px solid #c4b5fd;">
         <h3 class="font-bold text-gray-900 mb-3 flex items-center gap-2">🆕 이번 주 신규 방문자 <span id="newVisitorCount" class="text-sm text-gray-500 font-normal"></span></h3>
         <div id="newVisitorsList" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-gray-400 text-sm">불러오는 중…</div></div>
@@ -526,6 +531,7 @@ async function loadAll() {
     STAFF_LIST = staff.staff || [];
     renderDashboard();
     renderLiability();
+    renderInfoNeeded();
     renderNewVisitors();
     renderRoster();
     renderTeam();
@@ -595,6 +601,66 @@ function renderLiability() {
   }).join('');
 }
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function renderInfoNeeded() {
+  const myShort = getMyDeptShort();
+  const getIss = window.__getStudentIssuesDirector || (() => []);
+  const list = ROSTER.filter(s => {
+    const notes = (s.notes || '').toString();
+    if (/이동|transfer/i.test(notes)) return false;
+    if (s.isVisitor) return false;
+    if (s.department === '졸업') return false;
+    if (myShort && !(s.department || '').includes(myShort)) return false;
+    const iss = getIss(s);
+    const missing = iss.filter(x => x.type === 'missing' && x.label !== 'Liability');
+    return missing.length > 0;
+  });
+  window._infoNeededList = list;
+  const cnt = document.getElementById('infoNeededCount');
+  if (cnt) cnt.textContent = list.length ? '(' + list.length + '명)' : '';
+  const el = document.getElementById('infoNeededList');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div class="text-sm text-gray-600">모두 입력 완료! ✨</div>'; return; }
+  const noEmailList = list.filter(s => !(s.fatherEmail||s.motherEmail||'').trim());
+  const bulkBar = (ROLE === 'director') ? '<div class="flex flex-wrap gap-2 mb-3 sticky top-0 bg-white py-2 border-b border-gray-100 z-10">' + (noEmailList.length ? '<button onclick="bulkCopyInfoKakao()" class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-bold hover:bg-amber-600">📋 카톡 링크 일괄 복사 (' + noEmailList.length + '명)</button>' : '') + (list.length ? '<span class="text-xs text-gray-400 self-center">총 ' + list.length + '명 정보 미입력</span>' : '') + '</div>' : '';
+  el.innerHTML = bulkBar + list.map(s => {
+    const email = (s.fatherEmail||s.motherEmail||'').trim();
+    const phone = (s.phone||s.fatherPhone||s.motherPhone||'').trim();
+    const dept = (s.department||'').split(' ')[0];
+    const grade = s.grade ? ' · ' + s.grade : '';
+    const safeName = (s.name||'').replace(/'/g, "\\'");
+    const iss = getIss(s).filter(x => x.type === 'missing' && x.label !== 'Liability');
+    const labels = iss.slice(0, 4).map(x => '<span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:600;margin-right:2px;">· ' + escapeHtml(x.label) + '</span>').join('');
+    const more = iss.length > 4 ? '<span style="color:#9ca3af;font-size:10px;">+' + (iss.length-4) + '</span>' : '';
+    const btns = (ROLE === 'director') ? '<div class="flex flex-wrap gap-1.5 mt-1.5"><button onclick="copyInfoKakao(\'' + s.id + '\', \'' + safeName + '\')" class="text-[11px] px-2 py-1 rounded bg-amber-500 text-white font-semibold hover:bg-amber-600">📋 카톡 복사</button><a href="/parent-info.html?studentId=' + s.id + '&source=admin" class="text-[11px] px-2 py-1 rounded bg-purple-100 text-purple-700 font-semibold hover:bg-purple-200">✏️ 직접 입력</a></div>' : '';
+    return '<div class="p-2.5 bg-amber-50 rounded-lg"><div class="flex items-start justify-between gap-2"><div class="min-w-0 flex-1"><div class="font-semibold text-sm">' + escapeHtml(s.name) + (s.nameEN ? ' <span class="text-xs text-gray-400">' + escapeHtml(s.nameEN) + '</span>' : '') + '</div><div class="text-xs text-gray-500">' + escapeHtml(dept) + escapeHtml(grade) + '</div><div style="margin-top:4px;line-height:1.6;">' + labels + more + '</div><div class="text-[11px] text-gray-500 mt-1">' + (email ? '✉️ ' + escapeHtml(email) : '<span class="text-orange-600">⚠ 이메일 없음</span>') + (phone ? ' · 📞 ' + escapeHtml(phone) : '') + '</div></div></div>' + btns + '</div>';
+  }).join('');
+}
+
+function copyInfoKakao(pageId, name) {
+  const infoLink = location.origin + '/parent-info.html?studentId=' + pageId;
+  const msg = '[아미쿠스 교회] ' + name + ' 학생의 학생 정보 입력 부탁드립니다 🙏\n\n📋 정보 입력 (5분):\n' + infoLink + '\n\n문의: amicusnextc@gmail.com';
+  navigator.clipboard.writeText(msg).then(()=>{
+    alert('📋 정보 입력 카톡 메시지 복사됨\n부모님께 KakaoTalk으로 paste 해주세요.');
+  }).catch(()=>{
+    prompt('아래 메시지를 복사해서 KakaoTalk으로 보내세요:', msg);
+  });
+}
+
+function bulkCopyInfoKakao() {
+  const list = (window._infoNeededList||[]).filter(s => !(s.fatherEmail||s.motherEmail||'').trim());
+  if (!list.length) { alert('이메일 없는 학생이 없습니다.'); return; }
+  const lines = list.map(s => {
+    const infoLink = location.origin + '/parent-info.html?studentId=' + s.id;
+    return s.name + ' (' + (s.department||'').split(' ')[0] + '):\n📋 정보 입력: ' + infoLink;
+  });
+  const msg = '[아미쿠스 교회] 학생 정보 입력 링크 (' + list.length + '명):\n\n' + lines.join('\n\n') + '\n\n문의: amicusnextc@gmail.com';
+  navigator.clipboard.writeText(msg).then(()=>{
+    alert('📋 ' + list.length + '명 분 정보 입력 카톡 메시지 복사됨');
+  }).catch(()=>{
+    prompt('아래를 복사해서 사용:', msg);
+  });
+}
 async function sendLiabilityInvite(pageId, name) {
   if (!confirm(`${name} 부모님께 Liability Form 안내 이메일을 발송할까요?\nSend Liability invite email to ${name}'s parent?`)) return;
   const row = document.getElementById('lia-row-'+pageId);
