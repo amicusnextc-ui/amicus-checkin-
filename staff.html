@@ -2209,7 +2209,9 @@ setTimeout(cwShowIfReady,2000);
       var rDeptShort = (r.department || "").split(" ")[0].trim();
       if(rDeptShort !== dept) continue;
       var content = r.content || "";
-      if(r.title === WRAPUP_TITLE || content.indexOf(sundayShort) === 0) return r;
+      // Require date match — title alone caused last week's wrap-ups to leak (Task #255)
+      var dateMatch = content.match(/^(\d+\/\d+)/);
+      if(dateMatch && dateMatch[1] === sundayShort) return r;
     }
     return null;
   }
@@ -2380,7 +2382,12 @@ setTimeout(cwShowIfReady,2000);
     ];
   }
   function buildPanel(targetEl, mission, actions, scopeClass){
-    if(targetEl.querySelector("." + scopeClass)) return;
+    var existing = targetEl.querySelector("." + scopeClass);
+    if(existing){
+      // Check if mission text changed (e.g. dept switched). If same, skip; else remove and rebuild.
+      if(existing.textContent.indexOf(mission) >= 0) return;
+      existing.remove();
+    }
     var wrap = document.createElement("div");
     wrap.className = scopeClass;
     wrap.style.cssText = "margin-top:4px;font-size:11px;color:#6b7280;display:flex;align-items:center;gap:8px;flex-wrap:wrap;";
