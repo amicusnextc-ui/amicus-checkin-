@@ -20,6 +20,7 @@
 
 <header class="bg-white shadow-sm border-b border-gray-100">
   <div class="max-w-2xl mx-auto px-4 py-5">
+    <div id="adminBackBar" class="hidden mb-3"><button onclick="goBackAdmin()" class="text-sm text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">← 명단으로 돌아가기</button></div>
     <h1 class="text-xl sm:text-2xl font-black text-gray-900">📝 학부모 정보 입력</h1>
     <p class="text-xs sm:text-sm text-gray-500 mt-1">Parent Information Form · Amicus Presbyterian Church</p>
   </div>
@@ -369,7 +370,21 @@ function showFormError(msg) {
 }
 
 // Init
-window.addEventListener('DOMContentLoaded', loadStudent);
+window.addEventListener('DOMContentLoaded', function(){
+  var src = getQueryParam('source');
+  if (src === 'admin') {
+    var bar = document.getElementById('adminBackBar');
+    if (bar) bar.classList.remove('hidden');
+  }
+  loadStudent();
+});
+function goBackAdmin() {
+  if (document.referrer && (document.referrer.indexOf('/staff.html') >= 0 || document.referrer.indexOf('/director.html') >= 0)) {
+    history.back();
+  } else {
+    location.href = '/staff.html';
+  }
+}
 </script>
 
 </body>
