@@ -500,6 +500,7 @@ function doLogin(){
   var pw=document.getElementById("pwInput").value;
   if(!dept){showLoginError("이름을 선택해주세요");return;}
   if(pw!=="3"){showLoginError("비밀번호가 틀렸습니다");return;}
+  if (window.amicusFetchToken) window.amicusFetchToken('staff', staffName, pw);
   window._dept=dept;window._user=staffName;window._staffName=staffName;sessionStorage.removeItem("absenteesPopupDismissed_"+staffName);
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
@@ -532,7 +533,7 @@ function doLogout(){
   document.getElementById("loginError").classList.add("hidden");
   window._dept=null;window._user=null;window._staffName=null;
 }
-function doLeaderLogin(){ var sel=document.getElementById("leaderNameInput"),name=sel.value; var pw=document.getElementById("leaderPwInput").value; if(!name){showLeaderLoginError("이름을 선택해주세요");return;} var isDir=(name==="박명철"); var requiredPw=isDir?"3167":"777"; if(pw!==requiredPw){showLeaderLoginError(isDir?"디렉터 비밀번호가 틀렸습니다":"비밀번호가 틀렸습니다");return;} window._leaderName=name; window._isDirector=isDir; if(isDir){ window._dept=null; /* director = all-dept, no filter */ } document.getElementById("loginScreen").classList.add("hidden"); document.getElementById("leaderDashboard").classList.remove("hidden"); var selText=(sel.options[sel.selectedIndex]||{}).text||""; var role=isDir?"디렉터":(selText.indexOf("위원장")>=0?"위원장":"부장"); document.getElementById("leaderDashName").textContent=name+" "+role+"님";
+function doLeaderLogin(){ var sel=document.getElementById("leaderNameInput"),name=sel.value; var pw=document.getElementById("leaderPwInput").value; if(!name){showLeaderLoginError("이름을 선택해주세요");return;} var isDir=(name==="박명철"); var requiredPw=isDir?"3167":"777"; if(pw!==requiredPw){showLeaderLoginError(isDir?"디렉터 비밀번호가 틀렸습니다":"비밀번호가 틀렸습니다");return;} if (window.amicusFetchToken) window.amicusFetchToken(isDir?'director':'leader', name, pw); window._leaderName=name; window._isDirector=isDir; if(isDir){ window._dept=null; /* director = all-dept, no filter */ } document.getElementById("loginScreen").classList.add("hidden"); document.getElementById("leaderDashboard").classList.remove("hidden"); var selText=(sel.options[sel.selectedIndex]||{}).text||""; var role=isDir?"디렉터":(selText.indexOf("위원장")>=0?"위원장":"부장"); document.getElementById("leaderDashName").textContent=name+" "+role+"님";
   switchLeaderTab("summary");
 }
 function showLeaderLoginError(m){var e=document.getElementById("leaderLoginError");if(e){e.textContent=m;e.classList.remove("hidden");}}
