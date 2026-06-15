@@ -444,5 +444,28 @@ async function doManualCheckin(e) {
   }
 }
 </script>
+
+<script>
+/* === Task #50 Phase B — admin.html auth wrapper === */
+(function(){
+  if (window.__authFetchInstalled) return;
+  window.__authFetchInstalled = true;
+  var TOKEN = 'AMICUS-PUBLIC-KIOSK-V1';
+  var origFetch = window.fetch;
+  window.fetch = function(input, init){
+    init = init || {};
+    var u = '';
+    try { u = typeof input === 'string' ? input : (input && input.url) || ''; } catch(e){}
+    if (u.indexOf('/api/') >= 0) {
+      try {
+        var h = new Headers(init.headers || {});
+        if (!h.has('authorization') && !h.has('x-api-key')) h.set('x-api-key', TOKEN);
+        init.headers = h;
+      } catch(e){}
+    }
+    return origFetch.call(this, input, init);
+  };
+})();
+</script>
 </body>
 </html>
