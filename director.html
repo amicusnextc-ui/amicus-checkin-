@@ -401,6 +401,7 @@ function doLogin() {
     document.getElementById('loginErr').classList.remove('hidden');
     return;
   }
+  if (window.amicusFetchToken) window.amicusFetchToken(ROLE, name, pass);
   CURRENT_USER = name;
   sessionStorage.setItem('director_role', ROLE);
   sessionStorage.setItem('director_user', name);
