@@ -10,6 +10,25 @@ module.exports = async (req, res) => {
     res.setHeader("Access-Control-Allow-Headers","Content-Type");
     if(req.method==="OPTIONS") return res.status(200).end();
     if(req.method!=="POST") return res.status(405).end();
+
+  // === AUTH (Task #50): inline soft/hard-mode shared-secret check ===
+  {
+    const _expected = process.env.API_SECRET;
+    const _enforce  = process.env.API_AUTH_ENFORCE === '1';
+    if (_expected) {
+      let _provided = '';
+      try {
+        const _h = String((req.headers && req.headers.authorization) || '');
+        if (_h.toLowerCase().indexOf('bearer ') === 0) _provided = _h.slice(7).trim();
+        else if (req.headers && req.headers['x-api-key']) _provided = String(req.headers['x-api-key']).trim();
+        else if (req.query && req.query.apiKey) _provided = String(req.query.apiKey).trim();
+      } catch (e) {}
+      if (_provided !== _expected) {
+        if (_enforce) return res.status(401).json({ error: 'unauthorized' });
+        try { console.warn('[auth] missing/invalid token (soft) url=' + (req.url||'?')); } catch(e){}
+      }
+    }
+  }
     const body = req.body || {};
     // BACKFILL MODE
     if (body.mode === 'backfill') {
