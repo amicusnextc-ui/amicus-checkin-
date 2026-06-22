@@ -203,6 +203,20 @@ tbody tr:hover { background:#fafafa; }
           <tbody id="rosterTable"><tr><td colspan="10" style="text-align:center;padding:40px;color:#9ca3af">로딩 중...</td></tr></tbody>
         </table></div>
       </div>
+
+      <!-- Task #274: 📦 이전 학생들 (Archived) -->
+      <div class="mt-4 card overflow-hidden">
+        <button onclick="toggleArchivedList()" class="w-full px-5 py-3 border-b border-gray-100 flex items-center justify-between hover:bg-gray-50">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-gray-700">📦 이전 학생들 (비활성/교회이동/졸업)</span>
+            <span id="archivedCount" class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-bold">-</span>
+          </div>
+          <span id="archivedToggleIcon" class="text-gray-400">▼</span>
+        </button>
+        <div id="archivedListWrap" class="hidden">
+          <div id="archivedList" class="overflow-x-auto"><div style="text-align:center;padding:20px;color:#9ca3af">불러오는 중...</div></div>
+        </div>
+      </div>
     </div>
 
 
@@ -2602,6 +2616,81 @@ setTimeout(cwShowIfReady,2000);
   else hookRoster();
 })();
 </script>
+</script>
+
+<script>
+/* === Task #274: Archived students section === */
+window.__archivedLoaded = false;
+window.toggleArchivedList = function() {
+  var wrap = document.getElementById('archivedListWrap');
+  var icon = document.getElementById('archivedToggleIcon');
+  if (!wrap || !icon) return;
+  var isHidden = wrap.classList.contains('hidden');
+  if (isHidden) {
+    wrap.classList.remove('hidden');
+    icon.textContent = '▲';
+    if (!window.__archivedLoaded) { loadArchivedList(); window.__archivedLoaded = true; }
+  } else {
+    wrap.classList.add('hidden');
+    icon.textContent = '▼';
+  }
+};
+async function loadArchivedList() {
+  var list = document.getElementById('archivedList');
+  var count = document.getElementById('archivedCount');
+  if (!list || !count) return;
+  list.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af">불러오는 중...</div>';
+  try {
+    var r = await fetch('/api/roster?status=archived&includeVisitors=true');
+    var d = await r.json();
+    var students = d.students || [];
+    count.textContent = students.length + '명';
+    if (students.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af">archived 학생이 없습니다</div>';
+      return;
+    }
+    var html = '<table class="w-full"><thead class="bg-gray-50"><tr>' +
+      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700">이름</th>' +
+      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700">부서</th>' +
+      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700">상태</th>' +
+      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:#6b7280;font-weight:700">마지막 출석</th>' +
+      '<th style="padding:8px 12px"></th>' +
+      '</tr></thead><tbody>';
+    students.forEach(function(s) {
+      var dept = (s.department || '-').split(' ')[0];
+      var statusStr = s.status || ((s.department || '').indexOf('졸업') >= 0 ? '졸업' : '-');
+      html += '<tr style="border-top:1px solid #f3f4f6">' +
+        '<td style="padding:8px 12px;color:#9ca3af">' + (s.name || '') + (s.nameEN ? ' (' + s.nameEN + ')' : '') + '</td>' +
+        '<td style="padding:8px 12px;font-size:13px;color:#6b7280">' + dept + '</td>' +
+        '<td style="padding:8px 12px;font-size:13px;color:#9ca3af">' + statusStr + '</td>' +
+        '<td style="padding:8px 12px;font-size:13px;color:#6b7280">' + (s.lastAttended || '-') + '</td>' +
+        '<td style="padding:8px 12px;text-align:right">' +
+          '<button onclick="reactivateStudent(\'' + s.id + '\')" class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-lg font-bold hover:bg-green-100">↩️ 복원</button>' +
+        '</td></tr>';
+    });
+    html += '</tbody></table>';
+    list.innerHTML = html;
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:#dc2626">로드 실패: ' + e.message + '</div>';
+  }
+}
+window.reactivateStudent = async function(id) {
+  if (!confirm('이 학생을 활성 상태로 복원하시겠어요?\n(현재 부서에 다시 표시됩니다.)')) return;
+  try {
+    var r = await fetch('/api/update-student', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({pageId: id, status: '활성 (Active)'})
+    });
+    if (r.ok) {
+      alert('✅ 복원 완료');
+      window.__archivedLoaded = false;
+      loadArchivedList();
+    } else {
+      alert('❌ 실패: ' + r.status);
+    }
+  } catch(e) { alert('❌ 오류: ' + e.message); }
+};
 </script>
 
 <script>
