@@ -174,7 +174,7 @@ module.exports = async (req, res) => {
           var content = (contentArr && contentArr[0]) ? contentArr[0].text.content : '';
           var dateMatch = content.match(/^(\d+\/\d+)/);
           if (!dateMatch || dateMatch[1] !== sShort) return;
-          var casualMatch = content.match(/\[\uc784\uc2dc\ubc29\ubb38\uc790\s+(\d+)(?::\s*([^\]]+))?\]/);
+          var _bracketStart = content.lastIndexOf('[\uc784\uc2dc\ubc29\ubb38\uc790'); var casualMatch = _bracketStart >= 0 ? content.slice(_bracketStart).match(/^\[\uc784\uc2dc\ubc29\ubb38\uc790\s+(\d+)(?::\s*([^\]]+))?\]?/) : null;
           if (!casualMatch) return;
           var deptSel = p.properties && p.properties['부서 (Department)'] && p.properties['부서 (Department)'].select;
           var dept = deptSel ? deptSel.name : '';
@@ -193,7 +193,7 @@ module.exports = async (req, res) => {
           attended: st.attended,
           visitors: st.visitors,
           attendedNames: st.attendedNames || [],
-          visitorNames: st.visitorNames || [],
+          visitorNames: (st.visitorNames || []).concat((function(){ var _n = (casualByDept[d] && casualByDept[d].notes) || ''; if (!_n) return []; return _n.split(/,(?![^(]*\))/).map(function(s){ return s.trim(); }).filter(Boolean); })()),
           casualVisitors: (casualByDept[d] && casualByDept[d].count) || 0,
           casualNames: (casualByDept[d] && casualByDept[d].notes) || "",
           absent: Math.max(0, st.total - st.attended),
