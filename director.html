@@ -872,7 +872,7 @@ function renderDashboard() {
   document.getElementById('statTotal').textContent = g.total ?? SUMMARY.total ?? '—';
   document.getElementById('statAttended').textContent = g.attended ?? g.checkin ?? '—';
   document.getElementById('statAbsent').textContent = g.absent ?? '—';
-  document.getElementById('statVisitors').textContent = g.visitors ?? g.visitor ?? '—';
+  const _visTotal = (g.visitors ?? g.visitor ?? 0) + (g.casualVisitors || 0); document.getElementById('statVisitors').textContent = _visTotal || '—'; if (g.casualVisitors > 0) { try { document.getElementById('statVisitors').title = '정식 ' + (g.visitors ?? g.visitor ?? 0) + ' + 임시 ' + g.casualVisitors; } catch(e) {} }
 
   // Dept table
   const depts = SUMMARY.depts || [];
@@ -890,7 +890,7 @@ function renderDashboard() {
           <td class="text-right font-semibold">${d.total}</td>
           <td class="text-right text-green-600 font-semibold">${d.attended}</td>
           <td class="text-right text-red-600">${d.absent}</td>
-          <td class="text-right text-purple-600">${d.visitors}</td>
+          <td class="text-right text-purple-600" title="${d.casualVisitors > 0 ? `정식 ${d.visitors} + 임시 ${d.casualVisitors}` : ''}">${d.visitors + (d.casualVisitors || 0)}${d.casualVisitors > 0 ? ` <span class='text-xs text-blue-500'>(+${d.casualVisitors} 임시)</span>` : ''}</td>
           <td class="text-right"><span class="badge ${rate>=80?'badge-green':rate>=50?'badge-yellow':'badge-red'}">${rate}%</span></td>
         </tr>`;
       }).join('')}</tbody>
