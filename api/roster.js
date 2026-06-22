@@ -27,18 +27,28 @@ function cleanName(raw) {
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const { dept, includeVisitors } = req.query;
-  const filter = {
-    and: [
-      { property: '상태 (Status)', select: { equals: '활성 (Active)' } },
-      { property: '부서 (Department)', select: { does_not_equal: '졸업' } },
-    ]
-  };
+  const { dept, includeVisitors, status } = req.query;
+  // Task #274: status=archived shows only archived students (non-active OR 졸업)
+  // Default (no status param): only 활성 + non-졸업 students
+  const isArchived = (status === 'archived');
+  const filter = isArchived
+    ? {
+        or: [
+          { property: '상태 (Status)', select: { does_not_equal: '활성 (Active)' } },
+          { property: '부서 (Department)', select: { equals: '졸업' } }
+        ]
+      }
+    : {
+        and: [
+          { property: '상태 (Status)', select: { equals: '활성 (Active)' } },
+          { property: '부서 (Department)', select: { does_not_equal: '졸업' } },
+        ]
+      };
   // includeVisitors=true → include 방문자=YES (for staff name lookups). Default excludes visitors so dashboard counts stay accurate.
-  if (!includeVisitors || includeVisitors === 'false') {
+  if (!isArchived && (!includeVisitors || includeVisitors === 'false')) {
     filter.and.unshift({ property: '방문자 (Visitor)', checkbox: { equals: false } });
   }
-  if (dept) filter.and.push({ property: '부서 (Department)', select: { equals: dept } });
+  if (dept && !isArchived) filter.and.push({ property: '부서 (Department)', select: { equals: dept } });
 
   try {
     let allPages = [], cursor;
