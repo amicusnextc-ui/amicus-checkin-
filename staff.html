@@ -635,13 +635,13 @@ async function loadAttendance(){
       sumHtml+="</tr></thead><tbody>";
       var grandCheckin=0,grandTotal=0,grandVisitor=0,grandAbsent=0;
       deptsArr.forEach(function(d){
-        grandCheckin+=d.attended||0;grandTotal+=d.total||0;grandVisitor+=(d.visitors||0)+(d.casualVisitors||0);grandAbsent+=d.absent||0;
+        grandCheckin+=d.attended||0;grandTotal+=d.total||0;grandVisitor+=(d.casualVisitors>0?d.casualVisitors:(d.visitors||0));grandAbsent+=d.absent||0;
         var rate=d.total>0?Math.round((d.attended||0)/d.total*100):0;
         sumHtml+="<tr style='border-top:1px solid #f3f4f6'>";
         sumHtml+="<td style='padding:8px 12px;font-weight:600'>"+(d.short||"")+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:600'>"+(d.attended||0)+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:#dc2626'>"+((d.absent||0)||"-")+"</td>";
-        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#7c3aed' title='"+(d.casualVisitors>0?'\uc815\uc2dd '+(d.visitors||0)+' + \uc784\uc2dc '+d.casualVisitors:'')+"'>"+(((d.visitors||0)+(d.casualVisitors||0))||"-")+(d.casualVisitors>0?" <span style='font-size:10px;color:#3b82f6'>(+"+d.casualVisitors+" \uc784\uc2dc)</span>":"")+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#7c3aed'>"+(d.casualVisitors>0?d.casualVisitors:((d.visitors||0)||"-"))+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:#6b7280'>"+(d.total||0)+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:"+(rate>=80?"#059669":rate>=50?"#d97706":"#dc2626")+";font-weight:600'>"+rate+"%</td>";
         sumHtml+="</tr>";
