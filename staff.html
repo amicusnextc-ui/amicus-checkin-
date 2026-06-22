@@ -2283,6 +2283,13 @@ setTimeout(cwShowIfReady,2000);
         formHTML = '<div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid #e5e7eb;">'+
           '<div style="font-weight:600;margin-bottom:10px;color:#111827;">📝 '+role.dept+' · '+sun.short+' 마무리 보고 작성</div>'+
           '<textarea id="wrapupMsg" placeholder="이번 주 특이사항을 입력하세요 (없으면 [⚡ 없음] 클릭)" style="width:100%;min-height:80px;border:1px solid #d1d5db;border-radius:8px;padding:10px;font-size:14px;box-sizing:border-box;"></textarea>'+
+          '<div style="margin-top:12px;padding-top:12px;border-top:1px dashed #d1d5db;">'+
+          '<label style="display:block;font-size:13px;color:#374151;margin-bottom:6px;font-weight:600;">🆕 임시 방문자 (사촌/친구 등, 선택)</label>'+
+          '<div style="display:flex;gap:8px;align-items:flex-start;">'+
+          '<input id="wrapupCasualCount" type="number" min="0" max="50" placeholder="수" style="width:80px;border:1px solid #d1d5db;border-radius:8px;padding:8px;font-size:14px;"/>'+
+          '<textarea id="wrapupCasualNotes" placeholder="이름/메모 (예: Sarah(7th, moved to SD), Saige cousins)" style="flex:1;min-height:50px;border:1px solid #d1d5db;border-radius:8px;padding:8px;font-size:13px;box-sizing:border-box;"></textarea>'+
+          '</div>'+
+          '</div>'+
           '<div style="display:flex;gap:8px;margin-top:10px;">'+
           '<button id="wrapupNone" style="flex:1;background:#10b981;color:white;border:none;padding:12px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;">⚡ 없음 (자동완료)</button>'+
           '<button id="wrapupSubmit" style="flex:2;background:#6366f1;color:white;border:none;padding:12px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;">제출</button>'+
@@ -2307,7 +2314,7 @@ setTimeout(cwShowIfReady,2000);
     if(!msg){ alert("내용을 입력하세요"); return; }
     var role = getRole(); var sun = currentSunday();
     var deptObj = DEPTS.find(function(d){ return d.name === role.dept; });
-    var body = { title: WRAPUP_TITLE, content: sun.short + ". " + role.dept + " " + msg, requester: role.name, department: deptObj ? deptObj.full : role.dept };
+    var casualEl = document.getElementById("wrapupCasualCount"); var casualNotesEl = document.getElementById("wrapupCasualNotes"); var casualCount = casualEl ? parseInt(casualEl.value || "0", 10) : 0; var casualNotes = casualNotesEl ? (casualNotesEl.value || "").trim() : ""; var casualTag = (casualCount > 0) ? (" [임시방문자 " + casualCount + (casualNotes ? ": " + casualNotes : "") + "]") : ""; var body = { title: WRAPUP_TITLE, content: sun.short + ". " + role.dept + casualTag + " " + msg, requester: role.name, department: deptObj ? deptObj.full : role.dept };
     fetch("/api/attendance?type=requests", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) })
       .then(function(r){ return r.json(); })
       .then(function(j){ if(j && j.success){ alert("✅ 제출 완료"); loadAndRender(); } else { alert("❌ 제출 실패"); } })
