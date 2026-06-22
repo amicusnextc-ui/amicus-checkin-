@@ -154,6 +154,36 @@ module.exports = async (req, res) => {
     });
     photoList.sort((a,b) => (a.dept||"").localeCompare(b.dept||""));
 
+    // === Task #273: Parse wrap-up content for casual visitors ===
+    const casualByDept = {};
+    try {
+      const REQ_DB = 'd25f9fdaeeb748ac97ffda2f68f776bb';
+      const reqRes = await fetch('https://api.notion.com/v1/databases/' + REQ_DB + '/query', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + process.env.NOTION_TOKEN, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_size: 30, sorts: [{ timestamp: 'created_time', direction: 'descending' }] })
+      });
+      const reqData = await reqRes.json();
+      const sShort = (sundayDate.getMonth()+1) + '/' + sundayDate.getDate();
+      (reqData.results || []).forEach(function(p) {
+        try {
+          var titleArr = p.properties && p.properties['제목 (Title)'] && p.properties['제목 (Title)'].title;
+          var title = (titleArr && titleArr[0]) ? titleArr[0].text.content : '';
+          if (title.indexOf('주일 마무리') < 0) return;
+          var contentArr = p.properties && p.properties['요청 내용 (Content)'] && p.properties['요청 내용 (Content)'].rich_text;
+          var content = (contentArr && contentArr[0]) ? contentArr[0].text.content : '';
+          var dateMatch = content.match(/^(\d+\/\d+)/);
+          if (!dateMatch || dateMatch[1] !== sShort) return;
+          var casualMatch = content.match(/\[\uc784\uc2dc\ubc29\ubb38\uc790\s+(\d+)(?::\s*([^\]]+))?\]/);
+          if (!casualMatch) return;
+          var deptSel = p.properties && p.properties['부서 (Department)'] && p.properties['부서 (Department)'].select;
+          var dept = deptSel ? deptSel.name : '';
+          if (!dept) return;
+          casualByDept[dept] = { count: parseInt(casualMatch[1], 10) || 0, notes: (casualMatch[2] || '').trim() };
+        } catch(e) {}
+      });
+    } catch(e) {}
+
     const depts = DEPT_ORDER.filter(d => ds[d] && (ds[d].total > 0 || ds[d].attended > 0))
       .map(d => {
         const st = ds[d];
@@ -164,6 +194,8 @@ module.exports = async (req, res) => {
           visitors: st.visitors,
           attendedNames: st.attendedNames || [],
           visitorNames: st.visitorNames || [],
+          casualVisitors: (casualByDept[d] && casualByDept[d].count) || 0,
+          casualNames: (casualByDept[d] && casualByDept[d].notes) || "",
           absent: Math.max(0, st.total - st.attended),
           total: st.total
         };
@@ -171,8 +203,9 @@ module.exports = async (req, res) => {
 
     const total = depts.reduce((a,r) => {
       a.attended += r.attended; a.visitors += r.visitors;
+      a.casualVisitors += (r.casualVisitors || 0);
       a.absent += r.absent; a.total += r.total; return a;
-    }, { attended:0, visitors:0, absent:0, total:0 });
+    }, { attended:0, visitors:0, casualVisitors:0, absent:0, total:0 });
 
     const rows = depts.map(d => ({ dept:d.dept, short:d.short, checkin:d.attended, visitor:d.visitors, attendedNames:d.attendedNames, visitorNames:d.visitorNames, absent:d.absent, total:d.total }));
     const grand = { checkin:total.attended, visitor:total.visitors, absent:total.absent, total:total.total };
