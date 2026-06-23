@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
   // Task #274: status=archived shows only archived students (non-active OR 졸업)
   // Default (no status param): only 활성 + non-졸업 students
   const isArchived = (status === 'archived');
-  const filter = isArchived
+  let filter = isArchived
     ? {
         or: [
           { property: '상태 (Status)', select: { does_not_equal: '활성 (Active)' } },
@@ -49,6 +49,12 @@ module.exports = async (req, res) => {
     filter.and.unshift({ property: '방문자 (Visitor)', checkbox: { equals: false } });
   }
   if (dept && !isArchived) filter.and.push({ property: '부서 (Department)', select: { equals: dept } });
+  // Task #275: archived mode also supports dept filter (wrap or-filter in and)
+  if (dept && isArchived) {
+    const _origOr = filter;
+    // dept may be short like '중고등부' or full like '중고등부 (Youth)'; match prefix
+    filter = { and: [ _origOr, { or: [ { property: '부서 (Department)', select: { equals: dept } }, { property: '부서 (Department)', select: { contains: dept.split(' ')[0] } } ] } ] };
+  }
 
   try {
     let allPages = [], cursor;
