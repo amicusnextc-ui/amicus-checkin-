@@ -118,7 +118,18 @@ module.exports = async (req, res) => {
         lastAttended: prop(page, '마지막 출석 (Last Attended)'),
       };
     });
-    res.json({ students });
+    // Task #276: archived mode — filter out test pollution (🗑️/🧪 prefix + empty names)
+    let cleanStudents = students;
+    if (isArchived) {
+      cleanStudents = students.filter(function(s) {
+        var nm = (s.name || '').trim();
+        if (!nm) return false; // empty name = orphan/test
+        if (nm.indexOf('\ud83d\uddd1\ufe0f') === 0) return false; // 🗑️ trash prefix
+        if (nm.indexOf('\ud83e\uddea') === 0) return false; // 🧪 test prefix
+        return true;
+      });
+    }
+    res.json({ students: cleanStudents });
   } catch(e) {
     res.status(500).json({ error: e.message });
   }
