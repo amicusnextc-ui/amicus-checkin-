@@ -2629,7 +2629,7 @@ window.toggleArchivedList = function() {
   if (isHidden) {
     wrap.classList.remove('hidden');
     icon.textContent = '▲';
-    if (!window.__archivedLoaded) { loadArchivedList(); window.__archivedLoaded = true; }
+    loadArchivedList(); // Task #278: always fresh fetch (handles dept switch across logins)
   } else {
     wrap.classList.add('hidden');
     icon.textContent = '▼';
