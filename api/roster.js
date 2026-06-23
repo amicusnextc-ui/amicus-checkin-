@@ -109,6 +109,7 @@ module.exports = async (req, res) => {
         liabilityForm: prop(page, 'Liability Form'),
         baptized: prop(page, '세례 여부 (Baptized)'),
         photo: prop(page, '사진 촬영 (Photo)'),
+        status: prop(page, '상태 (Status)'),
         studentId,
         lastAttended: prop(page, '마지막 출석 (Last Attended)'),
       };
