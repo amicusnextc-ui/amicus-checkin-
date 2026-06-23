@@ -187,14 +187,23 @@ module.exports = async (req, res) => {
     const depts = DEPT_ORDER.filter(d => ds[d] && (ds[d].total > 0 || ds[d].attended > 0))
       .map(d => {
         const st = ds[d];
+        // Task #275: dedup casual names against 정식 visitorNames (first-word match)
+        var _origVisitorNames = st.visitorNames || [];
+        var _notes = (casualByDept[d] && casualByDept[d].notes) || '';
+        var _casualAll = _notes ? _notes.split(/,(?![^(]*\))/).map(function(s){ return s.trim(); }).filter(Boolean) : [];
+        var _firstWord = function(nm){ return (nm||'').split(/[\s(]/)[0].toLowerCase(); };
+        var _visitorFirsts = _origVisitorNames.map(_firstWord);
+        var _dedupCasual = _casualAll.filter(function(cn){ return _visitorFirsts.indexOf(_firstWord(cn)) < 0; });
+        var _mergedVisitorNames = _origVisitorNames.concat(_dedupCasual);
+        var _totalVisitors = st.visitors + _dedupCasual.length;
         return {
           dept: d,
           short: d.split(" ")[0],
           attended: st.attended,
-          visitors: st.visitors,
+          visitors: _totalVisitors,
           attendedNames: st.attendedNames || [],
-          visitorNames: (st.visitorNames || []).concat((function(){ var _n = (casualByDept[d] && casualByDept[d].notes) || ''; if (!_n) return []; return _n.split(/,(?![^(]*\))/).map(function(s){ return s.trim(); }).filter(Boolean); })()),
-          casualVisitors: (casualByDept[d] && casualByDept[d].count) || 0,
+          visitorNames: _mergedVisitorNames,
+          casualVisitors: _dedupCasual.length,
           casualNames: (casualByDept[d] && casualByDept[d].notes) || "",
           absent: Math.max(0, st.total - st.attended),
           total: st.total
