@@ -190,7 +190,17 @@ module.exports = async (req, res) => {
         // Task #275: dedup casual names against 정식 visitorNames (first-word match)
         var _origVisitorNames = st.visitorNames || [];
         var _notes = (casualByDept[d] && casualByDept[d].notes) || '';
-        var _casualAll = _notes ? _notes.split(/,(?![^(]*\))/).map(function(s){ return s.trim(); }).filter(Boolean) : [];
+        var _casualAllRaw = _notes ? _notes.split(/,(?![^(]*\))/).map(function(s){ return s.trim(); }).filter(Boolean) : [];
+        // Task #277: split names containing '/' (e.g. 'Hannah/Joshua' = 2 people)
+        var _casualAll = [];
+        _casualAllRaw.forEach(function(nm){
+          if (nm.indexOf('/') >= 0) {
+            var _parts = nm.split('/').map(function(p){ return p.trim(); }).filter(Boolean);
+            _parts.forEach(function(p){ _casualAll.push(p); });
+          } else {
+            _casualAll.push(nm);
+          }
+        });
         var _firstWord = function(nm){ return (nm||'').split(/[\s(]/)[0].toLowerCase(); };
         var _visitorFirsts = _origVisitorNames.map(_firstWord);
         var _dedupCasual = _casualAll.filter(function(cn){ return _visitorFirsts.indexOf(_firstWord(cn)) < 0; });
