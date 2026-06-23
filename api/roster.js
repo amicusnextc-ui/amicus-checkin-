@@ -49,12 +49,7 @@ module.exports = async (req, res) => {
     filter.and.unshift({ property: '방문자 (Visitor)', checkbox: { equals: false } });
   }
   if (dept && !isArchived) filter.and.push({ property: '부서 (Department)', select: { equals: dept } });
-  // Task #275: archived mode also supports dept filter (wrap or-filter in and)
-  if (dept && isArchived) {
-    const _origOr = filter;
-    // dept may be short like '중고등부' or full like '중고등부 (Youth)'; match prefix
-    filter = { and: [ _origOr, { or: [ { property: '부서 (Department)', select: { equals: dept } }, { property: '부서 (Department)', select: { contains: dept.split(' ')[0] } } ] } ] };
-  }
+  // Task #277: archived dept filter — done in JS after fetch since Notion select doesn't support contains/prefix match
 
   try {
     let allPages = [], cursor;
@@ -121,11 +116,17 @@ module.exports = async (req, res) => {
     // Task #276: archived mode — filter out test pollution (🗑️/🧪 prefix + empty names)
     let cleanStudents = students;
     if (isArchived) {
+      var _deptShort = (dept || '').split(' ')[0];
       cleanStudents = students.filter(function(s) {
         var nm = (s.name || '').trim();
         if (!nm) return false; // empty name = orphan/test
         if (nm.indexOf('\ud83d\uddd1\ufe0f') === 0) return false; // 🗑️ trash prefix
         if (nm.indexOf('\ud83e\uddea') === 0) return false; // 🧪 test prefix
+        // Task #277: dept short-name prefix match (handles 'Youth'/'Middle/High' variants)
+        if (_deptShort) {
+          var sd = (s.department || '');
+          if (sd.indexOf(_deptShort) < 0) return false;
+        }
         return true;
       });
     }
