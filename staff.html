@@ -2641,7 +2641,10 @@ async function loadArchivedList() {
   if (!list || !count) return;
   list.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af">불러오는 중...</div>';
   try {
-    var r = await fetch('/api/roster?status=archived&includeVisitors=true');
+    var _dept = window._dept || (typeof getRole==='function'?(getRole().dept||''):'');
+    var _url = '/api/roster?status=archived&includeVisitors=true';
+    if (_dept) _url += '&dept=' + encodeURIComponent(_dept);
+    var r = await fetch(_url);
     var d = await r.json();
     var students = d.students || [];
     count.textContent = students.length + '명';
