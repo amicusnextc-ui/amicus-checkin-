@@ -2102,6 +2102,24 @@ async function adminForceCheckout(rid, name){
           return "<div class='flex items-center justify-between p-2 bg-purple-50 rounded-lg'><div class='font-medium text-sm'>" + v.name + "</div><div class='text-xs text-gray-500'>" + v.dept + "</div></div>";
         }).join('');
       }
+    
+      /* Task 282: wrap-up status — detect submission by date prefix + content */
+      try {
+        var allRows = document.querySelectorAll('tr');
+        Array.prototype.forEach.call(allRows, function(tr){
+          var cells = tr.querySelectorAll('td');
+          if(cells.length < 4) return;
+          var statusText = (cells[1] && cells[1].textContent || '').trim();
+          var contentText = (cells[3] && cells[3].textContent || '').trim();
+          if(statusText.indexOf('대기') < 0) return;
+          /* Detect real submission: date prefix (e.g., 6/21.) + non-empty content */
+          var hasDatePrefix = /^\d{1,2}\/\d{1,2}\./.test(contentText);
+          var hasCasual = contentText.indexOf('임시방문자') >= 0;
+          if(hasDatePrefix && contentText.length > 10){
+            cells[1].innerHTML = '<span style="color:#059669;font-weight:600">✅ 완료</span>';
+          }
+        });
+      } catch(e2){ console.warn('[Task 282]', e2); }
     } catch(e){ console.warn('[Task 279 corrector]', e); }
   }
   function schedule(){
