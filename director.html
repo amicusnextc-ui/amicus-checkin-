@@ -2052,5 +2052,69 @@ async function adminForceCheckout(rid, name){
   };
 })();
 </script>
+
+
+<script>
+/* === Task 279-281 corrector: post-render dedup + cell override (2026-06-23) === */
+(function(){
+  function firstWord(nm){ return (nm||'').split(/[\s(]/)[0].toLowerCase(); }
+  async function fixCells(){
+    try {
+      var r = await fetch('/api/weekly-summary?_=' + Date.now()).then(function(r){return r.json();});
+      var depts = {};
+      var newVisitors = [];
+      var totalAtt = 0, totalVis = 0;
+      (r.depts||[]).forEach(function(d){
+        var vNames = d.visitorNames || [];
+        var cRaw = (d.casualNames||'').split(/,(?![^(]*\))/).map(function(s){return s.trim();}).filter(Boolean);
+        var cExp = [];
+        cRaw.forEach(function(nm){ if(nm.indexOf('/')>=0){ nm.split('/').forEach(function(p){if(p.trim())cExp.push(p.trim());}); } else cExp.push(nm); });
+        var vFirsts = vNames.map(firstWord);
+        var cDedup = cExp.filter(function(c){return vFirsts.indexOf(firstWord(c))<0;});
+        var allNames = vNames.concat(cDedup);
+        var visTotal = vNames.length + cDedup.length;
+        var attTotal = (d.attended||0) + visTotal;
+        depts[d.short] = {att: attTotal, vis: visTotal, casualUnique: cDedup.length, names: allNames};
+        totalAtt += attTotal; totalVis += visTotal;
+        allNames.forEach(function(n){ newVisitors.push({name:n, dept:d.short}); });
+      });
+      var trs = document.querySelectorAll('tbody tr');
+      Array.prototype.forEach.call(trs, function(tr){
+        var cells = tr.querySelectorAll('td');
+        if(cells.length < 6) return;
+        var short = (cells[0].textContent||'').trim();
+        var fix = depts[short];
+        if(!fix) return;
+        cells[2].textContent = fix.att;
+        if(fix.casualUnique > 0){
+          cells[4].innerHTML = fix.vis + " <span class='text-xs text-blue-500'>(+" + fix.casualUnique + " 임시)</span>";
+        } else {
+          cells[4].textContent = fix.vis || '-';
+        }
+      });
+      var sv = document.getElementById('statVisitors');
+      if(sv) sv.textContent = totalVis || '—';
+      var sa = document.getElementById('statAttended');
+      if(sa) sa.textContent = totalAtt || '—';
+      var nvList = document.getElementById('newVisitorsList');
+      if(nvList && newVisitors.length > 0){
+        nvList.innerHTML = newVisitors.map(function(v){
+          return "<div class='flex items-center justify-between p-2 bg-purple-50 rounded-lg'><div class='font-medium text-sm'>" + v.name + "</div><div class='text-xs text-gray-500'>" + v.dept + "</div></div>";
+        }).join('');
+      }
+    } catch(e){ console.warn('[Task 279 corrector]', e); }
+  }
+  function schedule(){
+    setTimeout(fixCells, 2500);
+    setTimeout(fixCells, 6000);
+    setInterval(fixCells, 30000);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', schedule);
+  } else {
+    schedule();
+  }
+})();
+</script>
 </body>
 </html>
