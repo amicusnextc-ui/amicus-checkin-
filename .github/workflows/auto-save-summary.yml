@@ -4,6 +4,8 @@ on:
   schedule:
     # Every Sunday 5:30pm LA — 1hr after checkout (4:30pm). 00:30 UTC Mon = 5:30pm PDT / 4:30pm PST
     - cron: '30 0 * * 1'
+    # Mon 10am PT — re-save after late wrap-up entries (catch up)
+    - cron: '0 17 * * 1'
   workflow_dispatch:  # allow manual trigger via Actions tab
 
 jobs:
