@@ -1,4 +1,4 @@
-name: Auto-save Weekly Summary to Notion
+    - cron: '0 17 * * 1'  # Mon 10am PT re-save for late wrap-up entriesname: Auto-save Weekly Summary to Notion
 
 on:
   schedule:
