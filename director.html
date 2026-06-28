@@ -2123,9 +2123,17 @@ async function adminForceCheckout(rid, name){
     } catch(e){ console.warn('[Task 279 corrector]', e); }
   }
   function schedule(){
-    setTimeout(fixCells, 2500);
+    setTimeout(fixCells, 1500);
+    setTimeout(fixCells, 3500);
     setTimeout(fixCells, 6000);
-    setInterval(fixCells, 30000);
+    setTimeout(fixCells, 9000);
+    setInterval(fixCells, 5000);
+    /* Task #289: MutationObserver — fire immediately on tbody changes */
+    try {
+      var obs = new MutationObserver(function(){ fixCells(); });
+      var tbody = document.querySelector('tbody');
+      if (tbody) obs.observe(tbody, {childList: true, subtree: true, characterData: true});
+    } catch(e){}
   }
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', schedule);
