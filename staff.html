@@ -794,7 +794,7 @@ function renderRoster(students){
     var bdayBadge=isBday?"<span style='background:#fce7f3;color:#9d174d' class='badge'>🎂</span>":"-";
     html+="<tr>";
     html+="<td><div style='font-weight:600'><a href='/parent-info.html?studentId="+s.id+"&source=admin' style='color:#4f46e5;text-decoration:none;padding:2px 6px;border-radius:6px;display:inline-block;transition:background 0.15s' onmouseover='this.style.background=&quot;#ede9fe&quot;' onmouseout='this.style.background=&quot;transparent&quot;' title='정보 카드 열기'>"+(s.name||"")+" <span style='font-size:10px;opacity:0.6'>📋</span></a></div>";
-    if(s.nameEN)html+="<div style='font-size:11px;color:#9ca3af'>"+s.nameEN+"</div>";
+    if(s.nameEN)html+="<div style='font-size:11px;color:#9ca3af'>"+s.nameEN+"</div>"+(s.notes?"<div style='font-size:11px;color:#7c3aed;margin-top:2px;font-style:italic'>📝 "+s.notes+"</div>":"");
     if(hasAllergy)html+="<span style='font-size:11px;background:#fee2e2;color:#b91c1c;padding:1px 6px;border-radius:999px'>⚠️ "+s.allergy+"</span>";
     html+="</td>";
     html+="<td><div style='font-weight:500'>"+(s.grade||"")+(age?" ("+age+")":"")+"</div>";
