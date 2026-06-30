@@ -2098,8 +2098,15 @@ async function adminForceCheckout(rid, name){
       if(sa) sa.textContent = totalAtt || '—';
       var nvList = document.getElementById('newVisitorsList');
       if(nvList && newVisitors.length > 0){
+        /* Task #294: fetch roster to include 특이사항 notes per visitor */
+        var _roster = [];
+        try { _roster = (await fetch('/api/roster?includeVisitors=true&_=' + Date.now()).then(function(r){return r.json();})).students || []; } catch(e2){}
         nvList.innerHTML = newVisitors.map(function(v){
-          return "<div class='flex items-center justify-between p-2 bg-purple-50 rounded-lg'><div class='font-medium text-sm'>" + v.name + "</div><div class='text-xs text-gray-500'>" + v.dept + "</div></div>";
+          var _firstWord = function(nm){ return (nm||'').split(/[\s(]/)[0].toLowerCase(); };
+          var _match = _roster.find(function(s){ return _firstWord(s.name) === _firstWord(v.name); });
+          var _note = _match && _match.notes ? _match.notes : '';
+          var _noteHtml = _note ? "<div class='text-xs text-purple-600 italic mt-1'>📝 " + _note + "</div>" : '';
+          return "<div class='p-2 bg-purple-50 rounded-lg'><div class='flex items-center justify-between'><div class='font-medium text-sm'>" + v.name + "</div><div class='text-xs text-gray-500'>" + v.dept + "</div></div>" + _noteHtml + "</div>";
         }).join('');
       }
     
