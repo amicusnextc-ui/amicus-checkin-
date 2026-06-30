@@ -313,6 +313,7 @@ async function handleSubmit(e) {
   var payload = {
     action: 'parent-info',
     studentId: _currentStudent.id,
+    token: getQueryParam('token') || '',
     fields: {
       nameEN: document.getElementById('f_nameEN').value.trim(),
       grade: document.getElementById('f_grade').value.trim(),
