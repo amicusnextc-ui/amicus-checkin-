@@ -176,7 +176,9 @@ module.exports = async (req, res) => {
           const parentEmail = motherEmail || fatherEmail;
           if (!parentEmail) { results.push({ pid, name: studentName, status: 'no-email' }); continue; }
           const link = 'https://amicus-checkin.vercel.app/liability.html?studentId=' + pid;
-          const infoLink = 'https://amicus-checkin.vercel.app/parent-info.html?studentId=' + pid;
+          const _infoTokSecret = process.env.REGISTER_TOKEN_SECRET || 'amicus-default-secret-change-me';
+          const infoToken = require('crypto').createHmac('sha256', _infoTokSecret).update('info:'+pid).digest('hex').slice(0,16);
+          const infoLink = 'https://amicus-checkin.vercel.app/parent-info.html?studentId=' + pid + '&token=' + infoToken;
           const html = '<div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#111827;"><div style="text-align:center;padding:16px 0;border-bottom:1px solid #e5e7eb;"><h1 style="margin:0;font-size:22px;color:#4f46e5;">📋 Liability Form 작성 안내 / Action Required</h1><p style="margin:6px 0 0;font-size:13px;color:#6b7280;">Amicus Presbyterian Church · 교육부</p></div><p style="margin:20px 0 12px;font-size:15px;line-height:1.7;">안녕하세요, <strong>' + studentName + '</strong> 학생의 부모님께,<br/>Hello, parent of <strong>' + studentName + '</strong>:</p><p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#374151;">아미쿠스 교회 교육부 활동 참여를 위해 책임 동의서(Liability Form) 작성이 필요합니다. 약 5분 소요됩니다.<br/><br/>For your child to participate in Amicus Education Ministry programs, please complete the Liability Form. Takes about 5 minutes.</p><div style="text-align:center;margin:28px 0;"><a href="' + link + '" style="display:inline-block;background:linear-gradient(to right,#4f46e5,#7c3aed);color:white;padding:14px 32px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 12px rgba(79,70,229,0.3);margin:0 4px 8px;">📝 안전 동의서 / Liability</a><a href="' + infoLink + '" style="display:inline-block;background:linear-gradient(to right,#10b981,#059669);color:white;padding:14px 32px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 12px rgba(16,185,129,0.3);margin:0 4px 8px;">📋 정보 입력 / Info Update</a></div><p style="margin:16px 0 8px;font-size:13px;color:#6b7280;line-height:1.6;border-top:1px solid #e5e7eb;padding-top:16px;">문의 / Contact: amicusnextc@gmail.com<br/>🏛️ Amicus Presbyterian Church</p></div>';
           const rr = await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -250,6 +252,18 @@ module.exports = async (req, res) => {
       const sId = body.studentId;
       const fields = body.fields || {};
       if (!sId) return res.status(400).json({ error: 'studentId required' });
+      /* Task #290: HMAC token verify (soft mode unless PARENT_INFO_TOKEN_ENFORCE=1) */
+      try {
+        const _piSecret = process.env.REGISTER_TOKEN_SECRET || 'amicus-default-secret-change-me';
+        const _expectedTok = require('crypto').createHmac('sha256', _piSecret).update('info:'+sId).digest('hex').slice(0,16);
+        const _gotTok = body.token || '';
+        if (_gotTok !== _expectedTok) {
+          if (process.env.PARENT_INFO_TOKEN_ENFORCE === '1') {
+            return res.status(403).json({ error: 'Invalid or missing token' });
+          }
+          console.warn('[parent-info] token mismatch (soft) sId=' + sId + ' got=' + (_gotTok? _gotTok.slice(0,4)+'...':'(none)'));
+        }
+      } catch(_te) { console.warn('[parent-info] token check error (soft):', _te.message); }
       const STUDENT_DB_PI = process.env.NOTION_STUDENT_DB_ID || '107828732f784c39bcb0136a4397c758';
       const piHeaders = { 'Authorization': 'Bearer ' + process.env.NOTION_TOKEN, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' };
       // Resolve pageId: accept Notion UUID directly, or look up by AMC code in title
@@ -371,6 +385,16 @@ module.exports = async (req, res) => {
       const token = genToken(sid.toUpperCase());
       const base = 'https://amicus-checkin.vercel.app/register.html';
       return res.json({ studentId: sid.toUpperCase(), token, link: base + '?student=' + sid.toUpperCase() + '&token=' + token });
+    }
+    
+    if (action === 'gen-parent-info-link') {
+      const crypto = require('crypto');
+      const SECRET = process.env.REGISTER_TOKEN_SECRET || 'amicus-default-secret-change-me';
+      const sid = req.query.student || req.body?.student || '';
+      if (!sid) return res.status(400).json({ error: 'student (studentId/pageId) required' });
+      const token = crypto.createHmac('sha256', SECRET).update('info:'+sid).digest('hex').slice(0,16);
+      const base = 'https://amicus-checkin.vercel.app/parent-info.html';
+      return res.json({ studentId: sid, token, link: base + '?studentId=' + sid + '&token=' + token });
     }
     
     if (action === 'liability') {
