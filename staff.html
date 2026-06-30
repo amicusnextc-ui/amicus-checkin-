@@ -776,7 +776,7 @@ async function uncheckin(btn){
 function renderRoster(students){
   var tbody=document.getElementById("rosterTable");
   if(!students||!students.length){tbody.innerHTML="<tr><td colspan='10' style='text-align:center;padding:40px;color:#9ca3af'>등록된 학생이 없습니다</td></tr>";return;}
-  var serviceSunday=getStaffServiceSundayISO();
+  var serviceSunday=getStaffServiceSundayISO();var ssMD=serviceSunday?(parseInt(serviceSunday.split("-")[1],10)+"/"+parseInt(serviceSunday.split("-")[2],10)):"";
   var now=new Date(),html="";
   for(var i=0;i<students.length;i++){
     var s=students[i];
@@ -818,7 +818,7 @@ function renderRoster(students){
     if(alreadyAttended){
       var safeNameU=(s.name||'').replace(/'/g,'&#39;').replace(/\"/g,'&quot;');
       var safeDeptU=(s.department||'').replace(/'/g,'&#39;');
-      html+="<td style='text-align:center;white-space:nowrap'><span style='color:#10b981;font-weight:700;font-size:13px'>✅ 출석</span> <button data-sid='"+s.id+"' data-name='"+safeNameU+"' data-dept='"+safeDeptU+"' onclick='uncheckin(this)' title='체크인 취소' style='font-size:11px;padding:2px 7px;border-radius:6px;background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;cursor:pointer;margin-left:4px'>취소</button></td>";
+      html+="<td style='text-align:center;white-space:nowrap'><span style='color:#10b981;font-weight:700;font-size:13px'>✅ "+ssMD+" 출석</span> <button data-sid='"+s.id+"' data-name='"+safeNameU+"' data-dept='"+safeDeptU+"' onclick='uncheckin(this)' title='체크인 취소' style='font-size:11px;padding:2px 7px;border-radius:6px;background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;cursor:pointer;margin-left:4px'>취소</button></td>";
     }else{
       var safeName=(s.name||'').replace(/'/g,'&#39;').replace(/\"/g,'&quot;');
       var safeDept=(s.department||'').replace(/'/g,'&#39;');
