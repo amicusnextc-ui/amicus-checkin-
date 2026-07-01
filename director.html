@@ -888,7 +888,7 @@ function renderDashboard() {
         return `<tr>
           <td><span class="stat-pill ${color}">${d.short || d.dept}</span></td>
           <td class="text-right font-semibold">${d.total}</td>
-          <td class="text-right text-green-600 font-semibold">${d.attended}</td>
+          <td class="text-right text-green-600 font-semibold">${(d.attendedNames && d.attendedNames.length) ? d.attendedNames.length : Math.max(0, d.attended - (d.visitors||0))}${(d.visitors||0) > 0 ? ` <span class="text-purple-500 text-xs">(+${d.visitors}방문)</span>` : ''}</td>
           <td class="text-right text-red-600">${d.absent}</td>
           <td class="text-right text-purple-600" title="${d.casualVisitors > 0 ? `정식 ${d.visitors} + 임시 ${d.casualVisitors}` : ''}">${d.visitors + (d.casualVisitors || 0)}${d.casualVisitors > 0 ? ` <span class='text-xs text-blue-500'>(+${d.casualVisitors} 임시)</span>` : ''}</td>
           <td class="text-right"><span class="badge ${rate>=80?'badge-green':rate>=50?'badge-yellow':'badge-red'}">${rate}%</span></td>
