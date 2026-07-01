@@ -638,8 +638,20 @@ function renderInfoNeeded() {
   }).join('');
 }
 
-function copyInfoKakao(pageId, name) {
-  const infoLink = location.origin + '/parent-info.html?studentId=' + pageId;
+async function copyInfoKakao(pageId, name) {
+  /* Task #300: fetch HMAC token via server; fall back to unsigned URL if API fails */
+  let infoLink;
+  try {
+    const _lr = await fetch('/api/update-student', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'gen-parent-info-link', student: pageId})
+    });
+    const _ld = await _lr.json();
+    infoLink = _ld && _ld.link ? _ld.link : (location.origin + '/parent-info.html?studentId=' + pageId);
+  } catch(_le) {
+    infoLink = location.origin + '/parent-info.html?studentId=' + pageId;
+  }
   const msg = '[아미쿠스 교회] ' + name + ' 학생의 학생 정보 입력 부탁드립니다 🙏\n\n📋 정보 입력 (5분):\n' + infoLink + '\n\n문의: amicusnextc@gmail.com';
   navigator.clipboard.writeText(msg).then(()=>{
     alert('📋 정보 입력 카톡 메시지 복사됨\n부모님께 KakaoTalk으로 paste 해주세요.');
