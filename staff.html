@@ -658,7 +658,7 @@ async function loadAttendance(){
         var rate=d.total>0?Math.round((d.attended||0)/d.total*100):0;
         sumHtml+="<tr style='border-top:1px solid #f3f4f6'>";
         sumHtml+="<td style='padding:8px 12px;font-weight:600'>"+(d.short||"")+"</td>";
-        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:600'>"+(d.attended||0)+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:600'>"+((d.attendedNames && d.attendedNames.length) ? d.attendedNames.length : Math.max(0,(d.attended||0)-(d.visitors||0)))+((d.visitors||0)>0 ? " <span style='font-size:11px;color:#7c3aed;font-weight:500'>(+"+(d.visitors||0)+"방문)</span>" : "")+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:#dc2626'>"+((d.absent||0)||"-")+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:#7c3aed'>"+(d.casualVisitors>0?d.casualVisitors:((d.visitors||0)||"-"))+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:#6b7280'>"+(d.total||0)+"</td>";
