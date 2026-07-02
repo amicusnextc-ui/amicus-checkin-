@@ -2161,5 +2161,44 @@ async function adminForceCheckout(rid, name){
   }
 })();
 </script>
+
+<script>
+/* Task #300 phase 2: intercept parent-info.html links and swap in HMAC-signed URL */
+(function(){
+  if (window.__parentInfoTokenInterceptor) return;
+  window.__parentInfoTokenInterceptor = true;
+  document.addEventListener('click', async function(e){
+    var a = e.target && (e.target.closest ? e.target.closest('a[href*="/parent-info.html?studentId="]') : null);
+    if (!a) return;
+    /* Preserve middle/right/cmd-click behavior — only intercept plain left click */
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    var href = a.getAttribute('href') || '';
+    var url;
+    try { url = new URL(href, location.href); } catch(_e){ location.href = a.href; return; }
+    var sid = url.searchParams.get('studentId');
+    if (!sid) { location.href = a.href; return; }
+    try {
+      var r = await fetch('/api/update-student', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({action:'gen-parent-info-link', student: sid})
+      });
+      var d = await r.json();
+      if (d && d.link) {
+        var newUrl = new URL(d.link, location.href);
+        url.searchParams.forEach(function(v, k){
+          if (k !== 'studentId' && k !== 'token') newUrl.searchParams.set(k, v);
+        });
+        var target = a.target || '_self';
+        if (target === '_blank') window.open(newUrl.toString(), '_blank');
+        else location.href = newUrl.toString();
+      } else {
+        location.href = a.href;
+      }
+    } catch(_te){ location.href = a.href; }
+  }, true);
+})();
+</script>
 </body>
 </html>
