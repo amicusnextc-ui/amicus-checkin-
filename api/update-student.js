@@ -307,6 +307,16 @@ module.exports = async (req, res) => {
       return res.json({ success: true, studentId: targetPageId, updatedFields: Object.keys(props).length });
     }
 
+    if (action === 'gen-parent-info-link') {
+      const crypto = require('crypto');
+      const SECRET = process.env.REGISTER_TOKEN_SECRET || 'amicus-default-secret-change-me';
+      const sid = req.query.student || req.body?.student || '';
+      if (!sid) return res.status(400).json({ error: 'student (studentId/pageId) required' });
+      const token = crypto.createHmac('sha256', SECRET).update('info:'+sid).digest('hex').slice(0,16);
+      const base = 'https://amicus-checkin.vercel.app/parent-info.html';
+      return res.json({ studentId: sid, token, link: base + '?studentId=' + sid + '&token=' + token });
+    }
+    
     if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
 
     if (action === 'parent-register') {
@@ -385,16 +395,6 @@ module.exports = async (req, res) => {
       const token = genToken(sid.toUpperCase());
       const base = 'https://amicus-checkin.vercel.app/register.html';
       return res.json({ studentId: sid.toUpperCase(), token, link: base + '?student=' + sid.toUpperCase() + '&token=' + token });
-    }
-    
-    if (action === 'gen-parent-info-link') {
-      const crypto = require('crypto');
-      const SECRET = process.env.REGISTER_TOKEN_SECRET || 'amicus-default-secret-change-me';
-      const sid = req.query.student || req.body?.student || '';
-      if (!sid) return res.status(400).json({ error: 'student (studentId/pageId) required' });
-      const token = crypto.createHmac('sha256', SECRET).update('info:'+sid).digest('hex').slice(0,16);
-      const base = 'https://amicus-checkin.vercel.app/parent-info.html';
-      return res.json({ studentId: sid, token, link: base + '?studentId=' + sid + '&token=' + token });
     }
     
     if (action === 'liability') {
