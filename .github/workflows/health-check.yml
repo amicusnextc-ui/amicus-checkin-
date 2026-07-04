@@ -15,8 +15,8 @@ jobs:
       - name: Check Staff Portal
         run: curl -f https://amicus-checkin.vercel.app/staff.html
       - name: Check Roster API
-        run: curl -f "https://amicus-checkin.vercel.app/api/roster" --max-time 10
+        run: curl -f -H 'x-api-key: AMICUS-PUBLIC-KIOSK-V1' "https://amicus-checkin.vercel.app/api/roster" --max-time 10
       - name: Check Attendance API
-        run: curl -f "https://amicus-checkin.vercel.app/api/weekly-summary" --max-time 10
+        run: curl -f -H 'x-api-key: AMICUS-PUBLIC-KIOSK-V1' "https://amicus-checkin.vercel.app/api/weekly-summary" --max-time 10
       - name: Done
         run: echo 'All OK'
