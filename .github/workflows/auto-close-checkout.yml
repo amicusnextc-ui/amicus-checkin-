@@ -24,6 +24,7 @@ jobs:
           BODY="$BODY}"
           curl -sS -X POST https://amicus-checkin.vercel.app/api/update-student \
             -H 'Content-Type: application/json' \
+            -H 'x-api-key: AMICUS-PUBLIC-KIOSK-V1' \
             -d "$BODY" | tee /tmp/result.json
           echo ''
           # Exit non-zero if response shows error
