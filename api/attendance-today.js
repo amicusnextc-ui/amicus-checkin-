@@ -2,6 +2,25 @@ const ATTENDANCE_DB = process.env.NOTION_ATTENDANCE_DB_ID || "89b6c47f85a8429684
 const NOTION_VERSION = "2022-06-28";
 const TIMEZONE = "America/Los_Angeles";
 module.exports = async (req, res) => {
+  // === AUTH (Task #305): inline soft/hard-mode shared-secret check ===
+  {
+    const _expected = process.env.API_SECRET;
+    const _enforce  = process.env.API_AUTH_ENFORCE === '1';
+    if (_expected) {
+      let _provided = '';
+      try {
+        const _h = String((req.headers && req.headers.authorization) || '');
+        if (_h.toLowerCase().indexOf('bearer ') === 0) _provided = _h.slice(7).trim();
+        else if (req.headers && req.headers['x-api-key']) _provided = String(req.headers['x-api-key']).trim();
+        else if (req.query && req.query.apiKey) _provided = String(req.query.apiKey).trim();
+      } catch (e) {}
+      if (_provided !== _expected) {
+        if (_enforce) return res.status(401).json({ error: 'unauthorized' });
+        try { console.warn('[auth] missing/invalid token (soft) url=' + (req.url||'?')); } catch(e){}
+      }
+    }
+  }
+
   res.setHeader("Access-Control-Allow-Origin", "*");
   if (req.method !== "GET") return res.status(405).end();
   const { password, dept } = req.query;
