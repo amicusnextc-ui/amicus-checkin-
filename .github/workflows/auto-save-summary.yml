@@ -16,6 +16,7 @@ jobs:
         run: |
           curl -X POST https://amicus-checkin.vercel.app/api/weekly-summary \
             -H 'Content-Type: application/json' \
+            -H 'x-api-key: AMICUS-PUBLIC-KIOSK-V1' \
             -d '{}' \
             --fail \
             --show-error
