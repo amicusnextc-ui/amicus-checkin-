@@ -818,13 +818,13 @@ function renderRoster(students){
     if(alreadyAttended){
       var safeNameU=(s.name||'').replace(/'/g,'&#39;').replace(/\"/g,'&quot;');
       var safeDeptU=(s.department||'').replace(/'/g,'&#39;');
-      html+="<td style='text-align:center;white-space:nowrap'><span style='color:#10b981;font-weight:700;font-size:13px'>✅ "+ssMD+" 출석</span> <button data-sid='"+s.id+"' data-name='"+safeNameU+"' data-dept='"+safeDeptU+"' onclick='uncheckin(this)' title='체크인 취소' style='font-size:11px;padding:2px 7px;border-radius:6px;background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;cursor:pointer;margin-left:4px'>취소</button></td>";
+      html+="<td style='text-align:center;white-space:nowrap'><span style='color:#10b981;font-weight:700;font-size:13px'>✅ "+ssMD+" 출석</span> <button data-sid='"+s.id+"' data-name='"+safeNameU+"' data-dept='"+safeDeptU+"' onclick='uncheckin(this)' title='체크인 취소' style='font-size:12px;padding:6px 12px;border-radius:8px;background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;cursor:pointer;margin-left:6px;min-width:44px'>취소</button></td>";
     }else{
       var safeName=(s.name||'').replace(/'/g,'&#39;').replace(/\"/g,'&quot;');
       var safeDept=(s.department||'').replace(/'/g,'&#39;');
-      html+="<td style='text-align:center'><button data-sid='"+s.id+"' data-name='"+safeName+"' data-dept='"+safeDept+"' data-allergy='"+(hasAllergy?1:0)+"' onclick='quickCheckin(this)' style='font-size:12px;padding:4px 10px;border-radius:8px;background:#ecfdf5;color:#059669;font-weight:600;border:1px solid #6ee7b7'>✓ 체크인</button></td>";
+      html+="<td style='text-align:center'><button data-sid='"+s.id+"' data-name='"+safeName+"' data-dept='"+safeDept+"' data-allergy='"+(hasAllergy?1:0)+"' onclick='quickCheckin(this)' style='font-size:13px;padding:8px 14px;border-radius:8px;background:#ecfdf5;color:#059669;font-weight:600;border:1px solid #6ee7b7;min-height:36px'>✓ 체크인</button></td>";
     }
-    html+="<td style='text-align:center'><button data-sid='"+s.id+"' onclick='openEditById(this)' style='font-size:12px;padding:4px 10px;border-radius:8px;background:#eef2ff;color:#4f46e5;font-weight:600'>수정</button></td>";
+    html+="<td style='text-align:center'><button data-sid='"+s.id+"' onclick='openEditById(this)' style='font-size:13px;padding:8px 14px;border-radius:8px;background:#eef2ff;color:#4f46e5;font-weight:600;min-height:36px'>수정</button></td>";
     html+="</tr>";
   }
   tbody.innerHTML=html;
