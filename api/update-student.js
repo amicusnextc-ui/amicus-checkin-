@@ -95,6 +95,12 @@ module.exports = async (req, res) => {
     }
   }
 
+  // === Task #305: hard-fail if REGISTER_TOKEN_SECRET is unset in production (prevents predictable tokens) ===
+  if (!process.env.REGISTER_TOKEN_SECRET && process.env.VERCEL_ENV === 'production') {
+    console.error('[FATAL] REGISTER_TOKEN_SECRET missing in production — all HMAC tokens would be predictable');
+    return res.status(500).json({ error: 'Server misconfigured: REGISTER_TOKEN_SECRET missing' });
+  }
+
   // === GET handler: liability submission history ===
   if (req.method === 'GET') {
     try {
