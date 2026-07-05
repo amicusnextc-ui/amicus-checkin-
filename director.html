@@ -762,19 +762,20 @@ function renderNewVisitors() {
   const el = document.getElementById('newVisitorsList');
   if (!el) return;
   if (list.length === 0) { el.innerHTML = '<div class="text-sm text-gray-600">이번 주 신규 방문자 없음</div>'; return; }
+  /* Task #309: escape all user-controlled fields to prevent XSS */
   el.innerHTML = list.map(s => `
     <div class="flex items-start justify-between p-3 bg-white/70 backdrop-blur rounded-lg">
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-semibold text-gray-900">${s.name}</span>
-          ${s.nameEN ? `<span class="text-xs text-gray-500">${s.nameEN}</span>` : ''}
+          <span class="font-semibold text-gray-900">${escapeHtml(s.name)}</span>
+          ${s.nameEN ? `<span class="text-xs text-gray-500">${escapeHtml(s.nameEN)}</span>` : ''}
           <span class="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full font-bold">🆕 NEW</span>
         </div>
-        <div class="text-xs text-gray-600 mt-1">${(s.department||'').split(' ')[0]}${s.grade ? ' · '+s.grade : ''}${s.dob ? ' · '+s.dob : ''}</div>
-        <div class="text-xs text-gray-500 mt-0.5">보호자: ${s.guardian || '—'}</div>
-        ${s.allergy && s.allergy !== '없음' ? `<div class="text-xs text-red-600 mt-0.5">⚠️ 알러지: ${s.allergy}</div>` : ''}
+        <div class="text-xs text-gray-600 mt-1">${escapeHtml((s.department||'').split(' ')[0])}${s.grade ? ' · '+escapeHtml(s.grade) : ''}${s.dob ? ' · '+escapeHtml(s.dob) : ''}</div>
+        <div class="text-xs text-gray-500 mt-0.5">보호자: ${escapeHtml(s.guardian || '—')}</div>
+        ${s.allergy && s.allergy !== '없음' ? `<div class="text-xs text-red-600 mt-0.5">⚠️ 알러지: ${escapeHtml(s.allergy)}</div>` : ''}
       </div>
-      ${s.phone ? `<a href="tel:${s.phone}" class="text-xs text-indigo-600 font-semibold ml-2 whitespace-nowrap">📞 ${s.phone}</a>` : ''}
+      ${s.phone ? `<a href="tel:${encodeURIComponent(s.phone)}" class="text-xs text-indigo-600 font-semibold ml-2 whitespace-nowrap">📞 ${escapeHtml(s.phone)}</a>` : ''}
     </div>`).join('');
 }
 
@@ -895,7 +896,9 @@ function renderDashboard() {
         <th class="text-right">결석</th><th class="text-right">방문자</th><th class="text-right">출석률</th>
       </tr></thead>
       <tbody>${depts.map(d => {
-        const rate = d.total ? Math.round(d.attended/d.total*100) : 0;
+        /* Task #309: mutation-proof rate — array-derived member count */
+        const _members = (d.attendedNames && d.attendedNames.length) ? d.attendedNames.length : Math.max(0, (d.attended||0) - (d.visitors||0));
+        const rate = d.total ? Math.round(_members/d.total*100) : 0;
         const color = DEPT_COLOR[d.dept] || 'dept-gray';
         return `<tr>
           <td><span class="stat-pill ${color}">${d.short || d.dept}</span></td>
@@ -1430,6 +1433,8 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
       else if(ht.indexOf('출석률')>=0) idxRate = j;
     }
     if(idxOut<0 || idxVis<0 || idxTotal<0 || idxRate<0) return;
+    /* Task #309: skip if cell already has Task #299 breakdown format */
+    if(cells[idxOut] && cells[idxOut].textContent.indexOf('방문') !== -1) { row.__rateFixed = true; return; }
     
     var checkinCombined = parseInt(cells[idxOut].textContent.replace(/\D/g, ''), 10) || 0;
     var visitor = parseInt(cells[idxVis].textContent.replace(/\D/g, ''), 10) || 0;
@@ -1485,6 +1490,8 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
       else if(ht.indexOf('출석률')>=0) idxRate = j;
     }
     if(idxOut<0 || idxVis<0 || idxTotal<0 || idxRate<0) return;
+    /* Task #309: skip if cell already has Task #299 breakdown format */
+    if(cells[idxOut] && cells[idxOut].textContent.indexOf('방문') !== -1) { row.__rateFixed = true; return; }
     
     var outCell = cells[idxOut];
     var visCell = cells[idxVis];
