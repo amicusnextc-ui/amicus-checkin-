@@ -1806,13 +1806,13 @@ async function adminLoadToday(){
       var dept = (x.dept || x.department || '').split(' ')[0];
       var ci = x.checkIn || x.checkInTime || '-';
       var co = x.checkOut || x.checkOutTime || '';
-      var coCell = co ? '<span class="text-gray-700">' + co + '</span>' : '<button onclick="adminForceCheckout(\\''+rid+'\\',\\''+nm+'\\')" class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded font-semibold">🚪 강제 체크아웃</button>';
+      var coCell = co ? '<span class="text-gray-700">' + co + '</span>' : '<button onclick="adminForceCheckout(\''+rid+'\',\''+nm+'\')" class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded font-semibold">🚪 강제 체크아웃</button>';
       return '<tr class="border-b border-gray-100">'+
         '<td class="py-2 px-2 font-semibold">' + nm + '</td>'+
         '<td class="py-2 px-2 text-xs text-gray-600">' + dept + '</td>'+
         '<td class="py-2 px-2 text-xs">' + ci + '</td>'+
         '<td class="py-2 px-2 text-xs">' + coCell + '</td>'+
-        '<td class="py-2 px-2"><button onclick="adminDeleteRecord(\\''+rid+'\\',\\''+nm+'\\')" class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded font-semibold">🗑️ 삭제</button></td>'+
+        '<td class="py-2 px-2"><button onclick="adminDeleteRecord(\''+rid+'\',\''+nm+'\')" class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded font-semibold">🗑️ 삭제</button></td>'+
         '</tr>';
     }).join('');
     el.innerHTML = '<div class="overflow-x-auto"><table class="w-full">'+
