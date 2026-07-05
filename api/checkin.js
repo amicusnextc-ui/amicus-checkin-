@@ -134,7 +134,7 @@ module.exports = async (req, res) => {
           and: [
             { property: '\uc8fc\uc77c \ub0a0\uc9dc (Date)', date: { equals: serviceSunday } },
             { property: '\uc774\ub984 (Name)', rich_text: { equals: displayName || studentId } }
-          ]
+          ].concat(department ? [{ property: '\ubd80\uc11c (Department)', select: { equals: department } }] : [])
         }
       })
     });
