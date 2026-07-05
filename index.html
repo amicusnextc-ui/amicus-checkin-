@@ -1220,9 +1220,9 @@ async function cwoDo(btn){
       var t = (spans[i].innerText||'').trim().split('\\n')[0].trim();
       if (!t) continue;
       if (t.indexOf('AMC')===0) continue;
-      if (/[가-힣]+부\\s*\\(/.test(t)) continue;
+      if (/[가-힣]+부\s*\(/.test(t)) continue;
       if (t.indexOf('Pre-K')!==-1||t.indexOf('Toddler')!==-1||t.indexOf('grade')!==-1||t.indexOf('Elementary')!==-1||t.indexOf('Infant')!==-1||t.indexOf('Preschool')!==-1||t.indexOf('Youth')!==-1||t.indexOf('Middle')!==-1||t.indexOf('High')!==-1) continue;
-      if (/^[가-힣\\s]+$/.test(t) && t.length<25) return t.trim();
+      if (/^[가-힣\s]+$/.test(t) && t.length<25) return t.trim();
     }
     return '';
   }
