@@ -655,10 +655,13 @@ async function loadAttendance(){
       var grandCheckin=0,grandTotal=0,grandVisitor=0,grandAbsent=0;
       deptsArr.forEach(function(d,_i){
         grandCheckin+=d.attended||0;grandTotal+=d.total||0;grandVisitor+=(d.casualVisitors>0?d.casualVisitors:(d.visitors||0));grandAbsent+=d.absent||0;
-        var rate=d.total>0?Math.round((d.attended||0)/d.total*100):0;
+        /* Task #308: mutation-proof rate — use array-derived member count instead of d.attended (which may be mutated by fetch wrapper) */
+        var _members = (d.attendedNames && d.attendedNames.length) ? d.attendedNames.length : Math.max(0,(d.attended||0)-(d.visitors||0));
+        var _visitors = (d.visitorNames && d.visitorNames.length) ? d.visitorNames.length : (d.visitors||0);
+        var rate=d.total>0?Math.round(_members/d.total*100):0;
         sumHtml+="<tr style='border-top:1px solid #f3f4f6;background:"+(_i%2===0?'#ffffff':'#f9fafb')+"'>";
         sumHtml+="<td style='padding:8px 12px;font-weight:600'>"+(d.short||"")+"</td>";
-        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:600'>"+((d.attendedNames && d.attendedNames.length) ? d.attendedNames.length : Math.max(0,(d.attended||0)-(d.visitors||0)))+((d.visitors||0)>0 ? " <span style='font-size:11px;color:#7c3aed;font-weight:500'>(+"+(d.visitors||0)+"방문)</span>" : "")+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:#059669;font-weight:600'>"+_members+(_visitors>0 ? " <span style='font-size:11px;color:#7c3aed;font-weight:500'>(+"+_visitors+"방문)</span>" : "")+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:#dc2626'>"+((d.absent||0)||"-")+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:#7c3aed'>"+(d.casualVisitors>0?d.casualVisitors:((d.visitors||0)||"-"))+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:#6b7280'>"+(d.total||0)+"</td>";
@@ -1982,6 +1985,8 @@ setTimeout(cwShowIfReady,2000);
       else if(ht.indexOf('출석률')>=0) idxRate = j;
     }
     if(idxOut<0 || idxVis<0 || idxTotal<0 || idxRate<0) return;
+    /* Task #308: skip if cell already has Task #299 breakdown format */
+    if(cells[idxOut] && cells[idxOut].textContent.indexOf('방문') !== -1) { row.__rateFixed = true; return; }
     var checkinCombined = parseInt(cells[idxOut].textContent.replace(/\D/g, ''), 10) || 0;
     var visitor = parseInt(cells[idxVis].textContent.replace(/\D/g, ''), 10) || 0;
     var total = parseInt(cells[idxTotal].textContent.replace(/\D/g, ''), 10) || 0;
@@ -2027,6 +2032,8 @@ setTimeout(cwShowIfReady,2000);
       else if(ht.indexOf('출석률')>=0) idxRate = j;
     }
     if(idxOut<0 || idxVis<0 || idxTotal<0 || idxRate<0) return;
+    /* Task #308: skip if cell already has Task #299 breakdown format */
+    if(cells[idxOut] && cells[idxOut].textContent.indexOf('방문') !== -1) { row.__rateFixed = true; return; }
     var outCell = cells[idxOut], visCell = cells[idxVis], totCell = cells[idxTotal], rateCell = cells[idxRate];
     var memberCheckin = parseInt(outCell.textContent.replace(/\D/g, ''), 10) || 0;
     var visitor = parseInt(visCell.textContent.replace(/\D/g, ''), 10) || 0;
