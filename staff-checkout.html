@@ -356,17 +356,23 @@ startAutoRefresh();
 <!-- STAFF-CO OVERRIDE: one-click checkout (no modal) + visitor filter -->
 <script>
 (function(){
-  var rosterSet=null;
+  var rosterSet=null, rosterPromise=null;
   async function getRoster(){
     if(rosterSet)return rosterSet;
-    try{
-      var r=await fetch("/api/roster?password=3&_t="+Date.now(),{cache:"no-store"});
-      var d=await r.json();
-      var names={};
-      (d.students||[]).forEach(function(s){if(s.name)names[s.name.trim()]=true;});
-      rosterSet=names;
-      return names;
-    }catch(e){return null;}
+    /* Task #312: serialize concurrent calls + includeVisitors=1 */
+    if(rosterPromise)return rosterPromise;
+    rosterPromise=(async function(){
+      try{
+        var r=await fetch("/api/roster?password=3&includeVisitors=1&_t="+Date.now(),{cache:"no-store"});
+        var d=await r.json();
+        var names={};
+        (d.students||[]).forEach(function(s){if(s.name)names[s.name.trim()]=true;});
+        rosterSet=names;
+        return names;
+      }catch(e){return null;}
+      finally{ rosterPromise=null; }
+    })();
+    return rosterPromise;
   }
   function waitReady(){
     if(typeof window.openConfirm!=="function" || typeof window.doCheckout!=="function"){setTimeout(waitReady,300);return;}
