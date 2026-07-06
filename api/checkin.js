@@ -142,8 +142,8 @@ module.exports = async (req, res) => {
     const existing = checkData.results?.[0];
 
     if (existing) {
-      // Already checked in this week - update time
-      await fetch('https://api.notion.com/v1/pages/' + existing.id, {
+      // Already checked in this week - update time (Task #312: verify response)
+      const _upRes = await fetch('https://api.notion.com/v1/pages/' + existing.id, {
         method: 'PATCH',
         headers: {
           'Authorization': 'Bearer ' + process.env.NOTION_TOKEN,
@@ -156,6 +156,11 @@ module.exports = async (req, res) => {
           }
         })
       });
+      if (!_upRes.ok) {
+        let _eb = '';
+        try { _eb = (await _upRes.text()).slice(0, 200); } catch(e){}
+        throw new Error('Notion checkin update failed: HTTP ' + _upRes.status + ' ' + _eb);
+      }
       return res.json({ success: true, action: 'updated', existingId: existing.id, serviceSunday, checkInTime });
     }
 
@@ -186,6 +191,10 @@ module.exports = async (req, res) => {
       body: JSON.stringify({ parent: { database_id: ATTENDANCE_DB }, properties: props })
     });
     const newRecord = await createRes.json();
+    // Task #312: verify creation succeeded — Notion returns object with id on success
+    if (!createRes.ok || !newRecord.id) {
+      throw new Error('Notion attendance record creation failed: HTTP ' + createRes.status + ' ' + JSON.stringify(newRecord).slice(0, 200));
+    }
 
     // Update student last attended — direct Notion API call (avoid Vercel self-fetch flakiness)
     if (studentId) {
