@@ -1,13 +1,54 @@
-name: Weekly Reconciliation (disabled)
+name: Weekly Reconciliation
 
-# Previous version failed on every push due to YAML escape issues.
-# Disabled until rebuilt cleanly. Manual trigger only.
+# Task #312 rebuild: fetches weekly-summary and warns if attendance totals don't add up.
+# Runs Mondays 11:00 UTC (3am PT summer / 4am PT winter). Non-blocking soft warnings.
 
 on:
+  schedule:
+    - cron: '0 11 * * 1'
   workflow_dispatch:
 
 jobs:
-  noop:
+  reconcile:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - run: echo "Disabled - rebuild later if needed"
+      - name: Fetch weekly summary
+        id: fetch
+        run: |
+          set -e
+          RESP=$(curl -sS -w "\n%{http_code}" \
+            -H "x-api-key: AMICUS-PUBLIC-KIOSK-V1" \
+            "https://amicus-checkin.vercel.app/api/weekly-summary")
+          HTTP=$(echo "$RESP" | tail -n1)
+          BODY=$(echo "$RESP" | sed '$d')
+          if [ "$HTTP" != "200" ]; then
+            echo "::warning::weekly-summary returned HTTP $HTTP"
+            echo "status=fail" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          TOTAL=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('grand',{}).get('total',0))")
+          ATTENDED=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('grand',{}).get('attended',0))")
+          ABSENT=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('grand',{}).get('absent',0))")
+          SUNDAY=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('sundayStr',''))")
+          echo "Weekly reconciliation for $SUNDAY: total=$TOTAL attended=$ATTENDED absent=$ABSENT"
+          echo "status=ok" >> $GITHUB_OUTPUT
+          echo "sunday=$SUNDAY" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "attended=$ATTENDED" >> $GITHUB_OUTPUT
+          echo "absent=$ABSENT" >> $GITHUB_OUTPUT
+
+      - name: Sanity check
+        if: steps.fetch.outputs.status == 'ok'
+        run: |
+          T=${{ steps.fetch.outputs.total }}
+          A=${{ steps.fetch.outputs.attended }}
+          B=${{ steps.fetch.outputs.absent }}
+          if [ "$T" -eq 0 ]; then
+            echo "::warning::total=0 for ${{ steps.fetch.outputs.sunday }} - possibly a holiday week"
+          fi
+          SUM=$((A + B))
+          if [ "$SUM" -ne "$T" ]; then
+            echo "::warning::attended+absent ($SUM) != total ($T) for ${{ steps.fetch.outputs.sunday }}"
+          fi
+          echo "Reconciliation complete for ${{ steps.fetch.outputs.sunday }}"
