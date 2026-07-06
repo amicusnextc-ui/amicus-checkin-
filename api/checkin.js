@@ -5,7 +5,20 @@ const STUDENT_DB = process.env.NOTION_STUDENT_DB || '107828732f784c39bcb0136a439
 // Get the Sunday date for the current service week (LA time)
 // Sun: today, Mon-Fri: last Sunday, Sat: returns null (reset day)
 function getServiceSunday() {
-  const now = new Date();
+  
+    /* Task #313 M6: reject if we're still in Saturday LA time (< Sunday 00:00 LA) */
+    {
+      const _laNow = new Date().toLocaleString('en-US', { timeZone: TIMEZONE });
+      const _laDate = new Date(_laNow);
+      const _laDow = _laDate.getDay();
+      const _laHour = _laDate.getHours();
+      if (_laDow === 6 && _laHour >= 22) {
+        if (!body.directorPassword && !body.bypassLiability) {
+          return res.status(400).json({ error: '체크인은 일요일 오전 12시 이후부터 가능합니다. Check-in opens Sunday 12:00 AM.', code: 'SATURDAY_LATE_BOUNDARY' });
+        }
+      }
+    }
+    const now = new Date();
   const laDate = new Intl.DateTimeFormat('en-CA', {
     timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit'
   }).format(now);
@@ -20,7 +33,13 @@ function getServiceSunday() {
 }
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  /* Task #313: CORS whitelist */
+  {
+    const _allowed = ['https://amicus-checkin.vercel.app', 'https://amicuschurch.com', 'https://www.amicuschurch.com'];
+    const _origin = (req.headers && req.headers.origin) || '';
+    const _isPreview = /^https:\/\/amicus-checkin-[a-z0-9-]+\.vercel\.app$/.test(_origin);
+    if (_allowed.indexOf(_origin) >= 0 || _isPreview) { res.setHeader('Access-Control-Allow-Origin', _origin); res.setHeader('Vary', 'Origin'); }
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
