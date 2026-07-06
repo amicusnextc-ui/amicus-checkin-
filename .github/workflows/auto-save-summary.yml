@@ -5,7 +5,8 @@ on:
     # Every Sunday 5:30pm LA — 1hr after checkout (4:30pm). 00:30 UTC Mon = 5:30pm PDT / 4:30pm PST
     - cron: '30 0 * * 1'
     # Mon 10am PT — re-save after late wrap-up entries (catch up)
-    - cron: '0 17 * * 1' 
+    - cron: '0 17 * * 1'  # summer PDT
+    - cron: '0 18 * * 1'  # winter PST (Task #312: DST fix — endpoint is idempotent)
   workflow_dispatch:  # allow manual trigger via Actions tab
 
 jobs:
