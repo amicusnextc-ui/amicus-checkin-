@@ -21,6 +21,18 @@
 @keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 .toast-anim { animation: slideUp .3s cubic-bezier(.32,.72,0,1); }
 </style>
+<script>
+/* Task #313 M1: director password kept in-memory only, cleared after 30 min idle */
+(function(){
+  window._memPw = null;
+  let _pwTimer = null;
+  function _resetPwTimer(){
+    if (_pwTimer) clearTimeout(_pwTimer);
+    _pwTimer = setTimeout(function(){ window._memPw = null; console.log('[pw] cleared after 30min idle'); }, 30*60*1000);
+  }
+  ['click','keydown','touchstart'].forEach(function(ev){ document.addEventListener(ev, _resetPwTimer, {passive:true}); });
+})();
+</script>
 </head>
 <body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
 
@@ -296,7 +308,7 @@ async function checkInStudent(studentId) {
     bypassLiability: true  // youth: liability handled separately at semester start
   };
   // Use cached director password if available (for non-Sunday testing)
-  const cachedPw = sessionStorage.getItem('_kioskDirectorPw');
+  const cachedPw = (window._memPw || '');
   if (cachedPw) body.directorPassword = cachedPw;
   try {
     let r = await fetch('/api/checkin', {
@@ -305,7 +317,7 @@ async function checkInStudent(studentId) {
     let d = await r.json();
     // Handle non-Sunday director auth requirement
     if (d.requiresDirectorAuth) {
-      sessionStorage.removeItem('_kioskDirectorPw');
+      (window._memPw = null);
       const dpw = prompt('⚠️ 일요일 외 체크인 — 디렉터 비밀번호 / Non-Sunday — Director password:');
       if (!dpw) {
         checkedIds.delete(studentId); renderCards();
@@ -323,7 +335,7 @@ async function checkInStudent(studentId) {
         return;
       }
       // Cache for rest of session
-      sessionStorage.setItem('_kioskDirectorPw', dpw);
+      (window._memPw = dpw);
     }
     if (!r.ok) throw new Error(d.error || '체크인 실패 / Check-in failed');
     const greetName = (s.nameEN || s.name || '').trim();
@@ -425,7 +437,7 @@ async function submitVisitor() {
     parentEmail,             // → Notion 어머니 이메일 (Mother Email)
     visitReason              // → Notion 방문 이유 (Visit Reason)
   };
-  const cachedPw = sessionStorage.getItem('_kioskDirectorPw');
+  const cachedPw = (window._memPw || '');
   if (cachedPw) visitorBody.directorPassword = cachedPw;
   try {
     let r = await fetch('/api/visitor-checkin', {
@@ -436,7 +448,7 @@ async function submitVisitor() {
     let d = await r.json();
     // Handle non-Sunday director auth requirement
     if (d.requiresDirectorAuth) {
-      sessionStorage.removeItem('_kioskDirectorPw');
+      (window._memPw = null);
       const dpw = prompt('⚠️ 일요일 외 등록 — 디렉터 비밀번호 / Non-Sunday — Director password:');
       if (!dpw) { btn.disabled = false; btn.textContent = oldText; return; }
       visitorBody.directorPassword = dpw;
@@ -448,7 +460,7 @@ async function submitVisitor() {
         err.textContent = '비번 틀림 / Wrong password'; err.classList.remove('hidden');
         btn.disabled = false; btn.textContent = oldText; return;
       }
-      sessionStorage.setItem('_kioskDirectorPw', dpw);
+      (window._memPw = dpw);
     }
     if (!r.ok) throw new Error(d.error || '등록 실패 / Registration failed');
     if (d.duplicate) {
