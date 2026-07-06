@@ -1629,7 +1629,7 @@ async function cwoDo(btn){
     window.doAction=async function(){
       try{
         if(window._student && (window._student.id || window._student.studentId)){
-          var r=await fetch("/api/roster?password=3&_t="+Date.now(),{cache:"no-store"});
+          var r=await fetch("/api/roster?password=3&includeVisitors=1&_t="+Date.now(),{cache:"no-store"});
           if(r.ok){
             var d=await r.json();
             var list=d.students||[];
