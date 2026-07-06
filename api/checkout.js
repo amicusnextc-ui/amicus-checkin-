@@ -93,8 +93,8 @@ module.exports = async (req, res) => {
       targetId = record.id;
     }
 
-    // Update check-out time
-    await fetch('https://api.notion.com/v1/pages/' + targetId, {
+    // Update check-out time — Task #312: verify Notion response, don't silently succeed
+    const _coRes = await fetch('https://api.notion.com/v1/pages/' + targetId, {
       method: 'PATCH',
       headers: {
         'Authorization': 'Bearer ' + process.env.NOTION_TOKEN,
@@ -107,6 +107,11 @@ module.exports = async (req, res) => {
         }
       })
     });
+    if (!_coRes.ok) {
+      let _errBody = '';
+      try { _errBody = (await _coRes.text()).slice(0, 200); } catch(e){}
+      throw new Error('Notion checkout PATCH failed: HTTP ' + _coRes.status + ' ' + _errBody);
+    }
 
     return res.json({ success: true, recordId: targetId, checkOutTime, serviceSunday });
 
