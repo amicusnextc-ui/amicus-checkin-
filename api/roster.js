@@ -45,7 +45,13 @@ module.exports = async (req, res) => {
     }
   }
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  /* Task #313: CORS whitelist */
+  {
+    const _allowed = ['https://amicus-checkin.vercel.app', 'https://amicuschurch.com', 'https://www.amicuschurch.com'];
+    const _origin = (req.headers && req.headers.origin) || '';
+    const _isPreview = /^https:\/\/amicus-checkin-[a-z0-9-]+\.vercel\.app$/.test(_origin);
+    if (_allowed.indexOf(_origin) >= 0 || _isPreview) { res.setHeader('Access-Control-Allow-Origin', _origin); res.setHeader('Vary', 'Origin'); }
+  }
   const { dept, includeVisitors, status } = req.query;
   // Task #274: status=archived shows only archived students (non-active OR 졸업)
   // Default (no status param): only 활성 + non-졸업 students
