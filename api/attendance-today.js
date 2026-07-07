@@ -21,7 +21,13 @@ module.exports = async (req, res) => {
     }
   }
 
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  /* Task #313: CORS whitelist */
+  {
+    const _allowed = ['https://amicus-checkin.vercel.app', 'https://amicuschurch.com', 'https://www.amicuschurch.com'];
+    const _origin = (req.headers && req.headers.origin) || '';
+    const _isPreview = /^https:\/\/amicus-checkin-[a-z0-9-]+\.vercel\.app$/.test(_origin);
+    if (_allowed.indexOf(_origin) >= 0 || _isPreview) { res.setHeader('Access-Control-Allow-Origin', _origin); res.setHeader('Vary', 'Origin'); }
+  }
   if (req.method !== "GET") return res.status(405).end();
   const { password, dept } = req.query;
   if (!password || password !== process.env.ADMIN_PASSWORD) {
