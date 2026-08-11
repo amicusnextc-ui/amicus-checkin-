@@ -42,6 +42,37 @@
   .badge-gray { background:#f3f4f6; color:#6b7280; }
   .warn-card { background:linear-gradient(135deg,#fef3c7,#fde68a); border:1px solid #fcd34d; }
 </style>
+<style id="task317-aesthetic-refresh">
+/* Task #317 (2026-08-10): iPad-friendly aesthetic refresh - non-destructive CSS overrides */
+body { -webkit-font-smoothing: antialiased; letter-spacing: -0.01em; background: linear-gradient(180deg,#fafbfd 0%,#f0f1f5 100%) !important; min-height: 100vh; }
+h1,h2,h3 { letter-spacing:-0.025em !important; }
+h2 { font-size:1.4rem !important; color:#111827 !important; }
+.card { border-radius:20px !important; box-shadow:0 2px 10px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.02) !important; transition:transform .15s ease, box-shadow .15s ease; }
+.card:hover { box-shadow:0 8px 24px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.03) !important; }
+#statTotal,#statAttended,#statAbsent,#statVisitors { font-size:2.75rem !important; font-weight:800 !important; line-height:1.05 !important; letter-spacing:-.04em !important; }
+.tab-btn { padding:14px 22px !important; border-radius:14px !important; font-size:15px !important; min-height:52px; transition:all .15s ease; }
+.tab-btn:active { transform:scale(.97); }
+.tab-btn.active { box-shadow:0 4px 14px rgba(79,70,229,.35) !important; }
+table { font-size:15px !important; }
+thead th { padding:14px 12px !important; font-size:11.5px !important; letter-spacing:.08em !important; }
+tbody td { padding:16px 12px !important; border-bottom:1px solid #f3f4f6 !important; }
+tbody tr { transition:background .12s ease; }
+tbody tr:hover { background:#f8f9fc !important; }
+.stat-pill { padding:8px 14px !important; border-radius:999px !important; font-size:13px !important; }
+.badge { padding:8px 14px !important; border-radius:999px !important; font-size:13.5px !important; font-weight:700 !important; min-width:88px; display:inline-block; text-align:center; }
+.badge-green { background:linear-gradient(135deg,#d1fae5,#a7f3d0) !important; color:#065f46 !important; }
+.badge-yellow { background:linear-gradient(135deg,#fef3c7,#fde68a) !important; color:#92400e !important; }
+.badge-red { background:linear-gradient(135deg,#fee2e2,#fecaca) !important; color:#991b1b !important; }
+button { min-height:44px; }
+button:active { transform:scale(.98); }
+a[href^="tel:"] { padding:10px 16px !important; border-radius:12px !important; background:#eef2ff; color:#4f46e5 !important; font-weight:600; display:inline-flex; align-items:center; min-height:44px; }
+a[href^="tel:"]:hover { background:#e0e7ff; }
+#absentList > div, #longAbsentList > div { padding:14px 18px !important; border-radius:14px !important; margin-bottom:8px !important; }
+::-webkit-scrollbar { width:10px; height:10px; }
+::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:999px; }
+::-webkit-scrollbar-thumb:hover { background:#9ca3af; }
+::-webkit-scrollbar-track { background:transparent; }
+</style>
 </head>
 <body class="min-h-screen">
 
