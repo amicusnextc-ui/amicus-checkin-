@@ -1502,6 +1502,7 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
   var DEPTS = ['유아부','유치부','유년부','초등부','중고등부'];
   
   function fixRow(row){
+    return; /* Task #315 (2026-08-10): DISABLED — renderDashboard(#309)가 이미 정확히 렌더. V2가 "5 (+2방문)" 텍스트를 "52"로 재파싱해 400% cascade 유발 */
     if(row.__cellFixV2done) return;
     var cells = row.cells;
     if(!cells || cells.length < 4) return;
