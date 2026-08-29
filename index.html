@@ -20,18 +20,18 @@
 <title>아미쿠스 교육부 | 출석 체크</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgc7ns90iT3zCprGXX9-fOnlWTgsQzPhM&libraries=places&loading=async&callback=_onGoogleMapsReady"></script>
 <style>
-* { font-family: 'Noto Sans KR', Arial, sans-serif; }
+* { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Helvetica Neue', 'Noto Sans KR', Arial, sans-serif; letter-spacing: -0.011em; }
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn .2s ease}
 @keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin .7s linear infinite}
 @keyframes checkPop{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}.check-pop{animation:checkPop .35s ease forwards}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}.slide-up{animation:slideUp .3s cubic-bezier(.32,.72,0,1)}
-@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(99,102,241,0.4)}70%{box-shadow:0 0 0 10px rgba(99,102,241,0)}100%{box-shadow:0 0 0 0 rgba(99,102,241,0)}}.pulse-ring{animation:pulse-ring 1.5s infinite}
+@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(0,113,227,0.35)}70%{box-shadow:0 0 0 10px rgba(0,113,227,0)}100%{box-shadow:0 0 0 0 rgba(0,113,227,0)}}.pulse-ring{animation:pulse-ring 1.5s infinite}
 @keyframes welcomePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}.welcome-pulse{animation:welcomePulse 3s ease-in-out infinite}
 @keyframes badgeShine{0%{background-position:200%}100%{background-position:-200%}}.badge-shine{background:linear-gradient(90deg,#000,#fbbf24,#000);background-size:200%;animation:badgeShine 2s linear infinite}
 @keyframes bdayPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.04);opacity:.95}}.bday-pulse{animation:bdayPulse 1.2s ease-in-out infinite}
@@ -48,10 +48,10 @@
 .dept-btn{transition:all .2s ease;position:relative}
 .student-card{transition:transform .15s ease,box-shadow .15s ease}
 .student-card:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,0.08)!important}
-.pin-digit{width:56px;height:64px;font-size:28px;font-weight:800;text-align:center;border:2px solid #e5e7eb;border-radius:14px;outline:none;transition:all .15s;background:#fff}
-.pin-digit:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.2)}
-.pin-digit.filled{border-color:#6366f1;background:#eef2ff;color:#4338ca}
-.badge-newcomer{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;letter-spacing:.3px;box-shadow:0 2px 8px rgba(99,102,241,0.4)}
+.pin-digit{width:56px;height:64px;font-size:28px;font-weight:600;text-align:center;border:1.5px solid #d2d2d7;border-radius:14px;outline:none;transition:all .15s;background:#fff;font-variant-numeric:tabular-nums}
+.pin-digit:focus{border-color:#0071e3;box-shadow:0 0 0 4px rgba(0,113,227,0.18)}
+.pin-digit.filled{border-color:#0071e3;background:#f0f7ff;color:#0071e3}
+.badge-newcomer{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:#0071e3;color:#fff;letter-spacing:.2px}
 .badge-birthday-today{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;background:#000;color:#fff;}
 .badge-birthday{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:#555;color:#fff;}
 .badge-allergy{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca}
@@ -72,35 +72,39 @@ gmp-place-autocomplete { display: block; width: 100%; }
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-white to-indigo-50 min-h-screen">
 
-<!-- WELCOME SCREEN -->
-<div id="welcomeScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-indigo-600 via-indigo-700 to-purple-800 px-6">
-  <div class="text-center mb-10 welcome-pulse">
-    <div class="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl"><span class="text-5xl">⛪</span></div>
-    <h1 class="text-3xl font-black text-white mb-1">Amicus Next Church</h1>
-    <p class="text-indigo-200 text-sm font-medium">아미쿠스 교육부 출석 체크인</p>
-    <p id="welcomeDate" class="text-indigo-300 text-xs mt-2"></p>
+<!-- WELCOME SCREEN — Apple-style minimal -->
+<div id="welcomeScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 ap-hero">
+  <div class="ap-glow" aria-hidden="true"></div>
+  <div class="text-center mb-10 relative ap-rise">
+    <div class="ap-mark mx-auto mb-6"><span>🌱</span></div>
+    <h1 class="ap-title">Amicus Next</h1>
+    <p class="ap-subtitle mt-2">아미쿠스 교육부 출석 체크인</p>
+    <p id="welcomeDate" class="ap-date mt-3"></p>
   </div>
-  <div class="w-full max-w-xs space-y-3">
-    <p class="text-center text-indigo-200 text-sm font-semibold mb-4">Welcome! Please sign in here 👋</p>
-    <button onclick="startCheckin()" class="w-full py-4 rounded-2xl bg-white text-indigo-700 font-black text-lg shadow-xl hover:bg-indigo-50 active:scale-95 transition-all flex items-center justify-center gap-3">
-      <span class="text-2xl">✅</span>
-      <div class="text-left"><div>Start Here — Check In</div><div class="text-xs font-medium text-indigo-400">출석 체크인</div></div>
+  <div class="w-full max-w-xs space-y-3 relative ap-rise" style="animation-delay:.08s">
+    <p class="text-center text-sm font-medium mb-5" style="color:#86868b">Welcome! Please sign in here&nbsp;👋</p>
+    <button onclick="startCheckin()" class="w-full py-4 rounded-full ap-cta-primary text-[17px] font-semibold active:scale-[.97] transition-all flex items-center justify-center gap-2.5">
+      <span class="text-xl">✅</span>
+      <span>Check In<span class="ap-cta-sub"> · 출석 체크인</span></span>
     </button>
-    <button onclick="startCheckout()" class="w-full py-4 rounded-2xl bg-white/15 text-white font-bold text-base border border-white/30 hover:bg-white/25 active:scale-95 transition-all flex items-center justify-center gap-3 backdrop-blur-sm">
+    <button onclick="startCheckout()" class="w-full py-4 rounded-full ap-cta-secondary text-[17px] font-semibold active:scale-[.97] transition-all flex items-center justify-center gap-2.5">
       <span class="text-xl">🙏</span>
-      <div class="text-left"><div>Check Out</div><div class="text-xs font-medium text-indigo-200">체크아웃</div></div>
+      <span>Check Out<span class="ap-cta-sub2"> · 체크아웃</span></span>
     </button>
   </div>
-  <a href="/staff.html" class="mt-8 block text-indigo-300 text-xs hover:text-white transition-colors">간사/사역자 포털 →</a>
-  <a href="/director.html" class="mt-3 block text-indigo-300 text-xs hover:text-white transition-colors">⭐ 교육부 디렉터 포털 →</a>
+  <div class="mt-10 flex items-center gap-5 relative ap-rise" style="animation-delay:.16s">
+    <a href="/staff.html" class="ap-footlink">간사/사역자 포털</a>
+    <span class="ap-dot" aria-hidden="true"></span>
+    <a href="/director.html" class="ap-footlink">교육부 디렉터</a>
+  </div>
 </div>
 
 <!-- HEADER -->
 <header id="mainHeader" class="hidden bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-20 shadow-sm">
   <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
     <button onclick="goHome()" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-      <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-sm">⛪</div>
-      <div><h1 class="text-sm font-bold text-gray-900 leading-tight">Amicus Next Church</h1><p class="text-xs text-gray-400 leading-tight" id="todayDate"></p></div>
+      <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm shadow-sm" style="background:#f5f5f7;border:1px solid rgba(0,0,0,.06)">🌱</div>
+      <div><h1 class="text-sm font-semibold text-gray-900 leading-tight" style="letter-spacing:-.02em">Amicus Next</h1><p class="text-xs text-gray-400 leading-tight" id="todayDate"></p></div>
     </button>
     <div class="flex items-center gap-2">
       <div id="modeTag" class="hidden text-xs font-bold px-2.5 py-1 rounded-full"></div>
@@ -2043,6 +2047,84 @@ async function cwoDo(btn){
   };
 })();
 </script>
+
+<!-- ═══ AMICUS NEXT · APPLE-STYLE SKIN (2026-08) — visual layer only, no logic.
+     Loads after the Tailwind CDN runtime styles so this palette wins. ═══ -->
+<style id="amicus-skin">
+:root{
+  --ap-bg:#f5f5f7; --ap-card:#ffffff; --ap-ink:#1d1d1f; --ap-sub:#86868b;
+  --ap-blue:#0071e3; --ap-blue-hover:#0077ed; --ap-blue-text:#0066cc;
+  --ap-blue-soft:#f0f7ff; --ap-blue-mist:#d6e8fc;
+  --ap-green:#2fb457; --ap-green-deep:#248a3d; --ap-green-soft:#ebf9ef;
+  --ap-hairline:rgba(0,0,0,.08);
+}
+html{background:var(--ap-bg)}
+body{background:var(--ap-bg)!important;color:var(--ap-ink)}
+h1,h2,h3{letter-spacing:-.022em}
+
+/* ── Welcome hero ── */
+.ap-hero{background:linear-gradient(180deg,#ffffff 0%,#fbfbfd 55%,#f5f5f7 100%);overflow:hidden}
+.ap-glow{position:absolute;top:-220px;left:50%;transform:translateX(-50%);width:640px;height:460px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(0,113,227,.10),rgba(0,113,227,0));pointer-events:none}
+.ap-mark{width:88px;height:88px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:44px;border:1px solid var(--ap-hairline);box-shadow:0 1px 2px rgba(0,0,0,.04),0 12px 32px rgba(0,0,0,.07)}
+.ap-title{font-size:44px;line-height:1.07;font-weight:700;letter-spacing:-.03em;color:var(--ap-ink)}
+.ap-subtitle{font-size:18px;font-weight:500;color:var(--ap-sub);letter-spacing:-.01em}
+.ap-date{font-size:13px;color:#a1a1a6}
+.ap-cta-primary{background:var(--ap-blue);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.ap-cta-primary:hover{background:var(--ap-blue-hover)}
+.ap-cta-sub{font-weight:500;opacity:.85;font-size:15px}
+.ap-cta-secondary{background:#fff;color:var(--ap-ink);border:1px solid var(--ap-hairline);box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.ap-cta-secondary:hover{background:#fafafa}
+.ap-cta-sub2{font-weight:500;color:var(--ap-sub);font-size:15px}
+.ap-footlink{font-size:13px;color:var(--ap-blue-text);text-decoration:none}
+.ap-footlink:hover{text-decoration:underline}
+.ap-dot{width:3px;height:3px;border-radius:50%;background:#c7c7cc;display:inline-block}
+@keyframes apRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.ap-rise{animation:apRise .7s cubic-bezier(.25,.6,.2,1) both}
+
+/* ── iOS-style frosted header ── */
+#mainHeader{background:rgba(255,255,255,.72)!important;-webkit-backdrop-filter:saturate(180%) blur(20px);
+  backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--ap-hairline)!important;box-shadow:none!important}
+
+/* ── Palette remap: indigo/purple → Apple blue · emerald → Apple green ── */
+.bg-indigo-600{background-color:var(--ap-blue)!important}
+.hover\:bg-indigo-700:hover,.bg-indigo-700{background-color:var(--ap-blue-hover)!important}
+.bg-indigo-500{background-color:#268ff5!important}.bg-indigo-400{background-color:#4b9beb!important}
+.bg-indigo-100{background-color:var(--ap-blue-mist)!important}
+.bg-indigo-50,.hover\:bg-indigo-50:hover{background-color:var(--ap-blue-soft)!important}
+.text-indigo-700{color:var(--ap-blue-text)!important}
+.text-indigo-600,.hover\:text-indigo-600:hover{color:var(--ap-blue)!important}
+.text-indigo-500{color:#268ff5!important}.text-indigo-400{color:#6b96bd!important}
+.text-indigo-300{color:#9bb8d3!important}.text-indigo-200{color:#c0d5e8!important}
+.border-indigo-400,.hover\:border-indigo-400:hover{border-color:#7ab4ef!important}
+.border-indigo-300{border-color:#a6cdf5!important}.border-indigo-200{border-color:#c9e1f9!important}
+.border-indigo-100{border-color:var(--ap-blue-mist)!important}
+.focus\:border-indigo-400:focus{border-color:var(--ap-blue)!important}
+.ring-indigo-400{--tw-ring-color:rgba(0,113,227,.35)!important}
+.bg-purple-600{background-color:var(--ap-blue)!important}.bg-purple-500{background-color:#268ff5!important}
+.bg-purple-100{background-color:var(--ap-blue-mist)!important}.bg-purple-50{background-color:var(--ap-blue-soft)!important}
+.text-purple-800,.text-purple-700{color:var(--ap-blue-text)!important}
+.border-purple-400{border-color:#7ab4ef!important}.border-purple-200{border-color:#c9e1f9!important}
+.bg-emerald-600{background-color:var(--ap-green)!important}
+.hover\:bg-emerald-700:hover,.bg-emerald-700{background-color:var(--ap-green-deep)!important}
+.bg-emerald-500{background-color:#34c759!important}.bg-emerald-100{background-color:#d7f3df!important}
+.bg-emerald-50{background-color:var(--ap-green-soft)!important}
+.text-emerald-800,.text-emerald-700{color:#1f7a35!important}
+.text-emerald-600,.text-emerald-500{color:var(--ap-green-deep)!important}
+.border-emerald-400{border-color:#59c97e!important}.border-emerald-200{border-color:#bfe9cb!important}
+
+/* ── Surfaces & polish (Apple restraint) ── */
+.bg-gray-100{background-color:#e8e8ed!important}
+.rounded-2xl{border-radius:16px!important}.rounded-3xl{border-radius:20px!important}
+.student-card{border-radius:18px;border-color:var(--ap-hairline)!important}
+.student-card:hover{box-shadow:0 4px 24px rgba(0,0,0,.08)!important;transform:translateY(-1px)}
+.shadow-xl,.shadow-lg{box-shadow:0 1px 2px rgba(0,0,0,.05),0 16px 40px rgba(0,0,0,.10)!important}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(0,113,227,.4);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){
+  .ap-rise,.welcome-pulse,.pulse-ring,.bday-pulse{animation:none!important}
+}
+</style>
 </body>
 </html>
 
