@@ -2239,5 +2239,89 @@ async function adminForceCheckout(rid, name){
   }, true);
 })();
 </script>
+
+<!-- AMICUS NEXTGEN SKIN — shared visual layer (2026-08), logic untouched -->
+<style id="amicus-skin">
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap');
+:root{
+  --ng-bg:#ffffff; --ng-bg2:#fafafa; --ng-ink:#17171b; --ng-sub:#6e6e73;
+  --ng-black:#111114; --ng-black-hover:#2b2b30;
+  --ng-lav:#edebf7; --ng-lav-deep:#dcd8ef; --ng-lav-text:#4c4570;
+  --ng-green:#2e9e5b; --ng-green-deep:#247c47; --ng-green-soft:#eaf7ef;
+  --ng-hairline:rgba(0,0,0,.10);
+}
+html{background:var(--ng-bg)}
+body{background:var(--ng-bg)!important;color:var(--ng-ink)}
+h1,h2,h3{font-family:'Poppins','Noto Sans KR',sans-serif!important;letter-spacing:-.02em;font-weight:700}
+
+/* ── Welcome hero — big type on white ── */
+.ap-hero{background:#fff;overflow:hidden}
+.ap-glow{position:absolute;bottom:-260px;left:50%;transform:translateX(-50%);width:720px;height:480px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(122,110,182,.14),rgba(122,110,182,0));pointer-events:none}
+.ap-mark{width:84px;height:84px;border-radius:24px;background:var(--ng-lav);display:flex;align-items:center;justify-content:center;
+  font-size:42px;border:1px solid rgba(76,69,112,.12)}
+.ap-eyebrow{font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;letter-spacing:.28em;color:var(--ng-sub)}
+.ap-title{font-family:'Poppins','Noto Sans KR',sans-serif;font-size:52px;line-height:1.02;font-weight:800;letter-spacing:-.035em;color:var(--ng-ink)}
+.ap-subtitle{font-size:17px;font-weight:500;color:var(--ng-sub);letter-spacing:-.01em}
+.ap-date{font-size:13px;color:#a1a1a6}
+.ap-cta-primary{background:var(--ng-black);color:#fff;font-family:'Poppins','Noto Sans KR',sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.16)}
+.ap-cta-primary:hover{background:var(--ng-black-hover)}
+.ap-cta-sub{font-weight:500;opacity:.8;font-size:15px}
+.ap-cta-secondary{background:#fff;color:var(--ng-ink);font-family:'Poppins','Noto Sans KR',sans-serif;border:1.5px solid var(--ng-ink);box-shadow:none}
+.ap-cta-secondary:hover{background:var(--ng-bg2)}
+.ap-cta-sub2{font-weight:500;color:var(--ng-sub);font-size:15px}
+.ap-footlink{font-size:13px;font-weight:600;color:var(--ng-sub);text-decoration:none}
+.ap-footlink:hover{color:var(--ng-ink);text-decoration:underline}
+.ap-dot{width:3px;height:3px;border-radius:50%;background:#c7c7cc;display:inline-block}
+@keyframes apRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.ap-rise{animation:apRise .7s cubic-bezier(.25,.6,.2,1) both}
+
+/* ── Header: white, hairline, bold wordmark ── */
+#mainHeader{background:rgba(255,255,255,.85)!important;-webkit-backdrop-filter:saturate(180%) blur(16px);
+  backdrop-filter:saturate(180%) blur(16px);border-bottom:1px solid var(--ng-hairline)!important;box-shadow:none!important}
+#mainHeader h1{font-family:'Poppins','Noto Sans KR',sans-serif;font-weight:700}
+
+/* ── Palette remap: indigo/purple → ink + lavender tints · emerald → muted green ── */
+.bg-indigo-600{background-color:var(--ng-black)!important}
+.hover\:bg-indigo-700:hover,.bg-indigo-700{background-color:var(--ng-black-hover)!important}
+.bg-indigo-500{background-color:#3a3a40!important}.bg-indigo-400{background-color:#55555c!important}
+.bg-indigo-100{background-color:var(--ng-lav-deep)!important}
+.bg-indigo-50,.hover\:bg-indigo-50:hover{background-color:var(--ng-lav)!important}
+.text-indigo-700{color:var(--ng-lav-text)!important}
+.text-indigo-600,.hover\:text-indigo-600:hover{color:var(--ng-ink)!important}
+.text-indigo-500{color:#3a3a40!important}.text-indigo-400{color:#8b87a3!important}
+.text-indigo-300{color:#a9a5bd!important}.text-indigo-200{color:#c9c6d8!important}
+.border-indigo-400,.hover\:border-indigo-400:hover{border-color:#8b87a3!important}
+.border-indigo-300{border-color:#b9b5cc!important}.border-indigo-200{border-color:var(--ng-lav-deep)!important}
+.border-indigo-100{border-color:var(--ng-lav)!important}
+.focus\:border-indigo-400:focus{border-color:var(--ng-ink)!important}
+.ring-indigo-400{--tw-ring-color:rgba(17,17,20,.3)!important}
+.bg-purple-600{background-color:var(--ng-black)!important}.bg-purple-500{background-color:#3a3a40!important}
+.bg-purple-100{background-color:var(--ng-lav-deep)!important}.bg-purple-50{background-color:var(--ng-lav)!important}
+.text-purple-800,.text-purple-700{color:var(--ng-lav-text)!important}
+.border-purple-400{border-color:#8b87a3!important}.border-purple-200{border-color:var(--ng-lav-deep)!important}
+.bg-emerald-600{background-color:var(--ng-green)!important}
+.hover\:bg-emerald-700:hover,.bg-emerald-700{background-color:var(--ng-green-deep)!important}
+.bg-emerald-500{background-color:#37b268!important}.bg-emerald-100{background-color:#d8efe1!important}
+.bg-emerald-50{background-color:var(--ng-green-soft)!important}
+.text-emerald-800,.text-emerald-700{color:var(--ng-green-deep)!important}
+.text-emerald-600,.text-emerald-500{color:var(--ng-green)!important}
+.border-emerald-400{border-color:#5fbd85!important}.border-emerald-200{border-color:#c3e6d0!important}
+
+/* ── Pills, cards, polish (Friends restraint) ── */
+.bg-gray-100{background-color:#f2f2f4!important}
+.rounded-2xl{border-radius:16px!important}.rounded-3xl{border-radius:20px!important}
+.student-card{border-radius:16px;border-color:var(--ng-hairline)!important}
+.student-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.10)!important;transform:translateY(-1px)}
+.shadow-xl,.shadow-lg{box-shadow:0 1px 2px rgba(0,0,0,.05),0 16px 40px rgba(0,0,0,.10)!important}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(17,17,20,.35);outline-offset:2px}
+#cwoBtn{background:var(--ng-black)!important;box-shadow:0 6px 20px rgba(0,0,0,.25)!important}
+.from-indigo-600,.from-purple-600,.from-indigo-500,.from-purple-500{--tw-gradient-from:#17171b!important;--tw-gradient-to:rgba(23,23,27,0)!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important}
+.to-purple-600,.to-indigo-600,.to-purple-500,.to-indigo-500{--tw-gradient-to:#3a3a40!important}
+.via-indigo-600,.via-purple-600{--tw-gradient-stops:var(--tw-gradient-from),#2b2b30,var(--tw-gradient-to)!important}
+@media (prefers-reduced-motion:reduce){
+  .ap-rise,.welcome-pulse,.pulse-ring,.bday-pulse{animation:none!important}
+}
+</style>
 </body>
 </html>

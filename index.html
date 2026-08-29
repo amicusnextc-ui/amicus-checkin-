@@ -85,11 +85,9 @@ gmp-place-autocomplete { display: block; width: 100%; }
   <div class="w-full max-w-xs space-y-3 relative ap-rise" style="animation-delay:.08s">
     <p class="text-center text-sm font-medium mb-5" style="color:#86868b">Welcome! Please sign in here&nbsp;👋</p>
     <button onclick="startCheckin()" class="w-full py-4 rounded-full ap-cta-primary text-[17px] font-semibold active:scale-[.97] transition-all flex items-center justify-center gap-2.5">
-      <span class="text-xl">✅</span>
       <span>Check In<span class="ap-cta-sub"> · 출석 체크인</span></span>
     </button>
     <button onclick="startCheckout()" class="w-full py-4 rounded-full ap-cta-secondary text-[17px] font-semibold active:scale-[.97] transition-all flex items-center justify-center gap-2.5">
-      <span class="text-xl">🙏</span>
       <span>Check Out<span class="ap-cta-sub2"> · 체크아웃</span></span>
     </button>
   </div>
@@ -1172,7 +1170,7 @@ document.getElementById("visitorModal").addEventListener("click",function(e){if(
   </div>
 
 <!-- ===== CHECKOUT BY NAME PANEL (added 2026-04-26) ===== -->
-<button id="cwoBtn" onclick="cwoOpen()" style="position:fixed;bottom:20px;right:20px;background:#10b981;color:white;border:none;padding:14px 22px;border-radius:50px;font-weight:bold;font-size:14px;box-shadow:0 6px 20px rgba(16,185,129,0.4);cursor:pointer;z-index:9998;">🔍 이름으로 체크아웃</button>
+<button id="cwoBtn" onclick="cwoOpen()" style="position:fixed;bottom:20px;right:20px;background:#10b981;color:white;border:none;padding:14px 22px;border-radius:50px;font-weight:bold;font-size:14px;box-shadow:0 6px 20px rgba(16,185,129,0.4);cursor:pointer;z-index:9998;">이름으로 체크아웃</button>
 <div id="cwoPanel" style="display:none;position:fixed;bottom:20px;right:20px;background:white;border:2px solid #10b981;border-radius:14px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:9999;width:360px;max-width:92vw;max-height:80vh;flex-direction:column;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
     <strong style="font-size:16px;">🔍 이름으로 체크아웃</strong>
@@ -2126,6 +2124,9 @@ h1,h2,h3{font-family:'Poppins','Noto Sans KR',sans-serif!important;letter-spacin
 .shadow-xl,.shadow-lg{box-shadow:0 1px 2px rgba(0,0,0,.05),0 16px 40px rgba(0,0,0,.10)!important}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(17,17,20,.35);outline-offset:2px}
 #cwoBtn{background:var(--ng-black)!important;box-shadow:0 6px 20px rgba(0,0,0,.25)!important}
+.from-indigo-600,.from-purple-600,.from-indigo-500,.from-purple-500{--tw-gradient-from:#17171b!important;--tw-gradient-to:rgba(23,23,27,0)!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important}
+.to-purple-600,.to-indigo-600,.to-purple-500,.to-indigo-500{--tw-gradient-to:#3a3a40!important}
+.via-indigo-600,.via-purple-600{--tw-gradient-stops:var(--tw-gradient-from),#2b2b30,var(--tw-gradient-to)!important}
 @media (prefers-reduced-motion:reduce){
   .ap-rise,.welcome-pulse,.pulse-ring,.bday-pulse{animation:none!important}
 }
