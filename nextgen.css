@@ -78,6 +78,10 @@ h1,h2,h3{font-family:var(--ng-display);letter-spacing:-.02em;font-weight:700}
    through. This is the one deliberate !important in the system.            */
 .hidden{display:none !important}
 .ng-step-pane{display:flex;flex-direction:column;flex:1}
+/* Vertical stacks that JS shows/hides — never set display inline, or
+   classList.remove("hidden") cannot bring them back. */
+.ng-stack{display:flex;flex-direction:column;gap:20px}
+.ng-stack-sm{display:flex;flex-direction:column;gap:12px}
 
 /* ── kiosk shell ──────────────────────────────────────────────────────────
    The mockups are 768×1024 iPad portrait. ng-kiosk fills the viewport up to
