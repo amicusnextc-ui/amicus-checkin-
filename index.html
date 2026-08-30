@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/nextgen.css">
+<link rel="stylesheet" href="/nextgen.css?v=20260830a">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgc7ns90iT3zCprGXX9-fOnlWTgsQzPhM&libraries=places&loading=async&callback=_onGoogleMapsReady"></script>
@@ -789,10 +789,19 @@ function onNameInput(val) {
         if(count) count.textContent = students.length + '명 · 탭하여 선택하세요';
 
         // Group siblings (same guardian phone) so a parent sees their own children together
+        /* Sibling key. Phone is the reliable signal, but visitor registrations
+           often have no guardian phone on file, which used to drop each child
+           into a group of one (Tylor / Dustin Shin, 엄지호 / 엄지율). Fall back
+           to the guardian's name before giving up and keying on the id. */
         var phones = {}, order = [];
         students.forEach(function(s) {
-          var phone = s.phone || s.fatherPhone || s.motherPhone || '';
-          var key = phone.slice(-4) || s.id;
+          var phone = (s.phone || s.fatherPhone || s.motherPhone || '').replace(/\D/g,'');
+          var guard = [s.fatherName, s.motherName, s.guardian]
+                        .map(function(v){ return (v||'').trim(); })
+                        .filter(Boolean).join('|');
+          var key = phone.length >= 4 ? 'p:' + phone.slice(-4)
+                  : guard             ? 'g:' + guard
+                  : 'i:' + s.id;
           if(!phones[key]) { phones[key] = []; order.push(key); }
           phones[key].push(s);
         });
