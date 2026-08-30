@@ -789,25 +789,47 @@ function onNameInput(val) {
         if(count) count.textContent = students.length + '명 · 탭하여 선택하세요';
 
         // Group siblings (same guardian phone) so a parent sees their own children together
-        /* Sibling key = parent names. Phone looked like the reliable signal
-           but the real roster disproves it: Tylor and Dustin Shin share both
-           parents (신종율 / 김경은) yet their father's numbers differ by one
-           digit (…6638 vs …6639), and 이혜나 / 이인요 share 이성욱 / 이미화 while
-           their primary phone fields point at different parents. Names are
-           what actually match, so key on those and use phone only as a last
-           resort before giving up. */
+        /* Family linking. Exact-matching the parent-name set fails on the real
+           roster, because one sibling's record often carries both parents and
+           the other only one — 엄지호 {엄기한} vs 엄지율 {엄기한, 백송이},
+           박서준 {박재형} vs 박서연 {박재형, 김희선}. Phone is no better:
+           Tylor and Dustin Shin share both parents but their fathers' numbers
+           differ by a digit.
+
+           So: link two students when ANY parent identifier overlaps — a
+           father/mother name, a guardian name, or a phone number — and take
+           the connected components. One shared parent is enough. */
         var norm = function(v){ return (v||'').replace(/\s+/g,'').toLowerCase(); };
+        var tokensFor = function(st){
+          var t = {};
+          [st.fatherName, st.motherName].forEach(function(v){
+            var n = norm(v); if(n) t['n:'+n] = 1;
+          });
+          String(st.guardian||'').split(/[\/,·]/).forEach(function(v){
+            var n = norm(v); if(n) t['n:'+n] = 1;
+          });
+          [st.fatherPhone, st.motherPhone, st.phone].forEach(function(v){
+            var d = String(v||'').replace(/\D/g,''); if(d.length >= 7) t['p:'+d] = 1;
+          });
+          return Object.keys(t);
+        };
+
+        var parent = students.map(function(_,i){ return i; });
+        var find = function(i){ while(parent[i] !== i){ parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
+        var union = function(i,j){ var a = find(i), b = find(j); if(a !== b) parent[b] = a; };
+
+        var seen = {};
+        students.forEach(function(st, i){
+          tokensFor(st).forEach(function(tok){
+            if(seen[tok] !== undefined) union(seen[tok], i); else seen[tok] = i;
+          });
+        });
+
         var phones = {}, order = [];
-        students.forEach(function(s) {
-          var parents = [norm(s.fatherName), norm(s.motherName)].filter(Boolean).sort().join('|');
-          var guard   = norm(s.guardian).split('/').filter(Boolean).sort().join('|');
-          var phone   = (s.phone || s.fatherPhone || s.motherPhone || '').replace(/\D/g,'');
-          var key = parents            ? 'n:' + parents
-                  : guard              ? 'g:' + guard
-                  : phone.length >= 4  ? 'p:' + phone.slice(-4)
-                  : 'i:' + s.id;
+        students.forEach(function(st, i){
+          var key = 'f:' + find(i);
           if(!phones[key]) { phones[key] = []; order.push(key); }
-          phones[key].push(s);
+          phones[key].push(st);
         });
 
         var html = '';
