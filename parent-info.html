@@ -10,172 +10,141 @@
 <link rel="stylesheet" href="/nextgen.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-* { font-family: 'Noto Sans KR', Arial, sans-serif; }
-.field-filled { background-color: #f0fdf4; border-color: #10b981; }
-.field-empty { background-color: #fef2f2; border-color: #fca5a5; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.fade-in { animation: fadeIn .3s ease-out; }
+/* Palette + type come from /nextgen.css. 2d's required-field signal: an
+   empty required field reads red, a satisfied one reads green. */
+body{font-family:var(--ng-body)}
+.field-filled{background:var(--ng-green-soft);border-color:var(--ng-green)}
+.field-empty{background:#fef2f2;border-color:#ef4444}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fade-in{animation:fadeIn .3s ease-out}
 </style>
 </head>
-<body class="ng-legacy pb-20">
+<body style="padding-bottom:40px">
 
-<header class="bg-white shadow-sm border-b border-gray-100">
-  <div class="max-w-2xl mx-auto px-4 py-5">
-    <div id="adminBackBar" class="hidden mb-3"><button onclick="goBackAdmin()" class="text-sm text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">← 명단으로 돌아가기</button></div>
-    <h1 class="text-xl sm:text-2xl font-black text-gray-900">📝 학부모 정보 입력</h1>
-    <p class="text-xs sm:text-sm text-gray-500 mt-1">Parent Information Form · Amicus Presbyterian Church</p>
+<header class="ng-header" style="flex-direction:column;align-items:stretch;gap:0">
+  <div id="adminBackBar" class="hidden" style="margin-bottom:12px">
+    <button onclick="goBackAdmin()" class="ng-back" type="button"><span aria-hidden="true">←</span> 명단으로 돌아가기</button>
+  </div>
+  <h1 class="ng-title-sm">학생 정보 업데이트</h1>
+  <p class="ng-sub-sm" style="margin-top:6px">Parent Information Form · Amicus Presbyterian Church</p>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+    <div class="ng-bar"><i id="piProgressBar" style="width:0%"></i></div>
+    <span id="piProgressLabel" style="font:600 12px 'Poppins',sans-serif;color:var(--ng-sub)">0 / 11</span>
   </div>
 </header>
 
-<main class="max-w-2xl mx-auto px-4 py-6">
+<main class="ng-kiosk ng-kiosk-pad" style="padding-top:26px;padding-bottom:40px">
 
-<!-- LOADING -->
-<div id="loadingSection" class="text-center py-20">
-  <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3"></div>
-  <p class="text-gray-500 text-sm">학생 정보 불러오는 중...</p>
+<div id="loadingSection" style="text-align:center;padding:80px 0">
+  <div class="spin" style="width:34px;height:34px;border:3px solid var(--ng-lav-deep);border-top-color:var(--ng-lav-text);border-radius:50%;margin:0 auto 12px;animation:spin .7s linear infinite"></div>
+  <p class="ng-sub-sm">학생 정보 불러오는 중...</p>
 </div>
 
-<!-- ERROR -->
-<div id="errorSection" class="hidden bg-white rounded-2xl shadow-md p-8 text-center fade-in">
-  <div class="text-5xl mb-3">⚠️</div>
-  <h2 id="errTitle" class="text-lg font-bold text-gray-900 mb-2">잘못된 링크</h2>
-  <p id="errMsg" class="text-sm text-gray-600 mb-4">학생 정보를 찾을 수 없습니다. 이메일/카톡의 정확한 링크를 사용해주세요.</p>
-  <p class="text-xs text-gray-400">문의: amicusnextc@gmail.com</p>
+<div id="errorSection" class="hidden ng-note ng-note-danger fade-in" style="text-align:center;padding:34px 24px">
+  <div style="font:700 18px 'Noto Sans KR',sans-serif" id="errTitle">잘못된 링크</div>
+  <div style="font:500 14px/1.6 'Noto Sans KR',sans-serif" id="errMsg">학생 정보를 찾을 수 없습니다. 이메일/카톡의 정확한 링크를 사용해주세요.</div>
+  <div style="font:500 12px 'Noto Sans KR',sans-serif;opacity:.8">문의: amicusnextc@gmail.com</div>
 </div>
 
-<!-- FORM -->
-<form id="formSection" class="hidden space-y-5 fade-in" onsubmit="return handleSubmit(event)">
+<form id="formSection" class="hidden ng-stack fade-in" onsubmit="return handleSubmit(event)">
 
-  <!-- Student summary card -->
-  <div class="bg-white rounded-2xl shadow-md p-5 border border-indigo-100">
-    <div class="flex items-center gap-3 mb-3">
-      <div id="studentAvatar" class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-lg">?</div>
-      <div class="flex-1 min-w-0">
-        <h2 id="studentName" class="text-lg font-bold text-gray-900 truncate"></h2>
-        <p class="text-xs text-gray-500"><span id="studentDept"></span> · <span id="studentAmc"></span></p>
+  <!-- Student summary -->
+  <div class="ng-panel ng-stack-sm">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div id="studentAvatar" class="ng-avatar" style="background:var(--ng-lav);color:var(--ng-lav-text)">?</div>
+      <div style="flex:1;min-width:0">
+        <h2 id="studentName" style="font:700 20px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin:0;overflow:hidden;text-overflow:ellipsis"></h2>
+        <p class="ng-sub-sm" style="margin-top:3px"><span id="studentDept"></span> · <span id="studentAmc" class="ng-mono"></span></p>
       </div>
     </div>
-    <p class="text-xs text-gray-500 bg-gray-50 rounded-lg p-2.5">아래 정보를 채워주세요. <strong class="text-emerald-700">초록</strong>=입력 완료, <strong class="text-red-600">빨강</strong>=미입력. 비어있는 곳만 채우셔도 됩니다.</p>
+    <p style="font:500 13px/1.6 'Noto Sans KR',sans-serif;color:var(--ng-sub);background:var(--ng-bg2);border-radius:var(--ng-r-sm);padding:12px 14px;margin:0">
+      아래 정보를 채워주세요. <strong style="color:var(--ng-green-deep)">초록</strong> = 입력 완료, <strong style="color:#dc2626">빨강</strong> = 미입력. 비어있는 곳만 채우셔도 됩니다.
+    </p>
   </div>
 
-  <!-- Already-submitted banner (shown when all fields filled) -->
-  <div id="alreadyFilledBanner" class="hidden bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 text-center">
-    <div class="text-3xl mb-2">✅</div>
-    <p class="font-bold text-emerald-800 text-sm mb-1">이미 작성 완료된 정보입니다</p>
-    <p class="text-xs text-emerald-700">수정사항이 없으시면 그냥 닫으셔도 됩니다.<br/>변경 사항이 있으시면 아래에서 수정 후 저장해주세요.</p>
+  <div id="alreadyFilledBanner" class="hidden ng-note ng-note-green" style="text-align:center;align-items:center">
+    <div style="width:56px;height:56px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font:400 26px system-ui,sans-serif;color:var(--ng-green)">✓</div>
+    <div style="font:700 15px 'Noto Sans KR',sans-serif">이미 작성 완료된 정보입니다</div>
+    <div class="ng-note-body" style="font-size:13px">수정사항이 없으시면 그냥 닫으셔도 됩니다.<br/>변경 사항이 있으시면 아래에서 수정 후 저장해주세요.</div>
   </div>
 
-  <!-- Student info section -->
-  <section class="bg-white rounded-2xl shadow-md p-5">
-    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">👤 학생 정보 <span class="text-xs text-gray-400 font-normal">Student Info</span></h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <div>
-        <label class="block text-xs font-bold text-gray-600 mb-1">영문 이름 / Name (English)</label>
-        <input id="f_nameEN" type="text" required placeholder="예: John Kim" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 mb-1">학년 / Grade</label>
-        <input id="f_grade" type="text" required placeholder="예: 5th grade" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
-      <div class="sm:col-span-2">
-        <label class="block text-xs font-bold text-gray-600 mb-1">학교 / School</label>
-        <input id="f_school" type="text" required placeholder="예: Olympian High School" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 mb-1">생년월일 / Date of Birth</label>
-        <input id="f_dob" type="date" required class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 mb-1">세례 여부 / Baptized</label>
-        <select id="f_baptized" required class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors bg-white">
+  <!-- Student -->
+  <section class="ng-panel ng-stack-sm">
+    <div class="ng-section-label">학생 정보 <span style="color:var(--ng-muted);font-weight:500">Student Info</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+      <div class="ng-field"><label class="ng-field-label" for="f_nameEN">영문 이름 / Name (English)</label>
+        <input id="f_nameEN" type="text" required placeholder="예: John Kim" class="ng-input ng-input-sm"/></div>
+      <div class="ng-field"><label class="ng-field-label" for="f_grade">학년 / Grade</label>
+        <input id="f_grade" type="text" required placeholder="예: 5th grade" class="ng-input ng-input-sm"/></div>
+      <div class="ng-field" style="grid-column:1/-1"><label class="ng-field-label" for="f_school">학교 / School</label>
+        <input id="f_school" type="text" required placeholder="예: Olympian High School" class="ng-input ng-input-sm"/></div>
+      <div class="ng-field"><label class="ng-field-label" for="f_dob">생년월일 / Date of Birth</label>
+        <input id="f_dob" type="date" required class="ng-input ng-input-sm ng-input-mono"/></div>
+      <div class="ng-field"><label class="ng-field-label" for="f_baptized">세례 여부 / Baptized</label>
+        <select id="f_baptized" required class="ng-input ng-input-sm" style="background-position:calc(100% - 20px) 23px,calc(100% - 15px) 23px">
           <option value="">선택해주세요 / Select</option>
           <option value="세례">세례 받음 / Baptized</option>
           <option value="유아세례">유아세례 / Infant Baptism</option>
           <option value="입교">입교 / Confirmation</option>
           <option value="미세례">아직 안 받음 / Not yet</option>
-          <option value="확인필요">모름 / Don't know</option>
-        </select>
-      </div>
-      <div class="sm:col-span-2">
-        <label class="block text-xs font-bold text-gray-600 mb-1">⚠️ 알러지 / Allergies <span class="text-gray-400 font-normal">(없으면 "없음")</span></label>
-        <input id="f_allergy" type="text" required placeholder="예: 땅콩, 우유 / 없음" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
+          <option value="확인필요">모름 / Don&#x2019;t know</option>
+        </select></div>
+      <div class="ng-field" style="grid-column:1/-1"><label class="ng-field-label" for="f_allergy">⚠️ 알러지 / Allergies <span style="color:var(--ng-muted);font-weight:500">(없으면 &ldquo;없음&rdquo;)</span></label>
+        <input id="f_allergy" type="text" required placeholder="예: 땅콩, 우유 / 없음" class="ng-input ng-input-sm"/></div>
     </div>
   </section>
 
-  <!-- Mother section -->
-  <section class="bg-white rounded-2xl shadow-md p-5">
-    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">👩 어머니 / Mother</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <div>
-        <label class="block text-xs font-bold text-gray-600 mb-1">이름 / Name</label>
-        <input id="f_motherName" type="text" required placeholder="예: 김민지" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 mb-1">연락처 / Phone</label>
-        <input id="f_motherPhone" type="tel" required placeholder="858-555-1234" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
-      <div class="sm:col-span-2">
-        <label class="block text-xs font-bold text-gray-600 mb-1">이메일 / Email <span class="text-red-400">*</span></label>
-        <input id="f_motherEmail" type="email" required placeholder="mom@example.com" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
+  <!-- Mother -->
+  <section class="ng-panel ng-stack-sm">
+    <div class="ng-section-label">어머니 / Mother</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+      <div class="ng-field"><label class="ng-field-label" for="f_motherName">이름 / Name</label>
+        <input id="f_motherName" type="text" required placeholder="예: 김민지" class="ng-input ng-input-sm"/></div>
+      <div class="ng-field"><label class="ng-field-label" for="f_motherPhone">연락처 / Phone</label>
+        <input id="f_motherPhone" type="tel" required placeholder="858-555-1234" class="ng-input ng-input-sm ng-input-mono"/></div>
+      <div class="ng-field" style="grid-column:1/-1"><label class="ng-field-label" for="f_motherEmail">이메일 / Email <span class="ng-req">*</span></label>
+        <input id="f_motherEmail" type="email" required placeholder="mom@example.com" class="ng-input ng-input-sm"/></div>
     </div>
   </section>
 
-  <!-- Father section -->
-  <section class="bg-white rounded-2xl shadow-md p-5">
-    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">👨 아버지 / Father</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <div>
-        <label class="block text-xs font-bold text-gray-600 mb-1">이름 / Name</label>
-        <input id="f_fatherName" type="text" required placeholder="예: 김철수" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-600 mb-1">연락처 / Phone</label>
-        <input id="f_fatherPhone" type="tel" required placeholder="858-555-5678" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
-      <div class="sm:col-span-2">
-        <label class="block text-xs font-bold text-gray-600 mb-1">이메일 / Email</label>
-        <input id="f_fatherEmail" type="email" required placeholder="dad@example.com" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
+  <!-- Father -->
+  <section class="ng-panel ng-stack-sm">
+    <div class="ng-section-label">아버지 / Father</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+      <div class="ng-field"><label class="ng-field-label" for="f_fatherName">이름 / Name</label>
+        <input id="f_fatherName" type="text" required placeholder="예: 김철수" class="ng-input ng-input-sm"/></div>
+      <div class="ng-field"><label class="ng-field-label" for="f_fatherPhone">연락처 / Phone</label>
+        <input id="f_fatherPhone" type="tel" required placeholder="858-555-5678" class="ng-input ng-input-sm ng-input-mono"/></div>
+      <div class="ng-field" style="grid-column:1/-1"><label class="ng-field-label" for="f_fatherEmail">이메일 / Email</label>
+        <input id="f_fatherEmail" type="email" required placeholder="dad@example.com" class="ng-input ng-input-sm"/></div>
     </div>
   </section>
 
-  <!-- Address + Emergency -->
-  <section class="bg-white rounded-2xl shadow-md p-5">
-    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">🏠 주소</h3>
-    <div class="space-y-3">
-      <div>
-        <label class="block text-xs font-bold text-gray-600 mb-1">집주소 / Home Address</label>
-        <input id="f_address" type="text" required placeholder="예: 12345 Some St, San Diego, CA 92128" class="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:border-indigo-400 transition-colors"/>
-      </div>
-          </div>
+  <!-- Address -->
+  <section class="ng-panel ng-stack-sm">
+    <div class="ng-section-label">주소</div>
+    <div class="ng-field"><label class="ng-field-label" for="f_address">집주소 / Home Address</label>
+      <input id="f_address" type="text" required placeholder="예: 12345 Some St, San Diego, CA 92128" class="ng-input ng-input-sm"/></div>
   </section>
 
-  <!-- Submit -->
-  <div class="sticky bottom-4 z-10">
-    <button id="submitBtn" type="submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black shadow-xl hover:shadow-2xl transition-all text-base">
-      💾 정보 저장하기 / Save Information
-    </button>
+  <p id="formError" class="hidden ng-note ng-note-danger" style="font:600 14px 'Noto Sans KR',sans-serif;text-align:center"></p>
+
+  <div style="position:sticky;bottom:16px;z-index:10">
+    <button id="submitBtn" type="submit" class="ng-btn ng-btn-primary">정보 저장하기 / Save Information</button>
   </div>
-
-  <p id="formError" class="hidden text-center text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded-xl p-3"></p>
-
 </form>
 
-<!-- SUCCESS -->
-<div id="successSection" class="hidden bg-white rounded-2xl shadow-md p-8 text-center fade-in">
-  <div class="text-6xl mb-3">🎉</div>
-  <h2 class="text-xl font-black text-gray-900 mb-2">감사합니다!</h2>
-  <p class="text-sm text-gray-600 mb-4">정보가 저장되었습니다. 교육부에서 확인 후 학생 카드에 반영됩니다.</p>
-  <p class="text-sm text-gray-600 mb-6">Information saved successfully.</p>
-  <a href="https://www.amicuschurch.com/" class="inline-block px-6 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-bold hover:bg-gray-200 transition-colors">교회 홈페이지로 / Church Home →</a>
+<div id="successSection" class="hidden ng-note ng-note-green fade-in" style="text-align:center;align-items:center;padding:44px 24px">
+  <div style="width:80px;height:80px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font:400 36px system-ui,sans-serif;color:var(--ng-green)">✓</div>
+  <div style="font:800 26px 'Poppins','Noto Sans KR',sans-serif;letter-spacing:-.03em;color:var(--ng-ink)">감사합니다!</div>
+  <div class="ng-note-body">정보가 저장되었습니다. 교육부에서 확인 후 학생 카드에 반영됩니다.<br/>Information saved successfully.</div>
+  <a href="https://www.amicuschurch.com/" class="ng-btn ng-btn-outline ng-btn-sm" style="display:inline-flex;width:auto;padding:0 22px;text-decoration:none;margin-top:6px">교회 홈페이지로 / Church Home →</a>
 </div>
 
 </main>
 
-<footer class="text-center py-4 text-xs text-gray-400">
-  🏛️ 아미쿠스 장로교회 교육부 · Amicus Presbyterian Church
+<footer style="text-align:center;padding:20px 0 32px;font:500 12px 'Noto Sans KR',sans-serif;color:var(--ng-muted)">
+  아미쿠스 장로교회 교육부 · Amicus Presbyterian Church
 </footer>
 
 <script>
@@ -200,7 +169,24 @@ function setField(id, value) {
     el.classList.remove('field-empty');
     if (el.value.trim()) el.classList.add('field-filled');
     else el.classList.remove('field-filled');
+    piProgress();
   });
+  el.addEventListener('change', piProgress);
+  piProgress();
+}
+
+/* 2d progress bar — counts the form's own required fields. */
+var PI_FIELDS = ['f_nameEN','f_grade','f_school','f_dob','f_baptized','f_allergy',
+                 'f_motherName','f_motherPhone','f_motherEmail','f_fatherName','f_address'];
+function piProgress(){
+  var done = PI_FIELDS.filter(function(id){
+    var e = document.getElementById(id);
+    return e && String(e.value||'').trim();
+  }).length;
+  var bar = document.getElementById('piProgressBar');
+  var lab = document.getElementById('piProgressLabel');
+  if(bar) bar.style.width = Math.round(done / PI_FIELDS.length * 100) + '%';
+  if(lab) lab.textContent = done + ' / ' + PI_FIELDS.length;
 }
 
 async function loadStudent() {
