@@ -173,11 +173,18 @@ gmp-place-autocomplete { display: block; width: 100%; }
         <input class="ng-pin" id="d3" maxlength="1" inputmode="none" pattern="[0-9]" type="text" aria-label="네 번째"/>
       </div>
 
-      <!-- Name search lives on the keypad, not in a separate mode (2c) -->
+      <!-- Name search: the field stays put and matches narrow underneath it
+           as you type. No jump to a separate results page. -->
       <div id="nameSearchSection" class="hidden ng-kiosk-pad" style="padding-top:20px">
-        <input id="nameInput" type="text" placeholder="이름 입력 (예: 봉서아)"
-          oninput="onNameInput(this.value)" class="ng-input"
-          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+        <div style="position:relative">
+          <input id="nameInput" type="text" placeholder="이름 입력 (예: 봉서아)"
+            oninput="onNameInput(this.value)" class="ng-input" style="height:64px;padding-right:56px"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+          <button type="button" id="nameClear" class="ng-x hidden" onclick="ngClearName()" aria-label="지우기"
+            style="position:absolute;right:10px;top:50%;transform:translateY(-50%)">✕</button>
+        </div>
+        <p id="ciNameCount" class="ng-sub-sm" style="margin:12px 2px 0"></p>
+        <div id="ciNameResults" style="padding-top:12px;display:flex;flex-direction:column;gap:12px"></div>
       </div>
 
       <div id="ciKeypad" class="ng-kiosk-pad ng-keypad" style="padding-top:32px">
@@ -198,8 +205,14 @@ gmp-place-autocomplete { display: block; width: 100%; }
       <button type="button" id="tabPhone" onclick="setSearchMode('phone')" class="hidden"></button>
 
       <div class="ng-kiosk-pad" style="margin-top:auto;padding-top:24px;padding-bottom:32px;display:flex;flex-direction:column;gap:14px">
-        <p style="font:500 13px 'Noto Sans KR',sans-serif;color:var(--ng-muted);text-align:center;margin:0">한글 또는 영어 이름으로도 찾을 수 있어요</p>
+        <p id="ciStep1Hint" style="font:500 13px 'Noto Sans KR',sans-serif;color:var(--ng-muted);text-align:center;margin:0">한글 또는 영어 이름으로도 찾을 수 있어요</p>
         <button type="button" id="ciContinue" class="ng-btn ng-btn-primary" disabled onclick="ngContinue()">다음 · Continue</button>
+        <!-- name mode: check in whoever was tapped, without leaving this screen -->
+        <button type="button" id="ciNameSubmit" class="hidden ng-btn ng-btn-primary" disabled onclick="ngCheckinSelected()"
+          style="height:82px;justify-content:space-between;padding:0 30px">
+          <span id="ciNameSubmitLabel" style="font-size:22px;letter-spacing:-.02em">자녀를 선택해주세요</span>
+          <span style="font:500 15px 'Poppins',sans-serif;color:rgba(255,255,255,.75)">CHECK IN →</span>
+        </button>
       </div>
     </div>
 
@@ -651,33 +664,64 @@ function ngContinue(){
 function setSearchMode(mode) {
   var phoneSection = document.getElementById('phoneDigitSection');
   var nameSection  = document.getElementById('nameSearchSection');
-  var tabName      = document.getElementById('tabName');
-  var checkinResults = document.getElementById('checkinResults');
+  var keypad       = document.getElementById('ciKeypad');
+  var contBtn      = document.getElementById('ciContinue');
+  var nameBtn      = document.getElementById('ciNameSubmit');
+  var hint         = document.getElementById('ciStep1Hint');
+  var isName = (mode === 'name');
 
-  if(mode === 'phone') {
-    if(phoneSection) phoneSection.classList.remove('hidden');
-    if(nameSection)  nameSection.classList.add('hidden');
-    if(tabName){ tabName.classList.remove('is-active'); tabName.textContent='이름 검색'; }
-    if(checkinResults) checkinResults.innerHTML = '';
+  /* Name mode swaps the numeric keypad out entirely — it cannot type Hangul,
+     and the device keyboard is what a parent will use. The field and its
+     results then own the screen. */
+  if(phoneSection) phoneSection.classList.toggle('hidden', isName);
+  if(keypad)       keypad.classList.toggle('hidden', isName);
+  if(nameSection)  nameSection.classList.toggle('hidden', !isName);
+  if(contBtn)      contBtn.classList.toggle('hidden', isName);
+  if(nameBtn)      nameBtn.classList.toggle('hidden', !isName);
+  if(hint)         hint.textContent = isName
+    ? '숫자 키패드로 돌아가려면 아래 전화번호로 찾기를 누르세요'
+    : '한글 또는 영어 이름으로도 찾을 수 있어요';
+
+  var sh=document.getElementById("searchHeader"), ss=document.getElementById("searchSubheader");
+  if(sh && ss){
+    if(isName){ sh.textContent="이름으로 검색"; ss.textContent="Search by name · 한글 또는 영어"; }
+    else { sh.textContent="전화번호 끝 4자리"; ss.textContent="Last 4 digits of registered phone number"; }
+  }
+
+  window._searchMode = mode;
+  window._ngSelected = {};
+  var host=document.getElementById('ciNameResults'); if(host) host.innerHTML='';
+  var cnt=document.getElementById('ciNameCount');    if(cnt) cnt.textContent='';
+  var clr=document.getElementById('nameClear');      if(clr) clr.classList.add('hidden');
+
+  if(isName){
+    var ni = document.getElementById('nameInput');
+    if(ni){ ni.value=''; setTimeout(function(){ ni.focus(); }, 100); }
+    ngBuildNameBackKey();
+  } else {
     ['d0','d1','d2','d3'].forEach(function(id){
       var el=document.getElementById(id); if(el){ el.value=''; el.classList.remove('filled'); }
     });
-  } else {
-    if(phoneSection) phoneSection.classList.add('hidden');
-    if(nameSection)  nameSection.classList.remove('hidden');
-    if(tabName){ tabName.classList.add('is-active'); tabName.textContent='끝 4자리'; }
-    if(checkinResults) checkinResults.innerHTML = '';
-    var nameInput = document.getElementById('nameInput');
-    if(nameInput){ nameInput.value=''; setTimeout(function(){ nameInput.focus(); }, 100); }
+    var back=document.getElementById('ciNameBack'); if(back) back.remove();
   }
-  var sh=document.getElementById("searchHeader"); var ss=document.getElementById("searchSubheader");
-  if(sh && ss){
-    if(mode==="phone"){ sh.textContent="전화번호 끝 4자리"; ss.textContent="Last 4 digits of registered phone number"; }
-    else { sh.textContent="이름 검색"; ss.textContent="Search by student name · 한글 또는 영어"; }
-  }
-  window._searchMode = mode;
   ngSyncContinue();
+  ngRefreshSubmit();
 }
+
+/* In name mode the keypad is gone, so the way back to the digits has to live
+   somewhere visible. */
+function ngBuildNameBackKey(){
+  if(document.getElementById('ciNameBack')) return;
+  var sec = document.getElementById('nameSearchSection');
+  if(!sec) return;
+  var b = document.createElement('button');
+  b.type='button'; b.id='ciNameBack'; b.className='ng-chip ng-chip-lg ng-chip-lav';
+  b.style.cssText='border:0;cursor:pointer;padding:10px 16px;margin-top:12px;align-self:flex-start';
+  b.textContent='← 전화번호로 찾기';
+  b.onclick=function(){ setSearchMode('phone'); };
+  sec.insertBefore(b, document.getElementById('ciNameCount'));
+}
+
 /* The 이름 검색 key toggles rather than one-way switching (it is a keypad key
    in 2c, not a tab), so a second tap returns to the digits. */
 (function(){
@@ -691,69 +735,83 @@ function setSearchMode(mode) {
 var _nameSearchTimer = null;
 function onNameInput(val) {
   clearTimeout(_nameSearchTimer);
-  if(!val || val.trim().length < 1) {
-    document.getElementById('checkinResults').innerHTML = '';
+  var host = document.getElementById('ciNameResults');
+  var count = document.getElementById('ciNameCount');
+  var clearBtn = document.getElementById('nameClear');
+  var trimmed = (val || '').trim();
+
+  if(clearBtn) clearBtn.classList.toggle('hidden', !trimmed);
+
+  if(!trimmed) {
+    if(host) host.innerHTML = '';
+    if(count) count.textContent = '';
+    window._ngSelected = {};
+    ngRefreshSubmit();
     return;
   }
+  if(count) count.textContent = '검색 중…';
+
+  /* Results narrow underneath the field as the parent types — the search box
+     never leaves the screen and there is no separate results page. */
   _nameSearchTimer = setTimeout(function() {
-    var trimmed = val.trim();
-    document.getElementById('checkinResults').innerHTML = '<div class="text-center py-6 text-gray-400">검색 중...</div>';
     fetch('/api/search-student?name=' + encodeURIComponent(trimmed))
       .then(function(r){ return r.json(); })
       .then(function(data) {
-        if(!data.students || data.students.length === 0) {
-          ngStep(2);
-          window._ngSearchKind = 'name';
-          var t0=document.getElementById('ciHouseTitle'), u0=document.getElementById('ciHouseSub');
-          if(t0) t0.textContent='결과가 없어요';
-          if(u0) u0.textContent=trimmed + ' (이)라는 이름을 찾을 수 없어요';
-          document.getElementById('checkinResults').innerHTML = '<div class="ng-panel" style="text-align:center;padding:34px 22px"><p style="font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-sub);margin:0 0 18px">이름을 다시 확인해주세요. 처음이시면 방문자 체크인을 눌러주세요.</p><button type="button" class="ng-btn ng-btn-outline ng-btn-sm" onclick="clearPinsAndReset()">다시 입력</button></div>';
+        var students = data.students || [];
+        window._ngSearchKind = 'name';
+        window._ngSelected = {};
+        if(!host) return;
+
+        if(!students.length) {
+          if(count) count.textContent = '';
+          host.innerHTML = '<div class="ng-panel" style="text-align:center;padding:28px 22px">'+
+            '<p style="font:700 16px \'Noto Sans KR\',sans-serif;color:var(--ng-ink);margin:0 0 6px">‘'+escapeHtml(trimmed)+'’ 검색 결과 없음</p>'+
+            '<p style="font:500 13.5px \'Noto Sans KR\',sans-serif;color:var(--ng-sub);margin:0">이름을 다시 확인해주세요. 처음이시면 아래 방문자 체크인을 눌러주세요.</p></div>';
           ngRefreshSubmit();
           return;
         }
-        (function(students) {
-        var container = document.getElementById('checkinResults');
-        if(!container) return;
-        var html = '';
-        var phones = {};
+
+        if(count) count.textContent = students.length + '명 · 탭하여 선택하세요';
+
+        // Group siblings (same guardian phone) so a parent sees their own children together
+        var phones = {}, order = [];
         students.forEach(function(s) {
           var phone = s.phone || s.fatherPhone || s.motherPhone || '';
           var key = phone.slice(-4) || s.id;
-          if(!phones[key]) phones[key] = [];
+          if(!phones[key]) { phones[key] = []; order.push(key); }
           phones[key].push(s);
         });
-        Object.keys(phones).forEach(function(key) {
+        var html = '';
+        order.forEach(function(key) {
           var group = phones[key];
           if(group.length > 1) {
-            html += '<div class="household-header"><span style="font:700 13px \'Noto Sans KR\',sans-serif;color:var(--ng-lav-text)">가족 체크인 · ' + group.length + '명</span></div>';
+            html += '<div class="household-header"><span style="font:700 13px \'Noto Sans KR\',sans-serif;color:var(--ng-lav-text)">같은 가정 · ' + group.length + '명</span></div>';
           }
           group.forEach(function(s) { html += studentCard(s); });
         });
-        ngStep(2);
-        window._ngSelected = {};
-        var t1=document.getElementById('ciHouseTitle'), u1=document.getElementById('ciHouseSub');
-        /* A name search matches parent and guardian names too (see
-           api/search-student.js), so results span unrelated families. It is
-           NOT a household — do not title it as one, and do not pre-select. */
-        window._ngSearchKind = 'name';
-        if(t1) t1.textContent = '\u2018' + trimmed + '\u2019 검색 결과';
-        if(u1) u1.textContent = students.length + '명 · 체크인할 자녀를 직접 선택해주세요';
-        container.innerHTML = html || '<div class="ng-panel" style="text-align:center;padding:34px 22px;font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-sub)">검색 결과 없음</div>';
-        // Register students in _studentMap so openModalById can find them
+        host.innerHTML = html;
+
         window._studentMap = window._studentMap || {};
         students.forEach(function(s) { window._studentMap[s.id] = s; });
-        // Load live status for each student
         students.forEach(function(s) { loadStatus(s); });
-      })(data.students);
-      }).catch(function(){ 
-        document.getElementById('checkinResults').innerHTML = '<div class="ng-note ng-note-danger">검색 오류가 발생했어요</div>';
+        ngRefreshSubmit();
+      }).catch(function(){
+        if(count) count.textContent = '';
+        if(host) host.innerHTML = '<div class="ng-note ng-note-danger">검색 오류가 발생했어요</div>';
       });
-  }, 400);
+  }, 250);
 }
+
+function ngClearName(){
+  var n = document.getElementById('nameInput');
+  if(n){ n.value=''; n.focus(); }
+  onNameInput('');
+}
+
 
 function startCheckin(){_currentMode="checkin";document.getElementById("welcomeScreen").classList.add("hidden");document.getElementById("mainHeader").classList.remove("hidden");document.getElementById("mainApp").classList.remove("hidden");document.getElementById("todayDate").textContent=dateStr;document.getElementById("checkinSection").classList.remove("hidden");document.getElementById("checkoutSection").classList.add("hidden");var mt=document.getElementById("modeTag");mt.textContent="출석 체크인";mt.className="ng-chip ng-chip-lg ng-chip-green";mt.classList.add("hidden");clearPins();setSearchMode("phone");ngStep(1);setTimeout(function(){var d=document.getElementById("d0");if(d)d.focus();},300);ngSyncCwoBtn();}
 function startCheckout(){_currentMode="checkout";document.getElementById("welcomeScreen").classList.add("hidden");document.getElementById("mainHeader").classList.remove("hidden");document.getElementById("mainApp").classList.remove("hidden");document.getElementById("todayDate").textContent=dateStr;document.getElementById("checkinSection").classList.add("hidden");document.getElementById("checkoutSection").classList.remove("hidden");var mt=document.getElementById("modeTag");mt.textContent="체크아웃";mt.className="ng-chip ng-chip-lg ng-chip-lav";mt.classList.add("hidden");clearPins();ngStep(1);setTimeout(function(){var c=document.getElementById("co0");if(c)c.focus();},300);ngSyncCwoBtn();}
-function clearPins(){["d0","d1","d2","d3","co0","co1","co2"].forEach(function(id){var el=document.getElementById(id);if(el){el.value="";el.classList.remove("filled");}});var ci=document.getElementById("checkinResults");if(ci)ci.innerHTML="";var co=document.getElementById("checkoutResults");if(co)co.innerHTML="";var wn=document.getElementById("ciWaiverNote");if(wn){wn.innerHTML="";wn.classList.add("hidden");}window._ngSelected={};window._ngWaiverBypass=false;ngSyncContinue();ngRefreshSubmit();}
+function clearPins(){["d0","d1","d2","d3","co0","co1","co2"].forEach(function(id){var el=document.getElementById(id);if(el){el.value="";el.classList.remove("filled");}});var ci=document.getElementById("checkinResults");if(ci)ci.innerHTML="";var co=document.getElementById("checkoutResults");if(co)co.innerHTML="";var wn=document.getElementById("ciWaiverNote");if(wn){wn.innerHTML="";wn.classList.add("hidden");}var nr=document.getElementById("ciNameResults");if(nr)nr.innerHTML="";var nc=document.getElementById("ciNameCount");if(nc)nc.textContent="";var ni2=document.getElementById("nameInput");if(ni2)ni2.value="";window._ngSelected={};window._ngWaiverBypass=false;ngSyncContinue();ngRefreshSubmit();}
 (function(){var digits=["d0","d1","d2","d3"];digits.forEach(function(id,i){var el=document.getElementById(id);el.addEventListener("input",function(){var v=this.value.replace(/[^0-9]/g,"");this.value=v.slice(-1);this.classList.toggle("filled",!!this.value);if(typeof ngSyncContinue==="function")ngSyncContinue();if(this.value&&i<digits.length-1)document.getElementById(digits[i+1]).focus();if(i===digits.length-1&&this.value){var pin=digits.map(function(d){return document.getElementById(d).value;}).join("");if(pin.length===4)searchByPhone(pin);}});el.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!this.value&&i>0)document.getElementById(digits[i-1]).focus();});});})();
 (function(){var digits=["co0","co1","co2"];digits.forEach(function(id,i){var el=document.getElementById(id);el.addEventListener("input",function(){var v=this.value.replace(/[^0-9]/g,"");this.value=v.slice(-1);this.classList.toggle("filled",!!this.value);if(typeof ngSyncContinue==="function")ngSyncContinue();if(this.value&&i<digits.length-1)document.getElementById(digits[i+1]).focus();if(i===digits.length-1&&this.value){var pin=digits.map(function(d){return document.getElementById(d).value;}).join("");if(pin.length===3)searchById(pin);}});el.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!this.value&&i>0)document.getElementById(digits[i-1]).focus();});});})();
 /* Household label. The mock reads "김 집사님 가정"; 집사 is a specific church
@@ -871,12 +929,13 @@ function ngPaintChild(sid){
 
 /* Bottom CTA label + the 2c waiver banner for whoever is still unsigned. */
 function ngRefreshSubmit(){
-  var btn=document.getElementById('ciSubmit'), lab=document.getElementById('ciSubmitLabel');
   var ids=Object.keys(window._ngSelected||{}).filter(function(k){return window._ngSelected[k];});
-  if(btn && lab){
+  [['ciSubmit','ciSubmitLabel'],['ciNameSubmit','ciNameSubmitLabel']].forEach(function(pair){
+    var btn=document.getElementById(pair[0]), lab=document.getElementById(pair[1]);
+    if(!btn||!lab) return;
     btn.disabled = ids.length===0;
     lab.textContent = ids.length ? (ids.length+'명 체크인') : '자녀를 선택해주세요';
-  }
+  });
   var note=document.getElementById('ciWaiverNote');
   if(!note) return;
   /* Only meaningful for a household lookup. On a name search the matches are
