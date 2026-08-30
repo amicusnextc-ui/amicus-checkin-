@@ -703,6 +703,7 @@ function onNameInput(val) {
       .then(function(data) {
         if(!data.students || data.students.length === 0) {
           ngStep(2);
+          window._ngSearchKind = 'name';
           var t0=document.getElementById('ciHouseTitle'), u0=document.getElementById('ciHouseSub');
           if(t0) t0.textContent='결과가 없어요';
           if(u0) u0.textContent=trimmed + ' (이)라는 이름을 찾을 수 없어요';
@@ -731,8 +732,12 @@ function onNameInput(val) {
         ngStep(2);
         window._ngSelected = {};
         var t1=document.getElementById('ciHouseTitle'), u1=document.getElementById('ciHouseSub');
-        if(t1) t1.textContent = ngHouseholdTitle(students);
-        if(u1) u1.textContent = '체크인할 자녀를 모두 선택해주세요 · ' + students.length + '명 검색됨';
+        /* A name search matches parent and guardian names too (see
+           api/search-student.js), so results span unrelated families. It is
+           NOT a household — do not title it as one, and do not pre-select. */
+        window._ngSearchKind = 'name';
+        if(t1) t1.textContent = '\u2018' + trimmed + '\u2019 검색 결과';
+        if(u1) u1.textContent = students.length + '명 · 체크인할 자녀를 직접 선택해주세요';
         container.innerHTML = html || '<div class="ng-panel" style="text-align:center;padding:34px 22px;font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-sub)">검색 결과 없음</div>';
         // Register students in _studentMap so openModalById can find them
         window._studentMap = window._studentMap || {};
@@ -763,6 +768,7 @@ function ngHouseholdTitle(students){
 async function searchByPhone(phone4){
   window._ngPin = phone4;
   window._ngSelected = {};
+  window._ngSearchKind = 'phone';
   var resEl=document.getElementById("checkinResults");
   ngStep(2);
   var title=document.getElementById('ciHouseTitle'), sub=document.getElementById('ciHouseSub');
@@ -873,6 +879,10 @@ function ngRefreshSubmit(){
   }
   var note=document.getElementById('ciWaiverNote');
   if(!note) return;
+  /* Only meaningful for a household lookup. On a name search the matches are
+     unrelated families, so naming their unsigned children here would be both
+     noise and a small privacy leak to whoever is standing at the kiosk. */
+  if(window._ngSearchKind !== 'phone'){ note.innerHTML=''; note.classList.add('hidden'); return; }
   var pending=[];
   Object.keys(_studentMap).forEach(function(id){
     var card=document.getElementById('card-'+id);
@@ -956,9 +966,13 @@ function loadStatus(s){
             if(e.key===' '||e.key==='Enter'){ e.preventDefault(); ngToggleChild(s.id); }
           });
         }
-        /* Pre-select everyone who is ready to go; leave unsigned waivers
-           unticked so the 2c banner is the thing that resolves them. */
-        if(window._ngSelected[s.id]===undefined) window._ngSelected[s.id] = !ngNeedsWaiver(s);
+        /* Pre-select only for a phone lookup, where the results really are
+           one household. Name results span families, so every child there
+           must be tapped deliberately — otherwise one tap on the CTA would
+           check in every match. */
+        if(window._ngSelected[s.id]===undefined){
+          window._ngSelected[s.id] = (window._ngSearchKind === 'phone') && !ngNeedsWaiver(s);
+        }
       } else {
         card.style.cursor='default';
         card.style.opacity='.72';
