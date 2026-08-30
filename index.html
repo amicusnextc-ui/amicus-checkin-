@@ -789,22 +789,27 @@ function onNameInput(val) {
         if(count) count.textContent = students.length + '명 · 탭하여 선택하세요';
 
         // Group siblings (same guardian phone) so a parent sees their own children together
-        /* Sibling key. Phone is the reliable signal, but visitor registrations
-           often have no guardian phone on file, which used to drop each child
-           into a group of one (Tylor / Dustin Shin, 엄지호 / 엄지율). Fall back
-           to the guardian's name before giving up and keying on the id. */
+        /* Sibling key = parent names. Phone looked like the reliable signal
+           but the real roster disproves it: Tylor and Dustin Shin share both
+           parents (신종율 / 김경은) yet their father's numbers differ by one
+           digit (…6638 vs …6639), and 이혜나 / 이인요 share 이성욱 / 이미화 while
+           their primary phone fields point at different parents. Names are
+           what actually match, so key on those and use phone only as a last
+           resort before giving up. */
+        var norm = function(v){ return (v||'').replace(/\s+/g,'').toLowerCase(); };
         var phones = {}, order = [];
         students.forEach(function(s) {
-          var phone = (s.phone || s.fatherPhone || s.motherPhone || '').replace(/\D/g,'');
-          var guard = [s.fatherName, s.motherName, s.guardian]
-                        .map(function(v){ return (v||'').trim(); })
-                        .filter(Boolean).join('|');
-          var key = phone.length >= 4 ? 'p:' + phone.slice(-4)
-                  : guard             ? 'g:' + guard
+          var parents = [norm(s.fatherName), norm(s.motherName)].filter(Boolean).sort().join('|');
+          var guard   = norm(s.guardian).split('/').filter(Boolean).sort().join('|');
+          var phone   = (s.phone || s.fatherPhone || s.motherPhone || '').replace(/\D/g,'');
+          var key = parents            ? 'n:' + parents
+                  : guard              ? 'g:' + guard
+                  : phone.length >= 4  ? 'p:' + phone.slice(-4)
                   : 'i:' + s.id;
           if(!phones[key]) { phones[key] = []; order.push(key); }
           phones[key].push(s);
         });
+
         var html = '';
         order.forEach(function(key) {
           var group = phones[key];
