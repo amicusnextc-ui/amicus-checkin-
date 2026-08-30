@@ -71,6 +71,14 @@ h1,h2,h3{font-family:var(--ng-display);letter-spacing:-.02em;font-weight:700}
 :where(button,a,input,select,textarea):focus-visible{
   outline:3px solid rgba(17,17,20,.35);outline-offset:2px}
 
+/* ── visibility primitive ─────────────────────────────────────────────────
+   Every screen in this app is toggled with classList.add/remove('hidden').
+   The Tailwind CDN injects its sheet at runtime, so source order against
+   nextgen.css is not guaranteed — .hidden has to win outright or panes leak
+   through. This is the one deliberate !important in the system.            */
+.hidden{display:none !important}
+.ng-step-pane{display:flex;flex-direction:column;flex:1}
+
 /* ── kiosk shell ──────────────────────────────────────────────────────────
    The mockups are 768×1024 iPad portrait. ng-kiosk fills the viewport up to
    that width and stays centred + readable on a phone or a laptop.          */
@@ -182,7 +190,9 @@ h1,h2,h3{font-family:var(--ng-display);letter-spacing:-.02em;font-weight:700}
   font-weight:700;font-size:42px;color:var(--ng-ink);text-align:center;
   box-sizing:border-box;caret-color:var(--ng-ink);min-width:0;padding:0}
 .ng-pin:focus{background:#fff;border:2px solid var(--ng-ink);outline:none}
-.ng-pin.is-filled{background:var(--ng-bg2);border-color:var(--ng-hairline)}
+/* `.filled` is toggled by clearPins()/the keypad — kept as the legacy hook name */
+.ng-pin.filled{background:var(--ng-lav);border-color:var(--ng-lav-deep);color:var(--ng-ink)}
+.ng-pin.filled:focus{background:#fff;border-color:var(--ng-ink)}
 .ng-pin-lg{width:120px;height:110px;border-radius:var(--ng-r-lg);font-size:46px;flex:none}
 @media (max-width:640px){
   .ng-pin{height:76px;font-size:32px}
