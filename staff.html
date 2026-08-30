@@ -644,6 +644,14 @@ async function loadAttendance(){
     for(var i=0;i<records.length;i++){
       var r=records[i];
       var _hasAllergy=!!(r.hasAllergy&&r.allergy&&r.allergy!=="없음");
+      /* Surface roster gaps here rather than blocking the kiosk: the volunteer
+         can chase them after the service instead of at the door. */
+      var _gaps=[];
+      if(!((r.fatherEmail||'').trim()||(r.motherEmail||'').trim())) _gaps.push('이메일');
+      if(!(r.address||'').trim()) _gaps.push('주소');
+      if(!(r.nameEN||'').trim()) _gaps.push('영문이름');
+      if(!r.dob) _gaps.push('생년월일');
+      var _noContact=!((r.fatherPhone||'').trim()||(r.motherPhone||'').trim()||(r.phone||'').trim());
       var allergyBadge=_hasAllergy?"<span class='badge ng-chip-danger'>"+r.allergy+"</span>":"<span style='color:#d4d4d8'>—</span>";
       var parentInfo=(r.fatherName?"👨 "+r.fatherName+" ":"")+((r.motherName?"👩 "+r.motherName:""));
       if(!parentInfo&&r.guardian)parentInfo=r.guardian;
@@ -652,7 +660,10 @@ async function loadAttendance(){
       html+=(_hasAllergy?"<tr class='allergy-row'>":"<tr>")+(isBdayRow?"<td style='background:#fdf2f8'>": "<td>")+"<div style='font-weight:600'>"+(r.name||"")+"</div>"+(r.nameEN?"<div style='font-size:11.5px;color:var(--ng-muted)'>"+r.nameEN+"</div>":"")+(isBdayRow?"<div style='font-size:11px;color:#be185d;font-weight:700'>🎂 오늘 생일!</div>":"")+"</td>";
       html+="<td style='color:var(--ng-sub)'>"+(r.grade||"—")+"</td>";
       html+="<td style='color:var(--ng-muted);font-family:\'IBM Plex Mono\',monospace;font-size:12px'>"+(r.dob||"—")+"</td>";
-      html+="<td>"+allergyBadge+"</td>";
+      html+="<td>"+allergyBadge
+        +(_noContact?"<div style='margin-top:4px'><span class='badge ng-chip-danger'>보호자 연락처 없음</span></div>":"")
+        +(_gaps.length?"<div style='margin-top:4px'><span class='badge' style='background:var(--ng-lav);color:var(--ng-lav-text)' title='"+_gaps.join(', ')+"'>정보 미입력 "+_gaps.length+"</span></div>":"")
+        +"</td>";
       html+="<td style='font-size:12.5px;color:var(--ng-sub)'>"+(parentInfo||"—")+"</td>";
       html+="<td style='text-align:center;font-family:\'IBM Plex Mono\',monospace;font-weight:500;color:var(--ng-sub)'>"+(r.checkIn||"—")+"</td>";
       html+="<td style='text-align:center;font-family:\'IBM Plex Mono\',monospace;font-weight:500;color:var(--ng-sub)'>"+(r.checkOut||"—")+"</td>";
