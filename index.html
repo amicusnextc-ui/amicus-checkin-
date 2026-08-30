@@ -749,6 +749,21 @@ function onNameInput(val) {
     ngRefreshSubmit();
     return;
   }
+
+  /* A Hangul IME composes 박 as ㅂ → 바 → 박, and each of those fires an
+     input event. Searching a bare jamo hits the API for something that can
+     never match, so wait for at least one complete syllable (가-힣) — or two
+     Latin letters for an English name. */
+  var hasSyllable = /[\uAC00-\uD7A3]/.test(trimmed);
+  var latinCount  = (trimmed.match(/[A-Za-z]/g) || []).length;
+  if(!hasSyllable && latinCount < 2) {
+    if(host) host.innerHTML = '';
+    if(count) count.textContent = '이름을 계속 입력해주세요';
+    window._ngSelected = {};
+    ngRefreshSubmit();
+    return;
+  }
+
   if(count) count.textContent = '검색 중…';
 
   /* Results narrow underneath the field as the parent types — the search box
@@ -785,9 +800,14 @@ function onNameInput(val) {
         order.forEach(function(key) {
           var group = phones[key];
           if(group.length > 1) {
-            html += '<div class="household-header"><span style="font:700 13px \'Noto Sans KR\',sans-serif;color:var(--ng-lav-text)">같은 가정 · ' + group.length + '명</span></div>';
+            /* Siblings go inside a bounded box. Without one, whoever is
+               listed next reads as part of the same family. */
+            html += '<div class="ng-household"><div class="ng-household-head">같은 가정 · ' + group.length + '명</div>';
+            group.forEach(function(s) { html += studentCard(s); });
+            html += '</div>';
+          } else {
+            html += studentCard(group[0]);
           }
-          group.forEach(function(s) { html += studentCard(s); });
         });
         host.innerHTML = html;
 
