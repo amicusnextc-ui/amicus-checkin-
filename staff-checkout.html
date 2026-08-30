@@ -6,7 +6,8 @@
 <title>간사 체크아웃 / Staff Checkout | 아미쿠스</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/nextgen.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 * { font-family: 'Noto Sans KR', Arial, sans-serif; }
@@ -20,78 +21,92 @@
 .pop { animation: pop .35s ease forwards; }
 </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen pb-20">
+<body style="padding-bottom:76px">
 
-<!-- HEADER -->
-<header class="sticky top-0 z-10 bg-white/95 backdrop-blur shadow-sm border-b border-gray-100">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-    <div class="flex items-center justify-between gap-3 mb-2">
-      <div class="min-w-0">
-        <h1 class="text-xl sm:text-2xl font-black text-gray-900 truncate">🙏 간사 체크아웃 <span class="text-indigo-600">/ Staff Checkout</span></h1>
-        <p class="text-xs sm:text-sm text-gray-500" id="dateLabel"></p>
-      </div>
-      <div class="text-right flex-shrink-0">
-        <div class="text-2xl sm:text-3xl font-black text-orange-600 leading-none"><span id="pendingCount">0</span></div>
-        <div class="text-[10px] sm:text-xs text-gray-500 mt-1">대기중 / Pending</div>
-      </div>
+<header class="ng-header" style="position:sticky;top:0;z-index:10;flex-direction:column;align-items:stretch;gap:12px">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+    <div style="min-width:0">
+      <h1 class="ng-title-sm">간사 체크아웃 <span style="font:500 15px 'Poppins',sans-serif;color:var(--ng-muted);letter-spacing:0">Staff Checkout</span></h1>
+      <p class="ng-date" id="dateLabel" style="margin-top:4px"></p>
     </div>
-    <input id="searchBox" type="text" placeholder="🔍 이름 검색 / Search by name" class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-sm"/>
+    <div class="ng-stat ng-stat-warn" style="text-align:right;flex:none;padding:10px 16px">
+      <div class="ng-stat-n" id="pendingCount">0</div>
+      <div class="ng-stat-l">대기중 / Pending</div>
+    </div>
   </div>
+  <input id="searchBox" type="text" placeholder="이름 검색 / Search by name" class="ng-input ng-input-sm"/>
 </header>
 
-<!-- INSTRUCTIONS -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 mt-3">
-  <div class="bg-gradient-to-r from-indigo-100 to-purple-100 border border-indigo-200 rounded-2xl p-3 text-center text-xs sm:text-sm">
-    <p class="font-bold text-indigo-900">👇 부모님이 데리러 오시면 <strong>학생 카드를 탭</strong>하세요 / Tap student card when parent arrives</p>
+<div style="max-width:1280px;margin:16px auto 0;padding:0 26px">
+  <div class="ng-note ng-note-lav" style="padding:14px 20px">
+    <div class="ng-note-body" style="font-size:13.5px">부모님이 데리러 오시면 <strong>학생 카드를 탭</strong>하세요 · Tap the student card when a parent arrives</div>
   </div>
 </div>
 
-<!-- MAIN -->
-<main class="max-w-7xl mx-auto p-4 sm:p-6">
-  <div id="loading" class="text-center py-20">
-    <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3"></div>
-    <p class="text-gray-500 text-sm">불러오는 중... / Loading...</p>
+<main style="max-width:1280px;margin:0 auto;padding:20px 26px 40px">
+  <div id="loading" style="text-align:center;padding:80px 0">
+    <div class="spin" style="width:34px;height:34px;border:3px solid var(--ng-lav-deep);border-top-color:var(--ng-lav-text);border-radius:50%;margin:0 auto 12px"></div>
+    <p class="ng-sub-sm">불러오는 중... / Loading...</p>
   </div>
-  <div id="empty" class="hidden text-center py-20">
-    <div class="text-6xl mb-3">✅</div>
-    <h2 class="text-xl font-black text-emerald-700 mb-1">모두 체크아웃 완료!</h2>
-    <p class="text-gray-500">All students have been checked out</p>
+  <div id="empty" class="hidden" style="text-align:center;padding:80px 0">
+    <div style="width:80px;height:80px;border-radius:50%;background:var(--ng-green-soft);display:flex;align-items:center;justify-content:center;font:400 38px system-ui,sans-serif;color:var(--ng-green);margin:0 auto 18px">✓</div>
+    <h2 style="font:800 24px 'Poppins','Noto Sans KR',sans-serif;letter-spacing:-.03em;color:var(--ng-ink);margin:0 0 6px">모두 체크아웃 완료!</h2>
+    <p class="ng-sub-sm">All students have been checked out</p>
   </div>
   <div id="container"></div>
 </main>
 
-<!-- CONFIRM MODAL -->
-<div id="confirmModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
-    <div class="text-center mb-4">
-      <div class="text-5xl mb-2 pop inline-block">🙏</div>
-      <h2 class="text-xl font-black text-gray-900">체크아웃 확인</h2>
-      <p class="text-sm text-gray-500">Confirm checkout</p>
+<!-- ══ 체크아웃 확인 · 보호자 인계 — design 2e ═══════════════════════════ -->
+<div id="confirmModal" class="hidden ng-overlay">
+  <div class="ng-sheet" style="max-width:620px">
+    <div class="ng-sheet-head" style="flex-direction:column;align-items:center;text-align:center;gap:8px">
+      <span class="ng-eyebrow ng-eyebrow-lav">CHECK OUT</span>
+      <h2 class="ng-title-sm">체크아웃 확인</h2>
     </div>
-    <div id="confirmInfo" class="bg-gray-50 rounded-xl p-4 mb-4 text-sm space-y-1.5"></div>
-    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-xs text-amber-800 flex items-start gap-2">
-      <span class="text-base">🏷️</span>
-      <span><strong>스티커 확인 필수 / Sticker check required</strong> — 부모님이 가지고 계신 스티커 번호와 일치하는지 확인해주세요 / Verify the sticker number matches</span>
+    <div class="ng-sheet-body" style="display:flex;flex-direction:column;gap:18px">
+      <div id="confirmInfo"></div>
+
+      <div class="ng-note ng-note-lav" style="gap:12px">
+        <div style="font:700 16px 'Noto Sans KR',sans-serif">보호자 인계 확인 / Guardian handoff</div>
+        <div id="handoffOptions" style="display:flex;gap:10px;flex-wrap:wrap">
+          <button type="button" class="ng-handoff is-on" data-handoff="아버지" onclick="ngPickHandoff(this)">아버지</button>
+          <button type="button" class="ng-handoff" data-handoff="어머니" onclick="ngPickHandoff(this)">어머니</button>
+          <button type="button" class="ng-handoff ng-handoff-alt" data-handoff="대리" onclick="ngPickHandoff(this)">그 외<br/>대리 픽업</button>
+        </div>
+      </div>
+
+      <div class="ng-note ng-note-warn">
+        <div style="font:700 14px 'Noto Sans KR',sans-serif">🏷️ 스티커 확인 필수 / Sticker check required</div>
+        <div class="ng-note-body" style="font-size:13.5px;color:var(--ng-warn-text2)">부모님이 가지고 계신 스티커 번호와 일치하는지 확인해주세요 / Verify the sticker number matches.</div>
+      </div>
     </div>
-    <div class="flex gap-3">
-      <button onclick="closeConfirm()" class="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition-colors">취소 / Cancel</button>
-      <button onclick="doCheckout()" id="confirmBtn" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold shadow-md hover:shadow-lg transition-all">체크아웃 / Confirm</button>
+    <div class="ng-sheet-foot" style="flex-direction:row;gap:12px">
+      <button onclick="closeConfirm()" class="ng-btn ng-btn-ghost" style="flex:none;width:170px">취소 / Cancel</button>
+      <button onclick="doCheckout()" id="confirmBtn" class="ng-btn ng-btn-green" style="flex:1">보호자 인계 확인 · 체크아웃</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-emerald-500 text-white px-5 py-3 sm:px-7 sm:py-4 rounded-2xl shadow-2xl text-base sm:text-lg font-bold flex items-center gap-3 max-w-[90vw]">
-  <span id="toastIcon" class="text-2xl">✅</span>
+<div id="toast" class="hidden" style="position:fixed;bottom:88px;left:50%;transform:translateX(-50%);z-index:40;background:var(--ng-ink);color:#fff;padding:16px 26px;border-radius:var(--ng-r-card);box-shadow:var(--ng-shadow);font:700 16px 'Noto Sans KR',sans-serif;display:flex;align-items:center;gap:12px;max-width:90vw">
+  <span id="toastIcon" style="font-size:20px">✓</span>
   <span id="toastMsg"></span>
 </div>
 
-<!-- FOOTER -->
-<footer class="text-center py-4 text-xs text-gray-400 fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-100">
-  <span id="staffNameDisplay" class="text-indigo-600 font-bold"></span> ·
-  <a href="/staff.html" class="hover:text-indigo-600 transition-colors">간사 모니터링 / Staff Monitor →</a> ·
-  <button onclick="manualRefresh()" class="hover:text-indigo-600">🔄 새로고침</button>
+<footer style="position:fixed;bottom:0;left:0;right:0;text-align:center;padding:14px;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-top:1px solid var(--ng-hairline);font:500 12px 'Noto Sans KR',sans-serif;color:var(--ng-muted)">
+  <span id="staffNameDisplay" style="font-weight:700;color:var(--ng-lav-text)"></span> ·
+  <a href="/staff.html" style="color:var(--ng-sub);text-decoration:none">간사 모니터링 / Staff Monitor →</a> ·
+  <button onclick="manualRefresh()" style="background:none;border:0;cursor:pointer;font:inherit;color:var(--ng-sub)">새로고침</button>
 </footer>
+
+<style>
+.ng-handoff{flex:1;min-width:120px;padding:16px;border-radius:var(--ng-r-md);background:#fff;
+  border:1.5px solid var(--ng-hairline);cursor:pointer;text-align:center;
+  font:700 16px 'Noto Sans KR',sans-serif;color:var(--ng-ink);line-height:1.3}
+.ng-handoff.is-on{border:2px solid var(--ng-ink)}
+.ng-handoff-alt{flex:none;width:120px;border-style:dashed;font-weight:600;color:var(--ng-sub)}
+.ng-handoff-alt.is-on{border-style:solid;color:var(--ng-ink)}
+.ng-handoff small{display:block;font:500 12px 'IBM Plex Mono',monospace;color:var(--ng-sub);margin-top:3px}
+</style>
 
 <script>
 // === STAFF NAME (optional — no prompt, just read if previously saved) ===
@@ -107,11 +122,11 @@ document.getElementById('dateLabel').textContent =
 // === DEPT ORDER + COLORS ===
 const DEPT_ORDER = ['유아부','유치부','유년부','초등부','중고등부'];
 const DEPT_COLORS = {
-  '유아부':   { bg: 'bg-blue-50',    border: 'border-blue-200',    text: 'text-blue-900',    avatar: 'bg-blue-500',    emoji: '👶' },
-  '유치부':   { bg: 'bg-green-50',   border: 'border-green-200',   text: 'text-green-900',   avatar: 'bg-green-500',   emoji: '🧒' },
-  '유년부':   { bg: 'bg-yellow-50',  border: 'border-yellow-200',  text: 'text-yellow-900',  avatar: 'bg-yellow-500',  emoji: '🦄' },
-  '초등부':   { bg: 'bg-orange-50',  border: 'border-orange-200',  text: 'text-orange-900',  avatar: 'bg-orange-500',  emoji: '⚽' },
-  '중고등부': { bg: 'bg-purple-50',  border: 'border-purple-200',  text: 'text-purple-900',  avatar: 'bg-purple-500',  emoji: '🎓' },
+  '유아부':   { cls:'ng-dept-infant',    tint:'#dbeafe', ink:'#1e40af' },
+  '유치부':   { cls:'ng-dept-preschool', tint:'#d1fae5', ink:'#065f46' },
+  '유년부':   { cls:'ng-dept-elemjr',    tint:'#fef9c3', ink:'#854d0e' },
+  '초등부':   { cls:'ng-dept-elem',      tint:'#ffedd5', ink:'#9a3412' },
+  '중고등부': { cls:'ng-dept-youth',     tint:'#f3e8ff', ink:'#6b21a8' },
 };
 function deptKey(d) {
   if (!d) return '기타';
@@ -167,7 +182,7 @@ function render() {
       empty.classList.remove('hidden');
     } else {
       empty.classList.add('hidden');
-      container.innerHTML = '<div class="text-center py-12 text-gray-400 text-sm">검색 결과 없음 / No matches for "' + escapeHtml(filter) + '"</div>';
+      container.innerHTML = '<div class="ng-panel" style="text-align:center;padding:40px 22px;font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-sub)">검색 결과 없음 / No matches for &ldquo;' + escapeHtml(filter) + '&rdquo;</div>';
     }
     return;
   }
@@ -191,14 +206,14 @@ function render() {
   let html = '';
   order.forEach(k => {
     if (!groups[k] || groups[k].length === 0) return;
-    const c = DEPT_COLORS[k] || { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-900', avatar: 'bg-gray-500', emoji: '📋' };
+    const c = DEPT_COLORS[k] || { cls:'ng-dept-none', tint:'#f2f2f4', ink:'#6e6e73' };
     html += `
-      <section class="mb-5">
-        <header class="flex items-center justify-between px-2 mb-2">
-          <h2 class="text-base sm:text-lg font-black ${c.text}">${c.emoji} ${escapeHtml(k)}</h2>
-          <span class="text-xs font-bold ${c.text} ${c.bg} px-3 py-1 rounded-full border ${c.border}">${groups[k].length}명 대기</span>
+      <section style="margin-bottom:26px">
+        <header style="display:flex;align-items:center;justify-content:space-between;padding:0 2px 10px">
+          <h2 style="font:700 17px 'Poppins','Noto Sans KR',sans-serif;letter-spacing:-.02em;color:var(--ng-ink);margin:0">${escapeHtml(k)}</h2>
+          <span class="ng-chip ng-chip-lg ${c.cls}">${groups[k].length}명 대기</span>
         </header>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px">
           ${groups[k].map(rec => cardHtml(rec, c)).join('')}
         </div>
       </section>`;
@@ -207,20 +222,18 @@ function render() {
 }
 
 function cardHtml(rec, c) {
-  const initials = (rec.name||'?').slice(0,2);
+  const initial = (rec.name||'?').trim().slice(0,1);
   const allergyBadge = rec.hasAllergy
-    ? '<span class="allergy-badge inline-block mt-1">⚠️ ALLERGY</span>'
+    ? '<span class="ng-chip ng-chip-danger" style="margin-top:8px">알러지</span>'
     : '';
   return `
-    <div class="student-card ${c.bg} border ${c.border} rounded-2xl p-3 text-center shadow-sm hover:shadow-lg"
-         data-rid="${rec.id}" onclick="openConfirm('${rec.id}')">
-      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full mx-auto mb-1.5 flex items-center justify-center text-lg sm:text-xl font-black text-white ${c.avatar}">
-        ${initials}
-      </div>
-      <div class="text-sm font-bold ${c.text} truncate">${escapeHtml(rec.name)}</div>
-      <div class="text-[10px] text-gray-500 mt-0.5">⏱️ ${escapeHtml(rec.checkIn||'?')} ${rec.checkIn ? '· ' + minsAgo(rec.checkIn) + '분' : ''}</div>
+    <button type="button" class="ng-card student-card" data-rid="${rec.id}" onclick="openConfirm('${rec.id}')"
+            style="cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 14px;font:inherit">
+      <span class="ng-avatar" style="background:${c.tint};color:${c.ink}">${escapeHtml(initial)}</span>
+      <span style="font:700 16px 'Noto Sans KR',sans-serif;color:var(--ng-ink);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(rec.name)}</span>
+      <span style="font:500 12px 'IBM Plex Mono',monospace;color:var(--ng-muted)">${escapeHtml(rec.checkIn||'?')}${rec.checkIn ? ' · ' + minsAgo(rec.checkIn) + '분' : ''}</span>
       ${allergyBadge}
-    </div>`;
+    </button>`;
 }
 
 function minsAgo(timeStr) {
@@ -243,17 +256,36 @@ function openConfirm(recordId) {
   if (!rec) return;
   _currentRecord = rec;
   const dept = (rec.department||'').split(' ')[0];
-  const allergyRow = rec.hasAllergy
-    ? '<div class="flex items-center gap-2 text-red-700 font-bold"><span class="allergy-badge">⚠️ 알러지</span><span class="text-xs">스태프에게 확인 필요</span></div>'
-    : '';
+  const dc = DEPT_COLORS[deptKey(rec.department)] || { cls:'ng-dept-none', tint:'#f2f2f4', ink:'#6e6e73' };
   document.getElementById('confirmInfo').innerHTML =
-    '<div class="font-bold text-lg text-gray-900 text-center mb-2">' + escapeHtml(rec.name) + '</div>' +
-    '<div class="flex justify-between"><span class="text-gray-500">부서</span><span class="font-medium">' + escapeHtml(dept) + '</span></div>' +
-    '<div class="flex justify-between"><span class="text-gray-500">체크인</span><span class="font-medium">' + escapeHtml(rec.checkIn||'-') + '</span></div>' +
-    (rec.notes ? '<div class="flex justify-between"><span class="text-gray-500">메모</span><span class="font-medium text-xs">' + escapeHtml(rec.notes) + '</span></div>' : '') +
-    allergyRow;
+    '<div class="ng-card ng-card-sel" style="display:flex;align-items:center;gap:20px">' +
+      '<span class="ng-avatar" style="width:66px;height:66px;border-radius:20px;font-size:26px;background:' + dc.tint + ';color:' + dc.ink + '">' + escapeHtml((rec.name||'?').trim().slice(0,1)) + '</span>' +
+      '<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">' +
+        '<span style="font:700 27px \'Noto Sans KR\',sans-serif;color:var(--ng-ink)">' + escapeHtml(rec.name) + '</span>' +
+        '<span style="font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-sub)">' + escapeHtml(dept) + ' · 체크인 ' + escapeHtml(rec.checkIn||'-') + ' · <b style="color:var(--ng-green)">재실 중</b></span>' +
+        (rec.notes ? '<span style="font:500 12.5px \'Noto Sans KR\',sans-serif;color:var(--ng-muted)">메모 · ' + escapeHtml(rec.notes) + '</span>' : '') +
+        (rec.hasAllergy ? '<span><span class="ng-chip ng-chip-danger">알러지 · 스태프 확인 필요</span></span>' : '') +
+      '</span>' +
+    '</div>';
+  ngResetHandoff();
   document.getElementById('confirmModal').classList.remove('hidden');
 }
+/* 2e guardian handoff. The volunteer must say who they handed the child to
+   before the green confirm unlocks. /api/checkout has no field for the
+   relationship, so the payload is unchanged and this stays a floor check —
+   wire it through once the API grows a column for it. */
+var _handoff = '아버지';
+function ngPickHandoff(btn){
+  _handoff = btn.getAttribute('data-handoff');
+  var host = document.getElementById('handoffOptions');
+  Array.prototype.forEach.call(host.children, function(b){ b.classList.toggle('is-on', b === btn); });
+}
+function ngResetHandoff(){
+  _handoff = '아버지';
+  var host = document.getElementById('handoffOptions');
+  if(host) Array.prototype.forEach.call(host.children, function(b,i){ b.classList.toggle('is-on', i === 0); });
+}
+
 function closeConfirm() {
   document.getElementById('confirmModal').classList.add('hidden');
   _currentRecord = null;
@@ -323,13 +355,16 @@ function showToast(msg, type) {
   const icon = document.getElementById('toastIcon');
   const msgEl = document.getElementById('toastMsg');
   msgEl.textContent = msg;
+  /* Style through the toast's own token colors — do not reassign className,
+     which would drop the NextGen classes the markup carries. */
   if (type === 'error') {
     icon.textContent = '⚠️';
-    toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-40 bg-red-500 text-white px-5 py-3 sm:px-7 sm:py-4 rounded-2xl shadow-2xl text-base sm:text-lg font-bold flex items-center gap-3 max-w-[90vw] toast-anim';
+    toast.style.background = 'var(--ng-danger-text)';
   } else {
-    icon.textContent = '✅';
-    toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-40 bg-emerald-500 text-white px-5 py-3 sm:px-7 sm:py-4 rounded-2xl shadow-2xl text-base sm:text-lg font-bold flex items-center gap-3 max-w-[90vw] toast-anim';
+    icon.textContent = '✓';
+    toast.style.background = 'var(--ng-green-deep)';
   }
+  toast.classList.remove('hidden');
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => toast.classList.add('hidden'), 3000);
 }
@@ -378,7 +413,15 @@ startAutoRefresh();
     if(typeof window.openConfirm!=="function" || typeof window.doCheckout!=="function"){setTimeout(waitReady,300);return;}
     if(window._staffCoOverridden)return;
     window._staffCoOverridden=true;
-    // Override openConfirm to skip modal and directly call doCheckout
+    /* ⚠️ DESIGN CONFLICT — left in place deliberately.
+       This override skips the confirmation sheet entirely: tapping a card
+       checks the child out in one tap. Design 2e specifies a confirmation
+       with a 보호자 인계 (guardian handoff) selection before check-out.
+       The sheet above has been rebuilt to 2e and is correct, but it stays
+       unreachable while this override is active — re-enabling it is a
+       workflow decision (it adds a step to the Sunday pickup line), not a
+       styling one, so it is left to the team. To adopt 2e's flow, delete
+       this override block; nothing else needs to change. */
     var origOpenConfirm=window.openConfirm;
     window.openConfirm=function(recordId){
       // Call original to set _currentRecord, then hide modal + fire doCheckout
@@ -443,87 +486,6 @@ startAutoRefresh();
 </script>
 
 <!-- AMICUS NEXTGEN SKIN — shared visual layer (2026-08), logic untouched -->
-<style id="amicus-skin">
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap');
-:root{
-  --ng-bg:#ffffff; --ng-bg2:#fafafa; --ng-ink:#17171b; --ng-sub:#6e6e73;
-  --ng-black:#111114; --ng-black-hover:#2b2b30;
-  --ng-lav:#edebf7; --ng-lav-deep:#dcd8ef; --ng-lav-text:#4c4570;
-  --ng-green:#2e9e5b; --ng-green-deep:#247c47; --ng-green-soft:#eaf7ef;
-  --ng-hairline:rgba(0,0,0,.10);
-}
-html{background:var(--ng-bg)}
-body{background:var(--ng-bg)!important;color:var(--ng-ink)}
-h1,h2,h3{font-family:'Poppins','Noto Sans KR',sans-serif!important;letter-spacing:-.02em;font-weight:700}
-
-/* ── Welcome hero — big type on white ── */
-.ap-hero{background:#fff;overflow:hidden}
-.ap-glow{position:absolute;bottom:-260px;left:50%;transform:translateX(-50%);width:720px;height:480px;border-radius:50%;
-  background:radial-gradient(closest-side,rgba(122,110,182,.14),rgba(122,110,182,0));pointer-events:none}
-.ap-mark{width:84px;height:84px;border-radius:24px;background:var(--ng-lav);display:flex;align-items:center;justify-content:center;
-  font-size:42px;border:1px solid rgba(76,69,112,.12)}
-.ap-eyebrow{font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;letter-spacing:.28em;color:var(--ng-sub)}
-.ap-title{font-family:'Poppins','Noto Sans KR',sans-serif;font-size:52px;line-height:1.02;font-weight:800;letter-spacing:-.035em;color:var(--ng-ink)}
-.ap-subtitle{font-size:17px;font-weight:500;color:var(--ng-sub);letter-spacing:-.01em}
-.ap-date{font-size:13px;color:#a1a1a6}
-.ap-cta-primary{background:var(--ng-black);color:#fff;font-family:'Poppins','Noto Sans KR',sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.16)}
-.ap-cta-primary:hover{background:var(--ng-black-hover)}
-.ap-cta-sub{font-weight:500;opacity:.8;font-size:15px}
-.ap-cta-secondary{background:#fff;color:var(--ng-ink);font-family:'Poppins','Noto Sans KR',sans-serif;border:1.5px solid var(--ng-ink);box-shadow:none}
-.ap-cta-secondary:hover{background:var(--ng-bg2)}
-.ap-cta-sub2{font-weight:500;color:var(--ng-sub);font-size:15px}
-.ap-footlink{font-size:13px;font-weight:600;color:var(--ng-sub);text-decoration:none}
-.ap-footlink:hover{color:var(--ng-ink);text-decoration:underline}
-.ap-dot{width:3px;height:3px;border-radius:50%;background:#c7c7cc;display:inline-block}
-@keyframes apRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.ap-rise{animation:apRise .7s cubic-bezier(.25,.6,.2,1) both}
-
-/* ── Header: white, hairline, bold wordmark ── */
-#mainHeader{background:rgba(255,255,255,.85)!important;-webkit-backdrop-filter:saturate(180%) blur(16px);
-  backdrop-filter:saturate(180%) blur(16px);border-bottom:1px solid var(--ng-hairline)!important;box-shadow:none!important}
-#mainHeader h1{font-family:'Poppins','Noto Sans KR',sans-serif;font-weight:700}
-
-/* ── Palette remap: indigo/purple → ink + lavender tints · emerald → muted green ── */
-.bg-indigo-600{background-color:var(--ng-black)!important}
-.hover\:bg-indigo-700:hover,.bg-indigo-700{background-color:var(--ng-black-hover)!important}
-.bg-indigo-500{background-color:#3a3a40!important}.bg-indigo-400{background-color:#55555c!important}
-.bg-indigo-100{background-color:var(--ng-lav-deep)!important}
-.bg-indigo-50,.hover\:bg-indigo-50:hover{background-color:var(--ng-lav)!important}
-.text-indigo-700{color:var(--ng-lav-text)!important}
-.text-indigo-600,.hover\:text-indigo-600:hover{color:var(--ng-ink)!important}
-.text-indigo-500{color:#3a3a40!important}.text-indigo-400{color:#8b87a3!important}
-.text-indigo-300{color:#a9a5bd!important}.text-indigo-200{color:#c9c6d8!important}
-.border-indigo-400,.hover\:border-indigo-400:hover{border-color:#8b87a3!important}
-.border-indigo-300{border-color:#b9b5cc!important}.border-indigo-200{border-color:var(--ng-lav-deep)!important}
-.border-indigo-100{border-color:var(--ng-lav)!important}
-.focus\:border-indigo-400:focus{border-color:var(--ng-ink)!important}
-.ring-indigo-400{--tw-ring-color:rgba(17,17,20,.3)!important}
-.bg-purple-600{background-color:var(--ng-black)!important}.bg-purple-500{background-color:#3a3a40!important}
-.bg-purple-100{background-color:var(--ng-lav-deep)!important}.bg-purple-50{background-color:var(--ng-lav)!important}
-.text-purple-800,.text-purple-700{color:var(--ng-lav-text)!important}
-.border-purple-400{border-color:#8b87a3!important}.border-purple-200{border-color:var(--ng-lav-deep)!important}
-.bg-emerald-600{background-color:var(--ng-green)!important}
-.hover\:bg-emerald-700:hover,.bg-emerald-700{background-color:var(--ng-green-deep)!important}
-.bg-emerald-500{background-color:#37b268!important}.bg-emerald-100{background-color:#d8efe1!important}
-.bg-emerald-50{background-color:var(--ng-green-soft)!important}
-.text-emerald-800,.text-emerald-700{color:var(--ng-green-deep)!important}
-.text-emerald-600,.text-emerald-500{color:var(--ng-green)!important}
-.border-emerald-400{border-color:#5fbd85!important}.border-emerald-200{border-color:#c3e6d0!important}
-
-/* ── Pills, cards, polish (Friends restraint) ── */
-.bg-gray-100{background-color:#f2f2f4!important}
-.rounded-2xl{border-radius:16px!important}.rounded-3xl{border-radius:20px!important}
-.student-card{border-radius:16px;border-color:var(--ng-hairline)!important}
-.student-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.10)!important;transform:translateY(-1px)}
-.shadow-xl,.shadow-lg{box-shadow:0 1px 2px rgba(0,0,0,.05),0 16px 40px rgba(0,0,0,.10)!important}
-button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(17,17,20,.35);outline-offset:2px}
-#cwoBtn{background:var(--ng-black)!important;box-shadow:0 6px 20px rgba(0,0,0,.25)!important}
-.from-indigo-600,.from-purple-600,.from-indigo-500,.from-purple-500{--tw-gradient-from:#17171b!important;--tw-gradient-to:rgba(23,23,27,0)!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important}
-.to-purple-600,.to-indigo-600,.to-purple-500,.to-indigo-500{--tw-gradient-to:#3a3a40!important}
-.via-indigo-600,.via-purple-600{--tw-gradient-stops:var(--tw-gradient-from),#2b2b30,var(--tw-gradient-to)!important}
-@media (prefers-reduced-motion:reduce){
-  .ap-rise,.welcome-pulse,.pulse-ring,.bday-pulse{animation:none!important}
-}
-</style>
+<!-- AMICUS NEXTGEN SKIN — moved to the shared /nextgen.css -->
 </body>
 </html>

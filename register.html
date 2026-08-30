@@ -6,156 +6,138 @@
 <title>정식 등록 / Registration | 아미쿠스 교회</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/nextgen.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>* { font-family: 'Noto Sans KR', Arial, sans-serif; }</style>
 </head>
-<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
+<body>
 
-<header class="bg-white shadow-sm border-b border-gray-100">
-  <div class="max-w-2xl mx-auto px-4 sm:px-6 py-4">
-    <h1 class="text-xl sm:text-2xl font-black text-gray-900">🎉 아미쿠스 교회 정식 등록 / Registration</h1>
-    <p class="text-sm text-gray-500 mt-1">자녀를 정식 등록 해주세요 / Please complete your child's registration</p>
+<header class="ng-header">
+  <div class="ng-kiosk" style="min-height:0;padding:0">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span class="ng-eyebrow ng-eyebrow-green">REGISTRATION</span>
+      <h1 class="ng-title-sm">아미쿠스 교회 정식 등록</h1>
+      <p class="ng-sub-sm">자녀를 정식 등록 해주세요 · Please complete your child&#x2019;s registration</p>
+    </div>
   </div>
 </header>
 
-<main class="max-w-2xl mx-auto px-4 sm:px-6 py-6">
+<main class="ng-kiosk ng-kiosk-pad" style="padding-top:26px;padding-bottom:40px;gap:20px">
 
   <!-- LOADING -->
-  <div id="loading" class="text-center py-20">
-    <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3"></div>
-    <p class="text-gray-500 text-sm">정보 불러오는 중... / Loading...</p>
+  <div id="loading" style="text-align:center;padding:80px 0">
+    <div class="spin" style="width:34px;height:34px;border:3px solid var(--ng-lav-deep);border-top-color:var(--ng-lav-text);border-radius:50%;margin:0 auto 12px"></div>
+    <p class="ng-sub-sm">정보 불러오는 중... / Loading...</p>
   </div>
 
   <!-- ERROR -->
-  <div id="error" class="hidden bg-red-50 border border-red-200 rounded-2xl p-5 text-center">
-    <div class="text-3xl mb-2">⚠️</div>
-    <h2 class="text-lg font-black text-red-800 mb-2" id="errTitle">링크 오류 / Link Error</h2>
-    <p class="text-sm text-red-700" id="errMsg"></p>
-    <p class="text-xs text-red-600 mt-3">
-      문의: amicusnextc@gmail.com<br/>
-      Contact: amicusnextc@gmail.com
-    </p>
+  <div id="error" class="hidden ng-note ng-note-danger" style="text-align:center">
+    <div style="font:700 17px 'Noto Sans KR',sans-serif" id="errTitle">링크 오류 / Link Error</div>
+    <div style="font:500 14px/1.6 'Noto Sans KR',sans-serif" id="errMsg"></div>
+    <div style="font:500 12px 'Noto Sans KR',sans-serif;opacity:.8">문의 / Contact: amicusnextc@gmail.com</div>
   </div>
 
   <!-- FORM -->
-  <form id="registerForm" class="hidden space-y-5">
-    <!-- Student info (auto-filled, readonly) -->
-    <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-4">
-      <h2 class="text-sm font-black text-indigo-900 uppercase tracking-wider mb-3">학생 정보 / Student Info</h2>
-      <div class="grid grid-cols-2 gap-3 text-sm">
-        <div><span class="text-gray-500">이름 / Name:</span> <strong id="studentName" class="text-gray-900"></strong></div>
-        <div><span class="text-gray-500">영문 / English:</span> <strong id="studentNameEN" class="text-gray-900"></strong></div>
-        <div><span class="text-gray-500">학년 / Grade:</span> <strong id="studentGrade" class="text-gray-900"></strong></div>
-        <div><span class="text-gray-500">알러지 / Allergy:</span> <strong id="studentAllergy" class="text-gray-900">없음</strong></div>
+  <form id="registerForm" class="hidden ng-stack">
+
+    <!-- Student info (auto-filled, read-only) -->
+    <div class="ng-note ng-note-lav">
+      <div class="ng-note-title">학생 정보 / STUDENT INFO</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+        <div><span class="ng-field-label">이름 / Name</span><div style="font:700 16px 'Noto Sans KR',sans-serif;color:var(--ng-ink)" id="studentName"></div></div>
+        <div><span class="ng-field-label">영문 / English</span><div style="font:700 16px 'Poppins',sans-serif;color:var(--ng-ink)" id="studentNameEN"></div></div>
+        <div><span class="ng-field-label">학년 / Grade</span><div style="font:700 16px 'Noto Sans KR',sans-serif;color:var(--ng-ink)" id="studentGrade"></div></div>
+        <div><span class="ng-field-label">알러지 / Allergy</span><div style="font:700 16px 'Noto Sans KR',sans-serif;color:var(--ng-ink)" id="studentAllergy">없음</div></div>
       </div>
-      <p class="text-xs text-indigo-700 mt-3">
-        ※ 학생 정보는 자동으로 채워졌습니다. 수정이 필요하면 교회로 연락해주세요.<br/>
-        Student info is auto-filled. Contact the church if changes are needed.
-      </p>
+      <div class="ng-note-body" style="font-size:13px">※ 학생 정보는 자동으로 채워졌습니다. 수정이 필요하면 교회로 연락해주세요. / Student info is auto-filled — contact the church if changes are needed.</div>
     </div>
 
-    <!-- Parent Info -->
-    <div class="bg-white shadow-md rounded-2xl p-5">
-      <h2 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-4">부모 정보 / Parent Info <span class="text-red-500">*</span></h2>
-      <div class="space-y-4">
-        <div>
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Parent Name / 부모 이름 <span class="text-red-500">*</span></label>
-          <input id="pName" type="text" required class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
-        </div>
-        <div>
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Parent Email / 부모 이메일 <span class="text-red-500">*</span></label>
-          <input id="pEmail" type="email" required class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
-        </div>
-        <div>
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Parent Phone / 부모 연락처 <span class="text-red-500">*</span></label>
-          <input id="pPhone" type="tel" required placeholder="(213) 555-0123" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
-        </div>
-      </div>
-    </div>
+    <!-- Parent -->
+    <section class="ng-panel" style="display:flex;flex-direction:column;gap:14px">
+      <div class="ng-section-label">부모 정보 / Parent Info <span class="ng-req">*</span></div>
+      <div class="ng-field"><label class="ng-field-label" for="pName">Parent Name / 부모 이름 <span class="ng-req">*</span></label>
+        <input id="pName" type="text" required class="ng-input"/></div>
+      <div class="ng-field"><label class="ng-field-label" for="pEmail">Parent Email / 부모 이메일 <span class="ng-req">*</span></label>
+        <input id="pEmail" type="email" required class="ng-input"/></div>
+      <div class="ng-field"><label class="ng-field-label" for="pPhone">Parent Phone / 부모 연락처 <span class="ng-req">*</span></label>
+        <input id="pPhone" type="tel" required placeholder="(213) 555-0123" class="ng-input ng-input-mono"/></div>
+    </section>
 
-    <!-- Emergency Contact -->
-    <div class="bg-white shadow-md rounded-2xl p-5">
-      <h2 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-4">Emergency Contact / 비상 연락처 <span class="text-red-500">*</span></h2>
-      <p class="text-xs text-gray-500 mb-3">부모님과 다른 분 (조부모, 친척 등) / Different from parent (grandparent, relative, etc.)</p>
-      <div class="space-y-4">
-        <div>
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Emergency Name / 비상 연락처 이름 <span class="text-red-500">*</span></label>
-          <input id="emName" type="text" required class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
-        </div>
-        <div>
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Emergency Phone / 비상 연락처 폰 <span class="text-red-500">*</span></label>
-          <input id="emPhone" type="tel" required class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
-        </div>
-      </div>
-    </div>
+    <!-- Emergency -->
+    <section class="ng-panel" style="display:flex;flex-direction:column;gap:14px">
+      <div class="ng-section-label">Emergency Contact / 비상 연락처 <span class="ng-req">*</span></div>
+      <p class="ng-sub-sm" style="font-size:13px;margin:-4px 0 0">부모님과 다른 분 (조부모, 친척 등) / Different from parent</p>
+      <div class="ng-field"><label class="ng-field-label" for="emName">Emergency Name / 이름 <span class="ng-req">*</span></label>
+        <input id="emName" type="text" required class="ng-input"/></div>
+      <div class="ng-field"><label class="ng-field-label" for="emPhone">Emergency Phone / 연락처 <span class="ng-req">*</span></label>
+        <input id="emPhone" type="tel" required class="ng-input ng-input-mono"/></div>
+    </section>
 
     <!-- Address -->
-    <div class="bg-white shadow-md rounded-2xl p-5">
-      <h2 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-4">Home Address / 집 주소 <span class="text-red-500">*</span></h2>
-      <input id="addr" type="text" required placeholder="123 Main St, Los Angeles, CA 90001" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none text-base"/>
-      <p class="text-[10px] text-gray-400 mt-1">전체 주소를 입력해주세요 / Please enter complete address</p>
-    </div>
+    <section class="ng-panel" style="display:flex;flex-direction:column;gap:10px">
+      <div class="ng-section-label">Home Address / 집 주소 <span class="ng-req">*</span></div>
+      <input id="addr" type="text" required placeholder="123 Main St, Los Angeles, CA 90001" class="ng-input"/>
+      <p class="ng-sub-sm" style="font-size:12px;margin:0">전체 주소를 입력해주세요 / Please enter complete address</p>
+    </section>
 
-    <!-- Liability + Media + Signature -->
-    <div class="bg-white shadow-md rounded-2xl p-5">
-      <h2 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-4">Liability Form / 책임 동의서 <span class="text-red-500">*</span></h2>
-      <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 max-h-48 overflow-y-auto text-xs text-gray-700 leading-relaxed mb-4">
-        <p class="font-bold mb-2">아미쿠스 교회 교육부 책임 동의서 / Amicus Church Education Ministry Liability Waiver</p>
-        <p class="mb-2">본인은 아미쿠스 교회 교육부 (이하 "교회") 활동에 자녀를 참여시키는 부모/보호자로서 다음 사항에 동의합니다.</p>
-        <p class="mb-2">As the parent/guardian enrolling my child in Amicus Church Education Ministry (the "Church") programs, I agree to the following:</p>
-        <p class="mb-2"><strong>1. 위험 인지 / Acknowledgment of Risk:</strong> 교회 활동에는 일반적인 안전 위험이 있을 수 있음을 인지합니다. / I acknowledge that Church activities involve standard safety risks.</p>
-        <p class="mb-2"><strong>2. 의료 처치 / Medical Authorization:</strong> 응급 상황 발생 시 교회 직원이 적절한 의료 처치를 받도록 허락합니다. / I authorize Church staff to seek appropriate medical care in emergencies.</p>
-        <p class="mb-2"><strong>3. 책임 면제 / Release of Liability:</strong> 본인은 교회 및 그 직원에 대해 활동 참여로 인한 일반적 부상에 대한 청구를 하지 않을 것에 동의합니다. / I agree not to claim against the Church or its staff for general injuries arising from program participation.</p>
+    <!-- Liability + media consent -->
+    <section class="ng-panel" style="display:flex;flex-direction:column;gap:14px">
+      <div class="ng-section-label">Liability Form / 책임 동의서 <span class="ng-req">*</span></div>
+      <div class="ng-waiver" style="max-height:220px">
+        <div class="ng-waiver-scroll" style="max-height:176px;padding-right:6px;gap:10px">
+          <p style="font:700 13px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin:0">아미쿠스 교회 교육부 책임 동의서 / Amicus Church Education Ministry Liability Waiver</p>
+          <p style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub);margin:0">본인은 아미쿠스 교회 교육부 (이하 &ldquo;교회&rdquo;) 활동에 자녀를 참여시키는 부모/보호자로서 다음 사항에 동의합니다. As the parent/guardian enrolling my child in Amicus Church Education Ministry (the &ldquo;Church&rdquo;) programs, I agree to the following:</p>
+          <div><div style="font:700 13.5px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin-bottom:3px">1. 위험 인지 / Acknowledgment of Risk</div><div style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub)">교회 활동에는 일반적인 안전 위험이 있을 수 있음을 인지합니다. / I acknowledge that Church activities involve standard safety risks.</div></div>
+          <div><div style="font:700 13.5px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin-bottom:3px">2. 의료 처치 / Medical Authorization</div><div style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub)">응급 상황 발생 시 교회 직원이 적절한 의료 처치를 받도록 허락합니다. / I authorize Church staff to seek appropriate medical care in emergencies.</div></div>
+          <div style="padding-bottom:40px"><div style="font:700 13.5px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin-bottom:3px">3. 책임 면제 / Release of Liability</div><div style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub)">본인은 교회 및 그 직원에 대해 활동 참여로 인한 일반적 부상에 대한 청구를 하지 않을 것에 동의합니다. / I agree not to claim against the Church or its staff for general injuries arising from program participation.</div></div>
+        </div>
+        <div class="ng-waiver-fade" aria-hidden="true"></div>
       </div>
-      <div class="space-y-3">
-        <label class="flex items-start gap-3 text-sm">
-          <input id="agree1" type="checkbox" required class="mt-1 w-5 h-5"/>
-          <span><strong>위험 인지</strong>에 동의합니다 / I agree to <strong>Acknowledgment of Risk</strong></span>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label class="ng-checkbox" style="background:var(--ng-lav);border-radius:var(--ng-r-sm)">
+          <input id="agree1" type="checkbox" required/><span class="ng-tick" aria-hidden="true">✓</span>
+          <span style="font:500 13.5px/1.5 'Noto Sans KR',sans-serif;color:var(--ng-lav-text)"><strong style="color:var(--ng-ink)">위험 인지</strong>에 동의합니다 / I agree to <strong style="color:var(--ng-ink)">Acknowledgment of Risk</strong></span>
         </label>
-        <label class="flex items-start gap-3 text-sm">
-          <input id="agree2" type="checkbox" required class="mt-1 w-5 h-5"/>
-          <span><strong>의료 처치 허락</strong>에 동의합니다 / I agree to <strong>Medical Authorization</strong></span>
+        <label class="ng-checkbox" style="background:var(--ng-lav);border-radius:var(--ng-r-sm)">
+          <input id="agree2" type="checkbox" required/><span class="ng-tick" aria-hidden="true">✓</span>
+          <span style="font:500 13.5px/1.5 'Noto Sans KR',sans-serif;color:var(--ng-lav-text)"><strong style="color:var(--ng-ink)">의료 처치 허락</strong>에 동의합니다 / I agree to <strong style="color:var(--ng-ink)">Medical Authorization</strong></span>
         </label>
-        <label class="flex items-start gap-3 text-sm">
-          <input id="agree3" type="checkbox" required class="mt-1 w-5 h-5"/>
-          <span><strong>책임 면제</strong>에 동의합니다 / I agree to <strong>Release of Liability</strong></span>
+        <label class="ng-checkbox" style="background:var(--ng-lav);border-radius:var(--ng-r-sm)">
+          <input id="agree3" type="checkbox" required/><span class="ng-tick" aria-hidden="true">✓</span>
+          <span style="font:500 13.5px/1.5 'Noto Sans KR',sans-serif;color:var(--ng-lav-text)"><strong style="color:var(--ng-ink)">책임 면제</strong>에 동의합니다 / I agree to <strong style="color:var(--ng-ink)">Release of Liability</strong></span>
         </label>
-        <label class="flex items-start gap-3 text-sm pt-2 border-t border-gray-100">
-          <input id="agreeMedia" type="checkbox" class="mt-1 w-5 h-5"/>
-          <span><strong>미디어 사용 동의</strong> (선택) / <strong>Media use consent</strong> (optional) — 사진/영상이 교회 자료에 사용될 수 있음 / Photos/video may be used in church materials</span>
+        <label class="ng-checkbox" style="background:var(--ng-bg2);border:1px solid var(--ng-hairline);border-radius:var(--ng-r-sm)">
+          <input id="agreeMedia" type="checkbox"/><span class="ng-tick" aria-hidden="true">✓</span>
+          <span style="font:500 13.5px/1.5 'Noto Sans KR',sans-serif;color:var(--ng-sub)"><strong style="color:var(--ng-ink)">미디어 사용 동의</strong> (선택) / <strong style="color:var(--ng-ink)">Media use consent</strong> (optional) — 사진/영상이 교회 자료에 사용될 수 있음</span>
         </label>
       </div>
-    </div>
+    </section>
 
     <!-- Signature -->
-    <div class="bg-white shadow-md rounded-2xl p-5">
-      <h2 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-4">Signature / 전자 서명 <span class="text-red-500">*</span></h2>
-      <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Type your full name as signature / 본인 이름을 입력하여 서명</label>
-      <input id="signature" type="text" required placeholder="e.g. Sarah Kim" class="w-full mt-1 px-4 py-3 rounded-xl border-2 border-indigo-200 bg-indigo-50/50 focus:border-indigo-400 focus:outline-none text-base font-bold"/>
-      <p class="text-xs text-gray-500 mt-2">날짜 / Date: <strong id="todayStr"></strong></p>
-    </div>
+    <section class="ng-panel" style="display:flex;flex-direction:column;gap:10px">
+      <div class="ng-section-label">Signature / 전자 서명 <span class="ng-req">*</span></div>
+      <label class="ng-field-label" for="signature">Type your full name as signature / 본인 이름을 입력하여 서명</label>
+      <input id="signature" type="text" required placeholder="e.g. Sarah Kim" class="ng-input ng-sign"/>
+      <p class="ng-sub-sm" style="font-size:12px;margin:0">날짜 / Date: <strong class="ng-mono" style="color:var(--ng-ink)" id="todayStr"></strong></p>
+    </section>
 
-    <!-- Error -->
-    <div id="formError" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
+    <div id="formError" class="hidden ng-note ng-note-danger" style="font:600 14px 'Noto Sans KR',sans-serif"></div>
 
-    <!-- Submit -->
-    <button type="submit" id="submitBtn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black text-lg shadow-lg hover:shadow-xl transition-all">
-      등록 완료 / Complete Registration
-    </button>
+    <button type="submit" id="submitBtn" class="ng-btn ng-btn-primary">등록 완료 / Complete Registration</button>
   </form>
 
   <!-- SUCCESS -->
-  <div id="success" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-8 text-center">
-    <div class="text-5xl mb-3">🎉</div>
-    <h2 class="text-2xl font-black text-emerald-900 mb-2">등록 완료! / Registration Complete!</h2>
-    <p class="text-emerald-800">확인 이메일을 보내드렸습니다. 환영합니다 / We've sent you a confirmation email. Welcome!</p>
+  <div id="success" class="hidden ng-note ng-note-green" style="text-align:center;align-items:center;padding:40px 24px">
+    <div style="width:72px;height:72px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font:400 34px system-ui,sans-serif;color:var(--ng-green)">✓</div>
+    <div style="font:800 26px 'Poppins','Noto Sans KR',sans-serif;letter-spacing:-.03em;color:var(--ng-ink)">등록 완료! / Registration Complete!</div>
+    <div class="ng-note-body">확인 이메일을 보내드렸습니다. 환영합니다 / We&#x2019;ve sent you a confirmation email. Welcome!</div>
   </div>
 
 </main>
 
-<footer class="text-center py-6 text-xs text-gray-400">
-  🏛️ 아미쿠스 장로교회 교육부 · Amicus Presbyterian Church
+<footer style="text-align:center;padding:26px 0 40px;font:500 12px 'Noto Sans KR',sans-serif;color:var(--ng-muted)">
+  아미쿠스 장로교회 교육부 · Amicus Presbyterian Church
 </footer>
 
 <script>
@@ -287,87 +269,6 @@ loadStudent();
 
 
 <!-- AMICUS NEXTGEN SKIN — shared visual layer (2026-08), logic untouched -->
-<style id="amicus-skin">
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap');
-:root{
-  --ng-bg:#ffffff; --ng-bg2:#fafafa; --ng-ink:#17171b; --ng-sub:#6e6e73;
-  --ng-black:#111114; --ng-black-hover:#2b2b30;
-  --ng-lav:#edebf7; --ng-lav-deep:#dcd8ef; --ng-lav-text:#4c4570;
-  --ng-green:#2e9e5b; --ng-green-deep:#247c47; --ng-green-soft:#eaf7ef;
-  --ng-hairline:rgba(0,0,0,.10);
-}
-html{background:var(--ng-bg)}
-body{background:var(--ng-bg)!important;color:var(--ng-ink)}
-h1,h2,h3{font-family:'Poppins','Noto Sans KR',sans-serif!important;letter-spacing:-.02em;font-weight:700}
-
-/* ── Welcome hero — big type on white ── */
-.ap-hero{background:#fff;overflow:hidden}
-.ap-glow{position:absolute;bottom:-260px;left:50%;transform:translateX(-50%);width:720px;height:480px;border-radius:50%;
-  background:radial-gradient(closest-side,rgba(122,110,182,.14),rgba(122,110,182,0));pointer-events:none}
-.ap-mark{width:84px;height:84px;border-radius:24px;background:var(--ng-lav);display:flex;align-items:center;justify-content:center;
-  font-size:42px;border:1px solid rgba(76,69,112,.12)}
-.ap-eyebrow{font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;letter-spacing:.28em;color:var(--ng-sub)}
-.ap-title{font-family:'Poppins','Noto Sans KR',sans-serif;font-size:52px;line-height:1.02;font-weight:800;letter-spacing:-.035em;color:var(--ng-ink)}
-.ap-subtitle{font-size:17px;font-weight:500;color:var(--ng-sub);letter-spacing:-.01em}
-.ap-date{font-size:13px;color:#a1a1a6}
-.ap-cta-primary{background:var(--ng-black);color:#fff;font-family:'Poppins','Noto Sans KR',sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.16)}
-.ap-cta-primary:hover{background:var(--ng-black-hover)}
-.ap-cta-sub{font-weight:500;opacity:.8;font-size:15px}
-.ap-cta-secondary{background:#fff;color:var(--ng-ink);font-family:'Poppins','Noto Sans KR',sans-serif;border:1.5px solid var(--ng-ink);box-shadow:none}
-.ap-cta-secondary:hover{background:var(--ng-bg2)}
-.ap-cta-sub2{font-weight:500;color:var(--ng-sub);font-size:15px}
-.ap-footlink{font-size:13px;font-weight:600;color:var(--ng-sub);text-decoration:none}
-.ap-footlink:hover{color:var(--ng-ink);text-decoration:underline}
-.ap-dot{width:3px;height:3px;border-radius:50%;background:#c7c7cc;display:inline-block}
-@keyframes apRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.ap-rise{animation:apRise .7s cubic-bezier(.25,.6,.2,1) both}
-
-/* ── Header: white, hairline, bold wordmark ── */
-#mainHeader{background:rgba(255,255,255,.85)!important;-webkit-backdrop-filter:saturate(180%) blur(16px);
-  backdrop-filter:saturate(180%) blur(16px);border-bottom:1px solid var(--ng-hairline)!important;box-shadow:none!important}
-#mainHeader h1{font-family:'Poppins','Noto Sans KR',sans-serif;font-weight:700}
-
-/* ── Palette remap: indigo/purple → ink + lavender tints · emerald → muted green ── */
-.bg-indigo-600{background-color:var(--ng-black)!important}
-.hover\:bg-indigo-700:hover,.bg-indigo-700{background-color:var(--ng-black-hover)!important}
-.bg-indigo-500{background-color:#3a3a40!important}.bg-indigo-400{background-color:#55555c!important}
-.bg-indigo-100{background-color:var(--ng-lav-deep)!important}
-.bg-indigo-50,.hover\:bg-indigo-50:hover{background-color:var(--ng-lav)!important}
-.text-indigo-700{color:var(--ng-lav-text)!important}
-.text-indigo-600,.hover\:text-indigo-600:hover{color:var(--ng-ink)!important}
-.text-indigo-500{color:#3a3a40!important}.text-indigo-400{color:#8b87a3!important}
-.text-indigo-300{color:#a9a5bd!important}.text-indigo-200{color:#c9c6d8!important}
-.border-indigo-400,.hover\:border-indigo-400:hover{border-color:#8b87a3!important}
-.border-indigo-300{border-color:#b9b5cc!important}.border-indigo-200{border-color:var(--ng-lav-deep)!important}
-.border-indigo-100{border-color:var(--ng-lav)!important}
-.focus\:border-indigo-400:focus{border-color:var(--ng-ink)!important}
-.ring-indigo-400{--tw-ring-color:rgba(17,17,20,.3)!important}
-.bg-purple-600{background-color:var(--ng-black)!important}.bg-purple-500{background-color:#3a3a40!important}
-.bg-purple-100{background-color:var(--ng-lav-deep)!important}.bg-purple-50{background-color:var(--ng-lav)!important}
-.text-purple-800,.text-purple-700{color:var(--ng-lav-text)!important}
-.border-purple-400{border-color:#8b87a3!important}.border-purple-200{border-color:var(--ng-lav-deep)!important}
-.bg-emerald-600{background-color:var(--ng-green)!important}
-.hover\:bg-emerald-700:hover,.bg-emerald-700{background-color:var(--ng-green-deep)!important}
-.bg-emerald-500{background-color:#37b268!important}.bg-emerald-100{background-color:#d8efe1!important}
-.bg-emerald-50{background-color:var(--ng-green-soft)!important}
-.text-emerald-800,.text-emerald-700{color:var(--ng-green-deep)!important}
-.text-emerald-600,.text-emerald-500{color:var(--ng-green)!important}
-.border-emerald-400{border-color:#5fbd85!important}.border-emerald-200{border-color:#c3e6d0!important}
-
-/* ── Pills, cards, polish (Friends restraint) ── */
-.bg-gray-100{background-color:#f2f2f4!important}
-.rounded-2xl{border-radius:16px!important}.rounded-3xl{border-radius:20px!important}
-.student-card{border-radius:16px;border-color:var(--ng-hairline)!important}
-.student-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.10)!important;transform:translateY(-1px)}
-.shadow-xl,.shadow-lg{box-shadow:0 1px 2px rgba(0,0,0,.05),0 16px 40px rgba(0,0,0,.10)!important}
-button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(17,17,20,.35);outline-offset:2px}
-#cwoBtn{background:var(--ng-black)!important;box-shadow:0 6px 20px rgba(0,0,0,.25)!important}
-.from-indigo-600,.from-purple-600,.from-indigo-500,.from-purple-500{--tw-gradient-from:#17171b!important;--tw-gradient-to:rgba(23,23,27,0)!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important}
-.to-purple-600,.to-indigo-600,.to-purple-500,.to-indigo-500{--tw-gradient-to:#3a3a40!important}
-.via-indigo-600,.via-purple-600{--tw-gradient-stops:var(--tw-gradient-from),#2b2b30,var(--tw-gradient-to)!important}
-@media (prefers-reduced-motion:reduce){
-  .ap-rise,.welcome-pulse,.pulse-ring,.bday-pulse{animation:none!important}
-}
-</style>
+<!-- AMICUS NEXTGEN SKIN — moved to the shared /nextgen.css -->
 </body>
 </html>

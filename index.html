@@ -20,12 +20,16 @@
 <title>아미쿠스 교육부 | 출석 체크</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/nextgen.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgc7ns90iT3zCprGXX9-fOnlWTgsQzPhM&libraries=places&loading=async&callback=_onGoogleMapsReady"></script>
 <style>
-* { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Helvetica Neue', 'Noto Sans KR', Arial, sans-serif; letter-spacing: -0.011em; }
+/* Body default only — the NextGen skin owns display/mono stacks per component.
+   (Was a `*` rule, which outranked every font-family the design system sets.) */
+body { font-family: var(--ng-body); letter-spacing: -0.011em; }
+input, select, textarea, button { font-family: inherit; }
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn .2s ease}
 @keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin .7s linear infinite}
@@ -48,214 +52,367 @@
 .dept-btn{transition:all .2s ease;position:relative}
 .student-card{transition:transform .15s ease,box-shadow .15s ease}
 .student-card:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,0.08)!important}
-.pin-digit{width:56px;height:64px;font-size:28px;font-weight:600;text-align:center;border:1.5px solid #d2d2d7;border-radius:14px;outline:none;transition:all .15s;background:#fff;font-variant-numeric:tabular-nums}
-.pin-digit:focus{border-color:#111114;box-shadow:0 0 0 4px rgba(17,17,20,0.14)}
-.pin-digit.filled{border-color:#111114;background:#edebf7;color:#111114}
-.badge-newcomer{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:#111114;color:#fff;letter-spacing:.2px}
-.badge-birthday-today{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;background:#000;color:#fff;}
-.badge-birthday{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:#555;color:#fff;}
-.badge-allergy{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca}
-.household-header{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1px solid #bae6fd;border-radius:16px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+/* Badges — restyled onto the NextGen chip scale (see .ng-chip in nextgen.css) */
+.badge-newcomer{display:inline-flex;align-items:center;gap:4px;font:700 10.5px 'Poppins',sans-serif;padding:2px 7px;border-radius:99px;background:var(--ng-pink-bg);color:var(--ng-pink-text)}
+.badge-birthday-today{display:inline-flex;align-items:center;gap:4px;font:700 11px 'Noto Sans KR',sans-serif;padding:3px 9px;border-radius:99px;background:var(--ng-ink);color:#fff}
+.badge-birthday{display:inline-flex;align-items:center;gap:4px;font:600 11px 'Noto Sans KR',sans-serif;padding:3px 9px;border-radius:99px;background:var(--ng-bg3);color:var(--ng-sub)}
+.badge-allergy{display:inline-flex;align-items:center;gap:4px;font:700 10.5px 'Poppins',sans-serif;padding:2px 7px;border-radius:99px;background:var(--ng-danger-bg);color:var(--ng-danger-text);border:1px solid var(--ng-danger-line)}
+.household-header{background:var(--ng-lav);border-radius:var(--ng-r-card);padding:14px 18px;margin-bottom:12px;display:flex;align-items:center;gap:14px}
 
 /* Info popup: red warning style for empty required fields */
-#infoPopup input.needs-input:placeholder-shown { border-color:#ef4444!important; background:#fef2f2; }
+/* 2d: required-but-empty reads red; satisfied reads green. */
+#infoPopup input.needs-input:placeholder-shown { border-color:#ef4444; background:#fef2f2; }
 #infoPopup input.needs-input:placeholder-shown::placeholder { color:#dc2626; font-weight:600; opacity:1; }
-#infoPopup input.needs-input:not(:placeholder-shown) { border-color:#10b981; background:#f0fdf4; }
-#infoPopup select.needs-input:invalid, #infoPopup select.needs-input:has(option[value=""]:checked) { border-color:#ef4444!important; background:#fef2f2; color:#dc2626; font-weight:600; }
-#infoPopup select.needs-input:valid:not(:has(option[value=""]:checked)) { border-color:#10b981; background:#f0fdf4; color:#111827; font-weight:500; }
+#infoPopup input.needs-input:not(:placeholder-shown) { border-color:var(--ng-green); background:var(--ng-green-soft); }
+#infoPopup select.needs-input:invalid, #infoPopup select.needs-input:has(option[value=""]:checked) { border-color:#ef4444; background:#fef2f2; color:#dc2626; font-weight:600; }
+#infoPopup select.needs-input:valid:not(:has(option[value=""]:checked)) { border-color:var(--ng-green); background:var(--ng-green-soft); color:var(--ng-ink); font-weight:500; }
 .pac-container, gmp-place-autocomplete::part(prediction-container), .gmp-pac-container { z-index: 9999 !important; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); margin-top: 4px; font-family: inherit; }
 .pac-item { padding: 8px 12px; font-size: 13px; cursor: pointer; }
 .pac-item:hover { background: #f3f4f6; }
 gmp-place-autocomplete { display: block; width: 100%; }
-#infoAddressContainer gmp-place-autocomplete input { width: 100% !important; padding: 8px 12px !important; border: 2px solid #e5e7eb !important; border-radius: 12px !important; font-size: 14px !important; font-family: inherit !important; background: #fff !important; box-sizing: border-box !important; }
+#infoAddressContainer gmp-place-autocomplete input { width:100%!important; height:58px!important; padding:0 16px!important; border:1.5px solid var(--ng-hairline)!important; border-radius:var(--ng-r-md)!important; font:500 17px 'Noto Sans KR',sans-serif!important; background:#fff!important; color:var(--ng-ink)!important; box-sizing:border-box!important; }
 </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-white to-indigo-50 min-h-screen">
+<body>
 
-<!-- WELCOME SCREEN — Apple-style minimal -->
-<div id="welcomeScreen" class="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 ap-hero">
-  <div class="ap-glow" aria-hidden="true"></div>
-  <div class="text-center mb-10 relative ap-rise">
-    <div class="ap-mark mx-auto mb-6"><span>🌱</span></div>
-    <p class="ap-eyebrow mb-2">AMICUS NEXT CHURCH</p>
-    <h1 class="ap-title">NextGen<br>Check-In</h1>
-    <p class="ap-subtitle mt-3">아미쿠스 교육부 출석 체크인</p>
-    <p id="welcomeDate" class="ap-date mt-3"></p>
-  </div>
-  <div class="w-full max-w-xs space-y-3 relative ap-rise" style="animation-delay:.08s">
-    <p class="text-center text-sm font-medium mb-5" style="color:#86868b">Welcome! Please sign in here&nbsp;👋</p>
-    <button onclick="startCheckin()" class="w-full py-4 rounded-full ap-cta-primary text-[17px] font-semibold active:scale-[.97] transition-all flex items-center justify-center gap-2.5">
-      <span>Check In<span class="ap-cta-sub"> · 출석 체크인</span></span>
-    </button>
-    <button onclick="startCheckout()" class="w-full py-4 rounded-full ap-cta-secondary text-[17px] font-semibold active:scale-[.97] transition-all flex items-center justify-center gap-2.5">
-      <span>Check Out<span class="ap-cta-sub2"> · 체크아웃</span></span>
-    </button>
-  </div>
-  <div class="mt-10 flex items-center gap-5 relative ap-rise" style="animation-delay:.16s">
-    <a href="/staff.html" class="ap-footlink">간사/사역자 포털</a>
-    <span class="ap-dot" aria-hidden="true"></span>
-    <a href="/director.html" class="ap-footlink">교육부 디렉터</a>
+<!-- ══ HOME — design 2b (icon marks) ══════════════════════════════════════ -->
+<div id="welcomeScreen" class="fixed inset-0 z-50 ng-hero" style="overflow-y:auto">
+  <div class="ng-kiosk">
+    <div class="ng-glow" aria-hidden="true"></div>
+    <header class="ng-header">
+      <span class="ng-wordmark">Amicus Next Church</span>
+      <span id="welcomeDate" class="ng-date"></span>
+    </header>
+
+    <div class="ng-kiosk-pad ng-rise" style="padding-top:72px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative">
+      <div class="ng-mark"><div class="ng-mark-ring"></div></div>
+      <p class="ng-eyebrow" style="margin:26px 0 0">AMICUS NEXT CHURCH</p>
+      <h1 class="ng-title" style="margin-top:14px">환영합니다</h1>
+      <p class="ng-subtitle" style="margin-top:14px;max-width:460px;text-wrap:pretty">교육부 출석 체크인 · 아래 버튼을 눌러 시작하세요</p>
+    </div>
+
+    <div class="ng-kiosk-pad ng-rise" style="animation-delay:.08s;padding-top:52px;display:flex;flex-direction:column;gap:14px;position:relative">
+      <button onclick="startCheckin()" class="ng-cta ng-cta-dark">
+        <span style="display:flex;align-items:center;gap:20px">
+          <span class="ng-cta-icon" style="background:rgba(255,255,255,.14)"><span style="width:16px;height:16px;border-radius:50%;background:#fff;display:block"></span></span>
+          <span style="display:flex;flex-direction:column;gap:5px">
+            <span class="ng-cta-title">출석 체크인</span>
+            <span class="ng-cta-sub" style="color:rgba(255,255,255,.8)">Start Here — Check In</span>
+          </span>
+        </span>
+        <span class="ng-cta-arrow" style="color:rgba(255,255,255,.7)" aria-hidden="true">→</span>
+      </button>
+
+      <button onclick="startCheckout()" class="ng-cta ng-cta-light">
+        <span style="display:flex;align-items:center;gap:20px">
+          <span class="ng-cta-icon" style="background:var(--ng-lav)"><span style="width:16px;height:16px;border-radius:50%;border:4px solid var(--ng-lav-text);box-sizing:border-box;display:block"></span></span>
+          <span style="display:flex;flex-direction:column;gap:5px">
+            <span class="ng-cta-title">체크아웃</span>
+            <span class="ng-cta-sub" style="color:var(--ng-sub)">Check Out</span>
+          </span>
+        </span>
+        <span class="ng-cta-arrow" style="color:var(--ng-muted)" aria-hidden="true">→</span>
+      </button>
+
+      <button onclick="startCheckin(); openVisitorModal()" class="ng-cta-green">
+        <span style="width:40px;height:40px;border-radius:12px;background:var(--ng-green);display:flex;align-items:center;justify-content:center;font:500 22px 'Noto Sans KR',sans-serif;color:#fff;flex:none">+</span>
+        <span style="display:flex;flex-direction:column;gap:3px">
+          <span style="font:700 19px 'Noto Sans KR',sans-serif;color:var(--ng-green-deep)">처음 오셨나요? 방문자 체크인</span>
+          <span style="font:500 13px 'Noto Sans KR',sans-serif;color:var(--ng-green)">First time here? — 1분이면 등록돼요</span>
+        </span>
+      </button>
+    </div>
+
+    <div class="ng-kiosk-pad ng-rise" style="animation-delay:.16s;margin-top:auto;padding-top:36px;padding-bottom:36px;display:flex;align-items:center;justify-content:center;gap:14px;position:relative">
+      <a href="/staff.html" style="font:600 13px 'Noto Sans KR',sans-serif;color:var(--ng-sub);text-decoration:none">간사/사역자 포털 →</a>
+      <span style="width:3px;height:3px;border-radius:50%;background:var(--ng-faint)" aria-hidden="true"></span>
+      <a href="/director.html" style="font:600 13px 'Noto Sans KR',sans-serif;color:var(--ng-sub);text-decoration:none">교육부 디렉터 포털 →</a>
+    </div>
   </div>
 </div>
 
-<!-- HEADER -->
-<header id="mainHeader" class="hidden bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-20 shadow-sm">
-  <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-    <button onclick="goHome()" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-      <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm shadow-sm" style="background:#f5f5f7;border:1px solid rgba(0,0,0,.06)">🌱</div>
-      <div><h1 class="text-sm font-semibold text-gray-900 leading-tight" style="letter-spacing:-.02em">Amicus Next</h1><p class="text-xs text-gray-400 leading-tight" id="todayDate"></p></div>
-    </button>
-    <div class="flex items-center gap-2">
-      <div id="modeTag" class="hidden text-xs font-bold px-2.5 py-1 rounded-full"></div>
-      <a href="/staff.html" class="text-xs text-gray-400 hover:text-indigo-600 px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors font-medium">간사</a>
+<!-- ══ HEADER (in-flow, shown once a flow starts) ═════════════════════════ -->
+<header id="mainHeader" class="hidden" style="position:sticky;top:0;z-index:20">
+  <div class="ng-kiosk" style="min-height:0">
+    <div class="ng-header">
+      <button onclick="goHome()" class="ng-back" type="button">
+        <span style="font:400 19px system-ui,sans-serif" aria-hidden="true">←</span>
+        <span id="backLabel">처음으로</span>
+      </button>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div id="ciSteps" class="ng-steps hidden">
+          <span class="ng-step is-done" id="ciStepDot1"></span>
+          <span class="ng-step" id="ciStepDot2"></span>
+          <span class="ng-step" id="ciStepDot3"></span>
+          <span class="ng-step-count" id="ciStepCount">1/3</span>
+        </div>
+        <button type="button" id="coNameSearch" class="hidden ng-chip ng-chip-lg ng-chip-lav" onclick="cwoOpen()" style="border:0;cursor:pointer;padding:9px 15px">🔍 이름으로 체크아웃</button>
+        <span id="modeTag" class="hidden ng-chip ng-chip-lg"></span>
+        <span id="todayDate" class="ng-date" style="display:none"></span>
+      </div>
     </div>
   </div>
 </header>
 
-<main id="mainApp" class="hidden max-w-lg mx-auto px-4 py-5">
-  <!-- CHECK-IN SECTION -->
-  <div id="checkinSection" class="hidden">
-    <!-- Search Mode Tabs -->
-    <div class="flex gap-2 mb-5 bg-gray-100 p-1 rounded-2xl">
-      <button id="tabPhone" onclick="setSearchMode('phone')" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-gray-900 shadow-sm">
-        📞 전화번호
-      </button>
-      <button id="tabName" onclick="setSearchMode('name')" class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-gray-400">
-        🔍 이름 검색
-      </button>
-    </div>
-    <div class="text-center mb-6">
-      <div class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2 mb-3"><span class="text-emerald-600 font-bold text-sm">✅ Check In — 체크인</span></div>
-      <h2 id="searchHeader" class="text-xl font-black text-gray-900">전화번호 끝 4자리</h2>
-      <p id="searchSubheader" class="text-gray-400 text-sm mt-1">Last 4 digits of registered phone number</p>
-    </div>
-    <div id="phoneDigitSection" class="flex justify-center gap-3 mb-6">
-      <input class="pin-digit" id="d0" maxlength="1" inputmode="numeric" pattern="[0-9]" type="text"/>
-      <input class="pin-digit" id="d1" maxlength="1" inputmode="numeric" pattern="[0-9]" type="text"/>
-      <input class="pin-digit" id="d2" maxlength="1" inputmode="numeric" pattern="[0-9]" type="text"/>
-      <input class="pin-digit" id="d3" maxlength="1" inputmode="numeric" pattern="[0-9]" type="text"/>
-    </div>
-    <!-- Name Search Input -->
-    <div id="nameSearchSection" class="hidden mb-4">
-      <div class="relative">
-        <input id="nameInput" type="text" placeholder="&#xC774;&#xB984; &#xC785;&#xB825; (&#xC608;: &#xBD09;&#xC11C;&#xC544;)" 
-          oninput="onNameInput(this.value)"
-          class="w-full px-5 py-4 text-lg rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold"
-          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-        />
+<main id="mainApp" class="hidden ng-kiosk" style="min-height:calc(100dvh - 87px)">
+  <!-- ══ CHECK-IN — design 2c ═══════════════════════════════════════════ -->
+  <div id="checkinSection" class="hidden ng-step-pane">
+
+    <!-- STEP 1 · 조회 — keypad -->
+    <div id="ciStep1" class="ng-step-pane">
+      <div class="ng-kiosk-pad" style="padding-top:44px">
+        <p class="ng-eyebrow ng-eyebrow-lav">STEP 1 · 조회</p>
+        <h2 id="searchHeader" class="ng-title-md" style="margin-top:12px">전화번호 끝 4자리</h2>
+        <p id="searchSubheader" class="ng-subtitle" style="font-size:16px;margin-top:8px">Last 4 digits of registered phone number</p>
       </div>
-      <p class="text-gray-400 text-xs mt-2 text-center">&#xD55C;&#xAE00; &#xB610;&#xB294; &#xC601;&#xC5B4; &#xC774;&#xB984;&#xC73C;&#xB85C; &#xAC80;&#xC0C9;</p>
-    </div>
-    <div id="checkinResults"></div>
-    <button onclick="openVisitorModal()" class="w-full mt-4 py-3 rounded-2xl border-2 border-dashed border-indigo-300 text-indigo-600 font-semibold text-sm hover:bg-indigo-50 hover:border-indigo-400 transition-all flex items-center justify-center gap-2">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-      First time here? — 방문자 체크인
-    </button>
-  </div>
 
-  <!-- CHECK-OUT SECTION -->
-  <div id="checkoutSection" class="hidden">
-    <div class="text-center mb-6">
-      <div class="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-2xl px-4 py-2 mb-3"><span class="text-indigo-600 font-bold text-sm">🙏 Check Out — 체크아웃</span></div>
-      <h2 class="text-xl font-black text-gray-900">고유번호 끝 3자리</h2>
-      <p class="text-gray-400 text-sm mt-1">Last 3 digits of student ID (AMC-XXX)</p>
-    </div>
-    <div class="flex justify-center gap-4 mb-6">
-      <input class="pin-digit" id="co0" maxlength="1" inputmode="numeric" pattern="[0-9]" type="text"/>
-      <input class="pin-digit" id="co1" maxlength="1" inputmode="numeric" pattern="[0-9]" type="text"/>
-      <input class="pin-digit" id="co2" maxlength="1" inputmode="numeric" pattern="[0-9]" type="text"/>
-    </div>
-    <div id="checkoutResults"></div>
-  </div>
-</main>
+      <div id="phoneDigitSection" class="ng-kiosk-pad ng-pins" style="padding-top:34px">
+        <input class="ng-pin" id="d0" maxlength="1" inputmode="none" pattern="[0-9]" type="text" aria-label="전화번호 끝 4자리 중 첫 번째"/>
+        <input class="ng-pin" id="d1" maxlength="1" inputmode="none" pattern="[0-9]" type="text" aria-label="두 번째"/>
+        <input class="ng-pin" id="d2" maxlength="1" inputmode="none" pattern="[0-9]" type="text" aria-label="세 번째"/>
+        <input class="ng-pin" id="d3" maxlength="1" inputmode="none" pattern="[0-9]" type="text" aria-label="네 번째"/>
+      </div>
 
-<!-- CONFIRMATION MODAL -->
-<div id="modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-  <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-sm p-6 slide-up sm:fade-in max-h-[90vh] overflow-y-auto">
-    <div id="modalHeader" class="text-center mb-4 p-4 rounded-2xl"></div>
-    <div id="modalInfo" class="space-y-0 mb-3 bg-gray-50 rounded-2xl overflow-hidden"></div>
-    <div id="pickupMsg" class="hidden mb-3 p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-sm">
-      <p class="font-semibold">📣 픽업 안내</p>
-      <p class="mt-1">예배 종료 후 <strong>즉시 픽업</strong>을 부탁드립니다. 감사합니다! 🙏</p>
-      <p class="text-xs mt-1 text-blue-600">Please pick up your child <strong>immediately after service</strong>. Thank you!</p>
+      <!-- Name search lives on the keypad, not in a separate mode (2c) -->
+      <div id="nameSearchSection" class="hidden ng-kiosk-pad" style="padding-top:20px">
+        <input id="nameInput" type="text" placeholder="이름 입력 (예: 봉서아)"
+          oninput="onNameInput(this.value)" class="ng-input"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      </div>
+
+      <div id="ciKeypad" class="ng-kiosk-pad ng-keypad" style="padding-top:32px">
+        <button type="button" class="ng-key" onclick="ngKey('1')">1</button>
+        <button type="button" class="ng-key" onclick="ngKey('2')">2</button>
+        <button type="button" class="ng-key" onclick="ngKey('3')">3</button>
+        <button type="button" class="ng-key" onclick="ngKey('4')">4</button>
+        <button type="button" class="ng-key" onclick="ngKey('5')">5</button>
+        <button type="button" class="ng-key" onclick="ngKey('6')">6</button>
+        <button type="button" class="ng-key" onclick="ngKey('7')">7</button>
+        <button type="button" class="ng-key" onclick="ngKey('8')">8</button>
+        <button type="button" class="ng-key" onclick="ngKey('9')">9</button>
+        <button type="button" id="tabName" class="ng-key ng-key-alt" onclick="setSearchMode('name')">이름 검색</button>
+        <button type="button" class="ng-key" onclick="ngKey('0')">0</button>
+        <button type="button" class="ng-key ng-key-del" onclick="ngKey('del')" aria-label="지우기">⌫</button>
+      </div>
+      <!-- kept so setSearchMode('phone') has a target to style back to -->
+      <button type="button" id="tabPhone" onclick="setSearchMode('phone')" class="hidden"></button>
+
+      <div class="ng-kiosk-pad" style="margin-top:auto;padding-top:24px;padding-bottom:32px;display:flex;flex-direction:column;gap:14px">
+        <p style="font:500 13px 'Noto Sans KR',sans-serif;color:var(--ng-muted);text-align:center;margin:0">한글 또는 영어 이름으로도 찾을 수 있어요</p>
+        <button type="button" id="ciContinue" class="ng-btn ng-btn-primary" disabled onclick="ngContinue()">다음 · Continue</button>
+      </div>
     </div>
-    <div id="guardianRow" class="hidden mb-4">
-      <label class="flex items-center gap-3 cursor-pointer p-3.5 bg-indigo-50 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-colors">
-        <input type="checkbox" id="guardianCheck" class="w-5 h-5 rounded accent-indigo-600"/>
-        <span class="text-sm font-semibold text-indigo-700">✅ 보호자 인계 확인</span>
-      </label>
-    </div>
-    <!-- Liability Warning Banner -->
-  <div id="liabilityWarning" class="hidden mb-3 px-4 py-3 bg-orange-50 border border-orange-300 rounded-2xl">
-    <div class="flex items-start gap-3">
-      <span class="text-xl flex-shrink-0">&#x26A0;&#xFE0F;</span>
-      <div class="flex-1">
-        <p class="font-bold text-orange-800 text-sm">&#xCC45;&#xC784; &#xB3D9;&#xC758;&#xC11C; &#xBBF8;&#xC81C;&#xCD9C;</p>
-        <p class="text-orange-700 text-xs mt-0.5">&#xC774; &#xD559;&#xC0DD;&#xC740; Liability Form&#xC744; &#xC544;&#xC9C1; &#xC81C;&#xCD9C;&#xD558;&#xC9C0; &#xC54A;&#xC558;&#xC5B4;&#xC694;.</p>
-        <button onclick="openLiabilityFormFromModal()" class="mt-2 px-4 py-1.5 bg-orange-500 text-white text-xs font-bold rounded-xl hover:bg-orange-600 transition-colors">
-          &#x1F4DD; &#xC9C0;&#xAE08; &#xC791;&#xC131;&#xD558;&#xAE30;
+
+    <!-- STEP 2 · 자녀 선택 -->
+    <div id="ciStep2" class="hidden ng-step-pane">
+      <div class="ng-kiosk-pad" style="padding-top:40px">
+        <h2 id="ciHouseTitle" class="ng-title-md" style="font-size:36px">가정 확인</h2>
+        <p id="ciHouseSub" class="ng-subtitle" style="font-size:16px;margin-top:8px">체크인할 자녀를 모두 선택해주세요</p>
+      </div>
+      <div id="checkinResults" class="ng-kiosk-pad" style="padding-top:28px;display:flex;flex-direction:column;gap:12px"></div>
+      <div class="ng-kiosk-pad" style="padding-top:12px">
+        <button onclick="openVisitorModal()" class="ng-card-dash" type="button">
+          <span style="width:34px;height:34px;border-radius:11px;background:var(--ng-lav);display:flex;align-items:center;justify-content:center;font:600 18px 'Noto Sans KR',sans-serif;color:var(--ng-lav-text);flex:none">+</span>
+          <span style="font:600 16px 'Noto Sans KR',sans-serif;color:var(--ng-lav-text)">명단에 없는 자녀 추가 / 방문자</span>
+        </button>
+      </div>
+      <div id="ciWaiverNote" class="hidden ng-kiosk-pad" style="padding-top:26px"></div>
+      <div class="ng-kiosk-pad" style="margin-top:auto;padding-top:26px;padding-bottom:32px;display:flex;flex-direction:column;gap:12px">
+        <label class="ng-checkbox" style="background:var(--ng-bg2);border:1px solid var(--ng-hairline);border-radius:var(--ng-r-card);padding:16px 20px">
+          <input type="checkbox" id="ciPickupAck" checked/>
+          <span class="ng-tick" aria-hidden="true">✓</span>
+          <span style="font:500 13.5px/1.45 'Noto Sans KR',sans-serif;color:var(--ng-sub)">예배 종료 후 <strong style="color:var(--ng-ink)">즉시 픽업</strong>하겠습니다 · Pickup notice acknowledged</span>
+        </label>
+        <button type="button" id="ciSubmit" class="ng-btn ng-btn-primary" disabled onclick="ngCheckinSelected()"
+          style="height:82px;justify-content:space-between;padding:0 30px">
+          <span id="ciSubmitLabel" style="font-size:22px;letter-spacing:-.02em">자녀를 선택해주세요</span>
+          <span style="font:500 15px 'Poppins',sans-serif;color:rgba(255,255,255,.75)">CHECK IN →</span>
         </button>
       </div>
     </div>
   </div>
-  <div class="flex gap-3">
-      <button onclick="closeModal()" class="flex-1 py-3.5 rounded-2xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">취소</button>
-      <button id="confirmBtn" onclick="doAction()" class="flex-1 py-3.5 rounded-2xl font-bold text-white transition-colors">확인 / Confirm</button>
+
+  <!-- ══ CHECK-OUT — design 2e (portrait) ═══════════════════════════════ -->
+  <div id="checkoutSection" class="hidden ng-step-pane">
+    <div class="ng-kiosk-pad" style="padding-top:40px">
+      <p class="ng-eyebrow ng-eyebrow-lav">CHECK OUT</p>
+      <h2 class="ng-title-md" style="font-size:38px;margin-top:12px">고유번호 끝 3자리</h2>
+      <p class="ng-subtitle" style="font-size:16px;margin-top:8px">Last 3 digits of student ID (AMC-XXX)</p>
+    </div>
+    <div class="ng-kiosk-pad" style="padding-top:30px;display:flex;gap:14px;justify-content:center">
+      <input class="ng-pin ng-pin-lg" id="co0" maxlength="1" inputmode="none" pattern="[0-9]" type="text" aria-label="고유번호 끝 3자리 중 첫 번째"/>
+      <input class="ng-pin ng-pin-lg" id="co1" maxlength="1" inputmode="none" pattern="[0-9]" type="text" aria-label="두 번째"/>
+      <input class="ng-pin ng-pin-lg" id="co2" maxlength="1" inputmode="none" pattern="[0-9]" type="text" aria-label="세 번째"/>
+    </div>
+    <div id="coKeypad" class="ng-kiosk-pad ng-keypad" style="padding-top:28px">
+      <button type="button" class="ng-key" onclick="ngKey('1')">1</button>
+      <button type="button" class="ng-key" onclick="ngKey('2')">2</button>
+      <button type="button" class="ng-key" onclick="ngKey('3')">3</button>
+      <button type="button" class="ng-key" onclick="ngKey('4')">4</button>
+      <button type="button" class="ng-key" onclick="ngKey('5')">5</button>
+      <button type="button" class="ng-key" onclick="ngKey('6')">6</button>
+      <button type="button" class="ng-key" onclick="ngKey('7')">7</button>
+      <button type="button" class="ng-key" onclick="ngKey('8')">8</button>
+      <button type="button" class="ng-key" onclick="ngKey('9')">9</button>
+      <button type="button" class="ng-key ng-key-alt" onclick="cwoOpen()">이름 검색</button>
+      <button type="button" class="ng-key" onclick="ngKey('0')">0</button>
+      <button type="button" class="ng-key ng-key-del" onclick="ngKey('del')" aria-label="지우기">⌫</button>
+    </div>
+    <div id="checkoutResults" class="ng-kiosk-pad" style="padding-top:24px;display:flex;flex-direction:column;gap:12px"></div>
+    <div class="ng-kiosk-pad" style="margin-top:auto;padding-top:24px;padding-bottom:30px">
+      <div class="ng-panel" style="background:var(--ng-bg2);font:500 13.5px/1.6 'Noto Sans KR',sans-serif;color:var(--ng-sub)">
+        📣 예배 종료 후 <strong style="color:var(--ng-ink)">즉시 픽업</strong>을 부탁드립니다. Please pick up your child immediately after service. 🙏
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ══ CONFIRMATION SHEET ═════════════════════════════════════════════ -->
+<div id="modal" class="hidden ng-overlay">
+  <div class="ng-sheet" style="max-width:560px">
+    <div id="modalHeader" class="ng-sheet-head" style="flex-direction:column;align-items:center;text-align:center;gap:8px"></div>
+    <div class="ng-sheet-body">
+      <div id="modalInfo" class="ng-panel" style="padding:0;overflow:hidden;background:var(--ng-bg2)"></div>
+
+      <div id="pickupMsg" class="hidden ng-note ng-note-lav" style="margin-top:16px">
+        <div class="ng-note-title">📣 픽업 안내 / PICKUP NOTICE</div>
+        <div class="ng-note-body">예배 종료 후 <strong>즉시 픽업</strong>을 부탁드립니다. Please pick up your child immediately after service. 🙏</div>
+      </div>
+
+      <div id="guardianRow" class="hidden" style="margin-top:16px">
+        <label class="ng-checkbox" style="background:var(--ng-lav);border-radius:var(--ng-r-card);padding:16px 20px">
+          <input type="checkbox" id="guardianCheck"/>
+          <span class="ng-tick" aria-hidden="true">✓</span>
+          <span style="font:600 14.5px 'Noto Sans KR',sans-serif;color:var(--ng-lav-text)">보호자 인계 확인 / Guardian handoff confirmed</span>
+        </label>
+      </div>
+
+      <div id="liabilityWarning" class="hidden ng-note ng-note-warn" style="margin-top:16px">
+        <div style="font:700 15px 'Noto Sans KR',sans-serif">⚠️ 책임 동의서 미제출</div>
+        <div style="font:500 13.5px/1.6 'Noto Sans KR',sans-serif;color:var(--ng-warn-text2)">이 학생은 Liability Form을 아직 제출하지 않았어요.</div>
+        <div><button type="button" onclick="openLiabilityFormFromModal()" style="margin-top:4px;padding:12px 18px;border-radius:12px;background:var(--ng-black);border:0;cursor:pointer;font:700 14px 'Noto Sans KR',sans-serif;color:#fff">지금 작성하기</button></div>
+      </div>
+    </div>
+    <div class="ng-sheet-foot" style="flex-direction:row;gap:12px">
+      <button onclick="closeModal()" class="ng-btn ng-btn-ghost" style="flex:none;width:170px">취소</button>
+      <button id="confirmBtn" onclick="doAction()" class="ng-btn ng-btn-primary" style="flex:1">확인 / Confirm</button>
     </div>
   </div>
 </div>
 
-<!-- SUCCESS MODAL -->
-<div id="success" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-  <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-sm p-6 slide-up sm:fade-in max-h-[90vh] overflow-y-auto">
-    <div class="text-center mb-4">
-      <div id="successIcon" class="text-5xl mb-2 check-pop inline-block"></div>
-      <h2 id="successTitle" class="text-xl font-bold text-gray-900"></h2>
-      <p id="successTime" class="text-sm text-gray-400 mt-1"></p>
+<!-- ══ STEP 3 · 완료 · 라벨 — design 2c ═══════════════════════════════════
+     Full-bleed on a kiosk, still a dismissible overlay elsewhere. The id and
+     the .hidden toggle are unchanged — the auto-reset watcher observes them. -->
+<div id="success" class="hidden ng-overlay" style="background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0;align-items:stretch">
+  <div class="ng-kiosk" style="overflow-y:auto;padding:40px 0">
+
+    <div class="ng-kiosk-pad" style="display:flex;flex-direction:column;align-items:center;text-align:center">
+      <div id="successIcon" class="ng-pop" style="width:80px;height:80px;border-radius:50%;background:var(--ng-green-soft);display:flex;align-items:center;justify-content:center;font:400 38px system-ui,sans-serif;color:var(--ng-green)">✓</div>
+      <p id="successTime" class="ng-eyebrow ng-eyebrow-green" style="margin:20px 0 0"></p>
+      <h2 id="successTitle" class="ng-title" style="font-size:42px;margin-top:12px"></h2>
+      <p id="successSub" class="ng-subtitle" style="font-size:16px;margin-top:10px">라벨을 뽑아 옷에 붙여주세요 · 픽업 태그는 보호자가 보관</p>
     </div>
-    <div id="successPickup" class="hidden mb-4 p-4 bg-blue-50 border border-blue-200 rounded-2xl text-center">
-      <p class="text-blue-800 font-bold text-sm">📣 픽업 안내 / Pickup Reminder</p>
-      <p class="text-blue-700 text-sm mt-1">예배 종료 후 <strong>즉시 픽업</strong>을 부탁드립니다.</p>
-      <p class="text-blue-600 text-xs mt-1">Please pick up your child immediately after service ends. Thank you! 🙏</p>
+
+    <!-- 2c label card -->
+    <div id="ngLabelCard" class="ng-kiosk-pad hidden" style="padding-top:30px"></div>
+
+    <!-- Pickup reminder -->
+    <div id="successPickup" class="hidden ng-kiosk-pad" style="padding-top:20px">
+      <div class="ng-note ng-note-lav">
+        <div class="ng-note-title">📣 픽업 안내 / PICKUP REMINDER</div>
+        <div class="ng-note-body" style="font-size:15.5px;text-wrap:pretty">예배 종료 후 <strong>즉시 픽업</strong>을 부탁드립니다. 체크아웃은 고유번호 끝 3자리 <strong id="successCoCode">—</strong>로 진행됩니다. 감사합니다!</div>
+      </div>
     </div>
-    <div id="tagContainer" class="hidden mb-4">
-      <p class="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">태그 미리보기</p>
-      <div style="overflow:auto;background:#f3f4f6;border-radius:12px;padding:10px;display:flex;justify-content:center;">
-        <div style="transform:scale(0.75);transform-origin:top center;display:inline-block;">
+
+    <!-- True print proof — Arial / mm, deliberately not reskinned -->
+    <div id="tagContainer" class="hidden ng-kiosk-pad" style="padding-top:20px">
+      <p style="font:600 10.5px 'Poppins',sans-serif;letter-spacing:.14em;color:var(--ng-muted);margin:0 0 8px">실제 인쇄 미리보기 / PRINT PROOF</p>
+      <div style="overflow:auto;background:var(--ng-bg2);border:1px solid var(--ng-hairline);border-radius:var(--ng-r-card);padding:14px;display:flex;justify-content:center">
+        <div style="transform:scale(0.8);transform-origin:top center;display:inline-block">
           <div id="previewCard"></div>
         </div>
       </div>
     </div>
-    <div class="flex gap-2">
-      <button onclick="closeSuccess()" class="flex-1 py-3.5 rounded-2xl text-gray-600 bg-gray-100 font-semibold text-sm hover:bg-gray-200 transition-colors">닫기</button>
-      <button onclick="printTag(); this.innerHTML='🔄 다시 인쇄'; if(window.deferAutoReset) window.deferAutoReset(15000);" id="printBtn" class="hidden flex-1 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition-colors">🖨️ 라벨 인쇄</button>
-    </div><div id="countdownBanner" class="hidden mt-3 text-center"><p class="text-xs text-gray-400 font-medium"><span id="countdownNum">10</span>&#xCD08; &#xB4A4;&#xC5D0; &#xBA54;&#xC778;&#xD654;&#xBA74;&#xC73C;&#xB85C; &#xB3CC;&#xC544;&#xAC11;&#xB2C8;&#xB2E4;</p><div class="mt-1 w-full bg-gray-100 rounded-full h-1"><div id="countdownBar" style="width:100%;transition:width 1s linear" class="bg-indigo-400 h-1 rounded-full"></div></div></div>
 
+    <div class="ng-kiosk-pad" style="padding-top:20px;display:flex;gap:12px">
+      <button onclick="printTag(); this.innerHTML='🔄 다시 인쇄'; if(window.deferAutoReset) window.deferAutoReset(15000);" id="printBtn" class="hidden ng-btn ng-btn-primary" style="flex:1;font-size:18px">🖨️ 라벨 인쇄</button>
+      <button onclick="closeSuccess()" class="ng-btn ng-btn-outline" style="flex:1;font-size:18px">한 명 더 체크인</button>
+    </div>
+
+    <div id="countdownBanner" class="hidden ng-kiosk-pad" style="margin-top:auto;padding-top:26px;display:flex;align-items:center;gap:12px">
+      <div class="ng-bar ng-bar-green" style="height:5px"><i id="countdownBar" style="width:100%;transition:width 1s linear"></i></div>
+      <span style="font:500 12px 'Noto Sans KR',sans-serif;color:var(--ng-muted);white-space:nowrap"><span id="countdownNum">10</span>초 뒤 메인화면으로</span>
+    </div>
   </div>
 </div>
 
-<!-- VISITOR MODAL -->
-<div id="visitorModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center">
-  <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-sm p-6 slide-up sm:fade-in max-h-[95vh] overflow-y-auto">
-    <div class="flex items-center justify-between mb-5">
-      <div><h2 class="text-lg font-bold text-gray-900">🆕 방문자 체크인</h2><p class="text-xs text-gray-400">처음 방문하시는 분들을 위한 등록</p></div>
-      <button onclick="closeVisitorModal()" class="text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+<!-- ══ 방문자 체크인 — design 3a ══════════════════════════════════════════
+     One screen, six fields, pickup consent inline. No modal stack. -->
+<div id="visitorModal" class="hidden ng-overlay">
+  <div class="ng-sheet">
+    <div class="ng-sheet-head">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="ng-eyebrow ng-eyebrow-green">FIRST TIME HERE</span>
+        <h2 style="font:800 30px 'Poppins','Noto Sans KR',sans-serif;letter-spacing:-.03em;color:var(--ng-ink);margin:0">방문자 체크인</h2>
+        <p class="ng-sub-sm">처음 방문하시는 분들을 위한 등록 · 1분이면 끝나요</p>
+      </div>
+      <button type="button" class="ng-x" onclick="closeVisitorModal()" aria-label="닫기">✕</button>
     </div>
-    <div class="space-y-3">
-      <div><label class="text-xs font-bold text-gray-500 uppercase tracking-wide">아이 이름 *</label><input id="v-name" type="text" placeholder="한글 이름" class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase tracking-wide">English Name</label><input id="v-nameEN" type="text" class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase tracking-wide">생년월일 (Date of Birth) *</label><input id="v-dob" type="date" class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/><p id="v-deptPreview" class="text-xs text-indigo-600 mt-1 hidden font-semibold">→ 자동 배정 부서: <strong id="v-deptPreviewName"></strong></p></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase tracking-wide">학년 / Grade</label><input id="v-grade" type="text" placeholder="예: 3rd grade, 유치원" class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase tracking-wide">보호자 이름 *</label><input id="v-guardian" type="text" class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase tracking-wide">연락처 (Phone)</label><input id="v-phone" type="tel" class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-      <div><label class="text-xs font-bold text-gray-500 uppercase tracking-wide">알러지 (Allergy)</label><input id="v-allergy" type="text" placeholder="없음" class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm"/></div>
-      <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-xs"><p class="font-semibold">📣 픽업 안내 / Pickup Notice</p><p class="mt-1">예배 종료 후 즉시 픽업을 부탁드립니다. Please pick up your child immediately after service.</p></div>
-      <label class="flex items-center gap-3 cursor-pointer p-3 bg-blue-50 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors"><input type="checkbox" id="v-pickupAck" class="w-5 h-5 accent-blue-600 flex-shrink-0"/><span class="text-sm font-semibold text-blue-700">픽업 안내 확인했습니다 / I acknowledge the pickup notice</span></label>
+
+    <div class="ng-sheet-body" style="display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="ng-section-label">아이 정보</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="ng-field"><label class="ng-field-label" for="v-name">아이 이름 <span class="ng-req">*</span></label>
+            <input id="v-name" type="text" placeholder="한글 이름" class="ng-input"/></div>
+          <div class="ng-field"><label class="ng-field-label" for="v-nameEN">English Name</label>
+            <input id="v-nameEN" type="text" placeholder="Hayoon" class="ng-input"/></div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="ng-field"><label class="ng-field-label" for="v-dob">생년월일 <span class="ng-req">*</span></label>
+            <input id="v-dob" type="date" class="ng-input ng-input-mono"/></div>
+          <div class="ng-field"><label class="ng-field-label" for="v-grade">학년 / Grade</label>
+            <input id="v-grade" type="text" placeholder="예: 3rd grade, 유치원" class="ng-input"/></div>
+        </div>
+        <!-- Department is derived from DOB; the matching chip lights up. -->
+        <div id="v-deptChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
+          <span class="ng-chip ng-chip-lg ng-dept-infant"    data-dept="유아부 (Infant)">유아부</span>
+          <span class="ng-chip ng-chip-lg ng-dept-preschool" data-dept="유치부 (Preschool)">유치부</span>
+          <span class="ng-chip ng-chip-lg ng-dept-elemjr"    data-dept="유년부 (Elementary Jr)">유년부</span>
+          <span class="ng-chip ng-chip-lg ng-dept-elem"      data-dept="초등부 (Elementary)">초등부</span>
+          <span class="ng-chip ng-chip-lg ng-dept-youth"     data-dept="중고등부 (Youth)">중고등부</span>
+        </div>
+        <p id="v-deptPreview" class="hidden" style="font:600 12px 'Noto Sans KR',sans-serif;color:var(--ng-lav-text);margin:0">→ 자동 배정 부서: <strong id="v-deptPreviewName"></strong></p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="ng-section-label">보호자 정보</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="ng-field"><label class="ng-field-label" for="v-guardian">보호자 이름 <span class="ng-req">*</span></label>
+            <input id="v-guardian" type="text" placeholder="보호자 이름" class="ng-input"/></div>
+          <div class="ng-field"><label class="ng-field-label" for="v-phone">연락처 (Phone)</label>
+            <input id="v-phone" type="tel" placeholder="858-123-4567" class="ng-input ng-input-mono"/></div>
+        </div>
+        <div class="ng-field"><label class="ng-field-label" for="v-allergy">⚠️ 알러지 (있으면 적어주세요)</label>
+          <input id="v-allergy" type="text" placeholder="없음" class="ng-input"/></div>
+      </div>
+
+      <div class="ng-note ng-note-lav" style="gap:12px">
+        <div class="ng-note-title">📣 픽업 안내 / PICKUP NOTICE</div>
+        <div class="ng-note-body">예배 종료 후 <strong>즉시 픽업</strong>을 부탁드립니다. Please pick up your child immediately after service.</div>
+        <label class="ng-checkbox">
+          <input type="checkbox" id="v-pickupAck"/>
+          <span class="ng-tick" aria-hidden="true">✓</span>
+          <span style="font:600 14px 'Noto Sans KR',sans-serif;color:var(--ng-ink)">픽업 안내 확인했습니다 / I acknowledge</span>
+        </label>
+      </div>
+
+      <div id="visitorError" class="hidden ng-note ng-note-danger" style="font:600 14px 'Noto Sans KR',sans-serif"></div>
     </div>
-    <div id="visitorError" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm"></div>
-    <div class="flex gap-3 mt-5">
-      <button onclick="closeVisitorModal()" class="flex-1 py-3.5 rounded-2xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">취소</button>
-      <button onclick="submitVisitor()" id="visitorBtn" class="flex-1 py-3.5 rounded-2xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">체크인 등록</button>
+
+    <div class="ng-sheet-foot" style="flex-direction:row;gap:12px">
+      <button onclick="closeVisitorModal()" class="ng-btn ng-btn-ghost" style="flex:none;width:190px">취소</button>
+      <button onclick="submitVisitor()" id="visitorBtn" class="ng-btn ng-btn-green" style="flex:1">체크인 등록</button>
     </div>
   </div>
 </div>
@@ -294,7 +451,7 @@ function checkSaturdayReset() {
   return isSaturday;
 }
 
-function goHome(){document.getElementById("welcomeScreen").classList.remove("hidden");document.getElementById("mainHeader").classList.add("hidden");document.getElementById("mainApp").classList.add("hidden");_currentMode=null;clearPins();}
+function goHome(){document.getElementById("welcomeScreen").classList.remove("hidden");document.getElementById("mainHeader").classList.add("hidden");document.getElementById("mainApp").classList.add("hidden");_currentMode=null;window._ngPin=null;clearPins();setSearchMode("phone");ngStep(1);ngSyncCwoBtn();}
 
 // ── Name Search Mode ──
 
@@ -317,11 +474,14 @@ function openLiabilityForm(student, checkinCallback) {
   var nameEl = document.getElementById('liabilityStudentName');
   var infoEl = document.getElementById('liabilityStudentInfo2');
   if(nameEl) nameEl.textContent = student.name + (student.nameEN ? ' (' + student.nameEN + ')' : '');
-  if(infoEl) infoEl.textContent = (student.department||'') + ' · ' + (student.grade||'') + ' · DOB: ' + (student.dob||'-');
+  if(infoEl) infoEl.textContent = '(' + ngDeptShort(student.department) + (student.grade ? ' · ' + student.grade : '') + ')';
 
   // Pre-fill guardian name if available
   var guardianInput = document.getElementById('liabilityGuardianName');
-  if(guardianInput && student.guardian) guardianInput.value = student.guardian;
+  var autofill = (student.guardian || student.fatherName || student.motherName || '').trim();
+  if(guardianInput && autofill) guardianInput.value = autofill;
+  var chip = document.getElementById('liabilityAutofillChip');
+  if(chip) chip.textContent = autofill ? ('자동 입력됨 · 보호자 ' + autofill) : '보호자 정보를 입력해주세요';
 
   // Set timestamp
   var ts = document.getElementById('liabilityTimestamp');
@@ -404,35 +564,129 @@ function submitLiabilityForm() {
   });
 }
 
+/* ══ 2c wizard controller ═══════════════════════════════════════════════
+   Step rail: 1 조회 (keypad) → 2 자녀 선택 → 3 완료·라벨 (the success view).
+   These helpers only move panes and paint the rail; every search / check-in
+   call still goes through the original searchByPhone / familyCheckinStart /
+   proceedWithAction path.                                                  */
+function ngStep(n){
+  window._ngStep = n;
+  var s1=document.getElementById('ciStep1'), s2=document.getElementById('ciStep2');
+  if(s1) s1.classList.toggle('hidden', n!==1);
+  if(s2) s2.classList.toggle('hidden', n!==2);
+  var rail=document.getElementById('ciSteps');
+  if(rail){
+    rail.classList.toggle('hidden', _currentMode!=='checkin');
+    for(var i=1;i<=3;i++){
+      var d=document.getElementById('ciStepDot'+i);
+      if(d) d.classList.toggle('is-done', i<=n);
+    }
+    var c=document.getElementById('ciStepCount'); if(c) c.textContent=n+'/3';
+  }
+  var back=document.getElementById('backLabel');
+  if(back) back.textContent = (n===2 && window._ngPin) ? ('····'+window._ngPin) : '처음으로';
+  if(n===1) window._ngSelected = {};
+}
+
+/* On-screen keypad. Writes into the existing #d0–#d3 / #co0–#co2 inputs and
+   dispatches 'input', so the original listeners (auto-advance, auto-search)
+   run untouched. */
+function ngKey(k){
+  var ids = (_currentMode==='checkout') ? ['co0','co1','co2'] : ['d0','d1','d2','d3'];
+  if(window._searchMode==='name' && _currentMode!=='checkout'){
+    var ni=document.getElementById('nameInput');
+    if(ni){
+      if(k==='del') ni.value = ni.value.slice(0,-1); else ni.value += k;
+      ni.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+    return;
+  }
+  var els = ids.map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  if(k==='del'){
+    for(var i=els.length-1;i>=0;i--){
+      if(els[i].value){ els[i].value=''; els[i].classList.remove('filled'); els[i].focus(); break; }
+      if(i===0) els[0].focus();
+    }
+    ngSyncContinue();
+    return;
+  }
+  for(var j=0;j<els.length;j++){
+    if(!els[j].value){
+      els[j].focus();
+      els[j].value = k;
+      els[j].dispatchEvent(new Event('input',{bubbles:true}));
+      break;
+    }
+  }
+  ngSyncContinue();
+}
+
+/* Enables 다음 · Continue once the code is complete. */
+function ngSyncContinue(){
+  var btn=document.getElementById('ciContinue'); if(!btn) return;
+  var ready;
+  if(window._searchMode==='name'){
+    var ni=document.getElementById('nameInput');
+    ready = !!(ni && ni.value.trim().length>=1);
+  } else {
+    ready = ['d0','d1','d2','d3'].every(function(id){
+      var el=document.getElementById(id); return el && el.value;
+    });
+  }
+  btn.disabled = !ready;
+}
+
+function ngContinue(){
+  if(window._searchMode==='name'){
+    var ni=document.getElementById('nameInput');
+    if(ni && ni.value.trim()) onNameInput(ni.value);
+    return;
+  }
+  var pin=['d0','d1','d2','d3'].map(function(id){
+    var el=document.getElementById(id); return el?el.value:'';
+  }).join('');
+  if(pin.length===4) searchByPhone(pin);
+}
+
 function setSearchMode(mode) {
   var phoneSection = document.getElementById('phoneDigitSection');
-  var nameSection = document.getElementById('nameSearchSection');
-  var tabPhone = document.getElementById('tabPhone');
-  var tabName = document.getElementById('tabName');
+  var nameSection  = document.getElementById('nameSearchSection');
+  var tabName      = document.getElementById('tabName');
   var checkinResults = document.getElementById('checkinResults');
-  var activeTab = 'bg-white text-gray-900 shadow-sm';
-  var inactiveTab = 'text-gray-400';
 
   if(mode === 'phone') {
     if(phoneSection) phoneSection.classList.remove('hidden');
-    if(nameSection) nameSection.classList.add('hidden');
-    tabPhone.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-gray-900 shadow-sm';
-    tabName.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-gray-400';
-    checkinResults.innerHTML = '';
-    // Clear digit inputs
-    ['d1','d2','d3','d4'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=''; });
+    if(nameSection)  nameSection.classList.add('hidden');
+    if(tabName){ tabName.classList.remove('is-active'); tabName.textContent='이름 검색'; }
+    if(checkinResults) checkinResults.innerHTML = '';
+    ['d0','d1','d2','d3'].forEach(function(id){
+      var el=document.getElementById(id); if(el){ el.value=''; el.classList.remove('filled'); }
+    });
   } else {
     if(phoneSection) phoneSection.classList.add('hidden');
-    if(nameSection) nameSection.classList.remove('hidden');
-    tabPhone.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-gray-400';
-    tabName.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-gray-900 shadow-sm';
-    checkinResults.innerHTML = '';
+    if(nameSection)  nameSection.classList.remove('hidden');
+    if(tabName){ tabName.classList.add('is-active'); tabName.textContent='끝 4자리'; }
+    if(checkinResults) checkinResults.innerHTML = '';
     var nameInput = document.getElementById('nameInput');
     if(nameInput){ nameInput.value=''; setTimeout(function(){ nameInput.focus(); }, 100); }
   }
-  var sh=document.getElementById("searchHeader"); var ss=document.getElementById("searchSubheader"); if(sh && ss){ if(mode==="phone"){ sh.textContent="전화번호 끝 4자리"; ss.textContent="Last 4 digits of registered phone number"; } else { sh.textContent="이름 검색"; ss.textContent="Search by student name"; } }
+  var sh=document.getElementById("searchHeader"); var ss=document.getElementById("searchSubheader");
+  if(sh && ss){
+    if(mode==="phone"){ sh.textContent="전화번호 끝 4자리"; ss.textContent="Last 4 digits of registered phone number"; }
+    else { sh.textContent="이름 검색"; ss.textContent="Search by student name · 한글 또는 영어"; }
+  }
   window._searchMode = mode;
+  ngSyncContinue();
 }
+/* The 이름 검색 key toggles rather than one-way switching (it is a keypad key
+   in 2c, not a tab), so a second tap returns to the digits. */
+(function(){
+  var orig = setSearchMode;
+  setSearchMode = function(mode){
+    if(mode==='name' && window._searchMode==='name') return orig('phone');
+    return orig(mode);
+  };
+})();
 
 var _nameSearchTimer = null;
 function onNameInput(val) {
@@ -448,7 +702,12 @@ function onNameInput(val) {
       .then(function(r){ return r.json(); })
       .then(function(data) {
         if(!data.students || data.students.length === 0) {
-          document.getElementById('checkinResults').innerHTML = '<div class="text-center py-8"><p class="text-4xl mb-2">🔍</p><p class="font-bold text-gray-700">검색 결과 없음</p><p class="text-gray-400 text-sm mt-1">' + trimmed + ' (이)라는 이름을 찾을 수 없어요</p></div>';
+          ngStep(2);
+          var t0=document.getElementById('ciHouseTitle'), u0=document.getElementById('ciHouseSub');
+          if(t0) t0.textContent='결과가 없어요';
+          if(u0) u0.textContent=trimmed + ' (이)라는 이름을 찾을 수 없어요';
+          document.getElementById('checkinResults').innerHTML = '<div class="ng-panel" style="text-align:center;padding:34px 22px"><p style="font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-sub);margin:0 0 18px">이름을 다시 확인해주세요. 처음이시면 방문자 체크인을 눌러주세요.</p><button type="button" class="ng-btn ng-btn-outline ng-btn-sm" onclick="clearPinsAndReset()">다시 입력</button></div>';
+          ngRefreshSubmit();
           return;
         }
         (function(students) {
@@ -465,11 +724,16 @@ function onNameInput(val) {
         Object.keys(phones).forEach(function(key) {
           var group = phones[key];
           if(group.length > 1) {
-            html += '<div class="mb-2 px-1 py-1 bg-blue-50 border border-blue-100 rounded-2xl flex items-center gap-2 text-xs text-blue-500 font-semibold"><span>&#x1F46A;</span> &#xAC00;&#xC871; &#xCCB4;&#xD06C;&#xC778; &mdash; ' + group.length + '&#xBA85;</div>';
+            html += '<div class="household-header"><span style="font:700 13px \'Noto Sans KR\',sans-serif;color:var(--ng-lav-text)">가족 체크인 · ' + group.length + '명</span></div>';
           }
           group.forEach(function(s) { html += studentCard(s); });
         });
-        container.innerHTML = html || '<div class="text-center py-8 text-gray-400">&#xAC80;&#xC0C9; &#xACB0;&#xACFC; &#xC5C6;&#xC74C;</div>';
+        ngStep(2);
+        window._ngSelected = {};
+        var t1=document.getElementById('ciHouseTitle'), u1=document.getElementById('ciHouseSub');
+        if(t1) t1.textContent = ngHouseholdTitle(students);
+        if(u1) u1.textContent = '체크인할 자녀를 모두 선택해주세요 · ' + students.length + '명 검색됨';
+        container.innerHTML = html || '<div class="ng-panel" style="text-align:center;padding:34px 22px;font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-sub)">검색 결과 없음</div>';
         // Register students in _studentMap so openModalById can find them
         window._studentMap = window._studentMap || {};
         students.forEach(function(s) { window._studentMap[s.id] = s; });
@@ -477,28 +741,272 @@ function onNameInput(val) {
         students.forEach(function(s) { loadStatus(s); });
       })(data.students);
       }).catch(function(){ 
-        document.getElementById('checkinResults').innerHTML = '<div class="text-center py-6 text-red-400">검색 오류가 발생했어요</div>';
+        document.getElementById('checkinResults').innerHTML = '<div class="ng-note ng-note-danger">검색 오류가 발생했어요</div>';
       });
   }, 400);
 }
 
-function startCheckin(){_currentMode="checkin";document.getElementById("welcomeScreen").classList.add("hidden");document.getElementById("mainHeader").classList.remove("hidden");document.getElementById("mainApp").classList.remove("hidden");document.getElementById("todayDate").textContent=dateStr;document.getElementById("checkinSection").classList.remove("hidden");document.getElementById("checkoutSection").classList.add("hidden");var mt=document.getElementById("modeTag");mt.textContent="✅ Check In";mt.className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700";mt.classList.remove("hidden");clearPins();setTimeout(function(){document.getElementById("d0").focus();},300);}
-function startCheckout(){_currentMode="checkout";document.getElementById("welcomeScreen").classList.add("hidden");document.getElementById("mainHeader").classList.remove("hidden");document.getElementById("mainApp").classList.remove("hidden");document.getElementById("todayDate").textContent=dateStr;document.getElementById("checkinSection").classList.add("hidden");document.getElementById("checkoutSection").classList.remove("hidden");var mt=document.getElementById("modeTag");mt.textContent="🙏 Check Out";mt.className="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700";mt.classList.remove("hidden");clearPins();setTimeout(function(){document.getElementById("co0").focus();},300);}
-function clearPins(){["d0","d1","d2","d3","co0","co1","co2"].forEach(function(id){var el=document.getElementById(id);if(el){el.value="";el.classList.remove("filled");}});document.getElementById("checkinResults").innerHTML="";document.getElementById("checkoutResults").innerHTML="";}
-(function(){var digits=["d0","d1","d2","d3"];digits.forEach(function(id,i){var el=document.getElementById(id);el.addEventListener("input",function(){var v=this.value.replace(/[^0-9]/g,"");this.value=v.slice(-1);this.classList.toggle("filled",!!this.value);if(this.value&&i<digits.length-1)document.getElementById(digits[i+1]).focus();if(i===digits.length-1&&this.value){var pin=digits.map(function(d){return document.getElementById(d).value;}).join("");if(pin.length===4)searchByPhone(pin);}});el.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!this.value&&i>0)document.getElementById(digits[i-1]).focus();});});})();
-(function(){var digits=["co0","co1","co2"];digits.forEach(function(id,i){var el=document.getElementById(id);el.addEventListener("input",function(){var v=this.value.replace(/[^0-9]/g,"");this.value=v.slice(-1);this.classList.toggle("filled",!!this.value);if(this.value&&i<digits.length-1)document.getElementById(digits[i+1]).focus();if(i===digits.length-1&&this.value){var pin=digits.map(function(d){return document.getElementById(d).value;}).join("");if(pin.length===3)searchById(pin);}});el.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!this.value&&i>0)document.getElementById(digits[i-1]).focus();});});})();
-async function searchByPhone(phone4){var resEl=document.getElementById("checkinResults");resEl.innerHTML='<div class="text-center py-8 text-gray-400"><div class="w-7 h-7 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-sm">검색 중...</p></div>';try{var res=await fetch("/api/search-student?phone4="+encodeURIComponent(phone4));var data=await res.json();if(!res.ok)throw new Error(data.error);var students=data.students||[];if(!students.length){resEl.innerHTML='<div class="text-center py-8 bg-white rounded-2xl border border-gray-100 shadow-sm"><div class="text-3xl mb-2">🔍</div><p class="text-gray-500 font-semibold">No results found</p><p class="text-gray-400 text-sm mt-1 mb-4">No student found with phone ending in '+phone4+'</p><button onclick="clearPinsAndReset()" class="text-sm text-gray-500 underline">Try again</button></div>';return;}students.forEach(function(s){_studentMap[s.id]=s;});var html='';if(students.length>1){var _fIds=students.map(function(s){return s.id;}).join(',');html+='<div class="household-header"><span class="text-2xl">👨‍👩‍👧‍👦</span><div class="flex-1"><p class="text-sm font-bold text-sky-800">가족 체크인 — Household Check-in</p><p class="text-xs text-sky-600">Phone: •••-•••-'+phone4+' · '+students.length+'명</p></div><button onclick="familyCheckinStart(\''+_fIds+'\')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 active:scale-95 transition-all whitespace-nowrap shadow-sm">✅ 모두 체크인</button></div>';}html+='<div class="space-y-3">';for(var i=0;i<students.length;i++){html+=studentCard(students[i]);}html+='</div>';resEl.innerHTML=html;students.forEach(function(s){loadStatus(s);});}catch(e){resEl.innerHTML='<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠️ '+(e.message||"오류")+'</div>';}}
-async function searchById(id3){var resEl=document.getElementById("checkoutResults");resEl.innerHTML='<div class="text-center py-8 text-gray-400"><div class="w-7 h-7 border-2 border-indigo-200 border-t-indigo-500 rounded-full spin mx-auto mb-2"></div><p class="text-sm">검색 중...</p></div>';try{var res=await fetch("/api/search-student?id3="+encodeURIComponent(id3));var data=await res.json();if(!res.ok)throw new Error(data.error);var students=data.students||[];if(!students.length){resEl.innerHTML='<div class="text-center py-8 bg-white rounded-2xl border border-gray-100 shadow-sm"><div class="text-3xl mb-2">🔍</div><p class="text-gray-500 font-semibold">No results found</p><p class="text-gray-400 text-sm mt-1 mb-4">No student with ID ending in '+id3+'</p><button onclick="clearPinsAndReset()" class="text-sm text-gray-500 underline">Try again</button></div>';return;}var primary=students[0];_studentMap[primary.id]=primary;var html='<div class="space-y-3">'+studentCard(primary)+'</div>';resEl.innerHTML=html;loadStatus(primary);if(primary.fatherPhone||primary.motherPhone||primary.phone){var phone=primary.fatherPhone||primary.motherPhone||primary.phone;var last4=phone.replace(/\D/g,"").slice(-4);if(last4&&last4!==id3){var r2=await fetch("/api/search-student?phone4="+encodeURIComponent(last4));var d2=await r2.json();if(d2.students&&d2.students.length>1){var siblings=d2.students.filter(function(s){return s.id!==primary.id;});if(siblings.length>0){var _fIdsAll=[primary.id].concat(siblings.map(function(s){return s.id;})).join(',');var sibHtml='<div class="mt-3"><div class="household-header"><span class="text-xl">👨‍👩‍👧‍👦</span><div class="flex-1"><p class="text-xs font-bold text-sky-800">가족 구성원 / Household members ('+(siblings.length+1)+'명)</p></div><button onclick="familyCheckinStart(\''+_fIdsAll+'\')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 active:scale-95 transition-all whitespace-nowrap shadow-sm">✅ 모두 체크인</button></div><div class="space-y-3">';siblings.forEach(function(s){_studentMap[s.id]=s;sibHtml+=studentCard(s);});sibHtml+='</div></div>';resEl.innerHTML+=sibHtml;siblings.forEach(function(s){loadStatus(s);});}}}}}catch(e){resEl.innerHTML='<div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm text-center">⚠️ '+(e.message||"오류")+'</div>';}}
-function clearPinsAndReset(){clearPins();if(_currentMode==="checkin")setTimeout(function(){document.getElementById("d0").focus();},100);else setTimeout(function(){document.getElementById("co0").focus();},100);}
-function deptBadge(d){var c=(DEPT_INFO[d]&&DEPT_INFO[d].color&&DEPT_INFO[d].color.badge)||"bg-gray-100 text-gray-600 border-gray-200";return'<span class="text-xs font-semibold px-2 py-0.5 rounded-full border '+c+'">'+((DEPT_INFO[d]&&DEPT_INFO[d].emoji)||"")+" "+(d||"미지정")+'</span>';}
+function startCheckin(){_currentMode="checkin";document.getElementById("welcomeScreen").classList.add("hidden");document.getElementById("mainHeader").classList.remove("hidden");document.getElementById("mainApp").classList.remove("hidden");document.getElementById("todayDate").textContent=dateStr;document.getElementById("checkinSection").classList.remove("hidden");document.getElementById("checkoutSection").classList.add("hidden");var mt=document.getElementById("modeTag");mt.textContent="출석 체크인";mt.className="ng-chip ng-chip-lg ng-chip-green";mt.classList.add("hidden");clearPins();setSearchMode("phone");ngStep(1);setTimeout(function(){var d=document.getElementById("d0");if(d)d.focus();},300);ngSyncCwoBtn();}
+function startCheckout(){_currentMode="checkout";document.getElementById("welcomeScreen").classList.add("hidden");document.getElementById("mainHeader").classList.remove("hidden");document.getElementById("mainApp").classList.remove("hidden");document.getElementById("todayDate").textContent=dateStr;document.getElementById("checkinSection").classList.add("hidden");document.getElementById("checkoutSection").classList.remove("hidden");var mt=document.getElementById("modeTag");mt.textContent="체크아웃";mt.className="ng-chip ng-chip-lg ng-chip-lav";mt.classList.add("hidden");clearPins();ngStep(1);setTimeout(function(){var c=document.getElementById("co0");if(c)c.focus();},300);ngSyncCwoBtn();}
+function clearPins(){["d0","d1","d2","d3","co0","co1","co2"].forEach(function(id){var el=document.getElementById(id);if(el){el.value="";el.classList.remove("filled");}});var ci=document.getElementById("checkinResults");if(ci)ci.innerHTML="";var co=document.getElementById("checkoutResults");if(co)co.innerHTML="";var wn=document.getElementById("ciWaiverNote");if(wn){wn.innerHTML="";wn.classList.add("hidden");}window._ngSelected={};window._ngWaiverBypass=false;ngSyncContinue();ngRefreshSubmit();}
+(function(){var digits=["d0","d1","d2","d3"];digits.forEach(function(id,i){var el=document.getElementById(id);el.addEventListener("input",function(){var v=this.value.replace(/[^0-9]/g,"");this.value=v.slice(-1);this.classList.toggle("filled",!!this.value);if(typeof ngSyncContinue==="function")ngSyncContinue();if(this.value&&i<digits.length-1)document.getElementById(digits[i+1]).focus();if(i===digits.length-1&&this.value){var pin=digits.map(function(d){return document.getElementById(d).value;}).join("");if(pin.length===4)searchByPhone(pin);}});el.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!this.value&&i>0)document.getElementById(digits[i-1]).focus();});});})();
+(function(){var digits=["co0","co1","co2"];digits.forEach(function(id,i){var el=document.getElementById(id);el.addEventListener("input",function(){var v=this.value.replace(/[^0-9]/g,"");this.value=v.slice(-1);this.classList.toggle("filled",!!this.value);if(typeof ngSyncContinue==="function")ngSyncContinue();if(this.value&&i<digits.length-1)document.getElementById(digits[i+1]).focus();if(i===digits.length-1&&this.value){var pin=digits.map(function(d){return document.getElementById(d).value;}).join("");if(pin.length===3)searchById(pin);}});el.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!this.value&&i>0)document.getElementById(digits[i-1]).focus();});});})();
+/* Household label. The mock reads "김 집사님 가정"; 집사 is a specific church
+   office, so we use the guardian's own name rather than assuming a title. */
+function ngHouseholdTitle(students){
+  var s0 = students[0] || {};
+  var g = (s0.fatherName||s0.motherName||s0.guardian||'').trim();
+  if(g) return g + '님 가정';
+  return students.length > 1 ? '가족 체크인' : '자녀 확인';
+}
+
+async function searchByPhone(phone4){
+  window._ngPin = phone4;
+  window._ngSelected = {};
+  var resEl=document.getElementById("checkinResults");
+  ngStep(2);
+  var title=document.getElementById('ciHouseTitle'), sub=document.getElementById('ciHouseSub');
+  if(title) title.textContent='조회 중…';
+  if(sub) sub.textContent='끝 4자리 '+phone4+'로 등록된 가정을 찾고 있어요';
+  resEl.innerHTML='<div style="text-align:center;padding:40px 0"><div class="spin" style="width:28px;height:28px;border:2px solid var(--ng-lav-deep);border-top-color:var(--ng-lav-text);border-radius:50%;margin:0 auto 10px"></div><p style="font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-muted);margin:0">검색 중...</p></div>';
+  try{
+    var res=await fetch("/api/search-student?phone4="+encodeURIComponent(phone4));
+    var data=await res.json();
+    if(!res.ok) throw new Error(data.error);
+    var students=data.students||[];
+    if(!students.length){
+      if(title) title.textContent='결과가 없어요';
+      if(sub) sub.textContent='끝 4자리 '+phone4+'로 등록된 학생을 찾지 못했습니다';
+      resEl.innerHTML='<div class="ng-panel" style="text-align:center;padding:34px 22px">'+
+        '<p style="font:700 17px \'Noto Sans KR\',sans-serif;color:var(--ng-ink);margin:0 0 6px">No results found</p>'+
+        '<p style="font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-sub);margin:0 0 18px">다시 입력하시거나, 처음이시면 방문자 체크인을 눌러주세요.</p>'+
+        '<button type="button" class="ng-btn ng-btn-outline ng-btn-sm" onclick="clearPinsAndReset()">다시 입력</button></div>';
+      ngRefreshSubmit();
+      return;
+    }
+    students.forEach(function(s){ _studentMap[s.id]=s; });
+    if(title) title.textContent = ngHouseholdTitle(students);
+    if(sub) sub.textContent = '체크인할 자녀를 모두 선택해주세요 · '+students.length+'명 등록됨';
+    resEl.innerHTML = students.map(studentCard).join('');
+    students.forEach(function(s){ loadStatus(s); });
+  }catch(e){
+    if(title) title.textContent='오류가 발생했어요';
+    if(sub) sub.textContent='';
+    resEl.innerHTML='<div class="ng-note ng-note-danger">⚠️ '+escapeHtml(e.message||"오류")+'</div>';
+  }
+}
+async function searchById(id3){var resEl=document.getElementById("checkoutResults");resEl.innerHTML='<div style="text-align:center;padding:34px 0"><div class="spin" style="width:28px;height:28px;border:2px solid var(--ng-lav-deep);border-top-color:var(--ng-lav-text);border-radius:50%;margin:0 auto 10px"></div><p style="font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-muted);margin:0">검색 중...</p></div>';try{var res=await fetch("/api/search-student?id3="+encodeURIComponent(id3));var data=await res.json();if(!res.ok)throw new Error(data.error);var students=data.students||[];if(!students.length){resEl.innerHTML='<div class="ng-panel" style="text-align:center;padding:30px 22px"><p style="font:700 17px \'Noto Sans KR\',sans-serif;color:var(--ng-ink);margin:0 0 6px">No results found</p><p style="font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-sub);margin:0 0 18px">AMC-'+id3+' 로 끝나는 학생을 찾지 못했어요.</p><button type="button" class="ng-btn ng-btn-outline ng-btn-sm" onclick="clearPinsAndReset()">다시 입력</button></div>';return;}var primary=students[0];_studentMap[primary.id]=primary;var html=studentCard(primary);resEl.innerHTML=html;loadStatus(primary);if(primary.fatherPhone||primary.motherPhone||primary.phone){var phone=primary.fatherPhone||primary.motherPhone||primary.phone;var last4=phone.replace(/\D/g,"").slice(-4);if(last4&&last4!==id3){var r2=await fetch("/api/search-student?phone4="+encodeURIComponent(last4));var d2=await r2.json();if(d2.students&&d2.students.length>1){var siblings=d2.students.filter(function(s){return s.id!==primary.id;});if(siblings.length>0){var _fIdsAll=[primary.id].concat(siblings.map(function(s){return s.id;})).join(',');var sibHtml='<div style="margin-top:12px;display:flex;flex-direction:column;gap:12px"><div class="household-header"><span style="flex:1;font:700 13px \'Noto Sans KR\',sans-serif;color:var(--ng-lav-text)">가족 구성원 / Household members ('+(siblings.length+1)+'명)</span><button type="button" onclick="familyCheckinStart(\''+_fIdsAll+'\')" class="ng-chip ng-chip-lg" style="border:0;cursor:pointer;background:var(--ng-black);color:#fff;padding:9px 14px">모두 체크인</button></div>';siblings.forEach(function(s){_studentMap[s.id]=s;sibHtml+=studentCard(s);});sibHtml+='</div>';resEl.innerHTML+=sibHtml;siblings.forEach(function(s){loadStatus(s);});}}}}}catch(e){resEl.innerHTML='<div class="ng-note ng-note-danger">⚠️ '+(e.message||"오류")+'</div>';}}
+function clearPinsAndReset(){clearPins();ngStep(1);if(_currentMode==="checkin")setTimeout(function(){document.getElementById("d0").focus();},100);else setTimeout(function(){document.getElementById("co0").focus();},100);}
+var NG_DEPT = {
+  "유아부 (Infant)":"ng-dept-infant", "유치부 (Preschool)":"ng-dept-preschool",
+  "유년부 (Elementary Jr)":"ng-dept-elemjr", "초등부 (Elementary)":"ng-dept-elem",
+  "중고등부 (Youth)":"ng-dept-youth"
+};
+var NG_DEPT_TINT = {
+  "ng-dept-infant":["#dbeafe","#1e40af"], "ng-dept-preschool":["#d1fae5","#065f46"],
+  "ng-dept-elemjr":["#fef9c3","#854d0e"], "ng-dept-elem":["#ffedd5","#9a3412"],
+  "ng-dept-youth":["#f3e8ff","#6b21a8"], "ng-dept-none":["#f2f2f4","#6e6e73"]
+};
+function ngDeptClass(d){ return NG_DEPT[d] || "ng-dept-none"; }
+function ngDeptShort(d){ return String(d||"미지정").split(" ")[0]; }
+function deptBadge(d,grade){var cls=ngDeptClass(d);return'<span class="ng-chip '+cls+'">'+ngDeptShort(d)+(grade?' · '+escapeHtml(grade):'')+'</span>';}
 function guardianStr(s){if(s.fatherName&&s.motherName)return"👨 "+s.fatherName+" / 👩 "+s.motherName;if(s.fatherName)return"👨 "+s.fatherName+(s.fatherPhone?" · "+s.fatherPhone:"");if(s.motherName)return"👩 "+s.motherName+(s.motherPhone?" · "+s.motherPhone:"");if(s.guardian)return s.guardian+(s.phone?" · "+s.phone:"");return"";}
 /* Task #309: XSS defense */
 function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-function studentCard(s){var dc=(DEPT_INFO[s.department]&&DEPT_INFO[s.department].color)||{};var leftColor=dc.left||"border-l-gray-300";var allergy=hasAllergy(s.allergy);var isBdayToday=isBirthdayToday(s.dob);var isBday=isBdayToday||isBirthdayThisMonth(s.dob);var h='<div id="card-'+s.id+'" class="student-card bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 '+leftColor+' p-4 fade-in">';h+='<div class="mb-2"><div class="flex flex-wrap items-center gap-2 mb-1">';h+='<span class="text-xl font-bold text-gray-900">'+escapeHtml(s.name)+'</span>';if(s.studentId)h+='<span class="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">'+escapeHtml(s.studentId)+'</span>';if(s.isVisitor)h+='<span class="badge-newcomer">🆕 NEW</span>';if(isBdayToday)h+='<span class="badge-birthday-today">🎂 Happy Birthday!</span>';else if(isBday)h+='<span class="badge-birthday">🎂 이달 생일</span>';if(allergy)h+='<span class="badge-allergy">⚠️ 알러지</span>';h+='</div>';if(s.nameEN)h+='<div class="text-sm text-gray-400 mb-1">'+escapeHtml(s.nameEN)+'</div>';h+='</div>';h+='<div class="flex flex-wrap gap-2 mb-3">'+deptBadge(s.department)+(s.grade?'<span class="text-xs text-gray-500 flex items-center">'+escapeHtml(s.grade)+'</span>':'')+'</div>';h+='<div id="action-'+s.id+'" class="mt-1"><div class="text-center py-2 text-gray-400 text-sm"><span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full spin align-middle mr-1"></span>상태 확인 중...</div></div>';h+='</div>';return h;}
-function loadStatus(s){fetch("/api/check-status?name="+encodeURIComponent(s.name)).then(function(r){return r.json();}).then(function(data){var el=document.getElementById("action-"+s.id);if(!el)return;if(data.checkedOutToday){el.innerHTML='<div class="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-400 text-center flex items-center justify-center gap-2"><span class="text-green-500 font-bold">✓</span> 체크아웃 완료 · '+(data.checkInTime||'')+' → '+(data.checkOutTime||'')+'</div>';}else if(data.checkedInToday){_recordMap[s.id]={id:data.recordId,checkIn:data.checkInTime};el.innerHTML='<div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 mb-2 text-sm text-emerald-700 flex items-center gap-2"><span class="text-emerald-500 font-bold text-base">✓</span><span>체크인됨 · '+(data.checkInTime||'')+' 입실</span></div>'+'<button data-sid="'+s.id+'" class="w-full py-3.5 rounded-xl font-bold text-base bg-indigo-600 text-white hover:bg-indigo-700 transition-colors active:scale-95">체크아웃 / Check Out</button>';el.querySelector("button").addEventListener("click",function(){openModalById("checkout",this.dataset.sid);});}else{el.innerHTML='<button data-sid="'+s.id+'" class="w-full py-3.5 rounded-xl font-bold text-base bg-emerald-600 text-white hover:bg-emerald-700 transition-colors active:scale-95 pulse-ring">체크인 / Check In</button>';el.querySelector("button").addEventListener("click",function(){openModalById("checkin",this.dataset.sid);});}}).catch(function(){var el2=document.getElementById("action-"+s.id);if(el2)el2.innerHTML='<div class="text-xs text-gray-400 text-center py-2">상태 확인 실패</div>';});}
+function studentCard(s){
+  var cls = ngDeptClass(s.department), tint = NG_DEPT_TINT[cls];
+  var initial = escapeHtml(String(s.name||"?").trim().charAt(0));
+  var h = '<div id="card-'+s.id+'" class="ng-card ng-pick student-card ng-rise" data-sid="'+s.id+'" style="align-items:flex-start">';
+  h += '<div class="ng-avatar" style="background:'+tint[0]+';color:'+tint[1]+'">'+initial+'</div>';
+  h += '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:7px">';
+  /* extractName() in the checkout patch scrapes span.font-bold for the Korean
+     name — keep that hook on a span holding the name and nothing else. */
+  h += '<div><span class="ng-pick-name font-bold">'+escapeHtml(s.name)+'</span>'+
+       (s.nameEN?' <span class="ng-pick-en">'+escapeHtml(s.nameEN)+'</span>':'')+'</div>';
+  h += '<div style="display:flex;gap:6px;flex-wrap:wrap">'+deptBadge(s.department, s.grade);
+  if(s.studentId) h += '<span class="ng-chip ng-chip-mono">'+escapeHtml(s.studentId)+'</span>';
+  if(s.isVisitor) h += '<span class="badge-newcomer">NEW</span>';
+  if(isBirthdayToday(s.dob)) h += '<span class="badge-birthday-today">🎂 Happy Birthday!</span>';
+  else if(isBirthdayThisMonth(s.dob)) h += '<span class="badge-birthday">🎂 이달 생일</span>';
+  if(hasAllergy(s.allergy)) h += '<span class="ng-chip ng-chip-danger">알러지 · '+escapeHtml(s.allergy)+'</span>';
+  if(ngNeedsWaiver(s)) h += '<span class="ng-chip ng-chip-warn">동의서 미제출</span>';
+  h += '</div>';
+  h += '<div id="action-'+s.id+'" style="margin-top:3px"><div style="font:500 13px \'Noto Sans KR\',sans-serif;color:var(--ng-muted)">상태 확인 중…</div></div>';
+  h += '</div>';
+  h += '<div class="ng-check" id="check-'+s.id+'" aria-hidden="true">✓</div>';
+  h += '</div>';
+  return h;
+}
+
+/* Mirrors the liability test inside doAction() so the card and the gate agree. */
+function ngNeedsWaiver(s){
+  var lf = s && s.liabilityForm;
+  return !lf||lf==='미제출'||lf==='재작성 필요'||lf==='확인 필요'||lf==='null'||
+         lf==='undefined'||lf===false||lf==='false'||lf==='__NO__'||lf==='X'||lf==='❌';
+}
+
+function ngToggleChild(sid){
+  window._ngSelected = window._ngSelected || {};
+  var card = document.getElementById('card-'+sid);
+  if(!card || card.getAttribute('data-selectable') !== '1') return;
+  window._ngSelected[sid] = !window._ngSelected[sid];
+  ngPaintChild(sid);
+  ngRefreshSubmit();
+}
+
+function ngPaintChild(sid){
+  var card=document.getElementById('card-'+sid), chk=document.getElementById('check-'+sid);
+  if(!card||!chk) return;
+  var on = !!(window._ngSelected && window._ngSelected[sid]);
+  card.classList.toggle('ng-card-sel', on);
+  chk.classList.toggle('is-on', on);
+  card.setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+
+/* Bottom CTA label + the 2c waiver banner for whoever is still unsigned. */
+function ngRefreshSubmit(){
+  var btn=document.getElementById('ciSubmit'), lab=document.getElementById('ciSubmitLabel');
+  var ids=Object.keys(window._ngSelected||{}).filter(function(k){return window._ngSelected[k];});
+  if(btn && lab){
+    btn.disabled = ids.length===0;
+    lab.textContent = ids.length ? (ids.length+'명 체크인') : '자녀를 선택해주세요';
+  }
+  var note=document.getElementById('ciWaiverNote');
+  if(!note) return;
+  var pending=[];
+  Object.keys(_studentMap).forEach(function(id){
+    var card=document.getElementById('card-'+id);
+    if(card && card.getAttribute('data-selectable')==='1' && ngNeedsWaiver(_studentMap[id])) pending.push(_studentMap[id]);
+  });
+  if(!pending.length){ note.innerHTML=''; note.classList.add('hidden'); return; }
+  var names = pending.map(function(s){return escapeHtml(s.name);}).join(' · ');
+  note.innerHTML =
+    '<div class="ng-note ng-note-warn">'+
+      '<div style="font:700 17px \'Noto Sans KR\',sans-serif">'+names+' — Liability Form이 아직 없어요</div>'+
+      '<div style="font:500 14px/1.6 \'Noto Sans KR\',sans-serif;color:var(--ng-warn-text2)">보호자 서명이 있어야 교회 활동에 참여할 수 있어요. 지금 하면 30초 걸려요.</div>'+
+      '<div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap">'+
+        '<button type="button" onclick="ngOpenWaiver(\''+pending[0].id+'\')" style="padding:12px 18px;border-radius:12px;background:var(--ng-black);border:0;cursor:pointer;font:700 14px \'Noto Sans KR\',sans-serif;color:#fff">지금 작성하기</button>'+
+        '<button type="button" onclick="ngWaiverLater()" style="padding:12px 18px;border-radius:12px;background:#fff;border:1.5px solid #fcd34d;cursor:pointer;font:600 14px \'Noto Sans KR\',sans-serif;color:var(--ng-warn-text)">일단 체크인 (다음주까지)</button>'+
+      '</div>'+
+    '</div>';
+  note.classList.remove('hidden');
+}
+
+function ngOpenWaiver(sid){
+  var s=_studentMap[sid]; if(!s) return;
+  openLiabilityForm(s, function(){
+    s.liabilityForm = '제출';
+    window._ngSelected[sid] = true;
+    ngPaintChild(sid);
+    ngRefreshSubmit();
+  });
+}
+/* "일단 체크인" — selects the unsigned children and lets the existing
+   bypassLiability path in proceedWithAction() carry them through. */
+function ngWaiverLater(){
+  window._ngWaiverBypass = true;
+  Object.keys(_studentMap).forEach(function(id){
+    var card=document.getElementById('card-'+id);
+    if(card && card.getAttribute('data-selectable')==='1' && ngNeedsWaiver(_studentMap[id])){
+      window._ngSelected[id]=true; ngPaintChild(id);
+    }
+  });
+  ngRefreshSubmit();
+}
+
+/* Hands the selection to the existing batch path. */
+function ngCheckinSelected(){
+  var ids=Object.keys(window._ngSelected||{}).filter(function(k){return window._ngSelected[k];});
+  if(!ids.length) return;
+  familyCheckinStart(ids.join(','), true);
+}
+function loadStatus(s){
+  fetch("/api/check-status?name="+encodeURIComponent(s.name)).then(function(r){return r.json();}).then(function(data){
+    var el=document.getElementById("action-"+s.id); if(!el) return;
+    var card=document.getElementById("card-"+s.id);
+    var selectable=false, strip='';
+
+    if(data.checkedOutToday){
+      strip = '<span class="ng-chip ng-chip-green">✓ 귀가 완료 · '+(data.checkInTime||'')+' → '+(data.checkOutTime||'')+'</span>';
+    } else if(data.checkedInToday){
+      _recordMap[s.id]={id:data.recordId,checkIn:data.checkInTime};
+      strip = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+              '<span class="ng-chip ng-chip-green">재실 중 · '+(data.checkInTime||'')+' 입실</span>'+
+              '<button type="button" data-sid="'+s.id+'" class="ng-chip ng-chip-lav" style="border:0;cursor:pointer;padding:7px 14px;font-size:12.5px">체크아웃</button>'+
+              '</div>';
+    } else {
+      selectable = true;
+      strip = '<span style="font:500 13px \'Noto Sans KR\',sans-serif;color:var(--ng-muted)">체크인 대기 · 탭하여 선택</span>';
+    }
+    el.innerHTML = strip;
+
+    var btn = el.querySelector("button[data-sid]");
+    if(btn) btn.addEventListener("click", function(e){ e.stopPropagation(); openModalById("checkout", this.dataset.sid); });
+
+    if(card){
+      card.setAttribute('data-selectable', selectable ? '1' : '0');
+      if(selectable){
+        card.style.cursor='pointer';
+        card.setAttribute('role','button');
+        card.setAttribute('tabindex','0');
+        if(!card.__ngWired){
+          card.__ngWired = true;
+          card.addEventListener('click', function(){ ngToggleChild(s.id); });
+          card.addEventListener('keydown', function(e){
+            if(e.key===' '||e.key==='Enter'){ e.preventDefault(); ngToggleChild(s.id); }
+          });
+        }
+        /* Pre-select everyone who is ready to go; leave unsigned waivers
+           unticked so the 2c banner is the thing that resolves them. */
+        if(window._ngSelected[s.id]===undefined) window._ngSelected[s.id] = !ngNeedsWaiver(s);
+      } else {
+        card.style.cursor='default';
+        card.style.opacity='.72';
+        window._ngSelected[s.id]=false;
+      }
+      ngPaintChild(s.id);
+    }
+    ngRefreshSubmit();
+  }).catch(function(){
+    var el2=document.getElementById("action-"+s.id);
+    if(el2) el2.innerHTML='<span style="font:500 13px \'Noto Sans KR\',sans-serif;color:var(--ng-muted)">상태 확인 실패</span>';
+  });
+}
 function openModalById(action,sid){var s=_studentMap[sid];window._currentModalStudent=s;var rec=(action==="checkout")?(_recordMap[sid]||null):null;if(s)openModal(action,s,rec);}
 var _action,_student,_record;
-function openModal(action,student,record){_action=action;_student=student;_record=record;var isIn=action==="checkin";var hdr=document.getElementById("modalHeader");hdr.className="text-center mb-4 p-4 rounded-2xl "+(isIn?"bg-emerald-50":"bg-indigo-50");hdr.innerHTML='<div class="text-5xl mb-2 check-pop inline-block">'+(isIn?"👋":"🙏")+'</div><h2 class="text-xl font-bold text-gray-900">'+(isIn?"체크인 확인":"체크아웃 확인")+'</h2>';var rows=[];rows.push(["이름","<strong>"+student.name+"</strong>"+(student.nameEN?' <span class="text-sm text-gray-400">'+student.nameEN+'</span>':'')+(student.studentId?' <span class="text-xs font-mono text-gray-400">'+student.studentId+'</span>':"")]);rows.push(["부서",deptBadge(student.department)+(student.grade?' <span class="text-xs text-gray-500 ml-1">'+student.grade+'</span>':"")]);var gd=guardianStr(student);if(gd)rows.push(["보호자",gd]);if(!isIn&&record&&record.checkIn)rows.push(["체크인",record.checkIn]);document.getElementById("modalInfo").innerHTML=rows.map(function(r){return'<div class="flex justify-between items-center px-4 py-3 border-b border-gray-100 last:border-0"><span class="text-xs text-gray-400 font-medium">'+r[0]+'</span><span class="text-sm text-gray-800 font-medium">'+r[1]+'</span></div>';}).join("");document.getElementById("pickupMsg").classList.toggle("hidden",!isIn);document.getElementById("guardianRow").classList.toggle("hidden",isIn);document.getElementById("guardianCheck").checked=false;var btn=document.getElementById("confirmBtn");btn.className="flex-1 py-3.5 rounded-2xl font-bold text-white transition-colors "+(isIn?"bg-emerald-600 hover:bg-emerald-700":"bg-indigo-600 hover:bg-indigo-700");document.getElementById("modal").classList.remove("hidden");
+function openModal(action,student,record){
+  _action=action;_student=student;_record=record;
+  var isIn = action==="checkin";
+  var hdr = document.getElementById("modalHeader");
+  hdr.className = "ng-sheet-head";
+  hdr.style.cssText = "flex-direction:column;align-items:center;text-align:center;gap:10px";
+  hdr.innerHTML =
+    '<div class="ng-pop" style="width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:400 30px system-ui,sans-serif;'+
+      (isIn ? 'background:var(--ng-green-soft);color:var(--ng-green)">✓' : 'background:var(--ng-lav);color:var(--ng-lav-text)">→')+'</div>'+
+    '<h2 class="ng-title-sm">'+(isIn?"체크인 확인":"체크아웃 확인")+'</h2>';
+
+  var rows=[];
+  rows.push(["이름",'<strong style="font:700 15px \'Noto Sans KR\',sans-serif;color:var(--ng-ink)">'+escapeHtml(student.name)+'</strong>'+
+    (student.nameEN?' <span class="ng-pick-en" style="font-size:13px">'+escapeHtml(student.nameEN)+'</span>':'')+
+    (student.studentId?' <span class="ng-chip ng-chip-mono">'+escapeHtml(student.studentId)+'</span>':"")]);
+  rows.push(["부서",deptBadge(student.department, student.grade)]);
+  var gd=guardianStr(student); if(gd) rows.push(["보호자",escapeHtml(gd)]);
+  if(!isIn && record && record.checkIn) rows.push(["체크인",'<span class="ng-mono">'+escapeHtml(record.checkIn)+'</span>']);
+
+  document.getElementById("modalInfo").innerHTML = rows.map(function(r){
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--ng-hairline-soft)">'+
+           '<span style="font:600 12.5px \'Noto Sans KR\',sans-serif;color:var(--ng-muted)">'+r[0]+'</span>'+
+           '<span style="text-align:right;font:500 14px \'Noto Sans KR\',sans-serif;color:var(--ng-ink)">'+r[1]+'</span></div>';
+  }).join("");
+
+  document.getElementById("pickupMsg").classList.toggle("hidden",!isIn);
+  document.getElementById("guardianRow").classList.toggle("hidden",isIn);
+  document.getElementById("guardianCheck").checked=false;
+
+  var btn=document.getElementById("confirmBtn");
+  btn.className = "ng-btn " + (isIn ? "ng-btn-green" : "ng-btn-primary");
+  btn.style.flex = "1";
+  document.getElementById("modal").classList.remove("hidden");
   // Show liability warning - use setTimeout to ensure DOM is ready
   setTimeout(function() {
     var liabWarn = document.getElementById("liabilityWarning");
@@ -515,7 +1023,7 @@ function openModal(action,student,record){_action=action;_student=student;_recor
   }, 50);
 }
 function closeModal(skipFamilyClear){document.getElementById("modal").classList.add("hidden");if(!skipFamilyClear && window._familyTotal > 0){_familyClear();}}
-async function doAction(){var isIn=_action==="checkin";if(isIn){var lf=_student.liabilityForm;var needsLiab=!lf||lf==='미제출'||lf==='재작성 필요'||lf==='확인 필요'||lf==='null'||lf==='undefined'||lf===false||lf==='false'||lf==='__NO__'||lf==='X'||lf==='❌';if(needsLiab){document.getElementById('liabPopupStudent').textContent=_student.name+' ('+(_student.department||'').split(' ')[0]+(_student.grade?' · '+_student.grade:'')+')';var lp=document.getElementById('liabPopup');lp.classList.remove('hidden');lp.classList.add('flex');return;}if(checkInfoMissing(_student)){showInfoPopup(_student);return;}}proceedWithAction(false);}
+async function doAction(){var isIn=_action==="checkin";if(isIn&&window._ngWaiverBypass){proceedWithAction(true);return;}if(isIn){var lf=_student.liabilityForm;var needsLiab=!lf||lf==='미제출'||lf==='재작성 필요'||lf==='확인 필요'||lf==='null'||lf==='undefined'||lf===false||lf==='false'||lf==='__NO__'||lf==='X'||lf==='❌';if(needsLiab){document.getElementById('liabPopupStudent').textContent=_student.name+' ('+(_student.department||'').split(' ')[0]+(_student.grade?' · '+_student.grade:'')+')';var lp=document.getElementById('liabPopup');lp.classList.remove('hidden');lp.classList.add('flex');return;}if(checkInfoMissing(_student)){showInfoPopup(_student);return;}}proceedWithAction(false);}
 function checkInfoMissing(s){if(!s)return false;var dept=(s.department||'').toString();var isYoung=dept.indexOf('유아부')===0||dept.indexOf('유치부')===0;var hasEmail=(s.fatherEmail||'').trim()||(s.motherEmail||'').trim();var hasPhone=(s.fatherPhone||'').trim()||(s.motherPhone||'').trim()||(s.phone||'').trim();var hasParent=(s.fatherName||'').trim()||(s.motherName||'').trim()||(s.guardian||'').trim();var hasName=(s.name||'').trim();var hasGrade=isYoung||(s.grade||'').trim();var hasSchool=isYoung||(s.school||'').trim();var hasNameEN=(s.nameEN||'').trim();var hasAddr=(s.address||'').trim();return !hasEmail||!hasPhone||!hasParent||!hasName||!hasGrade||!hasSchool||!hasNameEN||!hasAddr;}
 // School lists by grade level (based on Amicus student body)
 var _SCHOOLS = {
@@ -649,7 +1157,7 @@ function _validAddress(v){
   var t = String(v||'').trim();
   return t.length>=5;
 }
-function showInfoPopup(s){document.getElementById('infoPopupStudent').textContent=s.name+' ('+(s.department||'').split(' ')[0]+')';var fillOrEmpty=function(id,v){var el=document.getElementById(id);if(el)el.value=v||'';};fillOrEmpty('infoStudentName',s.name);fillOrEmpty('infoStudentNameEN',s.nameEN);fillOrEmpty('infoStudentGrade',s.grade);updateSchoolOptions(s.school||'');_attachPhoneFormatters();_attachAddressAutocomplete();fillOrEmpty('infoFather',s.fatherName);fillOrEmpty('infoFatherEmail',s.fatherEmail);fillOrEmpty('infoFatherPhone',s.fatherPhone);fillOrEmpty('infoMother',s.motherName);fillOrEmpty('infoMotherEmail',s.motherEmail);fillOrEmpty('infoMotherPhone',s.motherPhone);(function(){var h=document.getElementById('infoAddress');if(h)h.value=s.address||'';var f=document.getElementById('infoAddressFallback');if(f)f.value=s.address||'';})();document.getElementById('infoAllergy').value=(s.allergy&&s.allergy!=='없음')?s.allergy:'';var ip=document.getElementById('infoPopup');ip.classList.remove('hidden');ip.classList.add('flex');if(_inInfoGracePeriod()){var sk=document.getElementById('infoSkipBtn');if(sk)sk.classList.remove('hidden');var gb=document.getElementById('infoGraceBanner');if(gb)gb.classList.remove('hidden');}else{var sk2=document.getElementById('infoSkipBtn');if(sk2)sk2.classList.add('hidden');var gb2=document.getElementById('infoGraceBanner');if(gb2)gb2.classList.add('hidden');}}
+function showInfoPopup(s){document.getElementById('infoPopupStudent').textContent=s.name+' ('+(s.department||'').split(' ')[0]+')';var fillOrEmpty=function(id,v){var el=document.getElementById(id);if(el)el.value=v||'';};fillOrEmpty('infoStudentName',s.name);fillOrEmpty('infoStudentNameEN',s.nameEN);fillOrEmpty('infoStudentGrade',s.grade);updateSchoolOptions(s.school||'');_attachPhoneFormatters();_attachAddressAutocomplete();fillOrEmpty('infoFather',s.fatherName);fillOrEmpty('infoFatherEmail',s.fatherEmail);fillOrEmpty('infoFatherPhone',s.fatherPhone);fillOrEmpty('infoMother',s.motherName);fillOrEmpty('infoMotherEmail',s.motherEmail);fillOrEmpty('infoMotherPhone',s.motherPhone);(function(){var h=document.getElementById('infoAddress');if(h)h.value=s.address||'';var f=document.getElementById('infoAddressFallback');if(f)f.value=s.address||'';})();document.getElementById('infoAllergy').value=(s.allergy&&s.allergy!=='없음')?s.allergy:'';var ip=document.getElementById('infoPopup');ip.classList.remove('hidden');ip.classList.add('flex');ngParentTab(((s.motherName||'').trim()&&!(s.fatherName||'').trim())?'mother':'father');ngInfoProgress();if(_inInfoGracePeriod()){var sk=document.getElementById('infoSkipBtn');if(sk)sk.classList.remove('hidden');var gb=document.getElementById('infoGraceBanner');if(gb)gb.classList.remove('hidden');}else{var sk2=document.getElementById('infoSkipBtn');if(sk2)sk2.classList.add('hidden');var gb2=document.getElementById('infoGraceBanner');if(gb2)gb2.classList.add('hidden');}}
 function closeInfoPopup(){var ip=document.getElementById('infoPopup');ip.classList.add('hidden');ip.classList.remove('flex');}
 // ╔═══ TEMPORARY GRACE PERIOD ═══╗
 // 첫 주일 소프트 런칭용. 5/4 이후 아래 7개 모두 제거:
@@ -668,7 +1176,111 @@ async function saveInfoAndContinue(){var sName=document.getElementById('infoStud
 function liabPopupAction(choice){var popup=document.getElementById('liabPopup');popup.classList.add('hidden');popup.classList.remove('flex');if(choice==='signNow'){window.open('/liability.html?studentId='+encodeURIComponent(_student.id),'_blank');}else if(choice==='bypass'){proceedWithAction(true);}}
 async function proceedWithAction(bypassLiab){var isIn=_action==="checkin";if(isIn && !window._skipInfoCheck && checkInfoMissing(_student)){window._pendingBypass=bypassLiab;showInfoPopup(_student);return;}var btn=document.getElementById("confirmBtn");btn.textContent="처리 중...";btn.disabled=true;try{var time;if(isIn){var body={name:_student.name,department:_student.department,isNew:_student.isVisitor===true,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||"",studentId:_student.id};if(bypassLiab)body.bypassLiability=true;var res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});var data=await res.json();if(data.requiresDirectorAuth){var dpw=prompt("⚠️ 오늘은 일요일이 아닙니다.\n체크인을 진행하려면 디렉터 비밀번호가 필요합니다:");if(!dpw){btn.textContent="확인 / Confirm";btn.disabled=false;return;}body.directorPassword=dpw;res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});data=await res.json();if(data.requiresDirectorAuth)throw new Error("디렉터 비밀번호가 틀렸습니다");}if(!res.ok)throw new Error(data.error||"체크인 실패");if(data.alreadyCheckedIn){closeModal(true);loadStatus(_student);if(window._familyQueue && window._familyQueue.length > 0){_familyAdvance();}return;}time=data.checkInTime;}else{var res2=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked})});var data2=await res2.json();if(!res2.ok)throw new Error(data2.error||"체크아웃 실패");time=data2.checkOutTime;}closeModal(true);showSuccess(isIn,_student,time);loadStatus(_student);}catch(e){alert(e.message||"오류가 발생했습니다");}btn.textContent="확인 / Confirm";btn.disabled=false;}
 var _successTimer;
-function showSuccess(isIn,student,time){document.getElementById("successIcon").textContent=isIn?"🎉":"👋";document.getElementById("successTitle").textContent=student.name+(isIn?" 체크인 완료!":" 체크아웃 완료!");var _famPrefix='';if(window._familyTotal > 0){var _famDone = window._familyTotal - (window._familyQueue?window._familyQueue.length:0);_famPrefix='👨‍👩‍👧‍👦 가족 '+window._familyTotal+'명 중 '+_famDone+'명 완료'+(window._familyQueue&&window._familyQueue.length>0?' · 다음 학생 자동 진행':'')+' · ';}document.getElementById("successTime").textContent=_famPrefix+(time||"");document.getElementById("success").classList.remove("hidden");document.getElementById("successPickup").classList.toggle("hidden",!isIn);if(isIn){document.getElementById("tagContainer").classList.remove("hidden");document.getElementById("printBtn").classList.remove("hidden");buildTag(student,time);}else{document.getElementById("tagContainer").classList.add("hidden");document.getElementById("printBtn").classList.add("hidden");}clearTimeout(_successTimer);_successTimer=window._cd=5;document.getElementById("countdownBanner").classList.remove("hidden");document.getElementById("countdownNum").textContent=10;document.getElementById("countdownBar").style.width="100%";clearInterval(window._cd_interval);window._cd_interval=setInterval(function(){window._cd=window._cd-1;document.getElementById("countdownNum").textContent=window._cd;document.getElementById("countdownBar").style.width=(window._cd*10)+"%";if(window._cd<=0)clearInterval(window._cd_interval);},1000);setTimeout(closeSuccess,5000);}
+/* Korean vocative: 받침 present → "아", absent → "야". Falls back to a plain
+   completion line for names that are not all-Hangul. */
+function ngVocative(name){
+  var n = String(name||'').trim();
+  if(!/^[가-힣]{2,4}$/.test(n)) return null;
+  var given = n.length >= 2 ? n.slice(1) : n;
+  var last = given.charCodeAt(given.length-1);
+  var hasBatchim = ((last - 0xAC00) % 28) !== 0;
+  return given + (hasBatchim ? '아' : '야');
+}
+
+/* 2c label card — the designed confirmation. The Arial/mm print proof under it
+   is built separately by buildPreview() and is intentionally left alone. */
+function ngBuildLabelCard(student){
+  var host = document.getElementById('ngLabelCard');
+  if(!host) return;
+  var d = window._printData;
+  if(!d){ host.classList.add('hidden'); host.innerHTML=''; return; }
+  var dept = student.department || d.dept || '';
+  var info = DEPT_INFO[dept] || {};
+  var cls = ngDeptClass(dept);
+  var amc = d.amcCode || '';
+  var coCode = (amc.match(/(\d{3})\s*$/) || [])[1] || '';
+  var cc = document.getElementById('successCoCode');
+  if(cc) cc.textContent = coCode || '—';
+
+  var h = '<div class="ng-label">';
+  h += '<div class="ng-label-bar"><span>'+escapeHtml(dept.toUpperCase())+'</span><span style="font-weight:600;letter-spacing:0">'+escapeHtml(student.grade||d.grade||'')+'</span></div>';
+  h += '<div style="padding:24px 22px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px">';
+  h += '<div style="display:flex;flex-direction:column;gap:6px;min-width:0">';
+  h += '<div style="font:700 40px/1 \'Noto Sans KR\',sans-serif;color:var(--ng-ink);letter-spacing:-.02em">'+escapeHtml(d.koreanName||student.name)+'</div>';
+  if(d.englishName) h += '<div style="font:500 15px \'Poppins\',sans-serif;color:var(--ng-sub)">'+escapeHtml(d.englishName)+'</div>';
+  h += '<div style="font:600 18px \'IBM Plex Mono\',monospace;letter-spacing:.14em;color:var(--ng-ink);margin-top:8px">'+escapeHtml(amc)+'</div>';
+  h += '</div>';
+  h += '<canvas id="ngLabelQr" width="88" height="88" style="width:88px;height:88px;border-radius:4px;flex:none"></canvas>';
+  h += '</div>';
+  if(d.allergyFlag){
+    h += '<div class="ng-label-allergy"><div style="font:700 11px \'Poppins\',sans-serif;letter-spacing:.16em">⚠ ALLERGY / 알러지 ⚠</div>'+
+         '<div style="font:700 17px \'Noto Sans KR\',sans-serif;margin-top:2px">'+escapeHtml(d.allergy||'')+'</div></div>';
+  }
+  h += '<div style="display:flex;gap:28px;padding:20px 22px 24px;flex-wrap:wrap">';
+  if(info.location) h += '<div><div class="ng-label-meta">ROOM</div><div style="font:700 19px \'Noto Sans KR\',sans-serif;color:var(--ng-ink);margin-top:3px">'+escapeHtml(info.location)+'</div></div>';
+  if(info.staff)    h += '<div><div class="ng-label-meta">담당 간사</div><div style="font:700 19px \'Noto Sans KR\',sans-serif;color:var(--ng-ink);margin-top:3px">'+escapeHtml(info.staff)+'</div></div>';
+  if(coCode)        h += '<div><div class="ng-label-meta">체크아웃 코드</div><div style="font:700 19px \'IBM Plex Mono\',monospace;color:var(--ng-ink);margin-top:3px">'+escapeHtml(coCode)+'</div></div>';
+  h += '</div></div>';
+  host.innerHTML = h;
+  host.classList.remove('hidden');
+  try{ new QRious({element:document.getElementById('ngLabelQr'), value:d.QR_URL, size:88, background:'#ffffff', foreground:'#17171b', level:'M'}); }catch(e){}
+  void cls;
+}
+
+var NG_SUCCESS_SECONDS = 10;
+
+function showSuccess(isIn,student,time){
+  var icon = document.getElementById("successIcon");
+  icon.textContent = isIn ? "✓" : "→";
+  icon.style.background = isIn ? "var(--ng-green-soft)" : "var(--ng-lav)";
+  icon.style.color      = isIn ? "var(--ng-green)"      : "var(--ng-lav-text)";
+
+  document.getElementById("successTime").textContent =
+    (isIn ? "CHECKED IN" : "CHECKED OUT") + (time ? " · " + time : "");
+
+  var voc = isIn ? ngVocative(student.name) : null;
+  document.getElementById("successTitle").textContent =
+    voc ? (voc + ", 반가워!") : (student.name + (isIn ? " 체크인 완료!" : " 체크아웃 완료!"));
+
+  var sub = document.getElementById("successSub");
+  var famNote = '';
+  if(window._familyTotal > 0){
+    var done = window._familyTotal - (window._familyQueue ? window._familyQueue.length : 0);
+    famNote = '가족 '+window._familyTotal+'명 중 '+done+'명 완료'+
+              ((window._familyQueue && window._familyQueue.length>0) ? ' · 다음 자녀 자동 진행' : '')+' · ';
+  }
+  if(sub) sub.textContent = famNote + (isIn
+    ? '라벨을 뽑아 옷에 붙여주세요 · 픽업 태그는 보호자가 보관'
+    : '안전하게 인계되었습니다. 다음 주에 만나요!');
+
+  document.getElementById("success").classList.remove("hidden");
+  document.getElementById("successPickup").classList.toggle("hidden",!isIn);
+
+  if(isIn){
+    document.getElementById("tagContainer").classList.remove("hidden");
+    document.getElementById("printBtn").classList.remove("hidden");
+    buildTag(student,time);
+    ngBuildLabelCard(student);
+  } else {
+    document.getElementById("tagContainer").classList.add("hidden");
+    document.getElementById("printBtn").classList.add("hidden");
+    var lc=document.getElementById("ngLabelCard"); if(lc){ lc.classList.add("hidden"); lc.innerHTML=''; }
+  }
+
+  clearTimeout(_successTimer);
+  window._cd = NG_SUCCESS_SECONDS;
+  document.getElementById("countdownBanner").classList.remove("hidden");
+  document.getElementById("countdownNum").textContent = window._cd;
+  document.getElementById("countdownBar").style.width = "100%";
+  clearInterval(window._cd_interval);
+  window._cd_interval = setInterval(function(){
+    window._cd -= 1;
+    document.getElementById("countdownNum").textContent = Math.max(window._cd,0);
+    document.getElementById("countdownBar").style.width = (Math.max(window._cd,0)/NG_SUCCESS_SECONDS*100)+"%";
+    if(window._cd<=0) clearInterval(window._cd_interval);
+  },1000);
+  _successTimer = setTimeout(closeSuccess, NG_SUCCESS_SECONDS*1000);
+}
 function buildTag(s, time) {
   var QR_URL = 'https://amicus-checkin.vercel.app/';
 
@@ -959,12 +1571,14 @@ function printParentTag(d) {
 // === FAMILY CHECK-IN QUEUE ===
 window._familyQueue = window._familyQueue || [];
 window._familyTotal = window._familyTotal || 0;
-function familyCheckinStart(idsCsv){
+function familyCheckinStart(idsCsv, skipConfirm){
   var ids = (idsCsv||'').split(',').filter(Boolean);
   // Filter out students already checked in
   var students = ids.map(function(id){return _studentMap[id];}).filter(function(s){return s && !s.checkedInToday;});
   if(!students.length){alert('체크인할 학생이 없습니다 (모두 체크인 완료).');return;}
-  if(!confirm('가족 ' + students.length + '명 체크인을 진행할까요?\n\n각 학생별로 정보 확인 → 체크인 → 라벨 인쇄가 순차적으로 진행됩니다. 중간에 "취소"를 누르면 가족 체크인이 중단됩니다.'))return;
+  /* Step 2 of the 2c flow is itself the confirmation — the guardian picked the
+     children and pressed "N명 체크인" — so no native confirm() on that path. */
+  if(!skipConfirm && !confirm('가족 ' + students.length + '명 체크인을 진행할까요?\n\n각 학생별로 정보 확인 → 체크인 → 라벨 인쇄가 순차적으로 진행됩니다. 중간에 "취소"를 누르면 가족 체크인이 중단됩니다.'))return;
   window._familyQueue = students.map(function(s){return s.id;});
   window._familyTotal = students.length;
   _familyAdvance();
@@ -986,9 +1600,10 @@ function closeSuccess(){
   if(window._familyTotal > 0){window._familyTotal = 0;}
   // Do NOT goHome — user stays on search results so they can retry or click header logo manually to return to welcome
 }
-function openVisitorModal(){["v-name","v-nameEN","v-grade","v-guardian","v-phone"].forEach(function(id){document.getElementById(id).value="";});document.getElementById("v-dob").value="";document.getElementById("v-allergy").value="없음";document.getElementById("v-pickupAck").checked=false;document.getElementById("v-deptPreview").classList.add("hidden");document.getElementById("visitorError").classList.add("hidden");document.getElementById("visitorModal").classList.remove("hidden");setTimeout(function(){document.getElementById("v-name").focus();},300);}
+function openVisitorModal(){["v-name","v-nameEN","v-grade","v-guardian","v-phone"].forEach(function(id){document.getElementById(id).value="";});document.getElementById("v-dob").value="";document.getElementById("v-allergy").value="없음";document.getElementById("v-pickupAck").checked=false;document.getElementById("v-deptPreview").classList.add("hidden");ngPaintDeptChips(null);document.getElementById("visitorError").classList.add("hidden");document.getElementById("visitorModal").classList.remove("hidden");setTimeout(function(){document.getElementById("v-name").focus();},300);}
 function closeVisitorModal(){document.getElementById("visitorModal").classList.add("hidden");}
-document.getElementById("v-dob").addEventListener("change",function(){var dob=this.value;if(!dob)return;var d=new Date(dob),now=new Date();var m=(now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());if(now.getDate()<d.getDate())m--;document.getElementById("v-deptPreviewName").textContent=getDeptFromAge(m);document.getElementById("v-deptPreview").classList.remove("hidden");});
+document.getElementById("v-dob").addEventListener("change",function(){var dob=this.value;if(!dob)return;var d=new Date(dob),now=new Date();var m=(now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());if(now.getDate()<d.getDate())m--;var _d=getDeptFromAge(m);document.getElementById("v-deptPreviewName").textContent=_d;document.getElementById("v-deptPreview").classList.remove("hidden");ngPaintDeptChips(_d);});
+function ngPaintDeptChips(dept){var host=document.getElementById("v-deptChips");if(!host)return;Array.prototype.forEach.call(host.children,function(c){var on=c.getAttribute("data-dept")===dept;c.style.outline=on?"1.5px solid currentColor":"none";c.style.outlineOffset="-1.5px";c.textContent=ngDeptShort(c.getAttribute("data-dept"))+(on?" · 자동 배정됨":"");});}
 async function submitVisitor(){var name=document.getElementById("v-name").value.trim();var nameEN=document.getElementById("v-nameEN").value.trim();var dob=document.getElementById("v-dob").value;var grade=document.getElementById("v-grade").value.trim();var guardian=document.getElementById("v-guardian").value.trim();var phone=document.getElementById("v-phone").value.trim();var allergy=document.getElementById("v-allergy").value.trim()||"없음";var pickupAck=document.getElementById("v-pickupAck").checked;var err=document.getElementById("visitorError");err.classList.add("hidden");if(!name){err.textContent="이름을 입력해주세요";err.classList.remove("hidden");return;}if(!dob){err.textContent="생년월일을 입력해주세요";err.classList.remove("hidden");return;}if(!guardian){err.textContent="보호자 이름을 입력해주세요";err.classList.remove("hidden");return;}if(!pickupAck){err.textContent="픽업 안내 확인 체크가 필요합니다";err.classList.remove("hidden");return;}var btn=document.getElementById("visitorBtn");btn.textContent="등록 중...";btn.disabled=true;try{var visitorBody={name,nameEN,dob,grade,guardian,phone,allergy};var res=await fetch("/api/visitor-checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(visitorBody)});var data=await res.json();if(data.requiresDirectorAuth){var dpw=prompt("⚠️ 오늘은 일요일이 아닙니다.\n방문자 등록을 진행하려면 디렉터 비밀번호가 필요합니다:");if(!dpw){btn.textContent="체크인 등록";btn.disabled=false;return;}visitorBody.directorPassword=dpw;res=await fetch("/api/visitor-checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(visitorBody)});data=await res.json();if(data.requiresDirectorAuth)throw new Error("디렉터 비밀번호가 틀렸습니다");}if(data.duplicate && data.matches && data.matches.length>0){var m=data.matches[0];var visType=m.isVisitor?"방문자":"등록 학생";var msg="\u26a0\ufe0f 같은 이름의 학생이 이미 있습니다:\n\n"+m.name+" ("+m.dept+", "+visType+")"+(m.dob?"\n생년월일: "+m.dob:"")+"\n\n이 학생으로 체크인하시겠어요?\n\n[확인] = 기존 학생으로 체크인\n[취소] = 그래도 새 학생으로 등록";if(confirm(msg)){btn.textContent="체크인 중...";var ckRes=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:m.name,department:m.dept,studentId:m.id,isNew:false,hasAllergy:false,staff:""})});var ckData=await ckRes.json();if(!ckRes.ok)throw new Error(ckData.error||"체크인 실패");closeVisitorModal();showSuccess(true,{id:m.id,name:m.name,department:m.dept,guardian:guardian,fatherName:"",motherName:"",studentId:"",isVisitor:m.isVisitor,allergy:""},ckData.checkInTime);btn.textContent="체크인 등록";btn.disabled=false;return;}else{visitorBody.force=true;res=await fetch("/api/visitor-checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(visitorBody)});data=await res.json();}}if(!res.ok)throw new Error(data.error||"등록 실패");closeVisitorModal();showSuccess(true,{id:data.studentId,name,nameEN,department:data.department,guardian,fatherName:"",motherName:"",studentId:"",isVisitor:true,allergy},data.checkInTime);}catch(e){err.textContent=e.message;err.classList.remove("hidden");}btn.textContent="체크인 등록";btn.disabled=false;}
 document.getElementById("modal").addEventListener("click",function(e){if(e.target===this)closeModal();});
 document.getElementById("success").addEventListener("click",function(e){if(e.target===this)closeSuccess();});
@@ -998,191 +1613,260 @@ document.getElementById("visitorModal").addEventListener("click",function(e){if(
 (function(){ checkSaturdayReset(); })();
 </script>
 
-  <!-- ══ LIABILITY FORM MODAL ══ -->
-  <div id="liabilityModal" class="fixed inset-0 z-50 hidden flex items-end justify-center">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeLiabilityModal()"></div>
-    <div class="relative bg-white w-full max-w-lg rounded-t-3xl shadow-2xl flex flex-col" style="max-height:92vh;">
-      <!-- Header -->
-      <div class="flex items-center justify-between px-6 pt-5 pb-3 border-b border-gray-100 flex-shrink-0">
-        <div>
-          <h2 class="text-lg font-black text-gray-900">&#xCC45;&#xC784; &#xB3D9;&#xC758;&#xC11C; <span class="text-xs font-normal text-gray-400 ml-1">Liability Waiver</span></h2>
-          <p class="text-xs text-gray-400 mt-0.5">&#xC791;&#xC131; &#xD6C4; &#xCCB4;&#xD06C;&#xC778;&#xC774; &#xC644;&#xB8CC;&#xB429;&#xB2C8;&#xB2E4;</p>
+  <!-- ══ 책임 동의서 — design 2d ═════════════════════════════════════════ -->
+  <div id="liabilityModal" class="hidden ng-overlay">
+    <div class="ng-sheet">
+      <div class="ng-sheet-head">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <h2 class="ng-title-sm">책임 동의서 <span style="font:500 15px 'Poppins',sans-serif;color:var(--ng-muted);letter-spacing:0">Liability Waiver</span></h2>
+          <p class="ng-sub-sm">작성 후 체크인이 완료됩니다 · <span id="liabilityStudentName" style="font-weight:700;color:var(--ng-ink)"></span> <span id="liabilityStudentInfo2"></span></p>
         </div>
-        <button onclick="closeLiabilityModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-light">&times;</button>
+        <button type="button" class="ng-x" onclick="closeLiabilityModal()" aria-label="닫기">✕</button>
       </div>
 
-      <!-- Scrollable content -->
-      <div class="overflow-y-auto flex-1 px-6 py-4">
-
-        <!-- Auto-filled info banner -->
-        <div id="liabilityStudentInfo" class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-4">
-          <p class="text-xs text-indigo-500 font-semibold mb-1">&#xC790;&#xB3D9; &#xC785;&#xB825;&#xB428;</p>
-          <p id="liabilityStudentName" class="font-bold text-gray-900"></p>
-          <p id="liabilityStudentInfo2" class="text-sm text-gray-500"></p>
+      <div class="ng-sheet-body">
+        <div id="liabilityStudentInfo" style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="ng-chip ng-chip-lg ng-chip-green" id="liabilityAutofillChip">자동 입력됨</span>
+          <span class="ng-chip ng-chip-lg" style="font-family:'Poppins',sans-serif">2025.01.01 – 2027.12.31</span>
         </div>
 
-        <!-- Form text (scrollable) -->
-        <div class="bg-gray-50 rounded-2xl p-4 mb-4 text-xs text-gray-600 leading-relaxed" style="max-height:220px;overflow-y:auto;">
-          <p class="font-bold text-gray-800 mb-2">WAIVER OF LIABILITY, ASSUMPTION OF RISK, AND INDEMNITY AGREEMENT</p>
-          <p class="mb-2"><strong>Effective Dates: January 1, 2025 &ndash; December 31, 2027</strong><br/>FOR USE ONLY IF THE PARTICIPANT IS A MINOR</p>
-          <p class="mb-2"><strong>Functions and Activities:</strong> Prior to my child&#x2019;s participation in the programs and recreational and other activities of Amicus Presbyterian Church (&ldquo;Amicus&rdquo;), I acknowledge that there are certain risks associated with the activities, including physical injury, illness, even death, or property loss.</p>
-          <p class="mb-2"><strong>Release of Liability:</strong> I expressly assume all risks of the child when participating in the activities. I further release Amicus and its ministers, leaders, employees, volunteers, and agents from any claim that my child may have as a result of injury or illness incurred during participation. This release shall include any claims of negligence or breach of warranty.</p>
-          <p class="mb-2"><strong>Special Events and Field Trips:</strong> My child may take part in activities such as: Religious Studies, discussion groups, music, worship services, group songs, games of skill and experience, drama, walking to outside events at other locales and establishments, and other activities consistent with the purposes of the church&#x2019;s student ministry.</p>
-          <p class="mb-2"><strong>Photography, Audio, Video, and Social Media:</strong> I authorize Amicus to include my child in pictures or on audio or video for promotional purposes. I also authorize Amicus to post pictures or recordings of my children on conference presentations, worship services, educational presentations, or church website.</p>
-          <p class="mb-2"><strong>First Aid and Emergency Medical Treatment:</strong> I give permission for agents of Amicus to seek and secure any needed medical attention or treatment for the child named above including hospitalization. I agree to pay all fees and costs arising from this action.</p>
-          <p class="mb-2"><strong>Indemnification:</strong> I agree to indemnify and hold harmless Amicus for any and all claims, actions, suits, costs, expenses, damages, and liabilities including attorneys&#x2019; fees brought as a result of my involvement in the Activity.</p>
-          <p><strong>Acknowledgment:</strong> I have read this Waiver of Liability, Assumption of Risk, and Indemnity Agreement, and fully understand its terms. I understand that I am giving up substantial rights, including my right to sue.</p>
+        <div class="ng-waiver" style="margin-top:18px;height:300px">
+          <div class="ng-waiver-scroll" style="height:100%;padding-right:6px">
+            <p style="font:700 13px 'Poppins',sans-serif;letter-spacing:.1em;color:var(--ng-ink);margin:0">WAIVER OF LIABILITY, ASSUMPTION OF RISK, AND INDEMNITY AGREEMENT</p>
+            <p style="font:500 12.5px 'Noto Sans KR',sans-serif;color:var(--ng-sub);margin:0"><strong style="color:var(--ng-ink)">Effective Dates: January 1, 2025 &ndash; December 31, 2027</strong><br/>FOR USE ONLY IF THE PARTICIPANT IS A MINOR</p>
+            <div><div style="font:700 13.5px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin-bottom:3px">Functions and Activities</div><div style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub)">Prior to my child&#x2019;s participation in the programs and recreational and other activities of Amicus Presbyterian Church (&ldquo;Amicus&rdquo;), I acknowledge that there are certain risks associated with the activities, including physical injury, illness, even death, or property loss.</div></div>
+            <div><div style="font:700 13.5px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin-bottom:3px">Release of Liability</div><div style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub)">I expressly assume all risks of the child when participating in the activities. I further release Amicus and its ministers, leaders, employees, volunteers, and agents from any claim that my child may have as a result of injury or illness incurred during participation. This release shall include any claims of negligence or breach of warranty.</div></div>
+            <div><div style="font:700 13.5px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin-bottom:3px">Special Events and Field Trips</div><div style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub)">My child may take part in activities such as: Religious Studies, discussion groups, music, worship services, group songs, games of skill and experience, drama, walking to outside events at other locales and establishments, and other activities consistent with the purposes of the church&#x2019;s student ministry.</div></div>
+            <div><div style="font:700 13.5px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin-bottom:3px">Photography, Audio, Video, and Social Media</div><div style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub)">I authorize Amicus to include my child in pictures or on audio or video for promotional purposes. I also authorize Amicus to post pictures or recordings of my children on conference presentations, worship services, educational presentations, or church website.</div></div>
+            <div><div style="font:700 13.5px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin-bottom:3px">First Aid and Emergency Medical Treatment</div><div style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub)">I give permission for agents of Amicus to seek and secure any needed medical attention or treatment for the child named above including hospitalization. I agree to pay all fees and costs arising from this action.</div></div>
+            <div><div style="font:700 13.5px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin-bottom:3px">Indemnification</div><div style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub)">I agree to indemnify and hold harmless Amicus for any and all claims, actions, suits, costs, expenses, damages, and liabilities including attorneys&#x2019; fees brought as a result of my involvement in the Activity.</div></div>
+            <div style="padding-bottom:60px"><div style="font:700 13.5px 'Noto Sans KR',sans-serif;color:var(--ng-ink);margin-bottom:3px">Acknowledgment</div><div style="font:400 13px/1.65 'Noto Sans KR',sans-serif;color:var(--ng-sub)">I have read this Waiver of Liability, Assumption of Risk, and Indemnity Agreement, and fully understand its terms. I understand that I am giving up substantial rights, including my right to sue.</div></div>
+          </div>
+          <div class="ng-waiver-fade" aria-hidden="true"></div>
+          <span class="ng-waiver-hint">아래로 스크롤 · 6개 항목</span>
         </div>
 
-        <!-- Guardian name input -->
-        <div class="mb-3">
-          <label class="block text-sm font-bold text-gray-700 mb-1">&#xBCF4;&#xD638;&#xC790; &#xC774;&#xB984; <span class="text-red-400">*</span> <span class="text-xs font-normal text-gray-400">Guardian Name</span></label>
-          <input id="liabilityGuardianName" type="text" placeholder="&#xC774;&#xB984; &#xC785;&#xB825; (e.g. &#xBC15;&#xC138;&#xC5F4; / Peter Park)"
-            class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
-            autocomplete="off"/>
+        <div style="display:flex;gap:14px;margin-top:22px;flex-wrap:wrap">
+          <div class="ng-field">
+            <label class="ng-field-label" for="liabilityGuardianName">보호자 이름 <span class="ng-req">*</span> <span style="color:var(--ng-muted);font-weight:500">Guardian Name</span></label>
+            <input id="liabilityGuardianName" type="text" placeholder="이름 입력 (e.g. 박세열 / Peter Park)" class="ng-input" style="height:56px" autocomplete="off"/>
+          </div>
+          <div class="ng-field">
+            <label class="ng-field-label" for="liabilitySignature">서명 <span class="ng-req">*</span> <span style="color:var(--ng-muted);font-weight:500">Signature</span></label>
+            <input id="liabilitySignature" type="text" placeholder="이름을 입력하면 서명으로 인정됩니다" class="ng-input ng-sign" style="height:56px" autocomplete="off"/>
+          </div>
         </div>
 
-        <!-- Signature input -->
-        <div class="mb-4">
-          <label class="block text-sm font-bold text-gray-700 mb-1">&#xC11C;&#xBA85; (&#xC774;&#xB984; &#xC785;&#xB825;) <span class="text-red-400">*</span> <span class="text-xs font-normal text-gray-400">Signature</span></label>
-          <input id="liabilitySignature" type="text" placeholder="&#xC774;&#xB984;&#xC744; &#xC785;&#xB825;&#xD558;&#xBA74; &#xC11C;&#xBA85;&#xC73C;&#xB85C; &#xC778;&#xC815;&#xB429;&#xB2C8;&#xB2E4;"
-            class="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-indigo-400 focus:outline-none font-semibold text-gray-900"
-            autocomplete="off"/>
-        </div>
-
-        <!-- Agree checkbox -->
-        <label class="flex items-start gap-3 cursor-pointer mb-5">
-          <input id="liabilityAgree" type="checkbox" class="mt-1 w-5 h-5 rounded accent-indigo-500 flex-shrink-0"/>
-          <span class="text-sm text-gray-700 leading-relaxed">
-            <strong>&#xC704; &#xB0B4;&#xC6A9;&#xC744; &#xC77D;&#xACE0; &#xC774;&#xD574;&#xD558;&#xC600;&#xC73C;&#xBA70; &#xB3D9;&#xC758;&#xD569;&#xB2C8;&#xB2E4;.</strong><br/>
-            <span class="text-xs text-gray-400">I have read and agree to the above Waiver of Liability, Assumption of Risk, and Indemnity Agreement. (California E-SIGN Act compliant)</span>
+        <label class="ng-checkbox" style="background:var(--ng-lav);border-radius:var(--ng-r-card);padding:18px 20px;align-items:flex-start;margin-top:20px">
+          <input id="liabilityAgree" type="checkbox"/>
+          <span class="ng-tick" aria-hidden="true" style="margin-top:1px">✓</span>
+          <span style="font:500 13.5px/1.6 'Noto Sans KR',sans-serif;color:var(--ng-lav-text)">
+            <strong style="color:var(--ng-ink)">위 내용을 읽고 이해하였으며 동의합니다.</strong><br/>
+            I have read and agree to the above Waiver of Liability, Assumption of Risk, and Indemnity Agreement. (California E-SIGN Act compliant)
           </span>
         </label>
       </div>
 
-      <!-- Submit button -->
-      <div class="px-6 pb-6 pt-3 flex-shrink-0 border-t border-gray-100">
-        <button id="liabilitySubmitBtn" onclick="submitLiabilityForm()"
-          class="w-full py-4 rounded-2xl bg-indigo-600 text-white font-black text-base disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:bg-indigo-700">
-          &#xC81C;&#xCD9C; &amp; &#xCCB4;&#xD06C;&#xC778; &#xC644;&#xB8CC; &#x2713;
-        </button>
-        <p class="text-center text-xs text-gray-400 mt-2">&#xC11C;&#xBA85; &#xC2DC;&#xAC04;: <span id="liabilityTimestamp"></span></p>
+      <div class="ng-sheet-foot">
+        <button id="liabilitySubmitBtn" onclick="submitLiabilityForm()" class="ng-btn ng-btn-primary" style="height:78px">제출 &amp; 체크인 완료 ✓</button>
+        <p style="font:500 12px 'IBM Plex Mono',monospace;color:var(--ng-muted);text-align:center;margin:0">서명 시간 · <span id="liabilityTimestamp"></span></p>
       </div>
     </div>
   </div>
 
-  <!-- INFO UPDATE POPUP (required on check-in if missing info) -->
-<div id="infoPopup" class="hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm items-center justify-center p-4 overflow-y-auto">
-  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md my-8 flex flex-col" style="max-height:92vh;">
-    <div class="px-6 pt-5 pb-3 border-b border-gray-100 flex-shrink-0">
-      <div class="text-center">
-        <div class="text-4xl mb-2">📋</div>
-        <h2 class="text-lg font-black text-gray-900">학생 정보 업데이트 필요</h2>
-        <p id="infoPopupStudent" class="text-sm text-gray-600 mt-1"></p>
+  <!-- ══ 학생 정보 업데이트 — design 2d ═══════════════════════════════════ -->
+<div id="infoPopup" class="hidden ng-overlay" style="z-index:70">
+  <div class="ng-sheet">
+    <div class="ng-sheet-head" style="flex-direction:column;align-items:stretch;gap:0">
+      <h2 class="ng-title-sm">학생 정보 업데이트</h2>
+      <p class="ng-sub-sm" style="line-height:1.55;margin-top:6px">영수증 발송, 비상 연락, 교회 공지 수신에 필요해요. <span id="infoRemaining">몇 가지</span> 항목만 남았습니다.</p>
+      <p id="infoPopupStudent" style="font:600 13px 'Noto Sans KR',sans-serif;color:var(--ng-lav-text);margin:8px 0 0"></p>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+        <div class="ng-bar"><i id="infoProgressBar" style="width:0%"></i></div>
+        <span id="infoProgressLabel" style="font:600 12px 'Poppins',sans-serif;color:var(--ng-sub)">0 / 8</span>
       </div>
     </div>
-    <div class="overflow-y-auto flex-1 px-6 py-4 text-sm">
-      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
-        <p class="text-xs text-amber-800 leading-relaxed">체크인 전 아래 정보를 업데이트해주세요. 영수증 발송, 비상 연락, 교회 공지 수신에 필요합니다.</p>
+
+    <div class="ng-sheet-body" style="display:flex;flex-direction:column;gap:18px">
+      <div id="infoGraceBanner" class="hidden ng-note ng-note-lav" style="font:500 13.5px/1.6 'Noto Sans KR',sans-serif">
+        ⏳ <strong>첫 주일 유예 기간</strong> — 지금은 선택이에요. 아래 “나중에”를 눌러도 체크인됩니다.
       </div>
-      <div id="infoGraceBanner" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4">
-        <p class="text-xs text-emerald-800 leading-relaxed">⏳ <strong>첫 주일 유예 기간 (4/26~5/3)</strong>: 정보 입력은 선택입니다. 아래 <strong>"⏭️ 일단 체크인"</strong> 버튼을 눌러도 돼요. 5/4부터 필수입니다.</p>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="ng-section-label">학생 정보</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="ng-field"><label class="ng-field-label" for="infoStudentName">한글 이름 <span class="ng-req">*</span></label>
+            <input id="infoStudentName" placeholder="한글 이름을 적어주세요" class="ng-input needs-input"/></div>
+          <div class="ng-field"><label class="ng-field-label" for="infoStudentNameEN">English name <span class="ng-req">*</span></label>
+            <input id="infoStudentNameEN" placeholder="e.g. Ellie Park" class="ng-input needs-input"/></div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="ng-field"><label class="ng-field-label" for="infoStudentGrade">학년 <span class="ng-req">*</span></label>
+            <select id="infoStudentGrade" required onchange="updateSchoolOptions()" class="ng-input needs-input">
+              <option value="">학년을 선택해주세요</option>
+              <option value="Pre-K">Pre-K</option>
+              <option value="K">Kindergarten (K)</option>
+              <option value="1st grade">1st grade</option>
+              <option value="2nd grade">2nd grade</option>
+              <option value="3rd grade">3rd grade</option>
+              <option value="4th grade">4th grade</option>
+              <option value="5th grade">5th grade</option>
+              <option value="6th grade">6th grade</option>
+              <option value="7th grade">7th grade</option>
+              <option value="8th grade">8th grade</option>
+              <option value="9th grade">9th grade</option>
+              <option value="10th grade">10th grade</option>
+              <option value="11th grade">11th grade</option>
+              <option value="12th grade">12th grade</option>
+            </select></div>
+          <div class="ng-field"><label class="ng-field-label" for="infoStudentSchool">학교 <span class="ng-req">*</span></label>
+            <select id="infoStudentSchool" required onchange="toggleOtherSchool()" class="ng-input needs-input">
+              <option value="">먼저 학년을 선택해주세요</option>
+            </select></div>
+        </div>
+        <input id="infoStudentSchoolOther" placeholder="학교 이름을 직접 입력해주세요" class="hidden ng-input"/>
       </div>
-      <div class="mb-3">
-        <p class="text-xs font-bold text-gray-700 mb-2">🧒 학생 정보</p>
-        <input id="infoStudentName" placeholder="한글 이름을 적어주세요" class="needs-input w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
-        <input id="infoStudentNameEN" placeholder="English name (e.g. Ellie Park)" class="needs-input w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
-        <select id="infoStudentGrade" required onchange="updateSchoolOptions()" class="needs-input w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm bg-white">
-          <option value="">학년을 선택해주세요</option>
-          <option value="Pre-K">Pre-K</option>
-          <option value="K">Kindergarten (K)</option>
-          <option value="1st grade">1st grade</option>
-          <option value="2nd grade">2nd grade</option>
-          <option value="3rd grade">3rd grade</option>
-          <option value="4th grade">4th grade</option>
-          <option value="5th grade">5th grade</option>
-          <option value="6th grade">6th grade</option>
-          <option value="7th grade">7th grade</option>
-          <option value="8th grade">8th grade</option>
-          <option value="9th grade">9th grade</option>
-          <option value="10th grade">10th grade</option>
-          <option value="11th grade">11th grade</option>
-          <option value="12th grade">12th grade</option>
-        </select>
-        <select id="infoStudentSchool" required onchange="toggleOtherSchool()" class="needs-input w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm bg-white">
-          <option value="">먼저 학년을 선택해주세요</option>
-        </select>
-        <input id="infoStudentSchoolOther" placeholder="학교 이름을 직접 입력해주세요" class="hidden w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div class="ng-section-label">보호자 정보</div>
+          <span class="ng-chip" style="background:#fef9c3;color:#854d0e">아버지 또는 어머니 중 한 명 필수</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button type="button" id="infoTabFather" onclick="ngParentTab('father')" class="ng-btn" style="flex:1;min-height:44px;height:44px;border-radius:12px;font:600 14px 'Noto Sans KR',sans-serif;background:var(--ng-black);color:#fff">아버지</button>
+          <button type="button" id="infoTabMother" onclick="ngParentTab('mother')" class="ng-btn" style="flex:1;min-height:44px;height:44px;border-radius:12px;font:600 14px 'Noto Sans KR',sans-serif;background:var(--ng-bg3);color:var(--ng-sub)">어머니</button>
+        </div>
+        <div id="infoFatherBlock" style="display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:var(--ng-r-card);background:var(--ng-bg2);border:1px solid var(--ng-hairline)">
+          <input id="infoFather" placeholder="아버지 이름" class="ng-input ng-input-sm needs-input"/>
+          <input id="infoFatherPhone" type="tel" placeholder="전화번호 (858-XXX-XXXX)" class="ng-input ng-input-sm ng-input-mono needs-input"/>
+          <input id="infoFatherEmail" type="email" placeholder="이메일" class="ng-input ng-input-sm needs-input"/>
+        </div>
+        <div id="infoMotherBlock" class="hidden" style="flex-direction:column;gap:10px;padding:16px;border-radius:var(--ng-r-card);background:var(--ng-bg2);border:1px solid var(--ng-hairline)">
+          <input id="infoMother" placeholder="어머니 이름" class="ng-input ng-input-sm needs-input"/>
+          <input id="infoMotherPhone" type="tel" placeholder="전화번호 (858-XXX-XXXX)" class="ng-input ng-input-sm ng-input-mono needs-input"/>
+          <input id="infoMotherEmail" type="email" placeholder="이메일" class="ng-input ng-input-sm needs-input"/>
+        </div>
       </div>
-      <div class="mb-3">
-        <p class="text-xs font-bold text-gray-700 mb-2">👨 아버지 정보</p>
-        <input id="infoFather" placeholder="이름을 적어주세요" class="needs-input w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
-        <input id="infoFatherEmail" type="email" placeholder="이메일을 입력해주세요" class="needs-input w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
-        <input id="infoFatherPhone" type="tel" placeholder="전화번호를 넣어주세요 (858-XXX-XXXX)" class="needs-input w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div class="ng-field" style="min-width:260px">
+          <label class="ng-field-label" for="infoAddressFallback">집주소 <span class="ng-req">*</span></label>
+          <div id="infoAddressContainer" style="width:100%"><input id="infoAddressFallback" placeholder="주소 입력 (자동완성 로딩 중...)" class="ng-input needs-input"/></div>
+          <input id="infoAddress" type="hidden"/>
+        </div>
+        <div class="ng-field" style="max-width:210px">
+          <label class="ng-field-label" for="infoAllergy">알러지</label>
+          <input id="infoAllergy" placeholder="없으면 비워두세요" class="ng-input"/>
+        </div>
       </div>
-      <div class="mb-3">
-        <p class="text-xs font-bold text-gray-700 mb-2">👩 어머니 정보</p>
-        <input id="infoMother" placeholder="이름을 적어주세요" class="needs-input w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
-        <input id="infoMotherEmail" type="email" placeholder="이메일을 입력해주세요" class="needs-input w-full mb-2 px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
-        <input id="infoMotherPhone" type="tel" placeholder="전화번호를 넣어주세요 (858-XXX-XXXX)" class="needs-input w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
-      </div>
-      <div class="mb-3">
-        <label class="block text-xs font-bold text-gray-700 mb-1">🏠 집주소 <span class="text-red-500">*</span></label>
-        <div id="infoAddressContainer" class="w-full"><input id="infoAddressFallback" placeholder="주소 입력 (자동완성 로딩 중...)" class="needs-input w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/></div>
-        <input id="infoAddress" type="hidden"/>
-      </div>
-      <div class="mb-3">
-        <label class="block text-xs font-bold text-gray-700 mb-1">⚠️ 알러지 (있으면)</label>
-        <input id="infoAllergy" placeholder="예: 땅콩, 우유..." class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-sm"/>
-      </div>
-      <p class="text-xs text-gray-500 mb-2">⭐ <strong>필수:</strong> 보호자 이름, 이메일, 전화번호 (아버지 OR 어머니 중 한 명)</p>
     </div>
-    <div class="px-6 pb-5 pt-3 border-t border-gray-100 flex-shrink-0 space-y-2">
-      <button id="infoSaveBtn" onclick="saveInfoAndContinue()" class="w-full py-3 rounded-2xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">💾 저장하고 체크인</button>
-      <button id="infoSkipBtn" onclick="skipInfoAndContinue()" class="w-full py-2.5 rounded-2xl bg-amber-100 text-amber-800 text-sm font-bold hover:bg-amber-200 transition-colors border border-amber-300">⏭️ 나중에 / Later</button>
-      <button onclick="closeInfoPopup()" class="w-full py-2 text-gray-500 text-xs hover:text-gray-700">취소 (체크인 취소)</button>
+
+    <div class="ng-sheet-foot">
+      <button id="infoSaveBtn" onclick="saveInfoAndContinue()" class="ng-btn ng-btn-primary" style="font-size:19px">저장하고 체크인</button>
+      <div style="display:flex;gap:10px">
+        <button id="infoSkipBtn" onclick="skipInfoAndContinue()" class="hidden ng-btn ng-btn-outline ng-btn-sm" style="flex:1">나중에 / Later</button>
+        <button onclick="closeInfoPopup()" class="ng-btn ng-btn-ghost ng-btn-sm" style="flex:1">체크인 취소</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- LIABILITY POPUP -->
-<div id="liabPopup" class="hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm items-center justify-center p-4">
-  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 slide-up">
-    <div class="text-center mb-4">
-      <div class="text-5xl mb-3">🔒</div>
-      <h2 class="text-xl font-bold text-gray-900">책임 동의서 미제출</h2>
-      <p id="liabPopupStudent" class="text-sm text-gray-600 mt-1"></p>
+<script>
+/* 2d parent tabs. Both blocks stay in the DOM so saveInfoAndContinue() keeps
+   reading father and mother fields exactly as before — this only changes
+   which one is on screen. */
+function ngParentTab(which){
+  var f=document.getElementById('infoFatherBlock'), m=document.getElementById('infoMotherBlock');
+  var tf=document.getElementById('infoTabFather'), tm=document.getElementById('infoTabMother');
+  if(!f||!m) return;
+  var onF = which==='father';
+  f.classList.toggle('hidden', !onF);
+  m.classList.toggle('hidden', onF);
+  f.style.display = onF ? 'flex' : '';
+  m.style.display = onF ? '' : 'flex';
+  [[tf,onF],[tm,!onF]].forEach(function(pair){
+    if(!pair[0]) return;
+    pair[0].style.background = pair[1] ? 'var(--ng-black)' : 'var(--ng-bg3)';
+    pair[0].style.color      = pair[1] ? '#fff' : 'var(--ng-sub)';
+  });
+}
+
+/* Live progress against the same eight fields checkInfoMissing() gates on. */
+function ngInfoProgress(){
+  var val=function(id){var e=document.getElementById(id);return e?String(e.value||'').trim():'';};
+  var checks=[
+    !!val('infoStudentName'),
+    !!val('infoStudentNameEN'),
+    !!val('infoStudentGrade'),
+    !!(val('infoStudentSchool')==='기타 / Other' ? val('infoStudentSchoolOther') : val('infoStudentSchool')),
+    !!(val('infoFather')||val('infoMother')),
+    !!(val('infoFatherPhone')||val('infoMotherPhone')),
+    !!(val('infoFatherEmail')||val('infoMotherEmail')),
+    !!(val('infoAddress')||val('infoAddressFallback'))
+  ];
+  var done=checks.filter(Boolean).length, total=checks.length;
+  var bar=document.getElementById('infoProgressBar'), lab=document.getElementById('infoProgressLabel');
+  if(bar) bar.style.width=Math.round(done/total*100)+'%';
+  if(lab) lab.textContent=done+' / '+total;
+  var rem=document.getElementById('infoRemaining');
+  if(rem) rem.textContent=(total-done)+'개';
+}
+document.addEventListener('input', function(e){
+  if(e.target && e.target.closest && e.target.closest('#infoPopup')) ngInfoProgress();
+});
+document.addEventListener('change', function(e){
+  if(e.target && e.target.closest && e.target.closest('#infoPopup')) ngInfoProgress();
+});
+</script>
+
+<!-- ══ 동의서 미제출 안내 ═══════════════════════════════════════════════ -->
+<div id="liabPopup" class="hidden ng-overlay" style="z-index:60">
+  <div class="ng-sheet" style="max-width:520px">
+    <div class="ng-sheet-head" style="flex-direction:column;align-items:center;text-align:center;gap:10px">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--ng-warn-bg);border:1px solid var(--ng-warn-line);display:flex;align-items:center;justify-content:center;font-size:28px">🔒</div>
+      <h2 class="ng-title-sm">책임 동의서 미제출</h2>
+      <p id="liabPopupStudent" class="ng-sub-sm"></p>
     </div>
-    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
-      <p class="text-xs text-amber-800 leading-relaxed">이 학생은 Liability Form을 아직 제출하지 않았어요. 교회 활동 참여를 위해 보호자 서명이 필요합니다.</p>
+    <div class="ng-sheet-body">
+      <div class="ng-note ng-note-warn">
+        <div class="ng-note-body" style="color:var(--ng-warn-text2)">이 학생은 Liability Form을 아직 제출하지 않았어요. 교회 활동 참여를 위해 보호자 서명이 필요합니다.</div>
+      </div>
     </div>
-    <div class="space-y-2">
-      <button onclick="liabPopupAction('signNow')" class="w-full py-3.5 rounded-2xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors">📝 지금 작성하기 (권장)</button>
-      <button onclick="liabPopupAction('bypass')" class="w-full py-3 rounded-2xl bg-amber-100 text-amber-800 font-semibold hover:bg-amber-200 transition-colors text-sm">⚠ 일단 체크인 (다음주까지 제출 필요)</button>
-      <button onclick="liabPopupAction('cancel')" class="w-full py-2.5 text-gray-500 text-sm hover:text-gray-700">취소</button>
+    <div class="ng-sheet-foot">
+      <button onclick="liabPopupAction('signNow')" class="ng-btn ng-btn-primary">지금 작성하기 (권장)</button>
+      <button onclick="liabPopupAction('bypass')" class="ng-btn ng-btn-sm" style="background:var(--ng-warn-bg);border:1.5px solid var(--ng-warn-line);color:var(--ng-warn-text)">일단 체크인 (다음주까지 제출 필요)</button>
+      <button onclick="liabPopupAction('cancel')" class="ng-btn ng-btn-ghost ng-btn-sm">취소</button>
     </div>
   </div>
 </div>
 
 <!-- Saturday Reset Banner -->
-  <div id="saturdayResetBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9999; background:#7c3aed; color:white; text-align:center; padding:16px; font-weight:bold; font-size:15px;">
+  <div id="saturdayResetBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--ng-lav-text);color:#fff;text-align:center;padding:16px;font:700 15px 'Noto Sans KR',sans-serif;">
     토요일 자동 초기화 중 ✨ Saturday Auto-Renew &mdash; 내일 주일 준비 완료!
   </div>
 
 <!-- ===== CHECKOUT BY NAME PANEL (added 2026-04-26) ===== -->
-<button id="cwoBtn" onclick="cwoOpen()" style="position:fixed;bottom:20px;right:20px;background:#10b981;color:white;border:none;padding:14px 22px;border-radius:50px;font-weight:bold;font-size:14px;box-shadow:0 6px 20px rgba(16,185,129,0.4);cursor:pointer;z-index:9998;">이름으로 체크아웃</button>
-<div id="cwoPanel" style="display:none;position:fixed;bottom:20px;right:20px;background:white;border:2px solid #10b981;border-radius:14px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:9999;width:360px;max-width:92vw;max-height:80vh;flex-direction:column;">
+<button id="cwoBtn" onclick="cwoOpen()" style="display:none;position:fixed;bottom:20px;right:20px;background:var(--ng-black);color:#fff;border:none;padding:14px 22px;border-radius:99px;font:700 14px 'Noto Sans KR',sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer;z-index:9998;">이름으로 체크아웃</button>
+<div id="cwoPanel" style="display:none;position:fixed;bottom:20px;right:20px;background:#fff;border:1px solid var(--ng-hairline);border-radius:var(--ng-r-lg);padding:16px;box-shadow:var(--ng-shadow);z-index:9999;width:380px;max-width:92vw;max-height:80vh;flex-direction:column;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-    <strong style="font-size:16px;">🔍 이름으로 체크아웃</strong>
-    <button onclick="cwoClose()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666;">×</button>
+    <strong style="font:700 16px 'Noto Sans KR',sans-serif;color:var(--ng-ink)">이름으로 체크아웃</strong>
+    <button onclick="cwoClose()" class="ng-x" aria-label="닫기">✕</button>
   </div>
-  <input id="cwoSearch" type="text" placeholder="학생 이름 입력…" style="width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:10px;margin-bottom:10px;font-size:15px;" oninput="cwoLoad(this.value)" autocomplete="off">
+  <input id="cwoSearch" type="text" placeholder="학생 이름 입력…" class="ng-input ng-input-sm" style="margin-bottom:10px" oninput="cwoLoad(this.value)" autocomplete="off">
   <div id="cwoResults" style="overflow-y:auto;flex:1;min-height:120px;max-height:50vh;"></div>
-  <div id="cwoStatus" style="font-size:12px;color:#666;margin-top:6px;"></div>
+  <div id="cwoStatus" style="font:500 12px 'Noto Sans KR',sans-serif;color:var(--ng-sub);margin-top:6px"></div>
 </div>
 <script>
-function cwoOpen(){var p=document.getElementById('cwoPanel');p.style.display='flex';document.getElementById('cwoBtn').style.display='none';cwoLoad('');setTimeout(function(){var s=document.getElementById('cwoSearch');if(s)s.focus();},100);}
-function cwoClose(){document.getElementById('cwoPanel').style.display='none';document.getElementById('cwoBtn').style.display='block';}
+function cwoOpen(){var p=document.getElementById('cwoPanel');p.style.display='flex';ngSyncCwoBtn();cwoLoad('');setTimeout(function(){var s=document.getElementById('cwoSearch');if(s)s.focus();},100);}
+function cwoClose(){document.getElementById('cwoPanel').style.display='none';ngSyncCwoBtn();}
+/* The name-search launcher belongs to the check-out flow only — on the 2b home
+   and inside the 2c check-in wizard it is just a floating obstruction. */
+function ngSyncCwoBtn(){
+  var fab=document.getElementById('cwoBtn');
+  if(fab) fab.style.display='none';           // superseded by the 2e header pill
+  var pill=document.getElementById('coNameSearch');
+  if(pill) pill.classList.toggle('hidden', _currentMode!=='checkout');
+}
 async function cwoLoad(filter){
   var results=document.getElementById('cwoResults');var status=document.getElementById('cwoStatus');
   results.innerHTML='<div style="padding:20px;text-align:center;color:#666;font-size:13px;">로딩 중…</div>';
@@ -1246,12 +1930,12 @@ async function cwoDo(btn){
       fetch('/api/check-status?name=' + encodeURIComponent(name)).then(function(r){return r.json();}).then(function(s){
         var html = '';
         if (s.checkedInToday && s.checkedOutToday) {
-          html = '<div data-cwofix="1" style="background:#ecfdf5;border:2px solid #10b981;color:#065f46;padding:14px;border-radius:12px;text-align:center;font-weight:600;">✅ 이미 체크아웃 완료됨<div style="font-size:12px;color:#047857;margin-top:4px;font-weight:400;">체크인: ' + (s.checkInTime||'') + ' · 체크아웃: ' + (s.checkOutTime||'') + '</div></div>';
+          html = '<div data-cwofix="1" style="background:var(--ng-green-soft);color:var(--ng-green-deep);padding:14px;border-radius:12px;text-align:center;font:700 14px \'Noto Sans KR\',sans-serif;">귀가 완료<div style="font:500 12px \'IBM Plex Mono\',monospace;margin-top:4px;">' + (s.checkInTime||'') + ' → ' + (s.checkOutTime||'') + '</div></div>';
         } else if (s.checkedInToday && !s.checkedOutToday) {
           var safeName = name.replace(/'/g, '');
-          html = '<button data-cwofix="1" data-sid="'+sid+'" data-name="'+safeName+'" onclick="cwoFixedDoCheckout(this)" style="width:100%;background:#10b981;color:white;border:none;padding:14px;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;">🚪 체크아웃 / Check Out</button><div style="font-size:11px;color:#666;margin-top:6px;text-align:center;">체크인: ' + (s.checkInTime||'') + '</div>';
+          html = '<button data-cwofix="1" data-sid="'+sid+'" data-name="'+safeName+'" onclick="cwoFixedDoCheckout(this)" style="width:100%;background:var(--ng-green);color:#fff;border:none;padding:14px;border-radius:12px;font:700 16px \'Noto Sans KR\',sans-serif;cursor:pointer;">체크아웃 / Check Out</button><div style="font:500 11px \'IBM Plex Mono\',monospace;color:var(--ng-muted);margin-top:6px;text-align:center;">체크인 ' + (s.checkInTime||'') + '</div>';
         } else {
-          html = '<div data-cwofix="1" style="background:#fef3c7;border:2px solid #f59e0b;color:#92400e;padding:14px;border-radius:12px;text-align:center;font-weight:600;">⚠ 오늘 체크인 안 됨<div style="font-size:12px;color:#b45309;margin-top:4px;font-weight:400;">먼저 체크인 페이지에서 체크인하세요</div></div>';
+          html = '<div data-cwofix="1" style="background:var(--ng-warn-bg);border:1px solid var(--ng-warn-line);color:var(--ng-warn-text);padding:14px;border-radius:12px;text-align:center;font:700 14px \'Noto Sans KR\',sans-serif;">오늘 체크인 안 됨<div style="font:500 12px \'Noto Sans KR\',sans-serif;margin-top:4px;">먼저 체크인 페이지에서 체크인하세요</div></div>';
         }
         actionDiv.innerHTML = html;
       }).catch(function(e){console.warn('cwo status fetch failed', name, e);});
@@ -1264,9 +1948,9 @@ async function cwoDo(btn){
       var r = await fetch('/api/checkout', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({studentId: sid, studentName: name})});
       var d = await r.json();
       if (!d.success && !d.recordId) throw new Error(d.error || '실패');
-      btn.parentElement.innerHTML = '<div data-cwofix="1" style="background:#ecfdf5;border:2px solid #10b981;color:#065f46;padding:14px;border-radius:12px;text-align:center;font-weight:700;font-size:16px;">✅ 체크아웃 완료! ' + (d.checkOutTime||'') + '</div>';
+      btn.parentElement.innerHTML = '<div data-cwofix="1" style="background:var(--ng-green-soft);color:var(--ng-green-deep);padding:14px;border-radius:12px;text-align:center;font:700 16px \'Noto Sans KR\',sans-serif;">체크아웃 완료 · ' + (d.checkOutTime||'') + '</div>';
     } catch(e) {
-      btn.disabled = false; btn.style.opacity = '1'; btn.innerText = '🚪 체크아웃 / Check Out';
+      btn.disabled = false; btn.style.opacity = '1'; btn.innerText = '체크아웃 / Check Out';
       alert('체크아웃 실패: ' + e.message);
     }
   };
@@ -1334,7 +2018,7 @@ async function cwoDo(btn){
      이전 학생 이름이 검색 input에 남는 프라이버시 버그 fix -->
 <script>
 (function(){
-  var AUTO_RESET_MS = 5000;
+  var AUTO_RESET_MS = 10000; // matches the 2c countdown ("10초 뒤 메인화면으로")
   var resetTimer = null;
 
   function clearAllInputs() {
@@ -1360,7 +2044,7 @@ async function cwoDo(btn){
 
   function startAutoReset() {
     if (resetTimer) clearTimeout(resetTimer);
-    console.log('Auto-reset in 5s after check-in success');
+    console.log('Auto-reset in 10s after check-in success');
     resetTimer = setTimeout(fullReset, AUTO_RESET_MS);
   }
 
@@ -2050,87 +2734,7 @@ async function cwoDo(btn){
 <!-- ═══ AMICUS NEXTGEN SKIN (2026-08) — Friends-Church-inspired: white ground, heavy display
      type, black pill CTAs, lavender accents. Visual layer only, no logic.
      Loads after the Tailwind CDN runtime styles so this palette wins. ═══ -->
-<style id="amicus-skin">
-:root{
-  --ng-bg:#ffffff; --ng-bg2:#fafafa; --ng-ink:#17171b; --ng-sub:#6e6e73;
-  --ng-black:#111114; --ng-black-hover:#2b2b30;
-  --ng-lav:#edebf7; --ng-lav-deep:#dcd8ef; --ng-lav-text:#4c4570;
-  --ng-green:#2e9e5b; --ng-green-deep:#247c47; --ng-green-soft:#eaf7ef;
-  --ng-hairline:rgba(0,0,0,.10);
-}
-html{background:var(--ng-bg)}
-body{background:var(--ng-bg)!important;color:var(--ng-ink)}
-h1,h2,h3{font-family:'Poppins','Noto Sans KR',sans-serif!important;letter-spacing:-.02em;font-weight:700}
-
-/* ── Welcome hero — big type on white ── */
-.ap-hero{background:#fff;overflow:hidden}
-.ap-glow{position:absolute;bottom:-260px;left:50%;transform:translateX(-50%);width:720px;height:480px;border-radius:50%;
-  background:radial-gradient(closest-side,rgba(122,110,182,.14),rgba(122,110,182,0));pointer-events:none}
-.ap-mark{width:84px;height:84px;border-radius:24px;background:var(--ng-lav);display:flex;align-items:center;justify-content:center;
-  font-size:42px;border:1px solid rgba(76,69,112,.12)}
-.ap-eyebrow{font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;letter-spacing:.28em;color:var(--ng-sub)}
-.ap-title{font-family:'Poppins','Noto Sans KR',sans-serif;font-size:52px;line-height:1.02;font-weight:800;letter-spacing:-.035em;color:var(--ng-ink)}
-.ap-subtitle{font-size:17px;font-weight:500;color:var(--ng-sub);letter-spacing:-.01em}
-.ap-date{font-size:13px;color:#a1a1a6}
-.ap-cta-primary{background:var(--ng-black);color:#fff;font-family:'Poppins','Noto Sans KR',sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.16)}
-.ap-cta-primary:hover{background:var(--ng-black-hover)}
-.ap-cta-sub{font-weight:500;opacity:.8;font-size:15px}
-.ap-cta-secondary{background:#fff;color:var(--ng-ink);font-family:'Poppins','Noto Sans KR',sans-serif;border:1.5px solid var(--ng-ink);box-shadow:none}
-.ap-cta-secondary:hover{background:var(--ng-bg2)}
-.ap-cta-sub2{font-weight:500;color:var(--ng-sub);font-size:15px}
-.ap-footlink{font-size:13px;font-weight:600;color:var(--ng-sub);text-decoration:none}
-.ap-footlink:hover{color:var(--ng-ink);text-decoration:underline}
-.ap-dot{width:3px;height:3px;border-radius:50%;background:#c7c7cc;display:inline-block}
-@keyframes apRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.ap-rise{animation:apRise .7s cubic-bezier(.25,.6,.2,1) both}
-
-/* ── Header: white, hairline, bold wordmark ── */
-#mainHeader{background:rgba(255,255,255,.85)!important;-webkit-backdrop-filter:saturate(180%) blur(16px);
-  backdrop-filter:saturate(180%) blur(16px);border-bottom:1px solid var(--ng-hairline)!important;box-shadow:none!important}
-#mainHeader h1{font-family:'Poppins','Noto Sans KR',sans-serif;font-weight:700}
-
-/* ── Palette remap: indigo/purple → ink + lavender tints · emerald → muted green ── */
-.bg-indigo-600{background-color:var(--ng-black)!important}
-.hover\:bg-indigo-700:hover,.bg-indigo-700{background-color:var(--ng-black-hover)!important}
-.bg-indigo-500{background-color:#3a3a40!important}.bg-indigo-400{background-color:#55555c!important}
-.bg-indigo-100{background-color:var(--ng-lav-deep)!important}
-.bg-indigo-50,.hover\:bg-indigo-50:hover{background-color:var(--ng-lav)!important}
-.text-indigo-700{color:var(--ng-lav-text)!important}
-.text-indigo-600,.hover\:text-indigo-600:hover{color:var(--ng-ink)!important}
-.text-indigo-500{color:#3a3a40!important}.text-indigo-400{color:#8b87a3!important}
-.text-indigo-300{color:#a9a5bd!important}.text-indigo-200{color:#c9c6d8!important}
-.border-indigo-400,.hover\:border-indigo-400:hover{border-color:#8b87a3!important}
-.border-indigo-300{border-color:#b9b5cc!important}.border-indigo-200{border-color:var(--ng-lav-deep)!important}
-.border-indigo-100{border-color:var(--ng-lav)!important}
-.focus\:border-indigo-400:focus{border-color:var(--ng-ink)!important}
-.ring-indigo-400{--tw-ring-color:rgba(17,17,20,.3)!important}
-.bg-purple-600{background-color:var(--ng-black)!important}.bg-purple-500{background-color:#3a3a40!important}
-.bg-purple-100{background-color:var(--ng-lav-deep)!important}.bg-purple-50{background-color:var(--ng-lav)!important}
-.text-purple-800,.text-purple-700{color:var(--ng-lav-text)!important}
-.border-purple-400{border-color:#8b87a3!important}.border-purple-200{border-color:var(--ng-lav-deep)!important}
-.bg-emerald-600{background-color:var(--ng-green)!important}
-.hover\:bg-emerald-700:hover,.bg-emerald-700{background-color:var(--ng-green-deep)!important}
-.bg-emerald-500{background-color:#37b268!important}.bg-emerald-100{background-color:#d8efe1!important}
-.bg-emerald-50{background-color:var(--ng-green-soft)!important}
-.text-emerald-800,.text-emerald-700{color:var(--ng-green-deep)!important}
-.text-emerald-600,.text-emerald-500{color:var(--ng-green)!important}
-.border-emerald-400{border-color:#5fbd85!important}.border-emerald-200{border-color:#c3e6d0!important}
-
-/* ── Pills, cards, polish (Friends restraint) ── */
-.bg-gray-100{background-color:#f2f2f4!important}
-.rounded-2xl{border-radius:16px!important}.rounded-3xl{border-radius:20px!important}
-.student-card{border-radius:16px;border-color:var(--ng-hairline)!important}
-.student-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.10)!important;transform:translateY(-1px)}
-.shadow-xl,.shadow-lg{box-shadow:0 1px 2px rgba(0,0,0,.05),0 16px 40px rgba(0,0,0,.10)!important}
-button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(17,17,20,.35);outline-offset:2px}
-#cwoBtn{background:var(--ng-black)!important;box-shadow:0 6px 20px rgba(0,0,0,.25)!important}
-.from-indigo-600,.from-purple-600,.from-indigo-500,.from-purple-500{--tw-gradient-from:#17171b!important;--tw-gradient-to:rgba(23,23,27,0)!important;--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)!important}
-.to-purple-600,.to-indigo-600,.to-purple-500,.to-indigo-500{--tw-gradient-to:#3a3a40!important}
-.via-indigo-600,.via-purple-600{--tw-gradient-stops:var(--tw-gradient-from),#2b2b30,var(--tw-gradient-to)!important}
-@media (prefers-reduced-motion:reduce){
-  .ap-rise,.welcome-pulse,.pulse-ring,.bday-pulse{animation:none!important}
-}
-</style>
+<!-- AMICUS NEXTGEN SKIN — moved to the shared /nextgen.css -->
 </body>
 </html>
 
