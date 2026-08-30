@@ -10,25 +10,48 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/nextgen.css"/>
 <style>
-* { font-family: 'Noto Sans KR', sans-serif; }
-body { background: #f0f4f8; }
+/* Page components on the NextGen tokens from /nextgen.css (design 2e). */
+body { background: var(--ng-bg2); font-family: var(--ng-body); color: var(--ng-ink); }
 .fade-in { animation: fadeIn .25s ease; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-.badge { display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600; }
-.card { background:#fff;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.07); }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+.badge { display:inline-flex;align-items:center;padding:3px 9px;border-radius:var(--ng-r-chip);
+         font:600 11.5px 'Noto Sans KR',sans-serif; }
+.card { background:#fff;border:1px solid var(--ng-hairline);border-radius:var(--ng-r-card);box-shadow:none; }
+
 input:focus,select:focus,textarea:focus { outline:none; }
-.modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:50;display:flex;align-items:flex-end;justify-content:center; }
-@media(min-width:640px){ .modal-overlay { align-items:center; } }
-.modal-box { background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:520px;max-height:92vh;overflow-y:auto; }
-@media(min-width:640px){ .modal-box { border-radius:24px; } }
-.tab-btn { padding:6px 16px;border-radius:10px;font-size:13px;font-weight:600;transition:all .15s; }
-.tab-btn.active { background:#4f46e5;color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.3); }
-.tab-btn:not(.active) { color:#6b7280; }
-.stat-card { background:linear-gradient(135deg,var(--c1),var(--c2));border-radius:14px;padding:14px 18px;color:#fff; }
-thead th { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af;padding:10px 12px;text-align:left; }
-tbody td { padding:12px;font-size:13px;vertical-align:top; }
-tbody tr { border-bottom:1px solid #f3f4f6;transition:background .1s; }
-tbody tr:hover { background:#fafafa; }
+
+.modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.5);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:50;
+  display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box; }
+.modal-box { background:#fff;border-radius:26px;width:100%;max-width:620px;max-height:92vh;
+  overflow-y:auto;box-shadow:var(--ng-shadow); }
+@media(max-width:640px){ .modal-overlay{padding:0;align-items:flex-end}
+                         .modal-box{border-radius:24px 24px 0 0;max-height:94vh} }
+
+.tab-btn { padding:8px 14px;border-radius:10px;font:600 12.5px 'Noto Sans KR',sans-serif;
+           transition:background .15s,color .15s; }
+.tab-btn.active { background:var(--ng-black);color:#fff; }
+.tab-btn:not(.active) { color:var(--ng-sub);background:var(--ng-bg3); }
+.tab-btn:not(.active):hover { background:#e8e8ea; }
+
+/* 2e stat tiles — flat tints, not gradients. --c1 is kept as the accent so
+   the per-card inline custom properties still drive the color. */
+.stat-card { background:var(--ng-bg3); border-radius:var(--ng-r-card); padding:16px 18px;
+             color:var(--c1, var(--ng-ink)); }
+.stat-card p:first-child { font:800 30px 'Poppins',sans-serif; line-height:1; letter-spacing:-.02em; }
+.stat-card p:last-child { font:600 12.5px 'Noto Sans KR',sans-serif; opacity:.8; margin-top:4px; }
+
+table { width:100%; border-collapse:collapse; }
+thead th { font:600 12px 'Noto Sans KR',sans-serif;text-transform:none;letter-spacing:0;
+           color:var(--ng-muted);padding:12px;text-align:left;background:var(--ng-bg2);
+           border-bottom:1px solid var(--ng-hairline); }
+tbody td { padding:14px 12px;font:500 13px 'Noto Sans KR',sans-serif;vertical-align:top; }
+tbody tr { border-bottom:1px solid var(--ng-hairline-soft);transition:background .1s; }
+tbody tr:hover { background:var(--ng-bg2); }
+/* 2e: a row with an allergy reads pale red end to end */
+tbody tr.allergy-row { background:rgba(254,226,226,.3); }
+tbody tr.allergy-row:hover { background:rgba(254,226,226,.5); }
 </style>
 </head>
 <body class="ng-legacy">
@@ -102,7 +125,7 @@ tbody tr:hover { background:#fafafa; }
         <button id="tabRoster" onclick="switchTab('roster')" class="tab-btn">명단</button>
         <button id="tabRequests" onclick="switchTab('requests')" class="tab-btn">📋 요청<span id="reqBadge" style="display:none;margin-left:4px;background:#ef4444;color:white;font-size:11px;border-radius:9999px;padding:0 5px;font-weight:700;vertical-align:middle;">0</span></button>
         <button id="tabAbsentees" onclick="switchTab('absentees')" class="tab-btn">📞 결석자<span id="absBadge" style="display:none;margin-left:4px;background:#f97316;color:white;font-size:11px;border-radius:9999px;padding:0 5px;font-weight:700;vertical-align:middle;">0</span></button>
-        <button onclick="openRequestModal()" class="text-xs bg-amber-500 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-amber-600 transition-colors">요청 보내기</button>
+        <button onclick="openRequestModal()" class="tab-btn" style="background:var(--ng-black);color:#fff">요청 보내기</button>
         <button onclick="doLogout()" class="text-xs text-gray-400 ml-2">로그아웃</button>
       </div>
     </div>
@@ -148,10 +171,10 @@ tbody tr:hover { background:#fafafa; }
 <div class="max-w-6xl mx-auto px-4 py-6">
     <div id="attendanceTab" class="fade-in">
       <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
-        <div class="stat-card" style="--c1:#6366f1;--c2:#8b5cf6"><p class="text-xs opacity-75 mb-1">전체</p><p id="statTotal" class="text-2xl font-bold">—</p></div>
-        <div class="stat-card" style="--c1:#10b981;--c2:#059669"><p class="text-xs opacity-75 mb-1">체크인</p><p id="statIn" class="text-2xl font-bold">—</p></div>
-        <div class="stat-card" style="--c1:#f59e0b;--c2:#d97706"><p class="text-xs opacity-75 mb-1">체크아웃</p><p id="statOut" class="text-2xl font-bold">—</p></div>
-        <div class="stat-card" style="--c1:#ec4899;--c2:#db2777"><p class="text-xs opacity-75 mb-1">방문자</p><p id="statNew" class="text-2xl font-bold">—</p></div>
+        <div class="stat-card ng-stat-lav" style="--c1:var(--ng-lav-text)"><p id="statTotal">—</p><p>전체</p></div>
+        <div class="stat-card ng-stat-green" style="--c1:var(--ng-green-deep)"><p id="statIn">—</p><p>재실 중</p></div>
+        <div class="stat-card ng-stat-grey" style="--c1:var(--ng-sub)"><p id="statOut">—</p><p>귀가 완료</p></div>
+        <div class="stat-card ng-stat-pink" style="--c1:var(--ng-pink-text)"><p id="statNew">—</p><p>방문자</p></div>
       </div>
             <div id="weeklySummary" class="card overflow-hidden mb-4 hidden">
         <div class="px-5 py-4 border-b border-gray-100">
@@ -604,7 +627,7 @@ function switchLeaderTab(tab) {
 
 async function loadAttendance(){
   var tbody=document.getElementById("attendanceTable");if(!tbody)return;
-  tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>로딩 중...</td></tr>";
+  tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:44px;color:var(--ng-muted)'>로딩 중...</td></tr>";
   try{
     var dept=window._dept||"",url="/api/attendance-today?password=3"+(dept?"&dept="+encodeURIComponent(dept):"");
     var res=await fetch(url),data=await res.json(),records=data.records||[];
@@ -616,22 +639,23 @@ async function loadAttendance(){
     if(_pendBadge){if(_pendingCnt>0){document.getElementById("pendingCheckoutCount").textContent=_pendingCnt;_pendBadge.classList.remove("hidden");}else{_pendBadge.classList.add("hidden");}}
     document.getElementById("statNew").textContent=records.filter(function(r){return r.isNew;}).length;
     document.getElementById("lastUpdated").textContent=new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})+" 업데이트";/*noop*/
-    if(!records.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:40px;color:#9ca3af'>오늘 체크인 기록이 없습니다</td></tr>";}
+    if(!records.length){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:44px;color:var(--ng-muted)'>오늘 체크인 기록이 없습니다</td></tr>";}
     var html="";
     for(var i=0;i<records.length;i++){
       var r=records[i];
-      var allergyBadge=(r.hasAllergy&&r.allergy&&r.allergy!=="없음")?"<span class='badge' style='background:#fee2e2;color:#b91c1c'>⚠️ "+r.allergy+"</span>":"-";
+      var _hasAllergy=!!(r.hasAllergy&&r.allergy&&r.allergy!=="없음");
+      var allergyBadge=_hasAllergy?"<span class='badge ng-chip-danger'>"+r.allergy+"</span>":"<span style='color:#d4d4d8'>—</span>";
       var parentInfo=(r.fatherName?"👨 "+r.fatherName+" ":"")+((r.motherName?"👩 "+r.motherName:""));
       if(!parentInfo&&r.guardian)parentInfo=r.guardian;
-      var statusBadge=r.checkOut?"<span class='badge' style='background:#f3f4f6;color:#6b7280'>체크아웃</span>":r.checkIn?"<span class='badge' style='background:#d1fae5;color:#065f46'>체크인</span>":"-";
+      var statusBadge=r.checkOut?"<span class='badge badge-gray'>귀가 완료</span>":r.checkIn?"<span class='badge' style='background:var(--ng-green-soft);color:var(--ng-green-deep)'>재실 중</span>":"<span style='color:#d4d4d8'>—</span>";
       var bdayNow2=new Date();var rDob2=r.dob?new Date(r.dob):null;var isBdayRow=rDob2&&rDob2.getMonth()===bdayNow2.getMonth()&&rDob2.getDate()===bdayNow2.getDate();
-      html+="<tr>"+(isBdayRow?"<td style='background:#fdf2f8'>": "<td>")+"<div style='font-weight:600'>"+(r.name||"")+"</div>"+(r.nameEN?"<div style='font-size:11px;color:#9ca3af'>"+r.nameEN+"</div>":"")+(isBdayRow?"<div style='font-size:11px;color:#be185d;font-weight:700'>🎂 오늘 생일!</div>":"")+"</td>";
-      html+="<td style='color:#6b7280'>"+(r.grade||"-")+"</td>";
-      html+="<td style='color:#9ca3af;font-size:12px'>"+(r.dob||"-")+"</td>";
+      html+=(_hasAllergy?"<tr class='allergy-row'>":"<tr>")+(isBdayRow?"<td style='background:#fdf2f8'>": "<td>")+"<div style='font-weight:600'>"+(r.name||"")+"</div>"+(r.nameEN?"<div style='font-size:11.5px;color:var(--ng-muted)'>"+r.nameEN+"</div>":"")+(isBdayRow?"<div style='font-size:11px;color:#be185d;font-weight:700'>🎂 오늘 생일!</div>":"")+"</td>";
+      html+="<td style='color:var(--ng-sub)'>"+(r.grade||"—")+"</td>";
+      html+="<td style='color:var(--ng-muted);font-family:\'IBM Plex Mono\',monospace;font-size:12px'>"+(r.dob||"—")+"</td>";
       html+="<td>"+allergyBadge+"</td>";
-      html+="<td style='font-size:12px;color:#6b7280'>"+(parentInfo||"-")+"</td>";
-      html+="<td style='text-align:center;color:#059669;font-weight:600'>"+(r.checkIn||"-")+"</td>";
-      html+="<td style='text-align:center;color:#4f46e5;font-weight:600'>"+(r.checkOut||"-")+"</td>";
+      html+="<td style='font-size:12.5px;color:var(--ng-sub)'>"+(parentInfo||"—")+"</td>";
+      html+="<td style='text-align:center;font-family:\'IBM Plex Mono\',monospace;font-weight:500;color:var(--ng-sub)'>"+(r.checkIn||"—")+"</td>";
+      html+="<td style='text-align:center;font-family:\'IBM Plex Mono\',monospace;font-weight:500;color:var(--ng-sub)'>"+(r.checkOut||"—")+"</td>";
       html+="<td style='text-align:center'>"+statusBadge+"</td></tr>";
     }
     if(records.length>0)tbody.innerHTML=html;
