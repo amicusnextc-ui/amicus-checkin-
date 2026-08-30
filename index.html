@@ -800,9 +800,14 @@ function onNameInput(val) {
         order.forEach(function(key) {
           var group = phones[key];
           if(group.length > 1) {
-            html += '<div class="household-header"><span style="font:700 13px \'Noto Sans KR\',sans-serif;color:var(--ng-lav-text)">같은 가정 · ' + group.length + '명</span></div>';
+            /* Siblings go inside a bounded box. Without one, whoever is
+               listed next reads as part of the same family. */
+            html += '<div class="ng-household"><div class="ng-household-head">같은 가정 · ' + group.length + '명</div>';
+            group.forEach(function(s) { html += studentCard(s); });
+            html += '</div>';
+          } else {
+            html += studentCard(group[0]);
           }
-          group.forEach(function(s) { html += studentCard(s); });
         });
         host.innerHTML = html;
 

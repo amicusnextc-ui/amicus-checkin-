@@ -242,6 +242,15 @@ h1,h2,h3{font-family:var(--ng-display);letter-spacing:-.02em;font-weight:700}
   font-size:21px;color:transparent;box-sizing:border-box}
 .ng-check.is-on{background:var(--ng-green);border-color:var(--ng-green);color:#fff}
 
+/* Sibling group. A header alone only marks where a group starts, so the
+   students listed after it read as part of it — the box is what closes it. */
+.ng-household{border:1.5px solid var(--ng-lav-deep);border-radius:22px;
+  background:rgba(237,235,247,.45);padding:12px;display:flex;flex-direction:column;gap:10px}
+.ng-household > .ng-household-head{display:flex;align-items:center;gap:8px;
+  padding:4px 8px 2px;font:700 13px 'Noto Sans KR',sans-serif;color:var(--ng-lav-text)}
+.ng-household > .ng-household-head::before{content:'';width:6px;height:6px;
+  border-radius:50%;background:var(--ng-lav-text);flex:none}
+
 /* ── chips ────────────────────────────────────────────────────────────── */
 .ng-chip{display:inline-flex;align-items:center;gap:4px;font-family:var(--ng-body);
   font-weight:600;font-size:12px;padding:4px 10px;border-radius:var(--ng-r-chip);
