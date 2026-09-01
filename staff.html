@@ -781,7 +781,7 @@ async function quickCheckin(btn){
     btn.disabled=false;btn.textContent=originalText;
   }
 }
-async async function sendInfoEmail(btn){
+async function sendInfoEmail(btn){
   var sid=btn.getAttribute("data-sid"),nm=btn.getAttribute("data-name");
   if(!confirm(nm+" 부모님께 Liability + 정보 입력 링크 이메일을 보낼까요?"))return;
   btn.disabled=true;var _t=btn.textContent;btn.textContent="⏳...";
@@ -795,7 +795,7 @@ async async function sendInfoEmail(btn){
   }catch(e){alert("발송 실패: "+e.message);}
   btn.disabled=false;btn.textContent=_t;
 }
-function uncheckin(btn){
+async function uncheckin(btn){
   var sid=btn.getAttribute('data-sid');
   var name=btn.getAttribute('data-name');
   var dept=btn.getAttribute('data-dept');
