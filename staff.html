@@ -656,7 +656,7 @@ async function loadAttendance(){
       var parentInfo=(r.fatherName?"👨 "+r.fatherName+" ":"")+((r.motherName?"👩 "+r.motherName:""));
       if(!parentInfo&&r.guardian)parentInfo=r.guardian;
       var statusBadge=r.checkOut?"<span class='badge badge-gray'>귀가 완료</span>":r.checkIn?"<span class='badge' style='background:var(--ng-green-soft);color:var(--ng-green-deep)'>재실 중</span>":"<span style='color:#d4d4d8'>—</span>";
-      var bdayNow2=new Date();var rDob2=r.dob?new Date(r.dob):null;var isBdayRow=rDob2&&rDob2.getMonth()===bdayNow2.getMonth()&&rDob2.getDate()===bdayNow2.getDate();
+      var bdayNow2=new Date();var rDob2=null;if(r.dob){var _dq=String(r.dob).split("T")[0].split("-");if(_dq.length===3)rDob2=new Date(parseInt(_dq[0],10),parseInt(_dq[1],10)-1,parseInt(_dq[2],10));}var isBdayRow=rDob2&&rDob2.getMonth()===bdayNow2.getMonth()&&rDob2.getDate()===bdayNow2.getDate();
       html+=(_hasAllergy?"<tr class='allergy-row'>":"<tr>")+(isBdayRow?"<td style='background:#fdf2f8'>": "<td>")+"<div style='font-weight:600'>"+(r.name||"")+"</div>"+(r.nameEN?"<div style='font-size:11.5px;color:var(--ng-muted)'>"+r.nameEN+"</div>":"")+(isBdayRow?"<div style='font-size:11px;color:#be185d;font-weight:700'>🎂 오늘 생일!</div>":"")+"</td>";
       html+="<td style='color:var(--ng-sub)'>"+(r.grade||"—")+"</td>";
       html+="<td style='color:var(--ng-muted);font-family:\'IBM Plex Mono\',monospace;font-size:12px'>"+(r.dob||"—")+"</td>";
@@ -781,7 +781,21 @@ async function quickCheckin(btn){
     btn.disabled=false;btn.textContent=originalText;
   }
 }
-async function uncheckin(btn){
+async async function sendInfoEmail(btn){
+  var sid=btn.getAttribute("data-sid"),nm=btn.getAttribute("data-name");
+  if(!confirm(nm+" 부모님께 Liability + 정보 입력 링크 이메일을 보낼까요?"))return;
+  btn.disabled=true;var _t=btn.textContent;btn.textContent="⏳...";
+  try{
+    var r=await fetch("/api/update-student",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"send-liability-invite",pageId:sid})});
+    var d=await r.json();
+    var st=(d.results&&d.results[0]&&d.results[0].status)||"";
+    if(r.ok&&st!=="no-email"){if(typeof showToast==="function")showToast("📧 "+nm+" 부모님께 발송 완료","success");else alert("발송 완료");}
+    else if(st==="no-email"){alert("부모님 이메일이 등록되어 있지 않아 보낼 수 없어요.");}
+    else{alert("발송 실패: "+(d.error||"알 수 없는 오류"));}
+  }catch(e){alert("발송 실패: "+e.message);}
+  btn.disabled=false;btn.textContent=_t;
+}
+function uncheckin(btn){
   var sid=btn.getAttribute('data-sid');
   var name=btn.getAttribute('data-name');
   var dept=btn.getAttribute('data-dept');
@@ -820,7 +834,7 @@ function renderRoster(students){
   var now=new Date(),html="";
   for(var i=0;i<students.length;i++){
     var s=students[i];
-    var bday=s.dob?new Date(s.dob):null;
+    var bday=null;if(s.dob){var _dp=String(s.dob).split("T")[0].split("-");if(_dp.length===3)bday=new Date(parseInt(_dp[0],10),parseInt(_dp[1],10)-1,parseInt(_dp[2],10));}
     var isBday=bday&&bday.getMonth()===now.getMonth();
     var age="";if(bday){var a=now.getFullYear()-bday.getFullYear()-(now.getMonth()<bday.getMonth()||(now.getMonth()===bday.getMonth()&&now.getDate()<bday.getDate())?1:0);age=a+"세";}
     var hasAllergy=s.allergy&&s.allergy!=="없음"&&s.allergy.trim()!=="";
@@ -833,7 +847,7 @@ function renderRoster(students){
     var liabBadge=s.liabilityForm==="제출 완료"?"<span class='badge' style='background:#d1fae5;color:#065f46;white-space:nowrap'>✓ 완료</span>":s.liabilityForm==="미제출"?"<span class='badge' style='background:#fee2e2;color:#b91c1c;white-space:nowrap'>✕ 미제출</span><br>"+liabAdminBtn:(s.liabilityForm==="재작성 필요"?"<span class='badge' style='background:#fed7aa;color:#9a3412;white-space:nowrap'>재작성 필요</span><br>"+liabAdminBtn:(s.liabilityForm==="확인 필요"?"<span class='badge' style='background:#fef3c7;color:#92400e;white-space:nowrap'>확인 필요</span><br>"+liabAdminBtn:"<span class='badge' style='background:#f3f4f6;color:#9ca3af;white-space:nowrap'>미입력</span><br>"+liabAdminBtn));
     var bdayBadge=isBday?"<span style='background:#fce7f3;color:#9d174d' class='badge'>🎂</span>":"-";
     html+="<tr>";
-    html+="<td><div style='font-weight:600'><a href='/parent-info.html?studentId="+s.id+"&source=admin' style='color:#4f46e5;text-decoration:none;padding:2px 6px;border-radius:6px;display:inline-block;transition:background 0.15s' onmouseover='this.style.background=&quot;#ede9fe&quot;' onmouseout='this.style.background=&quot;transparent&quot;' title='정보 카드 열기'>"+(s.name||"")+((window.__getStudentIssues?window.__getStudentIssues(s):[]).length?" <span style='font-size:10px;background:#ede9fe;color:#6d28d9;padding:2px 7px;border-radius:999px;font-weight:700;white-space:nowrap'>📝 정보 입력 "+window.__getStudentIssues(s).length+"건</span>":"")+"</a></div>";
+    html+="<td><div style='font-weight:600'><a href='/parent-info.html?studentId="+s.id+"&source=admin' style='color:#4f46e5;text-decoration:none;padding:2px 6px;border-radius:6px;display:inline-block;transition:background 0.15s' onmouseover='this.style.background=&quot;#ede9fe&quot;' onmouseout='this.style.background=&quot;transparent&quot;' title='정보 카드 열기'>"+(s.name||"")+((window.__getStudentIssues?window.__getStudentIssues(s):[]).length?" <span title='미입력: "+window.__getStudentIssues(s).map(function(x){return x.label;}).join(", ").replace(/'/g,"")+"' style='font-size:10px;background:#ede9fe;color:#6d28d9;padding:2px 7px;border-radius:999px;font-weight:700;white-space:nowrap'>📝 정보 입력 "+window.__getStudentIssues(s).length+"건</span>":"")+"</a>"+(((window.__getStudentIssues?window.__getStudentIssues(s):[]).length&&(s.motherEmail||s.fatherEmail))?" <button data-sid='"+s.id+"' data-name='"+(s.name||"").replace(/'/g,"")+"' onclick='sendInfoEmail(this)' title='부모님 이메일로 Liability+정보입력 링크 발송' style='font-size:10px;padding:2px 8px;border-radius:999px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;cursor:pointer;font-weight:700;white-space:nowrap'>📧 부모님께 메일</button>":"")+"</div>";
     if(s.nameEN)html+="<div style='font-size:11px;color:#9ca3af'>"+s.nameEN+"</div>"+(s.notes?"<div style='font-size:11px;color:#7c3aed;margin-top:2px;font-style:italic'>📝 "+s.notes+"</div>":"");
     if(hasAllergy)html+="<span style='font-size:11px;background:#fee2e2;color:#b91c1c;padding:1px 6px;border-radius:999px'>⚠️ "+s.allergy+"</span>";
     html+="</td>";
