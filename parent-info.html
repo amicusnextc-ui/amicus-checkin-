@@ -297,10 +297,20 @@ async function handleSubmit(e) {
   }
   var motherEmail = document.getElementById('f_motherEmail').value.trim();
 
+  /* Fix: 디렉터 포털(직접 입력)에서 token 없이 열렸을 때 서버에서 토큰을 받아와 저장 (403 방지) */
+  var _piToken = getQueryParam('token') || '';
+  if (!_piToken) {
+    try {
+      var _tr = await fetch('/api/update-student', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'gen-parent-info-link', student: _currentStudent.id }) });
+      var _td = await _tr.json();
+      if (_td && _td.token) _piToken = _td.token;
+    } catch (_e) {}
+  }
+
   var payload = {
     action: 'parent-info',
     studentId: _currentStudent.id,
-    token: getQueryParam('token') || '',
+    token: _piToken,
     fields: {
       nameEN: document.getElementById('f_nameEN').value.trim(),
       grade: document.getElementById('f_grade').value.trim(),
