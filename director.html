@@ -1086,7 +1086,7 @@ function renderRoster() {
         const attColor = weeks >= 2 ? 'text-red-600 font-semibold' : 'text-gray-600';
         return `<tr onclick="showDetail(${i})" class="cursor-pointer">
           <td>
-            <div class="font-semibold"><a href="/parent-info.html?studentId=${s.id}&source=admin" onclick="event.stopPropagation()" style="color:#4f46e5;text-decoration:none;padding:2px 6px;border-radius:6px;display:inline-block;transition:background 0.15s" onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='transparent'" title="정보 카드 열기">${s.name} <span style="font-size:10px;opacity:0.6">📋</span></a>${s.isBirthdayMonth ? ' 🎂' : ''}</div>
+            <div class="font-semibold"><a href="/parent-info.html?studentId=${s.id}&source=admin" onclick="event.stopPropagation()" style="color:#4f46e5;text-decoration:none;padding:2px 6px;border-radius:6px;display:inline-block;transition:background 0.15s" onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='transparent'" title="정보 카드 열기">${s.name} <span style="font-size:10px;background:#ede9fe;color:#6d28d9;padding:2px 7px;border-radius:999px;font-weight:700">정보 입력</span></a>${s.isBirthdayMonth ? ' 🎂' : ''}</div>
             ${s.nameEN ? `<div class="text-xs text-gray-500">${s.nameEN}</div>` : ''}
           </td>
           <td><span class="stat-pill ${DEPT_COLOR[s.department]||'dept-gray'}">${(s.department||'').split(' ')[0]}</span></td>
@@ -1095,7 +1095,7 @@ function renderRoster() {
           <td class="text-xs">${s.phone || '—'}</td>
           <td class="text-xs ${(s.allergy && s.allergy!=='없음') ? 'text-red-600 font-semibold' : 'text-gray-500'}">${s.allergy || '—'}</td>
           <td class="text-xs ${attColor}">${s.lastAttended ? s.lastAttended + (weeks>=2?` (${weeks}주)`:'') : '기록없음'}</td>
-          <td>${s.liabilityForm === '제출 완료' ? '<span class="badge badge-green">제출</span>' : '<span class="badge badge-red">미제출</span>'}</td>
+          <td>${(function(){var lf=s.liabilityForm;var badge= lf==='제출 완료' ? '<span class="badge badge-green" style="white-space:nowrap">✓ 완료</span>' : lf==='미제출' ? '<span class="badge badge-red" style="white-space:nowrap">✕ 미제출</span>' : (lf==='재작성 필요'||lf==='확인 필요') ? '<span class="badge" style="background:#fef3c7;color:#92400e;white-space:nowrap">'+lf+'</span>' : '<span class="badge" style="background:#f3f4f6;color:#9ca3af;white-space:nowrap">미입력</span>'; if(lf!=='제출 완료'){badge+='<br><a href="/liability.html?admin=1&studentId='+s.id+'&adminName='+encodeURIComponent(CURRENT_USER||'Director')+'" target="_blank" onclick="event.stopPropagation()" style="display:inline-block;margin-top:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:#4f46e5;color:#ffffff;text-decoration:none;white-space:nowrap">✍️ 작성하기</a>';} return badge;})()}</td>
         </tr>`;
       }).join('')}</tbody>
     </table>`;
