@@ -186,26 +186,43 @@ module.exports = async (req, res) => {
           const motherEmail = props['어머니 이메일 (Mother Email)']?.email;
           const fatherEmail = props['아버지 이메일 (Father Email)']?.email;
           const parentEmail = motherEmail || fatherEmail;
-          if (!parentEmail) { results.push({ pid, name: studentName, status: 'no-email' }); continue; }
+          const testTo = (body.to && String(body.to).indexOf('@') > 0) ? String(body.to) : null;
+          if (!parentEmail && !testTo) { results.push({ pid, name: studentName, status: 'no-email' }); continue; }
+          const _rt = (f) => ((props[f] && props[f].rich_text && props[f].rich_text[0] && props[f].rich_text[0].plain_text) || '').trim();
+          const _sel = (f) => (props[f] && props[f].select && props[f].select.name) || '';
+          const missing = [];
+          if (!(props['생년월일 (DOB)'] && props['생년월일 (DOB)'].date && props['생년월일 (DOB)'].date.start)) missing.push('생년월일 / Date of Birth');
+          if (!_rt('학년 (Grade)')) missing.push('학년 / Grade');
+          if (!_rt('학교 (School)')) missing.push('학교 / School');
+          if (!_rt('집주소 (Address)')) missing.push('집주소 / Home Address');
+          if (!_rt('알러지 (Allergy)')) missing.push('알러지 / Allergies (없으면 "없음")');
+          if (!_sel('세례 여부 (Baptized)')) missing.push('세례 여부 / Baptized');
+          if (!motherEmail && !fatherEmail) missing.push('부모님 이메일 / Parent Email');
+          const liabStatus = _sel('Liability Form');
+          const needLiab = liabStatus !== '제출 완료';
+          if (!needLiab && missing.length === 0) { results.push({ pid, name: studentName, status: 'complete' }); continue; }
           const link = 'https://amicus-checkin.vercel.app/liability.html?studentId=' + pid;
           const _infoTokSecret = process.env.REGISTER_TOKEN_SECRET || 'amicus-default-secret-change-me';
           const infoToken = require('crypto').createHmac('sha256', _infoTokSecret).update('info:'+pid).digest('hex').slice(0,32); // Task #312: 32 chars (128 bits)
           const infoLink = 'https://amicus-checkin.vercel.app/parent-info.html?studentId=' + pid + '&token=' + infoToken;
-          const html = '<div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#111827;"><div style="text-align:center;padding:16px 0;border-bottom:1px solid #e5e7eb;"><h1 style="margin:0;font-size:22px;color:#4f46e5;">📋 Liability Form 작성 안내 / Action Required</h1><p style="margin:6px 0 0;font-size:13px;color:#6b7280;">Amicus Presbyterian Church · 교육부</p></div><p style="margin:20px 0 12px;font-size:15px;line-height:1.7;">안녕하세요, <strong>' + studentName + '</strong> 학생의 부모님께,<br/>Hello, parent of <strong>' + studentName + '</strong>:</p><p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#374151;">아미쿠스 교회 교육부 활동 참여를 위해 책임 동의서(Liability Form) 작성이 필요합니다. 약 5분 소요됩니다.<br/><br/>For your child to participate in Amicus Education Ministry programs, please complete the Liability Form. Takes about 5 minutes.</p><div style="text-align:center;margin:28px 0;"><a href="' + link + '" style="display:inline-block;background:linear-gradient(to right,#4f46e5,#7c3aed);color:white;padding:14px 32px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 12px rgba(79,70,229,0.3);margin:0 4px 8px;">📝 안전 동의서 / Liability</a><a href="' + infoLink + '" style="display:inline-block;background:linear-gradient(to right,#10b981,#059669);color:white;padding:14px 32px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 12px rgba(16,185,129,0.3);margin:0 4px 8px;">📋 정보 입력 / Info Update</a></div><p style="margin:16px 0 8px;font-size:13px;color:#6b7280;line-height:1.6;border-top:1px solid #e5e7eb;padding-top:16px;">문의 / Contact: amicusnextc@gmail.com<br/>🏛️ Amicus Presbyterian Church</p></div>';
+          const missingHtml = missing.length ? '<div style="background:#f9fafb;border-radius:12px;padding:14px 18px;margin:14px 0;text-align:left;"><p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#111827;">📌 작성이 필요한 항목 / Items to complete</p><ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.8;">' + missing.map(function(m){ return '<li>' + m + '</li>'; }).join('') + '</ul></div>' : '';
+          const liabBtn = needLiab ? '<a href="' + link + '" style="display:inline-block;background:#111114;color:white;padding:14px 32px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;margin:0 4px 8px;">📝 안전 동의서 / Liability</a>' : '';
+          const infoBtn = missing.length ? '<a href="' + infoLink + '" style="display:inline-block;background:#2e9e5b;color:white;padding:14px 32px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;margin:0 4px 8px;">📋 정보 입력 / Info Update</a>' : '';
+          const html = '<div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#111827;"><div style="text-align:center;padding:16px 0;border-bottom:1px solid #e5e7eb;"><h1 style="margin:0;font-size:22px;color:#17171b;">📋 ' + (needLiab ? 'Liability Form' : '학생 정보') + ' 작성 안내 / Action Required</h1><p style="margin:6px 0 0;font-size:13px;color:#6b7280;">Amicus Presbyterian Church · 교육부</p></div><p style="margin:20px 0 12px;font-size:15px;line-height:1.7;">안녕하세요, <strong>' + studentName + '</strong> 학생의 부모님께,<br/>Hello, parent of <strong>' + studentName + '</strong>:</p><p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#374151;">자녀의 안전한 교육부 활동을 위해 아래 항목 작성을 부탁드립니다. 약 5분 소요됩니다.<br/>Please complete the items below for your child' + String.fromCharCode(39) + 's participation. Takes about 5 minutes.</p>' + missingHtml + '<div style="text-align:center;margin:24px 0;">' + liabBtn + infoBtn + '</div><p style="margin:16px 0 8px;font-size:13px;color:#6b7280;line-height:1.6;border-top:1px solid #e5e7eb;padding-top:16px;">문의 / Contact: amicusnextc@gmail.com<br/>🏛️ Amicus Presbyterian Church</p></div>';
           const rr = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify({
               from: 'Amicus Church <noreply@amicuschurch.com>',
-              to: [parentEmail],
+              to: [testTo || parentEmail],
               bcc: [BCC_EMAIL],
-              subject: '[아미쿠스 교회] ' + studentName + ' - Liability Form 작성 안내',
+              subject: '[아미쿠스 교회] ' + studentName + ' - ' + (needLiab && missing.length ? 'Liability & 정보 입력 안내' : (needLiab ? 'Liability Form 작성 안내' : '학생 정보 입력 안내')),
               html,
               reply_to: 'amicusnextc@gmail.com'
             })
           });
           if (rr.ok) {
-            await notion.pages.update({ page_id: pid, properties: { 'Liability Form': { select: { name: '확인 필요' } } } }).catch(()=>{});
+            if (!testTo && needLiab && liabStatus !== '확인 필요') await notion.pages.update({ page_id: pid, properties: { 'Liability Form': { select: { name: '확인 필요' } } } }).catch(()=>{});
             results.push({ pid, name: studentName, status: 'sent', email: parentEmail });
           } else {
             const errd = await rr.json().catch(()=>({}));
