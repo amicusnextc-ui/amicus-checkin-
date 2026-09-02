@@ -2581,6 +2581,7 @@ setTimeout(cwShowIfReady,2000);
     var iss = [];
     if(!s.dob) iss.push({type:"missing",label:"생일"});
     if(!s.grade) iss.push({type:"missing",label:"학년"});
+    if(!(s.school||"").trim()) iss.push({type:"missing",label:"학교"});
     var hasParentName = (s.fatherName||"").trim() || (s.motherName||"").trim() || (s.guardian||"").trim();
     if(!hasParentName) iss.push({type:"missing",label:"부모 이름"});
     var hasParentPhone = (s.fatherPhone||"").trim() || (s.motherPhone||"").trim() || (s.phone||"").trim();
