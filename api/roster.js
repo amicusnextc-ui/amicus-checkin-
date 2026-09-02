@@ -137,6 +137,7 @@ module.exports = async (req, res) => {
         status: prop(page, '상태 (Status)'),
         studentId,
         lastAttended: prop(page, '마지막 출석 (Last Attended)'),
+        inviteSentAt: prop(page, '안내 발송일 (Invite Sent)'),
       };
     });
     // Task #276: archived mode — filter out test pollution (🗑️/🧪 prefix + empty names)
