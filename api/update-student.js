@@ -222,7 +222,11 @@ module.exports = async (req, res) => {
             })
           });
           if (rr.ok) {
-            if (!testTo && needLiab && liabStatus !== '확인 필요') await notion.pages.update({ page_id: pid, properties: { 'Liability Form': { select: { name: '확인 필요' } } } }).catch(()=>{});
+            if (!testTo) {
+              const upProps = { '안내 발송일 (Invite Sent)': { date: { start: new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date()) } } };
+              if (needLiab && liabStatus !== '확인 필요') upProps['Liability Form'] = { select: { name: '확인 필요' } };
+              await notion.pages.update({ page_id: pid, properties: upProps }).catch(()=>{});
+            }
             results.push({ pid, name: studentName, status: 'sent', email: parentEmail });
           } else {
             const errd = await rr.json().catch(()=>({}));
