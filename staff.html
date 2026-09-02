@@ -737,15 +737,15 @@ async function loadAttendance(){
     }catch(e2){console.warn("summary error",e2);}
   }catch(e){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:20px;color:#ef4444'>오류: "+e.message+"</td></tr>";}
 }var _allStudents=[];
-async function loadRoster(){
+async function loadRoster(quiet){
   var tbody=document.getElementById("rosterTable");if(!tbody)return;
-  tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:40px;color:#9ca3af'>로딩 중...</td></tr>";
+  if(!quiet)tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:40px;color:#9ca3af'>로딩 중...</td></tr>";
   try{
     var dept=window._dept||"",url="/api/roster"+(dept?"?dept="+encodeURIComponent(dept):"");
     var res=await fetch(url),data=await res.json();
     _allStudents=data.students||[];
     document.getElementById("rosterCount").textContent=_allStudents.length+"명";
-    renderRoster(_allStudents);
+    if(typeof filterRoster==="function"){filterRoster();}else{renderRoster(_allStudents);}
   }catch(e){tbody.innerHTML="<tr><td colspan='9' style='text-align:center;padding:20px;color:#ef4444'>오류: "+e.message+"</td></tr>";}
 }
 function filterRoster(){
@@ -758,6 +758,8 @@ function filterRoster(){
   if(q){list=list.filter(function(s){return(s.name&&s.name.toLowerCase().indexOf(q)>=0)||(s.nameEN&&s.nameEN.toLowerCase().indexOf(q)>=0)||(s.studentId&&s.studentId.toLowerCase().indexOf(q)>=0);});}
   renderRoster(list);
 }
+/* Live refresh: 부모 제출이 명단에 자동 반영 (45초) */
+setInterval(function(){try{var rt=document.getElementById("rosterTable");if(!rt||rt.offsetParent===null)return;if(document.visibilityState!=="visible")return;loadRoster(true);}catch(e){}},45000);
 function getStaffServiceSundayISO(){
   var now=new Date();
   var laDate=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
