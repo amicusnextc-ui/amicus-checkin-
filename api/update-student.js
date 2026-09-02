@@ -193,7 +193,7 @@ module.exports = async (req, res) => {
           const missing = [];
           if (!(props['생년월일 (DOB)'] && props['생년월일 (DOB)'].date && props['생년월일 (DOB)'].date.start)) missing.push('생년월일 / Date of Birth');
           if (!_rt('학년 (Grade)')) missing.push('학년 / Grade');
-          if (!_rt('학교 (School)')) missing.push('학교 / School');
+          if (!_rt('학교 (School)')) missing.push('학교 / School (안 다니면 \"N/A\")');
           if (!_rt('집주소 (Address)')) missing.push('집주소 / Home Address');
           if (!_rt('알러지 (Allergy)')) missing.push('알러지 / Allergies (없으면 "없음")');
           if (!_sel('세례 여부 (Baptized)')) missing.push('세례 여부 / Baptized');
