@@ -226,6 +226,7 @@ tbody tr.allergy-row:hover { background:rgba(254,226,226,.5); }
             <span id="rosterCount" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold"></span>
           </div>
           <div class="flex items-center gap-2">
+            <select id="rosterFilter" onchange="filterRoster()" class="px-3 py-2 rounded-xl border border-gray-200 text-sm bg-white"><option value="all">전체</option><option value="info">📝 정보 미완성</option><option value="liab">Liability 미완료</option><option value="absent">2주+ 결석</option></select>
             <input id="rosterSearch" type="text" placeholder="이름 검색..." oninput="filterRoster()" class="px-3 py-2 rounded-xl border border-gray-200 text-sm w-44"/>
             <button onclick="openAddStudent()" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-xl font-bold">추가 +</button>
           </div>
@@ -749,8 +750,13 @@ async function loadRoster(){
 }
 function filterRoster(){
   var q=(document.getElementById("rosterSearch").value||"").toLowerCase();
-  if(!q){renderRoster(_allStudents);return;}
-  renderRoster(_allStudents.filter(function(s){return(s.name&&s.name.toLowerCase().indexOf(q)>=0)||(s.nameEN&&s.nameEN.toLowerCase().indexOf(q)>=0)||(s.studentId&&s.studentId.toLowerCase().indexOf(q)>=0);}));
+  var f=(document.getElementById("rosterFilter")||{}).value||"all";
+  var list=_allStudents.slice();
+  if(f==="info"&&window.__getStudentIssues){list=list.filter(function(s){return window.__getStudentIssues(s).length>0;});}
+  else if(f==="liab"){list=list.filter(function(s){return s.liabilityForm!=="제출 완료";});}
+  else if(f==="absent"){list=list.filter(function(s){if(s.lastAttended){return Math.floor((Date.now()-new Date(s.lastAttended).getTime())/86400000)>=14;}return !s.isVisitor;});}
+  if(q){list=list.filter(function(s){return(s.name&&s.name.toLowerCase().indexOf(q)>=0)||(s.nameEN&&s.nameEN.toLowerCase().indexOf(q)>=0)||(s.studentId&&s.studentId.toLowerCase().indexOf(q)>=0);});}
+  renderRoster(list);
 }
 function getStaffServiceSundayISO(){
   var now=new Date();
