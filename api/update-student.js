@@ -197,6 +197,8 @@ module.exports = async (req, res) => {
           if (!_rt('집주소 (Address)')) missing.push('집주소 / Home Address');
           if (!_rt('알러지 (Allergy)')) missing.push('알러지 / Allergies (없으면 "없음")');
           if (!_sel('세례 여부 (Baptized)')) missing.push('세례 여부 / Baptized');
+          if (!_rt('아버지 이름 (Father Name)') && !_rt('어머니 이름 (Mother Name)')) missing.push('부모님 성함 / Parent Name');
+          if (!(props['아버지 연락처 (Father Phone)'] && props['아버지 연락처 (Father Phone)'].phone_number) && !(props['어머니 연락처 (Mother Phone)'] && props['어머니 연락처 (Mother Phone)'].phone_number)) missing.push('부모님 연락처 / Parent Phone');
           if (!motherEmail && !fatherEmail) missing.push('부모님 이메일 / Parent Email');
           const liabStatus = _sel('Liability Form');
           const needLiab = liabStatus !== '제출 완료';
