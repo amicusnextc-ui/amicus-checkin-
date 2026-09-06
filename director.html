@@ -28,8 +28,8 @@
 
   /* 부서 chips — DEPT_STYLE parity with the rest of the app */
   .dept-blue  { background:#dbeafe; color:#1e40af; }
-  .dept-green { background:#d1fae5; color:#065f46; }
-  .dept-yellow{ background:#fef9c3; color:#854d0e; }
+  .dept-green { background:var(--ng-ok-bg); color:var(--ng-ok-text); }
+  .dept-yellow{ background:var(--ng-amb100); color:#854d0e; }
   .dept-orange{ background:#ffedd5; color:#9a3412; }
   .dept-purple{ background:#f3e8ff; color:#6b21a8; }
   .dept-gray  { background:var(--ng-bg3); color:var(--ng-sub); }
@@ -63,7 +63,7 @@
            font:600 11.5px 'Noto Sans KR',sans-serif; }
   .badge-green { background:var(--ng-green-soft); color:var(--ng-green-deep); }
   .badge-red { background:var(--ng-danger-bg); color:var(--ng-danger-text); }
-  .badge-yellow { background:#fef9c3; color:#854d0e; }
+  .badge-yellow { background:var(--ng-amb100); color:#854d0e; }
   .badge-gray { background:var(--ng-bg3); color:var(--ng-sub); }
 
   .warn-card { background:var(--ng-warn-bg); border:1px solid var(--ng-warn-line); }
@@ -76,6 +76,7 @@
   .ng-bar-col > span { font:600 12px 'Noto Sans KR',sans-serif; color:var(--ng-sub); text-align:center; }
 
 /* Theme unification: indigo/purple → NextGen lavender+black (2026-09-01) */
+:root{--ng-ok-bg:#d1fae5;--ng-ok-text:#065f46;--ng-danger-bg:#fee2e2;--ng-danger-text:#b91c1c;--ng-warn-bg:#fef3c7;--ng-warn-text:#92400e;--ng-alert-bg:#fed7aa;--ng-alert-text:#9a3412;--ng-mute-bg:#f3f4f6;--ng-mute-text:#9ca3af;--ng-info-bg:#dbeafe;--ng-info-text:#1d4ed8;--ng-g100:#f3f4f6;--ng-g200:#e5e7eb;--ng-g300:#d1d5db;--ng-g400:#9ca3af;--ng-g500:#6b7280;--ng-g700:#374151;--ng-g900:#111827;--ng-red100:#fee2e2;--ng-red500:#ef4444;--ng-red600:#dc2626;--ng-grn500:#10b981;--ng-grn600:#059669;--ng-amb500:#f59e0b;--ng-vio600:#7c3aed;--ng-amb100:#fef9c3;--ng-warn-deep:#92400e}
 .bg-indigo-600{background:var(--ng-black)!important}
 .hover\:bg-indigo-700:hover{background:var(--ng-black-hover)!important}
 .text-indigo-500,.text-indigo-600,.text-indigo-700{color:var(--ng-lav-text)!important}
@@ -91,7 +92,7 @@ button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(
 /* Task #317 (2026-08-10): iPad-friendly aesthetic refresh - non-destructive CSS overrides */
 body { -webkit-font-smoothing: antialiased; letter-spacing: -0.01em; background: linear-gradient(180deg,#fafbfd 0%,#f0f1f5 100%) !important; min-height: 100vh; }
 h1,h2,h3 { letter-spacing:-0.025em !important; }
-h2 { font-size:1.4rem !important; color:#111827 !important; }
+h2 { font-size:1.4rem !important; color:var(--ng-g900) !important; }
 .card { border-radius:20px !important; box-shadow:0 2px 10px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.02) !important; transition:transform .15s ease, box-shadow .15s ease; }
 .card:hover { box-shadow:0 8px 24px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.03) !important; }
 #statTotal,#statAttended,#statAbsent,#statVisitors { font-size:2.5rem; line-height:1.05; letter-spacing:-.04em; }
@@ -100,22 +101,22 @@ h2 { font-size:1.4rem !important; color:#111827 !important; }
 .tab-btn.active { box-shadow:0 4px 14px rgba(79,70,229,.35) !important; }
 table { font-size:15px !important; }
 thead th { padding:14px 12px !important; font-size:11.5px !important; letter-spacing:.08em !important; }
-tbody td { padding:16px 12px !important; border-bottom:1px solid #f3f4f6 !important; }
+tbody td { padding:16px 12px !important; border-bottom:1px solid var(--ng-g100) !important; }
 tbody tr { transition:background .12s ease; }
 tbody tr:hover { background:#f8f9fc !important; }
 .stat-pill { padding:8px 14px !important; border-radius:999px !important; font-size:13px !important; }
 .badge { padding:8px 14px !important; border-radius:999px !important; font-size:13.5px !important; font-weight:700 !important; min-width:88px; display:inline-block; text-align:center; }
-.badge-green { background:linear-gradient(135deg,#d1fae5,#a7f3d0) !important; color:#065f46 !important; }
-.badge-yellow { background:linear-gradient(135deg,#fef3c7,#fde68a) !important; color:#92400e !important; }
-.badge-red { background:linear-gradient(135deg,#fee2e2,#fecaca) !important; color:#991b1b !important; }
+.badge-green { background:linear-gradient(135deg,var(--ng-ok-bg),#a7f3d0) !important; color:var(--ng-ok-text) !important; }
+.badge-yellow { background:linear-gradient(135deg,var(--ng-warn-bg),#fde68a) !important; color:var(--ng-warn-deep) !important; }
+.badge-red { background:linear-gradient(135deg,var(--ng-red100),#fecaca) !important; color:#991b1b !important; }
 button { min-height:44px; }
 button:active { transform:scale(.98); }
 a[href^="tel:"] { padding:10px 16px !important; border-radius:12px !important; background:var(--ng-lav); color:var(--ng-lav-text) !important; font-weight:600; display:inline-flex; align-items:center; min-height:44px; }
 a[href^="tel:"]:hover { background:#e0e7ff; }
 #absentList > div, #longAbsentList > div { padding:14px 18px !important; border-radius:14px !important; margin-bottom:8px !important; }
 ::-webkit-scrollbar { width:10px; height:10px; }
-::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:999px; }
-::-webkit-scrollbar-thumb:hover { background:#9ca3af; }
+::-webkit-scrollbar-thumb { background:var(--ng-g300); border-radius:999px; }
+::-webkit-scrollbar-thumb:hover { background:var(--ng-g400); }
 ::-webkit-scrollbar-track { background:transparent; }
 </style>
 </head>
@@ -350,7 +351,7 @@ a[href^="tel:"]:hover { background:#e0e7ff; }
         <h3 class="font-bold text-gray-900 mb-3">📥 데이터 내보내기</h3>
         <div class="flex flex-wrap gap-2">
           <button onclick="exportRoster('csv')" class="btn-primary">전체 명단 CSV</button>
-          <button onclick="exportAbsent()" class="btn-primary" style="background:#dc2626">2주 연속 결석자 연락처 CSV</button>
+          <button onclick="exportAbsent()" class="btn-primary" style="background:var(--ng-red600)">2주 연속 결석자 연락처 CSV</button>
         </div>
       </div>
 
@@ -697,8 +698,8 @@ function renderInfoNeeded() {
     const grade = s.grade ? ' · ' + s.grade : '';
     const safeName = (s.name||'').replace(/'/g, "\\'");
     const iss = getIss(s).filter(x => x.type === 'missing' && x.label !== 'Liability');
-    const labels = iss.slice(0, 4).map(x => '<span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:600;margin-right:2px;">· ' + escapeHtml(x.label) + '</span>').join('');
-    const more = iss.length > 4 ? '<span style="color:#9ca3af;font-size:10px;">+' + (iss.length-4) + '</span>' : '';
+    const labels = iss.slice(0, 4).map(x => '<span style="background:var(--ng-warn-bg);color:var(--ng-warn-text);padding:1px 6px;border-radius:6px;font-size:10px;font-weight:600;margin-right:2px;">· ' + escapeHtml(x.label) + '</span>').join('');
+    const more = iss.length > 4 ? '<span style="color:var(--ng-g400);font-size:10px;">+' + (iss.length-4) + '</span>' : '';
     const btns = (ROLE === 'director') ? '<div class="flex flex-wrap gap-1.5 mt-1.5"><button onclick="copyInfoKakao(\'' + s.id + '\', \'' + safeName + '\')" class="text-[11px] px-2 py-1 rounded bg-amber-500 text-white font-semibold hover:bg-amber-600">📋 카톡 복사</button><a href="/parent-info.html?studentId=' + s.id + '&source=admin" class="text-[11px] px-2 py-1 rounded bg-purple-100 text-purple-700 font-semibold hover:bg-purple-200">✏️ 직접 입력</a></div>' : '';
     return '<div class="p-2.5 bg-amber-50 rounded-lg"><div class="flex items-start justify-between gap-2"><div class="min-w-0 flex-1"><div class="font-semibold text-sm">' + escapeHtml(s.name) + (s.nameEN ? ' <span class="text-xs text-gray-400">' + escapeHtml(s.nameEN) + '</span>' : '') + '</div><div class="text-xs text-gray-500">' + escapeHtml(dept) + escapeHtml(grade) + '</div><div style="margin-top:4px;line-height:1.6;">' + labels + more + '</div><div class="text-[11px] text-gray-500 mt-1">' + (email ? '✉️ ' + escapeHtml(email) : '<span class="text-orange-600">⚠ 이메일 없음</span>') + (phone ? ' · 📞 ' + escapeHtml(phone) : '') + '</div></div></div>' + btns + '</div>';
   }).join('');
@@ -961,8 +962,8 @@ function renderDashboard() {
   (function renderDeptBars(){
     const host = document.getElementById('deptBars');
     if (!host) return;
-    const TINT = { 'dept-blue':['#dbeafe','#1e40af'], 'dept-green':['#d1fae5','#065f46'],
-                   'dept-yellow':['#fef9c3','#854d0e'], 'dept-orange':['#ffedd5','#9a3412'],
+    const TINT = { 'dept-blue':['#dbeafe','#1e40af'], 'dept-green':['var(--ng-ok-bg)','var(--ng-ok-text)'],
+                   'dept-yellow':['var(--ng-amb100)','#854d0e'], 'dept-orange':['#ffedd5','#9a3412'],
                    'dept-purple':['#f3e8ff','#6b21a8'], 'dept-gray':['#f2f2f4','#6e6e73'] };
     const vals = depts.map(d => (d.attendedNames && d.attendedNames.length)
       ? d.attendedNames.length : Math.max(0, (d.attended||0) - (d.visitors||0)));
@@ -1107,7 +1108,7 @@ function renderRoster() {
           <td class="text-xs">${s.phone || '—'}</td>
           <td class="text-xs ${(s.allergy && s.allergy!=='없음') ? 'text-red-600 font-semibold' : 'text-gray-500'}">${s.allergy || '—'}</td>
           <td class="text-xs ${attColor}">${s.lastAttended ? s.lastAttended + (weeks>=2?` (${weeks}주)`:'') : '기록없음'}</td>
-          <td>${(function(){var lf=s.liabilityForm;var badge= lf==='제출 완료' ? '<span class="badge badge-green" style="white-space:nowrap">✓ 완료</span>' : lf==='미제출' ? '<span class="badge badge-red" style="white-space:nowrap">✕ 미제출</span>' : (lf==='재작성 필요'||lf==='확인 필요') ? '<span class="badge" style="background:#fef3c7;color:#92400e;white-space:nowrap">'+lf+'</span>' : '<span class="badge" style="background:#f3f4f6;color:#9ca3af;white-space:nowrap">미입력</span>'; if(lf!=='제출 완료'){badge+='<br><a href="/liability.html?admin=1&studentId='+s.id+'&adminName='+encodeURIComponent(CURRENT_USER||'Director')+'" target="_blank" onclick="event.stopPropagation()" style="display:inline-block;margin-top:4px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--ng-black);color:#ffffff;text-decoration:none;white-space:nowrap">✍️ 작성하기</a>';} return badge;})()}</td>
+          <td>${(function(){var lf=s.liabilityForm;var badge= lf==='제출 완료' ? '<span class="badge badge-green" style="white-space:nowrap">✓ 완료</span>' : lf==='미제출' ? '<span class="badge badge-red" style="white-space:nowrap">✕ 미제출</span>' : (lf==='재작성 필요'||lf==='확인 필요') ? '<span class="badge" style="background:var(--ng-warn-bg);color:var(--ng-warn-text);white-space:nowrap">'+lf+'</span>' : '<span class="badge" style="background:var(--ng-mute-bg);color:var(--ng-mute-text);white-space:nowrap">미입력</span>'; if(lf!=='제출 완료'){badge+='<br><a href="/liability.html?admin=1&studentId='+s.id+'&adminName='+encodeURIComponent(CURRENT_USER||'Director')+'" target="_blank" onclick="event.stopPropagation()" style="display:inline-block;margin-top:4px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--ng-black);color:#ffffff;text-decoration:none;white-space:nowrap">✍️ 작성하기</a>';} return badge;})()}</td>
         </tr>`;
       }).join('')}</tbody>
     </table>`;
@@ -1428,19 +1429,19 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
       var html = '<p style="color:#666;font-size:13px;">\uD83D\uDCC5 Sunday: ' + sundayISO + ' \u2502 학생 총 ' + students.length + '명</p>';
       
       if(issues.length === 0){
-        html += '<div style="background:#d1fae5;color:#065f46;padding:14px 18px;border-radius:8px;font-weight:600;margin-top:12px;">\u2705 모두 정상 – 문제 없음</div>';
+        html += '<div style="background:var(--ng-ok-bg);color:var(--ng-ok-text);padding:14px 18px;border-radius:8px;font-weight:600;margin-top:12px;">\u2705 모두 정상 – 문제 없음</div>';
       } else {
-        html += '<div style="background:#fef3c7;color:#92400e;padding:12px 18px;border-radius:8px;font-weight:600;margin-top:12px;margin-bottom:14px;">\u26A0 ' + issues.length + '\uAC74 이상 감지</div>';
+        html += '<div style="background:var(--ng-warn-bg);color:var(--ng-warn-text);padding:12px 18px;border-radius:8px;font-weight:600;margin-top:12px;margin-bottom:14px;">\u26A0 ' + issues.length + '\uAC74 이상 감지</div>';
         html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
-        html += '<thead><tr style="background:#f3f4f6;"><th style="padding:8px;text-align:left;">이름</th><th style="padding:8px;text-align:left;">부서</th><th style="padding:8px;text-align:left;">상태</th></tr></thead><tbody>';
+        html += '<thead><tr style="background:var(--ng-g100);"><th style="padding:8px;text-align:left;">이름</th><th style="padding:8px;text-align:left;">부서</th><th style="padding:8px;text-align:left;">상태</th></tr></thead><tbody>';
         issues.forEach(function(i){
-          html += '<tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">'+i.name+'</td><td style="padding:8px;">'+i.dept+'</td><td style="padding:8px;color:#92400e;font-size:12px;">'+i.type+'</td></tr>';
+          html += '<tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">'+i.name+'</td><td style="padding:8px;">'+i.dept+'</td><td style="padding:8px;color:var(--ng-warn-deep);font-size:12px;">'+i.type+'</td></tr>';
         });
         html += '</tbody></table>';
       }
       body.innerHTML = html;
     }catch(e){
-      body.innerHTML = '<p style="color:#dc2626;">\u274C 검사 실패: ' + (e.message || e) + '</p>';
+      body.innerHTML = '<p style="color:var(--ng-red600);">\u274C 검사 실패: ' + (e.message || e) + '</p>';
     }
   }
   
@@ -1682,7 +1683,7 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
     var hdr = document.createElement('div');
     hdr.id = '__liveHeader';
     hdr.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#333;margin:14px 0 8px 4px;';
-    hdr.innerHTML = '📍 오늘 (실시간)<span style="display:inline-flex;align-items:center;gap:4px;background:#10b981;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">●LIVE</span>';
+    hdr.innerHTML = '📍 오늘 (실시간)<span style="display:inline-flex;align-items:center;gap:4px;background:var(--ng-grn500);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">●LIVE</span>';
     grid.parentElement.insertBefore(hdr, grid);
   }
   setTimeout(inject, 400);
@@ -1785,27 +1786,27 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
       var sub = findSubmission(reqs, d.name, sun.short);
       var status, color;
       if(!sub){ status = '⏳ 미작성'; color = '#999'; }
-      else if(isAutoCompleteContent(sub.content)){ status = '✅ 자동완료'; color = '#10b981'; }
-      else if(sub.status === '완료'){ status = '✅ 확인됨'; color = '#10b981'; }
-      else { status = '⚠️ 대기'; color = '#f59e0b'; }
+      else if(isAutoCompleteContent(sub.content)){ status = '✅ 자동완료'; color = 'var(--ng-grn500)'; }
+      else if(sub.status === '완료'){ status = '✅ 확인됨'; color = 'var(--ng-grn500)'; }
+      else { status = '⚠️ 대기'; color = 'var(--ng-amb500)'; }
       var content = sub ? (sub.content || '').slice(0, 60) : '—';
       var requester = sub ? (sub.requester || '—') : '—';
       var action = !sub
         ? '<button class="wuRem" data-dept="'+d.name+'" style="background:#6366f1;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">📧 리마인드</button>'
         : '—';
-      return '<tr><td style="padding:10px;border-bottom:1px solid #f3f4f6;">'+d.name+'</td>'+
-        '<td style="padding:10px;border-bottom:1px solid #f3f4f6;color:'+color+';font-weight:600;">'+status+'</td>'+
-        '<td style="padding:10px;border-bottom:1px solid #f3f4f6;color:#374151;">'+requester+'</td>'+
-        '<td style="padding:10px;border-bottom:1px solid #f3f4f6;font-size:13px;color:#374151;">'+content+'</td>'+
-        '<td style="padding:10px;border-bottom:1px solid #f3f4f6;text-align:right;">'+action+'</td></tr>';
+      return '<tr><td style="padding:10px;border-bottom:1px solid var(--ng-g100);">'+d.name+'</td>'+
+        '<td style="padding:10px;border-bottom:1px solid var(--ng-g100);color:'+color+';font-weight:600;">'+status+'</td>'+
+        '<td style="padding:10px;border-bottom:1px solid var(--ng-g100);color:var(--ng-g700);">'+requester+'</td>'+
+        '<td style="padding:10px;border-bottom:1px solid var(--ng-g100);font-size:13px;color:var(--ng-g700);">'+content+'</td>'+
+        '<td style="padding:10px;border-bottom:1px solid var(--ng-g100);text-align:right;">'+action+'</td></tr>';
     }).join('');
     container.innerHTML = '<table style="width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;">'+
       '<thead style="background:#f9fafb;"><tr>'+
-      '<th style="padding:10px;text-align:left;font-size:12px;color:#6b7280;">부서</th>'+
-      '<th style="padding:10px;text-align:left;font-size:12px;color:#6b7280;">상태</th>'+
-      '<th style="padding:10px;text-align:left;font-size:12px;color:#6b7280;">간사</th>'+
-      '<th style="padding:10px;text-align:left;font-size:12px;color:#6b7280;">특이사항</th>'+
-      '<th style="padding:10px;text-align:right;font-size:12px;color:#6b7280;">리마인드</th>'+
+      '<th style="padding:10px;text-align:left;font-size:12px;color:var(--ng-g500);">부서</th>'+
+      '<th style="padding:10px;text-align:left;font-size:12px;color:var(--ng-g500);">상태</th>'+
+      '<th style="padding:10px;text-align:left;font-size:12px;color:var(--ng-g500);">간사</th>'+
+      '<th style="padding:10px;text-align:left;font-size:12px;color:var(--ng-g500);">특이사항</th>'+
+      '<th style="padding:10px;text-align:right;font-size:12px;color:var(--ng-g500);">리마인드</th>'+
       '</tr></thead><tbody>'+rows+'</tbody></table>';
     container.querySelectorAll('.wuRem').forEach(function(b){
       b.addEventListener('click', async function(){
@@ -1822,7 +1823,7 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
           var d = await r.json();
           if (d.success) {
             b.textContent = '✅ 발송됨';
-            b.style.background = '#10b981';
+            b.style.background = 'var(--ng-grn500)';
             alert('✅ ' + dept + ' ' + d.staff + ' 간사 (' + d.sentTo + ')에게 리마인드 이메일 발송 완료!');
           } else { throw new Error(d.error || 'failed'); }
         } catch (e) {
@@ -1847,7 +1848,7 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
     if(document.getElementById('wrapupWidgetContent')) return;
     var card = document.createElement('div');
     card.style.cssText = 'background:white;border-radius:14px;padding:20px;margin-top:20px;box-shadow:0 1px 3px rgba(0,0,0,0.05);';
-    card.innerHTML = '<h3 style="font-size:16px;font-weight:600;margin-bottom:12px;color:#111827;">'+CAL+' 주일 마무리 현황 — '+currentSunday().short+'</h3><div id="wrapupWidgetContent">⏳ 로딩 중...</div>';
+    card.innerHTML = '<h3 style="font-size:16px;font-weight:600;margin-bottom:12px;color:var(--ng-g900);">'+CAL+' 주일 마무리 현황 — '+currentSunday().short+'</h3><div id="wrapupWidgetContent">⏳ 로딩 중...</div>';
     var deptTable = document.querySelector('table');
     if(deptTable && deptTable.parentNode){
       var parent = deptTable.closest('div[class*="card"]') || deptTable.parentNode;
@@ -1862,7 +1863,7 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
     fetch('/api/attendance?type=requests')
       .then(function(r){ return r.json(); })
       .then(function(j){ render((j && j.requests) || []); })
-      .catch(function(e){ var el = document.getElementById('wrapupWidgetContent'); if(el) el.innerHTML = '<div style="color:#dc2626;">❌ 로드 실패: '+(e.message||'unknown')+'</div>'; });
+      .catch(function(e){ var el = document.getElementById('wrapupWidgetContent'); if(el) el.innerHTML = '<div style="color:var(--ng-red600);">❌ 로드 실패: '+(e.message||'unknown')+'</div>'; });
   }
   function init(){
     load();
@@ -1981,7 +1982,7 @@ async function adminForceCheckout(rid, name){
     var banner = document.createElement("div");
     banner.id = "__directorIncompleteBanner";
     banner.style.cssText = "margin-bottom:12px;padding:14px 16px;background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;display:none;";
-    banner.innerHTML = '<div id="__directorIncompleteText" style="font-size:13px;color:#92400e;font-weight:600;"></div>';
+    banner.innerHTML = '<div id="__directorIncompleteText" style="font-size:13px;color:var(--ng-warn-deep);font-weight:600;"></div>';
     table.parentNode.insertBefore(banner, table);
     return true;
   }
@@ -2018,17 +2019,17 @@ async function adminForceCheckout(rid, name){
       var firstCell = tr.querySelector("td");
       if(!firstCell || firstCell.querySelector(".__issueBadge")) return;
       var labels = iss.slice(0,4).map(function(x){
-        var color = x.type === "invalid" ? "#dc2626" : "#92400e";
-        var bg = x.type === "invalid" ? "#fee2e2" : "#fef3c7";
+        var color = x.type === "invalid" ? "var(--ng-red600)" : "var(--ng-warn-deep)";
+        var bg = x.type === "invalid" ? "var(--ng-red100)" : "var(--ng-warn-bg)";
         return '<span style="background:'+bg+';color:'+color+';padding:1px 6px;border-radius:6px;margin-right:2px;font-size:10px;font-weight:600;">'+(x.type==="invalid"?"⚠":"·")+" "+x.label+'</span>';
       }).join("");
-      var more = iss.length > 4 ? '<span style="color:#9ca3af;font-size:10px;">+'+(iss.length-4)+'</span>' : "";
+      var more = iss.length > 4 ? '<span style="color:var(--ng-g400);font-size:10px;">+'+(iss.length-4)+'</span>' : "";
       var badge = document.createElement("div");
       badge.className = "__issueBadge";
       badge.style.cssText = "margin-top:4px;line-height:1.6;";
       badge.innerHTML = labels + more;
       firstCell.appendChild(badge);
-      tr.style.borderLeft = "3px solid #f59e0b";
+      tr.style.borderLeft = "3px solid var(--ng-amb500)";
     });
   }
   function hookRoster(){
@@ -2093,11 +2094,11 @@ async function adminForceCheckout(rid, name){
     var wrap = document.createElement("div");
     wrap.className = "__directorRolePanel";
     wrap.style.cssText = "margin-top:2px;font-size:11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;";
-    wrap.innerHTML = '<span>🎯 <span style="color:var(--ng-lav-text);font-weight:600;">' + mission + '</span></span><button id="__roleHelpBtn" style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:2px 8px;font-size:11px;color:#6b7280;cursor:pointer;">❓ 도움말</button>';
+    wrap.innerHTML = '<span>🎯 <span style="color:var(--ng-lav-text);font-weight:600;">' + mission + '</span></span><button id="__roleHelpBtn" style="background:var(--ng-g100);border:1px solid var(--ng-g200);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--ng-g500);cursor:pointer;">❓ 도움말</button>';
     parent.parentNode.appendChild(wrap);
     var panel = document.createElement("div");
-    panel.style.cssText = "display:none;position:fixed;top:80px;right:24px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.1);z-index:9999;max-width:360px;font-size:13px;line-height:1.6;color:#374151;";
-    panel.innerHTML = '<div style="font-weight:700;margin-bottom:8px;color:#111827;">📖 주요 액션</div><ul style="list-style:none;padding:0;margin:0;">' + actions.map(function(a){return '<li style="padding:4px 0;">' + a + '</li>';}).join("") + '</ul><div style="margin-top:12px;padding-top:8px;border-top:1px solid #f3f4f6;font-size:11px;color:#9ca3af;">📘 더 자세한 가이드는 컬쳐북/트레이닝 문서 참조</div>';
+    panel.style.cssText = "display:none;position:fixed;top:80px;right:24px;background:white;border:1px solid var(--ng-g200);border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.1);z-index:9999;max-width:360px;font-size:13px;line-height:1.6;color:var(--ng-g700);";
+    panel.innerHTML = '<div style="font-weight:700;margin-bottom:8px;color:var(--ng-g900);">📖 주요 액션</div><ul style="list-style:none;padding:0;margin:0;">' + actions.map(function(a){return '<li style="padding:4px 0;">' + a + '</li>';}).join("") + '</ul><div style="margin-top:12px;padding-top:8px;border-top:1px solid var(--ng-g100);font-size:11px;color:var(--ng-g400);">📘 더 자세한 가이드는 컬쳐북/트레이닝 문서 참조</div>';
     document.body.appendChild(panel);
     var btn = document.getElementById("__roleHelpBtn");
     if(btn){
@@ -2231,7 +2232,7 @@ async function adminForceCheckout(rid, name){
           var hasDatePrefix = /^\d{1,2}\/\d{1,2}\./.test(contentText);
           var hasCasual = contentText.indexOf('임시방문자') >= 0;
           if(hasDatePrefix && contentText.length > 10){
-            cells[1].innerHTML = '<span style="color:#059669;font-weight:600">✅ 완료</span>';
+            cells[1].innerHTML = '<span style="color:var(--ng-grn600);font-weight:600">✅ 완료</span>';
           }
         });
       } catch(e2){ console.warn('[Task 282]', e2); }
