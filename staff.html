@@ -717,7 +717,7 @@ async function loadAttendance(){
       sumHtml+="</tr></thead><tbody>";
       var grandCheckin=0,grandTotal=0,grandVisitor=0,grandAbsent=0;
       deptsArr.forEach(function(d,_i){
-        grandCheckin+=d.attended||0;grandTotal+=d.total||0;grandVisitor+=(d.casualVisitors>0?d.casualVisitors:(d.visitors||0));grandAbsent+=d.absent||0;
+        grandCheckin+=d.attended||0;grandTotal+=d.total||0;grandVisitor+=Math.max(d.casualVisitors||0,d.visitors||0);grandAbsent+=d.absent||0;
         /* Task #308: mutation-proof rate — use array-derived member count instead of d.attended (which may be mutated by fetch wrapper) */
         var _members = (d.attendedNames && d.attendedNames.length) ? d.attendedNames.length : Math.max(0,(d.attended||0)-(d.visitors||0));
         var _visitors = (d.visitorNames && d.visitorNames.length) ? d.visitorNames.length : (d.visitors||0);
@@ -726,7 +726,7 @@ async function loadAttendance(){
         sumHtml+="<td style='padding:8px 12px;font-weight:600'>"+(d.short||"")+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:var(--ng-grn600);font-weight:600'>"+_members+(_visitors>0 ? " <span style='font-size:11px;color:var(--ng-vio600);font-weight:500'>(+"+_visitors+"방문)</span>" : "")+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:var(--ng-red600)'>"+((d.absent||0)||"-")+"</td>";
-        sumHtml+="<td style='padding:8px 12px;text-align:center;color:var(--ng-vio600)'>"+(d.casualVisitors>0?d.casualVisitors:((d.visitors||0)||"-"))+"</td>";
+        sumHtml+="<td style='padding:8px 12px;text-align:center;color:var(--ng-vio600)'>"+(Math.max(d.casualVisitors||0,d.visitors||0)||"-")+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:var(--ng-g500)'>"+(d.total||0)+"</td>";
         sumHtml+="<td style='padding:8px 12px;text-align:center;color:"+(rate>=80?"var(--ng-grn600)":rate>=50?"#d97706":"var(--ng-red600)")+";font-weight:600'>"+rate+"%</td>";
         sumHtml+="</tr>";
