@@ -2872,11 +2872,11 @@ window.reactivateStudent = async function(id) {
     try {
       weekdayHint();
       var tables = document.querySelectorAll('table');
-      var target = null, iD = -1, iO = -1, iA = -1, iV = -1, iT = -1;
+      var target = null, iD = -1, iO = -1, iA = -1, iV = -1, iT = -1, iR = -1;
       for (var t = 0; t < tables.length; t++) {
         var hr = tables[t].querySelector('thead tr') || tables[t].rows[0];
         if (!hr) continue;
-        var d1 = -1, o1 = -1, a1 = -1, v1 = -1, t1 = -1;
+        var d1 = -1, o1 = -1, a1 = -1, v1 = -1, t1 = -1, r1 = -1;
         for (var j = 0; j < hr.cells.length; j++) {
           var ht = (hr.cells[j].textContent||'').trim();
           if (ht === '부서') d1 = j;
@@ -2884,8 +2884,9 @@ window.reactivateStudent = async function(id) {
           else if (ht === '결석') a1 = j;
           else if (ht === '방문자') v1 = j;
           else if (ht.indexOf('총') === 0) t1 = j;
+          else if (ht.indexOf('출석률') >= 0) r1 = j;
         }
-        if (d1 >= 0 && o1 >= 0) { target = tables[t]; iD = d1; iO = o1; iA = a1; iV = v1; iT = t1; break; }
+        if (d1 >= 0 && o1 >= 0) { target = tables[t]; iD = d1; iO = o1; iA = a1; iV = v1; iT = t1; iR = r1; break; }
       }
       if (!target) return;
       var rows = target.querySelectorAll('tbody tr');
@@ -2903,7 +2904,7 @@ window.reactivateStudent = async function(id) {
         function num(ix){ if (ix < 0 || !cells[ix]) return 0; var m2 = (cells[ix].textContent||'').trim().match(/^(\d+)/); return m2 ? parseInt(m2[1],10) : 0; }
         var member = parseInt(mm[1],10);
         var vis = vm ? parseInt(vm[1],10) : 0;
-        data.push({dept: dept, member: member, vis: vis, abs: num(iA), reg: num(iT), visCol: num(iV), tot: member + vis});
+        data.push({dept: dept, member: member, vis: vis, abs: num(iA), reg: num(iT), visCol: num(iV), rate: num(iR), tot: member + vis});
       });
       if (!data.length) return;
       var single = data.length === 1;
@@ -2921,12 +2922,12 @@ window.reactivateStudent = async function(id) {
       var html = '';
       if (single) {
         var cards = [
-          {n: d0.reg, l: '총 등록', bg: '#ede9fe', fg: '#5b21b6', sub: ''},
+          {n: d0.reg, l: '총 등록', bg: '#ede9fe', fg: '#5b21b6', sub: d0.rate > 0 ? '출석률 ' + d0.rate + '%' : ''},
           {n: d0.member, l: '출석', bg: '#dcfce7', fg: '#166534', sub: d0.vis > 0 ? '+' + d0.vis + '방문' : ''},
           {n: d0.abs, l: '결석', bg: '#fee2e2', fg: '#991b1b', sub: ''},
           {n: d0.visCol, l: '방문자', bg: '#fce7f3', fg: '#9d174d', sub: ''}
         ];
-        html += '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px" class="sm-grid-4-329">' + cards.map(function(c){
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px" class="sm-grid-4-329">' + cards.map(function(c){
           return '<div style="background:' + c.bg + ';border-radius:14px;padding:14px 16px">' +
             '<p style="font-size:1.9rem;font-weight:800;line-height:1.1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:' + c.fg + ';margin:0">' + c.n + (c.sub ? ' <span style="font-size:.8rem;font-weight:700">(' + c.sub + ')</span>' : '') + '</p>' +
             '<p style="font-size:12px;font-weight:600;color:' + c.fg + ';opacity:.75;margin:2px 0 0">' + c.l + '</p></div>';
@@ -2952,6 +2953,7 @@ window.reactivateStudent = async function(id) {
       html += '<div data-title style="font-size:14px;font-weight:700;color:var(--ng-ink,#111827);margin-bottom:12px">' + titleHtml + '</div>' +
         '<div style="display:flex;align-items:flex-end;gap:20px;max-width:560px;margin:0 auto;padding:0 4px;border-bottom:1px solid var(--ng-hairline,#e8e8ea)">' + bars + '</div>';
       host.innerHTML = '<div class="card" style="padding:20px 18px 14px;margin:0 0 14px">' + html + '</div>';
+      try { var _tc = target.closest('div'); if (single) { target.style.display = 'none'; } else { target.style.display = ''; } } catch(eH){}
     } catch(e){ console.warn('[chart329]', e); }
   }
   setTimeout(build, 1200);
