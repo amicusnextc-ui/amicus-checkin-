@@ -2194,7 +2194,13 @@ async function adminForceCheckout(rid, name){
         var short = (cells[0].textContent||'').trim();
         var fix = depts[short];
         if(!fix) return;
-        cells[2].textContent = fix.att;
+        /* Task #319 (2026-09-15): staff.html 표기와 통일 — 회원 (+N방문) breakdown */
+        var _mem319 = Math.max(0, fix.att - fix.vis);
+        if (fix.vis > 0) {
+          cells[2].innerHTML = _mem319 + " <span class='text-purple-500 text-xs'>(+" + fix.vis + "\ubc29\ubb38)</span>";
+        } else {
+          cells[2].textContent = _mem319;
+        }
         if(fix.casualUnique > 0){
           cells[4].innerHTML = fix.vis + " <span class='text-xs text-blue-500'>(+" + fix.casualUnique + " 임시)</span>";
         } else {
