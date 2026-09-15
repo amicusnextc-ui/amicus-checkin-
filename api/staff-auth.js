@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   // === AUTH (Task #305): inline soft/hard-mode shared-secret check ===
   {
     const _expected = process.env.API_SECRET;
-    const _enforce  = process.env.API_AUTH_ENFORCE === '1';
+    const _enforce  = false; /* Task #349: 토큰 발급 엔드포인트 — 자체 비밀번호 검증으로 보호, 하드 차단 제외 */
     if (_expected) {
       let _provided = '';
       try {
