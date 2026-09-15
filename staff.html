@@ -80,8 +80,7 @@ button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(
 
 /* Task #343b: 모바일/태블릿 반응형 */
 @media (max-width:768px){
-  div:has(> #rosterTable){ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  #rosterTable{ min-width:880px; }
+  table:has(#rosterTable){ min-width:880px; }
   #pf342 > div{ padding:20px 16px !important; border-radius:16px !important; }
 }
 @media (max-width:480px){
