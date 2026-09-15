@@ -896,7 +896,7 @@ function renderRoster(students){
     var bdayBadge=isBday?"<span style='background:#fce7f3;color:#9d174d' class='badge'>🎂</span>":"-";
     html+="<tr>";
     html+="<td><div style='font-weight:600'><a href='/parent-info.html?studentId="+s.id+"&source=admin' style='color:var(--ng-lav-text);text-decoration:none;padding:2px 6px;border-radius:6px;display:inline-block;transition:background 0.15s' onmouseover='this.style.background=&quot;var(--ng-lav)&quot;' onmouseout='this.style.background=&quot;transparent&quot;' title='정보 카드 열기'>"+(s.name||"")+"</a>"+(function(){var _is=(window.__getStudentIssues?window.__getStudentIssues(s):[]);if(!_is.length)return "";var _ls=_is.map(function(x){return x.label.split("(")[0];});var _tx=_ls.length===1?_ls[0]:(_ls.length===2?_ls[0]+"·"+_ls[1]:_ls[0]+" 외 "+(_ls.length-1));var _onlyLiab=(_is.length===1&&_ls[0]==="Liability");var _href=_onlyLiab?("/liability.html?admin=1&studentId="+s.id+"&adminName="+encodeURIComponent(window._staffName||"간사")):("/parent-info.html?studentId="+s.id+"&source=admin");var _ti=_onlyLiab?"Liability Form 작성 페이지 열기":("미입력: "+_ls.join(", ").replace(/'/g,"")+" — 정보 입력 페이지 열기");return " <a href='"+_href+"' target='_blank' title='"+_ti+"' style='font-size:11px;background:var(--ng-lav);color:var(--ng-lav-text);padding:5px 9px;border-radius:999px;font-weight:700;white-space:nowrap;text-decoration:none;display:inline-block'>📝 "+_tx+"</a>";})()+(function(){var _all=(window.__getStudentIssues?window.__getStudentIssues(s):[]);var _n=_all.filter(function(x){var _l=x.label.split("(")[0];if(_l==="사진")return false;if(_l==="Liability"&&s.liabilityForm==="확인 필요")return false;return true;}).length;if(!_n)return "";var _nm=(s.name||"").replace(/'/g,"");var _he=(s.motherEmail||s.fatherEmail)?"1":"0";var _d=null;if(s.inviteSentAt){_d=Math.floor((Date.now()-new Date(String(s.inviteSentAt).slice(0,10)+"T12:00:00").getTime())/86400000);}if(_d!==null&&_d>=0&&_d<7){var _md=String(s.inviteSentAt).slice(5,10).replace("-","/");return " <button data-sid='"+s.id+"' data-name='"+_nm+"' data-hasemail='"+_he+"' disabled title='"+_md+" 발송됨 · 7일 후 재발송 가능' style='font-size:11px;padding:6px 10px;border-radius:999px;background:var(--ng-bg3);color:var(--ng-sub);border:1px solid var(--ng-hairline);cursor:default;font-weight:700;white-space:nowrap'>✓ "+_md+" 발송됨</button>";}return " <button data-sid='"+s.id+"' data-name='"+_nm+"' data-hasemail='"+_he+"' onclick='sendInfoEmail(this)' title='"+(_he==="1"?"부모님 이메일로 Liability+정보입력 링크 발송":"이메일 미등록 — 누르면 이메일 입력 후 바로 발송")+"' style='font-size:11px;padding:6px 10px;border-radius:999px;background:var(--ng-green-soft);color:var(--ng-green-deep);border:1px solid var(--ng-hairline);cursor:pointer;font-weight:700;white-space:nowrap'>📧 부모님께 메일</button>";})()+"</div>";
-    html+="<div style='font-size:11px;color:var(--ng-g400)'>"+s.nameEN+"</div>"+(s.notes?"<div class='nt331' onclick='tgN331(this)' title='클릭하면 전체 보기' style='font-size:11px;color:var(--ng-vio600);margin-top:2px;font-style:italic;cursor:pointer'>📝 "+s.notes+"</div>":"");
+    html+="<div style='font-size:11px;color:var(--ng-g400)'>"+s.nameEN+"</div>"+(s.notes?"<div class='nt331' style='font-size:11px;color:var(--ng-vio600);margin-top:2px;font-style:italic'>📝 "+s.notes+"</div><button class='nt331b' onclick='tgN331(this)'>▾ 더보기</button>":"");
     if(hasAllergy)html+="<span style='font-size:11px;background:var(--ng-danger-bg);color:var(--ng-danger-text);padding:1px 6px;border-radius:999px'>⚠️ "+s.allergy+"</span>";
     html+="</td>";
     html+="<td><div style='font-weight:500'>"+(s.grade||"")+(age?" ("+age+")":"")+"</div>";
@@ -2739,10 +2739,10 @@ async function loadArchivedList() {
   try {
     var _dept = window._dept || (typeof getRole==='function'?(getRole().dept||''):'');
     var _url = '/api/roster?status=archived&includeVisitors=true';
-    if (_dept) _url += '&dept=' + encodeURIComponent(_dept);
+    /* Task #333: 졸업생은 모든 간사에게 */
     var r = await fetch(_url);
     var d = await r.json();
-    var students = d.students || [];
+    var students = (d.students || []).filter(function(s){ var sd = s.department || ''; if (sd.indexOf('졸업') >= 0) return true; if (!_dept) return true; return sd.indexOf(_dept.split(' ')[0]) >= 0; });
     count.textContent = students.length + '명';
     if (students.length === 0) {
       list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ng-g400)">archived 학생이 없습니다</div>';
@@ -2953,12 +2953,39 @@ window.reactivateStudent = async function(id) {
 })();
 </script>
 <style id="task331">
-/* Task #331: 명단 특이사항 1줄 클램프 + sticky 헤더 */
+/* Task #331+#333: 명단 특이사항 1줄 클램프 + 더보기 + sticky 헤더 */
 .nt331{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;max-width:300px}
 .nt331.open331{-webkit-line-clamp:unset;max-width:none}
+.nt331b{font-size:10.5px;font-weight:700;color:var(--ng-vio600,#7c3aed);background:none;border:none;padding:1px 0 0;cursor:pointer;display:block}
+.nt331b:hover{text-decoration:underline}
 table:has(#rosterTable) thead th{position:sticky;top:0;background:#f9fafb;z-index:9;box-shadow:0 1px 0 #eef0f3}
+#bday333{background:linear-gradient(90deg,#fff7ed,#fef3c7);border:1px solid #fde68a;border-radius:12px;padding:10px 14px;margin:0 0 12px;font-size:13px;color:#92400e;font-weight:600}
+#bday333 b{font-weight:800}
 </style>
-<script>window.tgN331=function(el){el.classList.toggle('open331');};</script>
+<script>
+window.tgN331=function(btn){var d=btn.previousElementSibling;if(!d)return;d.classList.toggle('open331');btn.textContent=d.classList.contains('open331')?'▴ 접기':'▾ 더보기';};
+/* 더보기 버튼: 넘치지 않는 메모는 숨김 */
+setInterval(function(){ try { document.querySelectorAll('.nt331b').forEach(function(b){ var d = b.previousElementSibling; if (!d) return; if (!d.classList.contains('open331') && d.scrollHeight <= d.clientHeight + 2) b.style.display = 'none'; else b.style.display = ''; }); } catch(e){} }, 2000);
+/* Task #333: 이번 주 생일 배너 (LA 주간 일~토) */
+setInterval(function(){ try {
+  var tbl = document.getElementById('rosterTable');
+  if (!tbl) return;
+  var wrapEl = tbl.closest('.overflow-x-auto') || tbl.closest('div');
+  if (!wrapEl || !wrapEl.parentElement) return;
+  var all = window._allStudents || [];
+  if (!all.length) return;
+  var laNow = new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Los_Angeles'}));
+  var sun = new Date(laNow); sun.setDate(laNow.getDate() - laNow.getDay()); sun.setHours(0,0,0,0);
+  var days = []; for (var k = 0; k < 7; k++) { var dd = new Date(sun); dd.setDate(sun.getDate() + k); days.push((dd.getMonth()+1) + '/' + dd.getDate()); }
+  var bd = [];
+  all.forEach(function(s){ if (!s.dob) return; var m = String(s.dob).match(/(\d{4})-(\d{2})-(\d{2})/); if (!m) return; var md = parseInt(m[2],10) + '/' + parseInt(m[3],10); if (days.indexOf(md) >= 0) bd.push({nm: s.name, md: md}); });
+  var el = document.getElementById('bday333');
+  if (!bd.length) { if (el) el.remove(); return; }
+  var txt = '🎂 이번 주 생일 — ' + bd.map(function(x){ return '<b>' + x.nm + '</b> (' + x.md + ')'; }).join(' · ');
+  if (!el) { el = document.createElement('div'); el.id = 'bday333'; wrapEl.parentElement.insertBefore(el, wrapEl); }
+  if (el.__sig !== txt) { el.innerHTML = txt; el.__sig = txt; }
+} catch(e){} }, 3000);
+</script>
 </body>
 </html>
 
