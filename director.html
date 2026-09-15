@@ -2384,5 +2384,29 @@ async function adminForceCheckout(rid, name){
   };
 })();
 </script>
+<script>
+/* Task #328 (2026-09-15): 실시간 반영 — 60초마다 roster 조용히 재로드 + 위젯 재렌더 (발송됨 상태 포함) */
+(function(){
+  if (window.__rosterAutoRefresh328) return; window.__rosterAutoRefresh328 = true;
+  async function quietRefresh(){
+    try {
+      if (document.visibilityState !== 'visible') return;
+      if (typeof ROSTER === 'undefined') return;
+      if (!ROSTER || !ROSTER.length) return; /* 초기 로드 전이면 skip */
+      var r = await fetch('/api/roster?includeVisitors=1&_=' + Date.now());
+      if (!r.ok) return;
+      var j = await r.json();
+      if (!j || !j.students || !j.students.length) return;
+      ROSTER = j.students;
+      window._allStudents = j.students;
+      try { if (typeof renderInfoNeeded === 'function') renderInfoNeeded(); } catch(e1){}
+      try { if (typeof renderLiability === 'function') renderLiability(); } catch(e2){}
+      try { if (typeof renderRoster === 'function') renderRoster(); } catch(e3){}
+    } catch(e){ console.warn('[Task 328]', e); }
+  }
+  setInterval(quietRefresh, 60000);
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') quietRefresh(); });
+})();
+</script>
 </body>
 </html>
