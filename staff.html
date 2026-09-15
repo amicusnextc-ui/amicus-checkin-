@@ -888,7 +888,11 @@ function renderRoster(students){
     var hasAllergy=s.allergy&&s.allergy!=="없음"&&s.allergy.trim()!=="";
     var nowMs=Date.now();var isAbsent=false;if(s.lastAttended){var daysAgo=Math.floor((nowMs-new Date(s.lastAttended).getTime())/86400000);isAbsent=daysAgo>=14;}else if(!s.isVisitor){isAbsent=true;}
     var absenceBadge=isAbsent?"<span style='background:var(--ng-danger-bg);color:var(--ng-danger-text)' class='badge'>⚠️ 결석</span>":"-";
-    var photoBadge=s.photo==="촬영 완료"?"<span class='badge' style='background:var(--ng-ok-bg);color:var(--ng-ok-text);white-space:nowrap'>✓ 완료</span>":"<span class='badge' style='background:var(--ng-mute-bg);color:var(--ng-mute-text);white-space:nowrap'>미촬영</span>";
+    var photoBadge = s.photoUrl
+      ? "<img src='"+s.photoUrl+"' onclick='window.open(this.src)' style='width:38px;height:38px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid var(--ng-hairline,#e5e7eb)' alt='사진'/>"
+      : (s.photo==="촬영 완료"
+        ? "<span class='badge' style='background:var(--ng-ok-bg);color:var(--ng-ok-text);white-space:nowrap'>✓ 완료</span>"
+        : "<button data-sid='"+s.id+"' onclick='capturePhoto339(this)' style='font-size:11px;padding:6px 10px;border-radius:999px;background:var(--ng-lav,#ede9fe);color:var(--ng-lav-text,#5b21b6);border:none;cursor:pointer;font-weight:700;white-space:nowrap'>📷 촬영</button>");
     var baptBadge=(s.baptized&&s.baptized!=="미세례"&&s.baptized!=="확인필요"&&s.baptized!=="확인 필요")?"<span class='badge' style='background:var(--ng-info-bg);color:var(--ng-info-text);white-space:nowrap'>💧 "+s.baptized+"</span>":(s.baptized==="미세례"?"<span class='badge' style='background:var(--ng-mute-bg);color:var(--ng-mute-text);white-space:nowrap'>미세례</span>":"-");
     var needsLiab=s.liabilityForm!=="제출 완료";
     var liabAdminBtn=needsLiab?"<a href='/liability.html?admin=1&studentId="+s.id+"&adminName="+encodeURIComponent(window._staffName||'간사')+"' target='_blank' title='간사가 학부모 대신 Liability Form을 작성합니다' style='display:inline-block;margin-top:4px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--ng-black);color:#ffffff;text-decoration:none;white-space:nowrap'>✍️ 작성하기</a>":"";
@@ -3059,6 +3063,38 @@ setInterval(function(){ try {
   setTimeout(wrapNudge, 4000);
   setInterval(wrapNudge, 120000);
 })();
+</script>
+<script>
+/* Task #339 (2026-09-15): 교회 촬영 — 명단에서 바로 카메라 촬영 → 리사이즈 → Notion 업로드 */
+window.capturePhoto339 = function(btn){
+  var sid = btn.getAttribute('data-sid');
+  var inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*'; inp.setAttribute('capture', 'environment');
+  inp.onchange = function(){
+    var f = inp.files && inp.files[0]; if (!f) return;
+    btn.disabled = true; btn.textContent = '⏳...';
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var MAX = 640, w = img.width, h = img.height;
+        var sc = Math.min(1, MAX / Math.max(w, h));
+        var cv = document.createElement('canvas'); cv.width = Math.round(w*sc); cv.height = Math.round(h*sc);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        var b64 = cv.toDataURL('image/jpeg', 0.82);
+        fetch('/api/update-student', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action: 'upload-photo', pageId: sid, imageBase64: b64})})
+          .then(function(r){ return r.json().then(function(d){ return {ok: r.ok, d: d}; }); })
+          .then(function(x){
+            if (x.ok && x.d.ok) { btn.textContent = '✓ 완료'; if (typeof showToast === 'function') showToast('사진 업로드 완료', 'success'); if (typeof loadRoster === 'function') setTimeout(function(){ loadRoster(true); }, 800); }
+            else { alert('업로드 실패: ' + (x.d.error || x.d.message || '')); btn.disabled = false; btn.textContent = '📷 촬영'; }
+          })
+          .catch(function(e){ alert('오류: ' + e.message); btn.disabled = false; btn.textContent = '📷 촬영'; });
+      } catch(e){ alert('이미지 처리 오류: ' + e.message); btn.disabled = false; btn.textContent = '📷 촬영'; }
+      URL.revokeObjectURL(img.src);
+    };
+    img.src = URL.createObjectURL(f);
+  };
+  inp.click();
+};
 </script>
 </body>
 </html>
