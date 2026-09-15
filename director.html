@@ -1100,11 +1100,14 @@ function renderRoster() {
       <tbody>${filtered.map((s,i) => {
         const weeks = weeksSince(s.lastAttended);
         const attColor = weeks >= 2 ? 'text-red-600 font-semibold' : 'text-gray-600';
+        /* Task #346: 프로필 아바타 */
+        const _av346 = s.photoUrl ? `<img src="${s.photoUrl}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none;border:1.5px solid #e5e7eb" alt="사진"/>` : `<span style="width:40px;height:40px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;background:var(--ng-lav,#ede9fe);color:var(--ng-lav-text,#6d28d9);font-weight:700;font-size:16px">${(s.name||"?").trim().charAt(0)||"?"}</span>`;
         return `<tr onclick="showDetail(${i})" class="cursor-pointer">
           <td>
+            <div style="display:flex;align-items:center;gap:8px">${_av346}<div style="min-width:0;flex:1">
             <div class="font-semibold"><a href="/parent-info.html?studentId=${s.id}&source=admin" onclick="event.stopPropagation()" style="color:var(--ng-lav-text);text-decoration:none;padding:2px 6px;border-radius:6px;display:inline-block;transition:background 0.15s" onmouseover="this.style.background='var(--ng-lav)'" onmouseout="this.style.background='transparent'" title="정보 카드 열기">${s.name} <span style="font-size:10px;background:var(--ng-lav);color:var(--ng-lav-text);padding:2px 7px;border-radius:999px;font-weight:700">정보 입력</span></a>${s.isBirthdayMonth ? ' 🎂' : ''}</div>
             ${s.nameEN ? `<div class="text-xs text-gray-500">${s.nameEN}</div>` : ''}
-          </td>
+          </div></div></td>
           <td><span class="stat-pill ${DEPT_COLOR[s.department]||'dept-gray'}">${(s.department||'').split(' ')[0]}</span></td>
           <td>${s.grade || '—'}</td>
           <td>${s.guardian || '—'}</td>
@@ -1124,6 +1127,7 @@ function showDetail(i) {
   const f = (label, val) => val ? `<div class="grid grid-cols-3 gap-3 py-1.5 border-b border-gray-100"><div class="text-xs text-gray-500 font-semibold">${label}</div><div class="col-span-2 text-sm">${val}</div></div>` : '';
   document.getElementById('detailTitle').textContent = s.name + (s.nameEN ? ` (${s.nameEN})` : '');
   document.getElementById('detailBody').innerHTML = `
+    ${s.photoUrl ? `<div style="display:flex;justify-content:center;margin-bottom:12px"><img src="${s.photoUrl}" onclick="window.open(this.src)" style="width:120px;height:120px;border-radius:50%;object-fit:cover;cursor:pointer;border:3px solid #ede9fe" alt="사진"/></div>` : ''}
     ${f('부서', s.department)}
     ${f('학년', s.grade)}
     ${f('학교', s.school)}
