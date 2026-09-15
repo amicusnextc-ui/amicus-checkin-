@@ -2060,7 +2060,7 @@ async function adminForceCheckout(rid, name){
 <script>
 /* 🎯 역할 미션 배너 + 도움말 v1 — director.html (Task #253) */
 (function(){
-  if(window.__roleMissionDirInjected) return;
+  if(window.__roleMissionDirInjected || true) return; /* Task #336: 미션 배너 제거 */
   window.__roleMissionDirInjected = true;
   function getMission(role){
     if(role === "director") return "교육부 운영 + Liability/정보 발송 + 시스템 관리";
