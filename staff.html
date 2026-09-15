@@ -100,7 +100,7 @@ button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(
           <option value="유치부 (Preschool)">김향숙 — 유치부</option>
           <option value="유년부 (Elementary Jr)">박은혜 — 유년부</option>
           <option value="초등부 (Elementary)">백진주 — 초등부</option>
-          <option value="중고등부 (Youth)">박명철 전도사님 — 중고등부</option>
+          <option value="중고등부 (Youth)">박명철 강도사님 — 중고등부</option>
         </select>
       </div>
       <div>
@@ -2545,7 +2545,7 @@ setTimeout(cwShowIfReady,2000);
     document.addEventListener("click", function(e){ if(!helpPanel.contains(e.target) && e.target !== helpBtn) helpPanel.style.display = "none"; });
     wrap.appendChild(missionSpan);
     /* Task #335: 도움말/주요액션 카드 제거 — 환영 모달로 대체 */
-    targetEl.appendChild(wrap);
+    /* Task #336: 미션 라인 제거 */
   }
   function inject(){
     var dashName = document.getElementById("dashName");
