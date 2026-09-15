@@ -437,7 +437,9 @@ module.exports = async (req, res) => {
       if (!signature || signature.trim().length < 2) return res.status(400).json({ error: 'signature required' });
       const ts = new Date().toISOString();
       const curNotes = (page.properties['특이사항 (Notes)']?.rich_text || []).map(b => b.plain_text || '').join('');
-      const appendPrefix = curNotes ? curNotes + '\n' : '';
+      /* Task #344: 서명 완료 시 낡은 'Liability 필요' 메모 자동 제거 */
+        const cleanNotes = curNotes.replace(/Liability(?!\s*20)[^·\[\n]*/g,'').replace(/·\s*·/g,'·').replace(/[ \t]*[·+][ \t]*(?=\n|$)/gm,'').replace(/(^|\n)[ \t]*·[ \t]*/g,'$1').replace(/[ \t]+(?=\n|$)/gm,'').trim();
+        const appendPrefix = cleanNotes ? cleanNotes + '\n' : '';
       const regLine = '[REGISTER ' + ts.slice(0,10) + '] Parent: ' + parentName + ' | Email: ' + parentEmail + ' | Phone: ' + parentPhone + (emergencyName ? ' | Emergency: ' + emergencyName + ' (' + (emergencyPhone||'') + ')' : '') + ' | Sig: ' + signature;
       const newNotes = appendPrefix + regLine;
       await notion.pages.update({
