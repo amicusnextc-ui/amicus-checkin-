@@ -2544,9 +2544,8 @@ setTimeout(cwShowIfReady,2000);
     helpBtn.addEventListener("click", function(e){ e.stopPropagation(); helpPanel.style.display = helpPanel.style.display === "block" ? "none" : "block"; });
     document.addEventListener("click", function(e){ if(!helpPanel.contains(e.target) && e.target !== helpBtn) helpPanel.style.display = "none"; });
     wrap.appendChild(missionSpan);
-    wrap.appendChild(helpBtn);
+    /* Task #335: 도움말/주요액션 카드 제거 — 환영 모달로 대체 */
     targetEl.appendChild(wrap);
-    document.body.appendChild(helpPanel);
   }
   function inject(){
     var dashName = document.getElementById("dashName");
@@ -2975,13 +2974,14 @@ setInterval(function(){ try {
   var all = window._allStudents || [];
   if (!all.length) return;
   var laNow = new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Los_Angeles'}));
-  var sun = new Date(laNow); sun.setDate(laNow.getDate() - laNow.getDay()); sun.setHours(0,0,0,0);
-  var days = []; for (var k = 0; k < 7; k++) { var dd = new Date(sun); dd.setDate(sun.getDate() + k); days.push((dd.getMonth()+1) + '/' + dd.getDate()); }
+  var curMonth = laNow.getMonth() + 1; /* Task #335: 월 단위 */
+  
   var bd = [];
-  all.forEach(function(s){ if (!s.dob) return; var m = String(s.dob).match(/(\d{4})-(\d{2})-(\d{2})/); if (!m) return; var md = parseInt(m[2],10) + '/' + parseInt(m[3],10); if (days.indexOf(md) >= 0) bd.push({nm: s.name, md: md}); });
+  all.forEach(function(s){ if (!s.dob) return; var m = String(s.dob).match(/(\d{4})-(\d{2})-(\d{2})/); if (!m) return; var mo = parseInt(m[2],10); var md = mo + '/' + parseInt(m[3],10); if (mo === curMonth) bd.push({nm: s.name, md: md, dd: parseInt(m[3],10)}); });
+  bd.sort(function(a,b){ return a.dd - b.dd; });
   var el = document.getElementById('bday333');
   if (!bd.length) { if (el) el.remove(); return; }
-  var txt = '🎂 이번 주 생일 — ' + bd.map(function(x){ return '<b>' + x.nm + '</b> (' + x.md + ')'; }).join(' · ');
+  var txt = '🎂 ' + curMonth + '월 생일 — ' + bd.map(function(x){ return '<b>' + x.nm + '</b> (' + x.md + ')'; }).join(' · ');
   if (!el) { el = document.createElement('div'); el.id = 'bday333'; wrapEl.parentElement.insertBefore(el, wrapEl); }
   if (el.__sig !== txt) { el.innerHTML = txt; el.__sig = txt; }
 } catch(e){} }, 3000);
@@ -3003,11 +3003,13 @@ setInterval(function(){ try {
   window.__goWrap334 = goWrapTab;
   function showWelcome(){
     try {
-      if (sessionStorage.getItem('welcome334')) return;
-      var nmEl = document.getElementById('dashName');
+      var _nmEl0 = document.getElementById('dashName') || document.getElementById('leaderDashName');
+      var _nm0 = _nmEl0 ? (_nmEl0.textContent||'').trim() : '';
+      if (sessionStorage.getItem('welcome334') === _nm0 && _nm0) return; /* Task #335: 사용자별 1회 */
+      var nmEl = document.getElementById('dashName') || document.getElementById('leaderDashName');
       var nm = nmEl ? (nmEl.textContent||'').trim() : '';
       if (!nm) return; /* 로그인 전 */
-      sessionStorage.setItem('welcome334', '1');
+      sessionStorage.setItem('welcome334', nm);
       var n = laNow();
       var isSun = n.getDay() === 0;
       var cheer = CHEER[(n.getDate() + n.getMonth()) % CHEER.length];
@@ -3027,7 +3029,7 @@ setInterval(function(){ try {
     } catch(e){ console.warn('[welcome334]', e); }
   }
   var wTry = 0;
-  var wInt = setInterval(function(){ wTry++; var nmEl = document.getElementById('dashName'); if (nmEl && (nmEl.textContent||'').trim()) { clearInterval(wInt); showWelcome(); } if (wTry > 120) clearInterval(wInt); }, 1000);
+  var wInt = setInterval(function(){ wTry++; var nmEl = document.getElementById('dashName') || document.getElementById('leaderDashName'); if (nmEl && (nmEl.textContent||'').trim()) { showWelcome(); } if (wTry > 120) clearInterval(wInt); }, 1000);
   /* 주일 오후 3시 이후 주일마무리 미제출 배너 */
   var wrapDone334 = false;
   async function wrapNudge(){
