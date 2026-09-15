@@ -2847,15 +2847,22 @@ window.reactivateStudent = async function(id) {
     } catch(e){}
     return null;
   };
+  /* Task #350: 토큰 발급 레이스 fix — 발급 중이면 API 요청이 기다리도록 프로미스 기록 */
+  var _amOrig350 = window.amicusFetchToken;
+  window.amicusFetchToken = function(){ var p = _amOrig350.apply(this, arguments); window.__amTokP = p; return p; };
   window.amicusClearToken = function(){
     TOKEN = '';
     try { sessionStorage.removeItem('amicusApiToken'); } catch(e){}
   };
   var origFetch = window.fetch;
-  window.fetch = function(input, init){
+  window.fetch = async function(input, init){
     init = init || {};
     var u = '';
     try { u = typeof input === 'string' ? input : (input && input.url) || ''; } catch(e){}
+    if (u.indexOf('/api/') >= 0 && u.indexOf('staff-auth') === -1 && !TOKEN && window.__amTokP) {
+      try { await window.__amTokP; } catch(e){}
+      try { TOKEN = sessionStorage.getItem('amicusApiToken') || TOKEN; } catch(e){}
+    }
     if (u.indexOf('/api/') >= 0 && TOKEN) {
       try {
         var h = new Headers(init.headers || {});
