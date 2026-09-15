@@ -965,8 +965,11 @@ function renderDashboard() {
     const TINT = { 'dept-blue':['#dbeafe','#1e40af'], 'dept-green':['var(--ng-ok-bg)','var(--ng-ok-text)'],
                    'dept-yellow':['var(--ng-amb100)','#854d0e'], 'dept-orange':['#ffedd5','#9a3412'],
                    'dept-purple':['#f3e8ff','#6b21a8'], 'dept-gray':['#f2f2f4','#6e6e73'] };
-    const vals = depts.map(d => (d.attendedNames && d.attendedNames.length)
-      ? d.attendedNames.length : Math.max(0, (d.attended||0) - (d.visitors||0)));
+    /* Task #320 (2026-09-15): 차트 막대 = 방문자 포함 합산 (staff 차트와 통일) */
+    const vals = depts.map(d => {
+      const _m = (d.attendedNames && d.attendedNames.length) ? d.attendedNames.length : Math.max(0, (d.attended||0) - (d.visitors||0));
+      return _m + (d.visitors||0) + (d.casualVisitors||0);
+    });
     const peak = Math.max(1, ...vals);
     host.innerHTML = depts.map((d, i) => {
       const t = TINT[DEPT_COLOR[d.dept] || 'dept-gray'];
