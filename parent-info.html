@@ -196,7 +196,7 @@ async function loadStudent() {
     return;
   }
   try {
-    var r = await fetch('/api/roster?password=3', { cache: 'no-store' });
+    var r = await fetch('/api/roster?password=3&includeVisitors=1', { cache: 'no-store' });
     if (!r.ok) throw new Error('학생 정보 조회 실패');
     var d = await r.json();
     var students = d.students || [];
