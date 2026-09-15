@@ -202,7 +202,10 @@ async function loadStudent() {
     var students = d.students || [];
     // Match by Notion UUID or AMC code
     var s = students.find(function(x) {
-      return x.id === presetId || x.studentId === presetId;
+      if (x.id === presetId || x.studentId === presetId) return true;
+      /* Task #318: AMC 패딩 무관 숫자 매칭 (AMC-3 == AMC-003) */
+      var _pn = String(presetId).replace(/\D/g, ''); var _sn = String(x.studentId || '').replace(/\D/g, '');
+      return _pn.length > 0 && _pn === String(parseInt(_pn)) && parseInt(_pn) === parseInt(_sn || '0') && /^AMC/i.test(presetId);
     });
     if (!s) {
       showError('학생을 찾을 수 없습니다', '입력하신 학생 ID(' + presetId + ')에 해당하는 학생이 없습니다.');
