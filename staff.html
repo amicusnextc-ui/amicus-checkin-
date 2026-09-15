@@ -3112,10 +3112,11 @@ window.showProfile342 = function(el){
   var chips='';
   function chip(txt,bg,fg){ chips+='<span style="background:'+bg+';color:'+fg+';font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px">'+txt+'</span>'; }
   if(s.baptized&&s.baptized!=='-'&&s.baptized!=='없음')chip('💧 '+esc(s.baptized),'#e0f2fe','#075985');
-  if(s.liabilityForm==='완료')chip('Liability 완료','#dcfce7','#166534'); else if(s.liabilityForm&&s.liabilityForm!=='-')chip('Liability '+esc(s.liabilityForm),'#fee2e2','#991b1b');
-  var pa=''; if(s.fatherName||s.fatherPhone)pa+=row('아버지',(s.fatherName||'')+' '+(s.fatherPhone||''));
-  if(s.motherName||s.motherPhone)pa+=row('어머니',(s.motherName||'')+' '+(s.motherPhone||''));
-  if(!s.fatherName&&!s.motherName&&s.guardian)pa+=row('보호자',(s.guardian||'')+' '+(s.phone||''));
+  var _lf=String(s.liabilityForm||'');
+  if(_lf.indexOf('완료')>-1)chip('Liability 완료','#dcfce7','#166534'); else if(_lf&&_lf!=='-')chip('Liability '+esc(_lf),'#fee2e2','#991b1b');
+  function prow(label,nm,ph){ if(!nm&&!ph) return ''; var h=esc(nm||''); if(ph){ var tel=String(ph).replace(/[^0-9+]/g,''); h+=(h?' ':'')+'<a href="tel:'+tel+'" style="color:#6d28d9;text-decoration:none;font-weight:600">'+esc(ph)+'</a>'; } return '<div style="display:flex;gap:10px;font-size:13px;padding:5px 0;border-bottom:1px solid #f3f4f6"><span style="color:#9ca3af;min-width:64px;flex:none">'+label+'</span><span style="color:#374151">'+h+'</span></div>'; }
+  var pa=''; pa+=prow('아버지',s.fatherName,s.fatherPhone); pa+=prow('어머니',s.motherName,s.motherPhone);
+  if(!s.fatherName&&!s.motherName&&s.guardian)pa+=prow('보호자',s.guardian,s.phone);
   var box=document.createElement('div');
   box.style.cssText='background:#fff;border-radius:20px;max-width:380px;width:100%;max-height:86vh;overflow-y:auto;padding:28px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25)';
   box.innerHTML='<div style="display:flex;justify-content:center;margin-bottom:14px">'+ph+'</div>'
@@ -3124,7 +3125,7 @@ window.showProfile342 = function(el){
    +'<div style="font-size:13px;color:#6b7280;margin-top:4px">'+esc((s.department||'')+(s.grade?' · '+s.grade:'')+(s.age?' ('+s.age+'세)':''))+'</div>'
    +'<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:12px 0">'+chips+'</div>'
    +'<div style="text-align:left;margin-top:6px">'
-   +row('학교',s.school)+row('생년월일',s.dob)+pa+row('주소',s.address)+((s.allergy&&s.allergy!=='없음')?row('⚠️ 알러지',s.allergy):'')
+   +row('학교',s.school)+row('생년월일',s.dob)+pa+row('주소',s.address)+row('마지막 출석',s.lastAttended)+((s.allergy&&s.allergy!=='없음')?row('⚠️ 알러지',s.allergy):'')
    +'</div>'
    +'<div style="display:flex;gap:8px;margin-top:18px">'
    +'<button data-sid="'+esc(sid)+'" onclick="capturePhoto339(this)" style="flex:1;padding:11px 0;border-radius:12px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-weight:700;font-size:13px;cursor:pointer">📷 '+(s.photoUrl?'재촬영':'촬영')+'</button>'
