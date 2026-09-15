@@ -2842,7 +2842,7 @@ window.reactivateStudent = async function(id) {
 <!-- AMICUS NEXTGEN SKIN — shared visual layer (2026-08), logic untouched -->
 <!-- AMICUS NEXTGEN SKIN — moved to the shared /nextgen.css -->
 <script>
-/* Task #322 (2026-09-15): 차트 v3 — NextGen 토큰 정합 (.card, hairline, no-shadow, emoji-free, tabular-nums) */
+/* Task #324 (2026-09-15): 차트 v4 — layout(베이스라인/max-width), 제목 중복 제거, in-place 값 갱신 + height 전환, 평일 힌트 */
 (function(){
   if(window.__deptChart320) return; window.__deptChart320 = true;
   var TINT = {'유아부':['#dbeafe','#1e40af'],'유치부':['#dcfce7','#166534'],'유년부':['#fef3c7','#854d0e'],'초등부':['#ffedd5','#9a3412'],'중고등부':['#f3e8ff','#6b21a8']};
@@ -2852,8 +2852,25 @@ window.reactivateStudent = async function(id) {
     {key:'abs', label:'결석자', c:['#fee2e2','#991b1b']},
     {key:'tot', label:'총 참여', c:['#e0e7ff','#3730a3']}
   ];
+  function weekdayHint(){
+    try {
+      if (document.getElementById('hint324')) return;
+      var dow = new Intl.DateTimeFormat('en-US', {timeZone:'America/Los_Angeles', weekday:'short'}).format(new Date());
+      if (dow === 'Sun') return;
+      var hdr = document.getElementById('__liveHeader');
+      if (!hdr) return;
+      var grid = hdr.nextElementSibling;
+      if (!grid) return;
+      var note = document.createElement('div');
+      note.id = 'hint324';
+      note.style.cssText = 'font-size:12px;color:#9ca3af;margin:-14px 0 16px 4px;';
+      note.textContent = '주일 체크인이 시작되면 실시간으로 집계됩니다';
+      grid.parentElement.insertBefore(note, grid.nextElementSibling);
+    } catch(e){}
+  }
   function build(){
     try {
+      weekdayHint();
       var tables = document.querySelectorAll('table');
       var target = null, iD = -1, iO = -1, iA = -1;
       for (var t = 0; t < tables.length; t++) {
@@ -2888,38 +2905,58 @@ window.reactivateStudent = async function(id) {
         data.push({dept: dept, member: member, vis: vis, abs: abs, tot: member + vis});
       });
       if (!data.length) return;
-      var sig = JSON.stringify(data);
-      var host = document.getElementById('deptChart320');
-      if (host && host.__sig === sig) return;
-      if (!host) {
-        host = document.createElement('div');
-        host.id = 'deptChart320';
-        var card = target.closest('div') || target;
-        card.parentElement.insertBefore(host, card);
-      }
-      host.__sig = sig;
-      var title, items;
+      var items, titleHtml;
       if (data.length === 1) {
         var d0 = data[0];
         var vals = {att: d0.member, vis: d0.vis, abs: d0.abs, tot: d0.tot};
-        items = CAT.map(function(c){ return {label: c.label, val: vals[c.key], c: c.c}; });
-        title = d0.dept + ' 이번 주 — 총 참여 ' + d0.tot + '명 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span>';
+        items = CAT.map(function(c){ return {label: c.label, val: vals[c.key], c: c.c, em: c.key === 'tot'}; });
+        titleHtml = d0.dept + ' · 총 참여 ' + d0.tot + '명 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span>';
       } else {
-        items = data.map(function(d){ return {label: d.dept, val: d.tot, c: TINT[d.dept]}; });
-        title = '부서별 출석 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span>';
+        items = data.map(function(d){ return {label: d.dept, val: d.tot, c: TINT[d.dept], em: false}; });
+        titleHtml = '부서별 출석 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span>';
       }
+      var sig = JSON.stringify(items);
+      var host = document.getElementById('deptChart320');
+      if (host && host.__sig === sig) return;
       var peak = 1; items.forEach(function(d){ if(d.val > peak) peak = d.val; });
-      var bars = items.map(function(d){
-        var h = Math.round(20 + d.val / peak * 120);
-        return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:56px;flex:0 1 90px">' +
-          '<b style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:' + d.c[1] + '">' + d.val + '</b>' +
-          '<i style="display:block;width:100%;height:' + h + 'px;background:' + d.c[0] + ';border-top:3px solid ' + d.c[1] + ';border-radius:8px 8px 0 0"></i>' +
-          '<span style="font-size:12px;font-weight:600;color:#6b7280">' + d.label + '</span></div>';
-      }).join('');
-      host.innerHTML = '<div class="card" style="padding:20px 18px 14px;margin:0 0 14px">' +
-        '<div style="font-size:14px;font-weight:700;color:var(--ng-ink,#111827);margin-bottom:12px">' + title + '</div>' +
-        '<div style="display:flex;align-items:flex-end;gap:18px;justify-content:center">' + bars + '</div></div>';
-    } catch(e){ console.warn('[chart322]', e); }
+      var fresh = !host;
+      if (fresh) {
+        host = document.createElement('div');
+        host.id = 'deptChart320';
+        host.style.cssText = 'opacity:0;transform:translateY(6px);transition:opacity 200ms cubic-bezier(0.23,1,0.32,1),transform 200ms cubic-bezier(0.23,1,0.32,1);';
+        var card = target.closest('div') || target;
+        card.parentElement.insertBefore(host, card);
+      }
+      var canPatch = !fresh && host.__count === items.length;
+      if (canPatch) {
+        var cols = host.querySelectorAll('[data-bar]');
+        items.forEach(function(d, i){
+          var col = cols[i]; if (!col) return;
+          var bEl = col.querySelector('b');
+          var iEl = col.querySelector('i');
+          var sEl = col.querySelector('span');
+          if (bEl) { bEl.textContent = d.val; bEl.style.color = d.c[1]; }
+          if (iEl) { iEl.style.height = Math.round(16 + d.val / peak * 120) + 'px'; iEl.style.background = d.c[0]; iEl.style.borderTopColor = d.c[1]; }
+          if (sEl) sEl.textContent = d.label;
+        });
+        var tEl = host.querySelector('[data-title]');
+        if (tEl) tEl.innerHTML = titleHtml;
+      } else {
+        var bars = items.map(function(d){
+          var h = Math.round(16 + d.val / peak * 120);
+          return '<div data-bar style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:0">' +
+            '<b style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:' + d.c[1] + '">' + d.val + '</b>' +
+            '<i style="display:block;width:100%;height:' + h + 'px;background:' + d.c[0] + ';border-top:3px solid ' + d.c[1] + ';border-radius:8px 8px 0 0;transition:height 250ms cubic-bezier(0.23,1,0.32,1)"></i>' +
+            '<span style="font-size:12px;font-weight:' + (d.em ? 700 : 600) + ';color:' + (d.em ? '#3730a3' : '#6b7280') + '">' + d.label + '</span></div>';
+        }).join('');
+        host.innerHTML = '<div class="card" style="padding:20px 18px 14px;margin:0 0 14px">' +
+          '<div data-title style="font-size:14px;font-weight:700;color:var(--ng-ink,#111827);margin-bottom:14px">' + titleHtml + '</div>' +
+          '<div style="display:flex;align-items:flex-end;gap:20px;max-width:560px;margin:0 auto;padding:0 4px;border-bottom:1px solid var(--ng-hairline,#e8e8ea)">' + bars + '</div></div>';
+        host.__count = items.length;
+      }
+      host.__sig = sig;
+      if (fresh) { requestAnimationFrame(function(){ requestAnimationFrame(function(){ host.style.opacity = '1'; host.style.transform = 'translateY(0)'; }); }); }
+    } catch(e){ console.warn('[chart324]', e); }
   }
   setTimeout(build, 1200);
   setTimeout(build, 3000);
