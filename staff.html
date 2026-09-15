@@ -701,7 +701,7 @@ async function loadAttendance(){
       var sumRes=await fetch("/api/weekly-summary");
       var sumData=await sumRes.json();
       var titleEl=document.getElementById("weeklySummaryTitle");
-      if(titleEl)titleEl.textContent="📊 이번 주 현황 — "+(sumData.sundayStr||"")+" (주일)";
+      if(titleEl)titleEl.textContent="이번 주 현황 — "+(sumData.sundayStr||"")+" (주일)";
       var deptsArr=sumData.depts||[];
       var myShort=(window._dept||"").match(/중고등부|초등부|유년부|유치부|유아부/);
       myShort=myShort?myShort[0]:"";
@@ -2195,7 +2195,7 @@ setTimeout(cwShowIfReady,2000);
     var hdr = document.createElement('div');
     hdr.id = '__liveHeader';
     hdr.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#333;margin:14px 0 8px 4px;';
-    hdr.innerHTML = '📍 오늘 (실시간)<span style="display:inline-flex;align-items:center;gap:4px;background:var(--ng-grn500);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">●LIVE</span>';
+    hdr.innerHTML = '오늘 (실시간)<span style="display:inline-flex;align-items:center;gap:4px;background:var(--ng-grn500);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">●LIVE</span>';
     grid.parentElement.insertBefore(hdr, grid);
   }
   setTimeout(inject, 400);
@@ -2842,7 +2842,7 @@ window.reactivateStudent = async function(id) {
 <!-- AMICUS NEXTGEN SKIN — shared visual layer (2026-08), logic untouched -->
 <!-- AMICUS NEXTGEN SKIN — moved to the shared /nextgen.css -->
 <script>
-/* Task #321 (2026-09-15): 부서 차트 v2 — 단일 부서는 출석/방문/결석/총참여 4-bar, 멀티 부서는 부서별 합산 bar */
+/* Task #322 (2026-09-15): 차트 v3 — NextGen 토큰 정합 (.card, hairline, no-shadow, emoji-free, tabular-nums) */
 (function(){
   if(window.__deptChart320) return; window.__deptChart320 = true;
   var TINT = {'유아부':['#dbeafe','#1e40af'],'유치부':['#dcfce7','#166534'],'유년부':['#fef3c7','#854d0e'],'초등부':['#ffedd5','#9a3412'],'중고등부':['#f3e8ff','#6b21a8']};
@@ -2903,23 +2903,23 @@ window.reactivateStudent = async function(id) {
         var d0 = data[0];
         var vals = {att: d0.member, vis: d0.vis, abs: d0.abs, tot: d0.tot};
         items = CAT.map(function(c){ return {label: c.label, val: vals[c.key], c: c.c}; });
-        title = '📊 ' + d0.dept + ' 이번 주 — 총 참여 ' + d0.tot + '명 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span>';
+        title = d0.dept + ' 이번 주 — 총 참여 ' + d0.tot + '명 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span>';
       } else {
         items = data.map(function(d){ return {label: d.dept, val: d.tot, c: TINT[d.dept]}; });
-        title = '📊 부서별 출석 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span>';
+        title = '부서별 출석 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span>';
       }
       var peak = 1; items.forEach(function(d){ if(d.val > peak) peak = d.val; });
       var bars = items.map(function(d){
         var h = Math.round(20 + d.val / peak * 120);
         return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:56px;flex:0 1 90px">' +
-          '<b style="font:800 15px \'Noto Sans KR\',sans-serif;color:' + d.c[1] + '">' + d.val + '</b>' +
+          '<b style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:' + d.c[1] + '">' + d.val + '</b>' +
           '<i style="display:block;width:100%;height:' + h + 'px;background:' + d.c[0] + ';border-top:3px solid ' + d.c[1] + ';border-radius:8px 8px 0 0"></i>' +
-          '<span style="font:600 12px \'Noto Sans KR\',sans-serif;color:#6b7280">' + d.label + '</span></div>';
+          '<span style="font-size:12px;font-weight:600;color:#6b7280">' + d.label + '</span></div>';
       }).join('');
-      host.innerHTML = '<div style="background:#fff;border-radius:16px;padding:20px 16px 12px;margin:0 0 14px;box-shadow:0 1px 4px rgba(0,0,0,.07)">' +
-        '<div style="font:700 14px \'Noto Sans KR\',sans-serif;color:#374151;margin-bottom:12px">' + title + '</div>' +
+      host.innerHTML = '<div class="card" style="padding:20px 18px 14px;margin:0 0 14px">' +
+        '<div style="font-size:14px;font-weight:700;color:var(--ng-ink,#111827);margin-bottom:12px">' + title + '</div>' +
         '<div style="display:flex;align-items:flex-end;gap:18px;justify-content:center">' + bars + '</div></div>';
-    } catch(e){ console.warn('[chart321]', e); }
+    } catch(e){ console.warn('[chart322]', e); }
   }
   setTimeout(build, 1200);
   setTimeout(build, 3000);
