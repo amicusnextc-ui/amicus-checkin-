@@ -369,6 +369,16 @@ module.exports = async (req, res) => {
       const guardianParts = [fields.fatherName, fields.motherName].filter(Boolean);
       if (guardianParts.length > 0) props['\ubcf4\ud638\uc790 (Guardian)'] = { rich_text: [{ text: { content: guardianParts.join('/') } }] };
       if (Object.keys(props).length === 0) return res.status(400).json({ error: 'No fields to update' });
+      /* Task #353: 학교 채워지면 낡은 메모 자동 제거 */
+      if (fields.school) {
+        try {
+          const _gRes = await fetch('https://api.notion.com/v1/pages/' + targetPageId, { headers: piHeaders });
+          const _gd = await _gRes.json();
+          const _cn = ((_gd.properties && _gd.properties['특이사항 (Notes)'] && _gd.properties['특이사항 (Notes)'].rich_text) || []).map(b => b.plain_text || '').join('');
+          const _sc = _cn.replace(/\s*·?\s*학교[^·\n\[]*(업데이트|등록)[^·\n\[]*필요[^·\n\[]*/g,'').replace(/·\s*·/g,'·').replace(/[ \t·]+(?=\n|$)/gm,'').replace(/(^|\n)[ \t·]+/g,'$1');
+          if (_sc !== _cn) props['특이사항 (Notes)'] = { rich_text: [{ text: { content: _sc } }] };
+        } catch (e) {}
+      }
       const uRes = await fetch('https://api.notion.com/v1/pages/' + targetPageId, {
         method: 'PATCH', headers: piHeaders,
         body: JSON.stringify({ properties: props })
@@ -579,7 +589,7 @@ module.exports = async (req, res) => {
     if (body.school !== undefined) props['\ud559\uad50 (School)'] = { rich_text: [{ text: { content: body.school||'' } }] };
     if (body.dob !== undefined) props['date:\uc0dd\ub144\uc6d4\uc77c (DOB):start'] = body.dob || null; // might need adjustment — but Notion API requires date object
     if (allergy !== undefined) props['\uc54c\ub7ec\uc9c0 (Allergy)'] = { rich_text: [{ text: { content: allergy||'' } }] };
-    if (notes !== undefined) props['\ud2b9\uc774\uc0ac\ud56d (Notes)'] = { rich_text: [{ text: { content: notes||'' } }] };
+    if (notes !== undefined) { let _nt353 = notes||''; /* Task #353: 학교 채워지면 낡은 '학교 … 필요' 메모 자동 제거 */ if (body.school) { _nt353 = _nt353.replace(/\s*·?\s*학교[^·\n\[]*(업데이트|등록)[^·\n\[]*필요[^·\n\[]*/g,'').replace(/·\s*·/g,'·').replace(/[ \t·]+(?=\n|$)/gm,'').replace(/(^|\n)[ \t·]+/g,'$1'); } props['특이사항 (Notes)'] = { rich_text: [{ text: { content: _nt353 } }] }; }
     if (liabilityForm !== undefined) props['Liability Form'] = { select: liabilityForm ? { name: liabilityForm } : null };
     if (status !== undefined) props['\uc0c1\ud0dc (Status)'] = { select: status ? { name: status } : null };
     if (lastAttended !== undefined) props['\ub9c8\uc9c0\ub9c9 \ucd9c\uc11d (Last Attended)'] = { date: { start: lastAttended } };
