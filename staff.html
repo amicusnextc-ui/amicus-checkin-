@@ -2842,24 +2842,31 @@ window.reactivateStudent = async function(id) {
 <!-- AMICUS NEXTGEN SKIN — shared visual layer (2026-08), logic untouched -->
 <!-- AMICUS NEXTGEN SKIN — moved to the shared /nextgen.css -->
 <script>
-/* Task #320 (2026-09-15): 부서별 출석 미니 차트 — 이번주 현황 table 기반, 방문자 포함 합산 */
+/* Task #321 (2026-09-15): 부서 차트 v2 — 단일 부서는 출석/방문/결석/총참여 4-bar, 멀티 부서는 부서별 합산 bar */
 (function(){
   if(window.__deptChart320) return; window.__deptChart320 = true;
   var TINT = {'유아부':['#dbeafe','#1e40af'],'유치부':['#dcfce7','#166534'],'유년부':['#fef3c7','#854d0e'],'초등부':['#ffedd5','#9a3412'],'중고등부':['#f3e8ff','#6b21a8']};
+  var CAT = [
+    {key:'att', label:'출석자', c:['#dcfce7','#166534']},
+    {key:'vis', label:'방문자', c:['#f3e8ff','#6b21a8']},
+    {key:'abs', label:'결석자', c:['#fee2e2','#991b1b']},
+    {key:'tot', label:'총 참여', c:['#e0e7ff','#3730a3']}
+  ];
   function build(){
     try {
       var tables = document.querySelectorAll('table');
-      var target = null, idxDept = -1, idxOut = -1;
+      var target = null, iD = -1, iO = -1, iA = -1;
       for (var t = 0; t < tables.length; t++) {
         var hr = tables[t].querySelector('thead tr') || tables[t].rows[0];
         if (!hr) continue;
-        var iD = -1, iO = -1;
+        var d1 = -1, o1 = -1, a1 = -1;
         for (var j = 0; j < hr.cells.length; j++) {
           var ht = (hr.cells[j].textContent||'').trim();
-          if (ht === '부서') iD = j;
-          else if (ht === '출석') iO = j;
+          if (ht === '부서') d1 = j;
+          else if (ht === '출석') o1 = j;
+          else if (ht === '결석') a1 = j;
         }
-        if (iD >= 0 && iO >= 0) { target = tables[t]; idxDept = iD; idxOut = iO; break; }
+        if (d1 >= 0 && o1 >= 0) { target = tables[t]; iD = d1; iO = o1; iA = a1; break; }
       }
       if (!target) return;
       var rows = target.querySelectorAll('tbody tr');
@@ -2867,15 +2874,18 @@ window.reactivateStudent = async function(id) {
       var data = [];
       Array.prototype.forEach.call(rows, function(tr){
         var cells = tr.cells;
-        if (!cells || cells.length <= Math.max(idxDept, idxOut)) return;
-        var dept = (cells[idxDept].textContent||'').trim().split(/[\s(]/)[0];
+        if (!cells || cells.length <= iO) return;
+        var dept = (cells[iD].textContent||'').trim().split(/[\s(]/)[0];
         if (!TINT[dept]) return;
-        var txt = (cells[idxOut].textContent||'').trim();
+        var txt = (cells[iO].textContent||'').trim();
         var mm = txt.match(/^(\d+)/);
         var vm = txt.match(/\+\s*(\d+)\s*\uBC29\uBB38/);
         if (!mm) return;
-        var combined = parseInt(mm[1],10) + (vm ? parseInt(vm[1],10) : 0);
-        data.push({dept: dept, val: combined});
+        var member = parseInt(mm[1],10);
+        var vis = vm ? parseInt(vm[1],10) : 0;
+        var abs = 0;
+        if (iA >= 0 && cells[iA]) { var am = (cells[iA].textContent||'').trim().match(/^(\d+)/); if (am) abs = parseInt(am[1],10); }
+        data.push({dept: dept, member: member, vis: vis, abs: abs, tot: member + vis});
       });
       if (!data.length) return;
       var sig = JSON.stringify(data);
@@ -2888,19 +2898,28 @@ window.reactivateStudent = async function(id) {
         card.parentElement.insertBefore(host, card);
       }
       host.__sig = sig;
-      var peak = 1; data.forEach(function(d){ if(d.val > peak) peak = d.val; });
-      var bars = data.map(function(d){
-        var tt = TINT[d.dept];
+      var title, items;
+      if (data.length === 1) {
+        var d0 = data[0];
+        var vals = {att: d0.member, vis: d0.vis, abs: d0.abs, tot: d0.tot};
+        items = CAT.map(function(c){ return {label: c.label, val: vals[c.key], c: c.c}; });
+        title = '📊 ' + d0.dept + ' 이번 주 — 총 참여 ' + d0.tot + '명 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span>';
+      } else {
+        items = data.map(function(d){ return {label: d.dept, val: d.tot, c: TINT[d.dept]}; });
+        title = '📊 부서별 출석 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span>';
+      }
+      var peak = 1; items.forEach(function(d){ if(d.val > peak) peak = d.val; });
+      var bars = items.map(function(d){
         var h = Math.round(20 + d.val / peak * 120);
         return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:56px;flex:0 1 90px">' +
-          '<b style="font:800 15px \'Noto Sans KR\',sans-serif;color:' + tt[1] + '">' + d.val + '</b>' +
-          '<i style="display:block;width:100%;height:' + h + 'px;background:' + tt[0] + ';border-top:3px solid ' + tt[1] + ';border-radius:8px 8px 0 0"></i>' +
-          '<span style="font:600 12px \'Noto Sans KR\',sans-serif;color:#6b7280">' + d.dept + '</span></div>';
+          '<b style="font:800 15px \'Noto Sans KR\',sans-serif;color:' + d.c[1] + '">' + d.val + '</b>' +
+          '<i style="display:block;width:100%;height:' + h + 'px;background:' + d.c[0] + ';border-top:3px solid ' + d.c[1] + ';border-radius:8px 8px 0 0"></i>' +
+          '<span style="font:600 12px \'Noto Sans KR\',sans-serif;color:#6b7280">' + d.label + '</span></div>';
       }).join('');
       host.innerHTML = '<div style="background:#fff;border-radius:16px;padding:20px 16px 12px;margin:0 0 14px;box-shadow:0 1px 4px rgba(0,0,0,.07)">' +
-        '<div style="font:700 14px \'Noto Sans KR\',sans-serif;color:#374151;margin-bottom:12px">📊 부서별 출석 <span style="font-weight:500;color:#9ca3af;font-size:11px">(방문자 포함)</span></div>' +
+        '<div style="font:700 14px \'Noto Sans KR\',sans-serif;color:#374151;margin-bottom:12px">' + title + '</div>' +
         '<div style="display:flex;align-items:flex-end;gap:18px;justify-content:center">' + bars + '</div></div>';
-    } catch(e){ console.warn('[chart320]', e); }
+    } catch(e){ console.warn('[chart321]', e); }
   }
   setTimeout(build, 1200);
   setTimeout(build, 3000);
