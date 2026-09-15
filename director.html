@@ -968,7 +968,7 @@ function renderDashboard() {
     /* Task #320 (2026-09-15): 차트 막대 = 방문자 포함 합산 (staff 차트와 통일) */
     const vals = depts.map(d => {
       const _m = (d.attendedNames && d.attendedNames.length) ? d.attendedNames.length : Math.max(0, (d.attended||0) - (d.visitors||0));
-      return _m + (d.visitors||0) + (d.casualVisitors||0);
+      return _m + (d.visitors||0); /* Task #323: casual은 corrector가 dedup 후 차트 동기화 */
     });
     const peak = Math.max(1, ...vals);
     host.innerHTML = depts.map((d, i) => {
@@ -2210,6 +2210,28 @@ async function adminForceCheckout(rid, name){
           cells[4].textContent = fix.vis || '-';
         }
       });
+      /* Task #323 (2026-09-15): 차트 막대도 dedup된 합산으로 동기화 (29 이중카운트 fix) */
+      try {
+        var _bcols = document.querySelectorAll('.ng-bar-col');
+        if (_bcols.length) {
+          var _bvals = [];
+          Array.prototype.forEach.call(_bcols, function(col){
+            var lb = col.querySelector('span');
+            var short = lb ? lb.textContent.trim() : '';
+            var fx = depts[short];
+            _bvals.push({col: col, val: fx ? fx.att : null});
+          });
+          var _bpeak = 1;
+          _bvals.forEach(function(x){ if (x.val !== null && x.val > _bpeak) _bpeak = x.val; });
+          _bvals.forEach(function(x){
+            if (x.val === null) return;
+            var bEl = x.col.querySelector('b');
+            var iEl = x.col.querySelector('i');
+            if (bEl && bEl.textContent != String(x.val)) bEl.textContent = x.val;
+            if (iEl) iEl.style.height = Math.round(24 + x.val / _bpeak * 172) + 'px';
+          });
+        }
+      } catch(e3){ console.warn('[Task 323]', e3); }
       var sv = document.getElementById('statVisitors');
       if(sv) sv.textContent = totalVis || '—';
       var sa = document.getElementById('statAttended');
