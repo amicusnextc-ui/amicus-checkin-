@@ -172,6 +172,39 @@ module.exports = async (req, res) => {
     } = body;
 
     // === SEND LIABILITY INVITE EMAILS (single or bulk, no pageId guard) ===
+    // === Task #338: 사진 업로드 (교회 촬영) → Notion Files + 촬영 완료 ===
+    if (action === 'upload-photo') {
+      const _upId = body.pageId;
+      const _img = body.imageBase64 || '';
+      if (!_upId || !_img) return res.status(400).json({ error: 'pageId and imageBase64 required' });
+      try {
+        const _nh = { 'Authorization': 'Bearer ' + process.env.NOTION_TOKEN, 'Notion-Version': '2022-06-28' };
+        const _fn = body.filename || ('photo-' + Date.now() + '.jpg');
+        const _cRes = await fetch('https://api.notion.com/v1/file_uploads', {
+          method: 'POST', headers: { ..._nh, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: _fn, content_type: 'image/jpeg' })
+        });
+        const _cd = await _cRes.json();
+        if (!_cRes.ok || !_cd.id) return res.status(502).json({ error: 'file_upload create failed: ' + (_cd.message || _cRes.status) });
+        const _buf = Buffer.from(_img.replace(/^data:[^,]+,/, ''), 'base64');
+        const _fd = new FormData();
+        _fd.append('file', new Blob([_buf], { type: 'image/jpeg' }), _fn);
+        const _sRes = await fetch('https://api.notion.com/v1/file_uploads/' + _cd.id + '/send', { method: 'POST', headers: _nh, body: _fd });
+        if (!_sRes.ok) { const _sd = await _sRes.json().catch(() => ({})); return res.status(502).json({ error: 'file_upload send failed: ' + (_sd.message || _sRes.status) }); }
+        const _pRes = await fetch('https://api.notion.com/v1/pages/' + _upId, {
+          method: 'PATCH', headers: { ..._nh, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ properties: {
+            '사진 (Photo)': { files: [{ type: 'file_upload', file_upload: { id: _cd.id }, name: _fn }] },
+            '사진 촬영 (Photo)': { select: { name: '촬영 완료' } }
+          } })
+        });
+        if (!_pRes.ok) { const _pd = await _pRes.json().catch(() => ({})); return res.status(502).json({ error: 'page attach failed: ' + (_pd.message || _pRes.status) }); }
+        return res.status(200).json({ ok: true });
+      } catch (e) {
+        return res.status(500).json({ error: 'upload-photo error: ' + e.message });
+      }
+    }
+
     if (action === 'send-liability-invite') {
       const pageIds = body.pageIds || (pageId ? [pageId] : []);
       if (!pageIds.length) return res.status(400).json({ error: 'pageId or pageIds required' });
