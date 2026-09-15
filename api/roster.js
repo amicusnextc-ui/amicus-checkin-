@@ -138,6 +138,7 @@ module.exports = async (req, res) => {
         studentId,
         lastAttended: prop(page, '마지막 출석 (Last Attended)'),
         inviteSentAt: prop(page, '안내 발송일 (Invite Sent)'),
+        photoUrl: (function(){ try { var _f = page.properties['사진 (Photo)']; var _x = _f && _f.files && _f.files[0]; return _x ? ((_x.file && _x.file.url) || (_x.external && _x.external.url) || '') : ''; } catch(e){ return ''; } })(),
       };
     });
     // Task #276: archived mode — filter out test pollution (🗑️/🧪 prefix + empty names)
