@@ -2986,6 +2986,78 @@ setInterval(function(){ try {
   if (el.__sig !== txt) { el.innerHTML = txt; el.__sig = txt; }
 } catch(e){} }, 3000);
 </script>
+<script>
+/* Task #334 (2026-09-15): 로그인 환영 모달 (오늘 할 일 체크리스트) + 주일 오후 주일마무리 미제출 배너 */
+(function(){
+  if (window.__welcome334) return; window.__welcome334 = true;
+  var CHEER = [
+    '오늘도 아이들을 위해 수고하시는 손길, 하나님이 기억하십니다',
+    '선생님의 섬김이 한 영혼을 자라게 합니다',
+    '작은 섬김 하나도 헛되지 않습니다 (고전 15:58)',
+    '오늘 만나는 아이 한 명 한 명이 하나님의 선물입니다',
+    '수고하시는 모든 순간이 예배입니다'
+  ];
+  function laNow(){ return new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Los_Angeles'})); }
+  function lastSundayMD(){ var n = laNow(); var s = new Date(n); s.setDate(n.getDate() - n.getDay()); return (s.getMonth()+1) + '/' + s.getDate(); }
+  function goWrapTab(){ var btns = document.querySelectorAll('button'); for (var k = 0; k < btns.length; k++) { if ((btns[k].textContent||'').indexOf('주일 마무리') >= 0) { btns[k].click(); return; } } }
+  window.__goWrap334 = goWrapTab;
+  function showWelcome(){
+    try {
+      if (sessionStorage.getItem('welcome334')) return;
+      var nmEl = document.getElementById('dashName');
+      var nm = nmEl ? (nmEl.textContent||'').trim() : '';
+      if (!nm) return; /* 로그인 전 */
+      sessionStorage.setItem('welcome334', '1');
+      var n = laNow();
+      var isSun = n.getDay() === 0;
+      var cheer = CHEER[(n.getDate() + n.getMonth()) % CHEER.length];
+      var todo = isSun
+        ? ['1️⃣ 체크인 관리 — 오늘 출석 확인', '2️⃣ 예배 후 체크아웃 돕기', '3️⃣ 체크아웃 끝나면 바로 → 주일 마무리 제출 (1분!)', '4️⃣ 새가족·특이사항 메모']
+        : ['1️⃣ 지난 주일 결석자 확인 → 연락', '2️⃣ 명단 정보 보완 (배너 확인)', '3️⃣ 생일자 확인 🎂'];
+      var ov = document.createElement('div');
+      ov.id = 'welcome334';
+      ov.style.cssText = 'position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+      ov.innerHTML = '<div style="background:#fff;border-radius:20px;max-width:420px;width:100%;padding:26px 24px;box-shadow:0 20px 60px rgba(0,0,0,.25)">' +
+        '<div style="font-size:19px;font-weight:800;color:#111827;margin-bottom:6px">' + nm + ', 환영합니다 🙌</div>' +
+        '<div style="font-size:13px;color:#7c3aed;font-weight:600;margin-bottom:16px">' + cheer + '</div>' +
+        '<div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">' + (isSun ? '오늘 (주일) 할 일' : '이번 주 할 일') + '</div>' +
+        todo.map(function(t){ return '<div style="font-size:14px;color:#374151;padding:7px 0;border-bottom:1px solid #f3f4f6">' + t + '</div>'; }).join('') +
+        '<button onclick="document.getElementById(\'welcome334\').remove()" style="margin-top:18px;width:100%;background:#111827;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer">오늘도 화이팅! 💪</button></div>';
+      document.body.appendChild(ov);
+    } catch(e){ console.warn('[welcome334]', e); }
+  }
+  var wTry = 0;
+  var wInt = setInterval(function(){ wTry++; var nmEl = document.getElementById('dashName'); if (nmEl && (nmEl.textContent||'').trim()) { clearInterval(wInt); showWelcome(); } if (wTry > 120) clearInterval(wInt); }, 1000);
+  /* 주일 오후 3시 이후 주일마무리 미제출 배너 */
+  var wrapDone334 = false;
+  async function wrapNudge(){
+    try {
+      if (wrapDone334) return;
+      var n = laNow();
+      if (n.getDay() !== 0 || n.getHours() < 15) { var old0 = document.getElementById('wrapNudge334'); if (old0) old0.remove(); return; }
+      var dept = window._dept || '';
+      if (!dept) return;
+      var short = dept.split(' ')[0];
+      var r = await fetch('/api/attendance?type=requests&department=' + encodeURIComponent(dept) + '&_=' + Date.now());
+      var d = await r.json();
+      var md = lastSundayMD();
+      var found = (d.requests || d.results || []).some(function(q){
+        var ti = (q.title || ''); var ct = (q.content || '');
+        return ti.indexOf('주일 마무리') >= 0 && ct.indexOf(md + '.') === 0;
+      });
+      if (found) { wrapDone334 = true; var old1 = document.getElementById('wrapNudge334'); if (old1) old1.remove(); return; }
+      if (document.getElementById('wrapNudge334')) return;
+      var bar = document.createElement('div');
+      bar.id = 'wrapNudge334';
+      bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;background:linear-gradient(90deg,#f59e0b,#f97316);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:center;gap:14px;font-size:14px;font-weight:700;box-shadow:0 2px 12px rgba(0,0,0,.2)';
+      bar.innerHTML = '⏰ ' + short + ' 주일 마무리가 아직 제출되지 않았어요 <button onclick="window.__goWrap334();this.parentElement.remove()" style="background:#fff;color:#c2410c;border:none;border-radius:999px;padding:7px 16px;font-weight:800;font-size:13px;cursor:pointer">지금 작성하기 (1분)</button>';
+      document.body.appendChild(bar);
+    } catch(e){}
+  }
+  setTimeout(wrapNudge, 4000);
+  setInterval(wrapNudge, 120000);
+})();
+</script>
 </body>
 </html>
 
