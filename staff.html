@@ -3170,6 +3170,17 @@ window.showProfile342 = function(el){
   ov.appendChild(box); document.body.appendChild(ov);
 };
 </script>
+<script>
+/* Task #358: 새 배포 자동 반영 — 탭 복원 시 버전 체크 후 새로고침 */
+(function(){
+  var TAG=null;
+  function cur(){ return fetch(location.pathname,{method:"HEAD",cache:"no-store"}).then(function(r){return r.headers.get("etag")||r.headers.get("last-modified")||""}).catch(function(){return null}); }
+  cur().then(function(t){ TAG=t; });
+  function check(){ if(!TAG) return; cur().then(function(t){ if(t&&t!==TAG){ var ae=document.activeElement; var typing=ae&&(ae.tagName==="INPUT"||ae.tagName==="TEXTAREA"); if(!typing){ location.reload(); } } }); }
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden) check(); });
+  setInterval(check, 600000);
+})();
+</script>
 </body>
 </html>
 
