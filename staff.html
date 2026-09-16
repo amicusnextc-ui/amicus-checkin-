@@ -772,6 +772,7 @@ async function loadAttendance(){
       var sumBody=document.getElementById("weeklySummaryBody");
       var sumCard=document.getElementById("weeklySummary");
       if(sumBody)sumBody.innerHTML=sumHtml;
+      try{ if(window.__build332) window.__build332(); }catch(e332){} /* Task #355: unhide 전 카드 변환 — 표 깜박임 제거 */
       if(sumCard)sumCard.classList.remove("hidden");
     }catch(e2){console.warn("summary error",e2);}
   }catch(e){tbody.innerHTML="<tr><td colspan='8' style='text-align:center;padding:20px;color:var(--ng-red500)'>오류: "+e.message+"</td></tr>";}
@@ -2985,6 +2986,7 @@ window.reactivateStudent = async function(id) {
       try { if (single) { target.style.display = 'none'; } else { target.style.display = ''; } } catch(eH){}
     } catch(e){ console.warn('[chart332]', e); }
   }
+  window.__build332 = build; /* Task #355 */
   setTimeout(build, 1200);
   setTimeout(build, 3000);
   setInterval(build, 5000);
