@@ -47,8 +47,8 @@ jobs:
           // New grade -> dept mapping
           function gradeToDept(g) {
             if(!g || g === '졸업') return '졸업';
-            if(/Pre-?K|Toddler/i.test(g)) return '유치부 (Preschool)';
-            if(/^K$|Kindergarten/i.test(g)) return '유년부 (Elementary Jr)';
+            if(/Pre-?K|Toddler/i.test(g)) return '유아부 (Infant)'; /* Task #357: 체크인 폼 기준 통일 */
+            if(/^K$|Kindergarten/i.test(g)) return '유치부 (Preschool)';
             const m = g.match(/^(\d+)/);
             if(!m) return null;
             const n = parseInt(m[1]);
