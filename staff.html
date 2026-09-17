@@ -2330,7 +2330,7 @@ setTimeout(cwShowIfReady,2000);
     else if (typeof window._leaderName === "string" && window._leaderName) name = window._leaderName;
     if (!name) {
       var nameEl = document.getElementById("dashName") || document.getElementById("leaderDashName");
-      name = nameEl ? (nameEl.textContent || "").replace(/전도사님|간사님|님/g, "").trim() : "";
+      name = nameEl ? (nameEl.textContent || "").replace(/강도사님|전도사님|간사님|님/g, "").trim() : "";
     }
     if (!name) name = getVal("staffName").trim();
     // === Dept ===
