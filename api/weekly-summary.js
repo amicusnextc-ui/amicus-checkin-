@@ -3,7 +3,7 @@ const STUDENT_DB = process.env.NOTION_STUDENT_DB_ID || "107828732f784c39bcb0136a
 const NOTION_VERSION = "2022-06-28";
 const TIMEZONE = "America/Los_Angeles";
 const DEPT_ORDER = ["유아부 (Infant)","유치부 (Preschool)","유년부 (Elementary Jr)","초등부 (Elementary)","중고등부 (Youth)"];
-const STAFF_MAP = {"유아부 (Infant)":"이지혜","유치부 (Preschool)":"김향숙","유년부 (Elementary Jr)":"박은혜","초등부 (Elementary)":"백진주","중고등부 (Youth)":"박명철 전도사님"};
+const STAFF_MAP = {"유아부 (Infant)":"이지혜","유치부 (Preschool)":"김향숙","유년부 (Elementary Jr)":"박은혜","초등부 (Elementary)":"백진주","중고등부 (Youth)":"박명철 강도사님"};
 
 module.exports = async (req, res) => {
   // === AUTH (Task #305): inline soft/hard-mode shared-secret check ===
