@@ -2333,6 +2333,7 @@ setTimeout(cwShowIfReady,2000);
       name = nameEl ? (nameEl.textContent || "").replace(/강도사님|전도사님|간사님|님/g, "").trim() : "";
     }
     if (!name) name = getVal("staffName").trim();
+    name = name.replace(/강도사님|전도사님|간사님/g, "").trim(); /* Task #362d: 직함 제거 — 모든 분기 공통 */
     // === Dept ===
     var dept = "";
     // 1) window._dept (set on staff login; director sets null)
