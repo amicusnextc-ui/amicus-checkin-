@@ -2419,16 +2419,6 @@ async function adminForceCheckout(rid, name){
   document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') quietRefresh(); });
 })();
 </script>
-<script>
-/* Task #358: 새 배포 자동 반영 */
-(function(){
-  var TAG=null;
-  function cur(){ return fetch(location.pathname,{method:"HEAD",cache:"no-store"}).then(function(r){return r.headers.get("etag")||r.headers.get("last-modified")||""}).catch(function(){return null}); }
-  cur().then(function(t){ TAG=t; });
-  function check(){ if(!TAG) return; cur().then(function(t){ if(t&&t!==TAG){ var ae=document.activeElement; var typing=ae&&(ae.tagName==="INPUT"||ae.tagName==="TEXTAREA"); if(!typing){ location.reload(); } } }); }
-  document.addEventListener("visibilitychange",function(){ if(!document.hidden) check(); });
-  setInterval(check, 600000);
-})();
-</script>
+<!-- #358 removed (#360) -->
 </body>
 </html>
