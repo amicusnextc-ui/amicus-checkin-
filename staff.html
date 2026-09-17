@@ -3170,17 +3170,7 @@ window.showProfile342 = function(el){
   ov.appendChild(box); document.body.appendChild(ov);
 };
 </script>
-<script>
-/* Task #358: 새 배포 자동 반영 — 탭 복원 시 버전 체크 후 새로고침 */
-(function(){
-  var TAG=null;
-  function cur(){ return fetch(location.pathname,{method:"HEAD",cache:"no-store"}).then(function(r){return r.headers.get("etag")||r.headers.get("last-modified")||""}).catch(function(){return null}); }
-  cur().then(function(t){ TAG=t; });
-  function check(){ if(!TAG) return; cur().then(function(t){ if(t&&t!==TAG){ var ae=document.activeElement; var typing=ae&&(ae.tagName==="INPUT"||ae.tagName==="TEXTAREA"); if(!typing){ location.reload(); } } }); }
-  document.addEventListener("visibilitychange",function(){ if(!document.hidden) check(); });
-  setInterval(check, 600000);
-})();
-</script>
+<!-- Task #358 자동 새로고침 제거: no-store 헤더(#359)가 대체. 엣지 불일치 시 리로드 루프 위험 -->
 <div id="vtag358" style="position:fixed;left:8px;bottom:6px;z-index:99998;font:600 10px -apple-system,sans-serif;color:#c4c9d4;pointer-events:none">v9.16-2</div>
 </body>
 </html>
