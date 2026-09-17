@@ -62,6 +62,9 @@ module.exports = async (req, res) => {
     return res.status(405).end();
   }
 
+  /* Task #361: 직함 suffix 제거 — 드롭다운 '박명철 강도사님' 등도 인증되게 */
+  name = String(name || '').replace(/\s*(강도사님|전도사님|간사님)\s*$/, '').trim();
+
   if (!name || !password) return res.status(400).json({ ok: false, error: 'missing params' });
 
   const staffPw = process.env.STAFF_PASSWORD || process.env.ADMIN_PASSWORD;
