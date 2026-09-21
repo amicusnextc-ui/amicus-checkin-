@@ -398,7 +398,8 @@ module.exports = async (req, res) => {
       return res.json({ studentId: sid, token, link: base + '?studentId=' + sid + '&token=' + token });
     }
     
-    if (!pageId) return res.status(400).json({ error: 'Missing pageId' });
+    const _isCreate367 = !pageId && !action && !!(name && String(name).trim()); /* Task #367: 신규 추가는 pageId 없이 허용 */
+    if (!pageId && !_isCreate367) return res.status(400).json({ error: 'Missing pageId' });
 
     if (action === 'parent-register') {
       const crypto = require('crypto');
@@ -608,6 +609,14 @@ module.exports = async (req, res) => {
       delete props['date:\uc0dd\ub144\uc6d4\uc77c (DOB):start'];
     }
 
+    if (_isCreate367) {
+      /* Task #367: 신규 학생 생성 (pageId 없이 저장) */
+      const _SDB = process.env.NOTION_STUDENT_DB_ID || '107828732f784c39bcb0136a4397c758';
+      if (!props['등록일 (Registered)']) props['등록일 (Registered)'] = { date: { start: new Date().toISOString().slice(0,10) } };
+      if (!props['상태 (Status)'] || !props['상태 (Status)'].select) props['상태 (Status)'] = { select: { name: '활성 (Active)' } };
+      const _created = await notion.pages.create({ parent: { database_id: _SDB }, properties: props });
+      return res.json({ success: true, action: 'created', pageId: _created.id });
+    }
     if (Object.keys(props).length > 0) {
       await notion.pages.update({ page_id: pageId, properties: props });
     }
