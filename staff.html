@@ -686,7 +686,7 @@ async function loadAttendance(){
     /* Task #364: 오늘 출석 행에 명단 정보 병합 — 학년/생일/부모 빈칸과 거짓 “정보 미입력” 경고 제거 */
     try{ var _rr=await fetch("/api/roster?includeVisitors=1"); if(_rr.ok){ var _rj=await _rr.json(); window.__roster365=_rj.students||[]; /* Task #365 */ var _m={}; (_rj.students||[]).forEach(function(s){ _m[String(s.name||"").trim()]=s; }); var _F=["grade","dob","nameEN","school","address","allergy","guardian","phone","fatherName","fatherPhone","motherName","motherPhone","fatherEmail","motherEmail"]; records.forEach(function(r){ var s=_m[String(r.name||"").trim()]; if(!s) return; _F.forEach(function(k){ if(!r[k] && s[k]) r[k]=s[k]; }); }); } }catch(e){}
     document.getElementById("statTotal").textContent=records.length;
-    document.getElementById("statIn").textContent=records.filter(function(r){return r.checkIn;}).length;
+    document.getElementById("statIn").textContent=records.filter(function(r){return r.checkIn && !r.checkOut;}).length; /* Task #366: 재실 중 = 체크인했고 아직 귀가 전 */
     document.getElementById("statOut").textContent=records.filter(function(r){return r.checkOut;}).length;
     var _pendingCnt=records.filter(function(r){return r.checkIn && !r.checkOut;}).length;
     var _pendBadge=document.getElementById("pendingCheckoutBadge");
