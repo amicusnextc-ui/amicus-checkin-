@@ -2,6 +2,10 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8"/>
+<script>
+/* Task #363: 인증 래퍼 선설치 — 첫 API 호출이 키 없이 나가 401→빈 화면 되는 버그 방지 */
+(function(){if(window.__authFetchInstalled)return;window.__authFetchInstalled=true;var TOKEN="AMICUS-PUBLIC-KIOSK-V1";var o=window.fetch;window.fetch=function(input,init){init=init||{};var u="";try{u=typeof input==="string"?input:(input&&input.url)||"";}catch(e){}if(u.indexOf("/api/")>=0&&TOKEN){try{var h=new Headers(init.headers||{});if(!h.has("authorization")&&!h.has("x-api-key"))h.set("authorization","Bearer "+TOKEN);init.headers=h;}catch(e){}}return o.call(this,input,init);};})();
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>중고등부 체크인 키오스크 | 아미쿠스</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -199,6 +203,7 @@ let _refreshTimer = null;
 async function loadStudents() {
   try {
     const r = await fetch('/api/roster', { cache: 'no-store' });
+    if(!r.ok) throw new Error('명단 불러오기 실패 (HTTP '+r.status+')'); /* Task #363: 401을 조용히 빈 목록으로 처리하지 않음 */
     const d = await r.json();
     students = (d.students || []).filter(s =>
       s.department && s.department.indexOf(DEPT.short) === 0
