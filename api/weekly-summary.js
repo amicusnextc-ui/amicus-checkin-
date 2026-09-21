@@ -106,6 +106,8 @@ module.exports = async (req, res) => {
     ]};
     const allStu = await queryAll(STUDENT_DB, stuFilter);
 
+    const MEMBER_NAMES368 = new Set((allStu||[]).map(function(p){ try { return String((p.properties["이름 (Name)"].title[0]||{}).plain_text||"").trim(); } catch(e) { return ""; } }).filter(Boolean)); /* Task #368 */
+
     const ds = {};
     DEPT_ORDER.forEach(d => { ds[d] = { attended: 0, visitors: 0, total: 0 }; });
 
@@ -120,7 +122,8 @@ module.exports = async (req, res) => {
       const isNew = p.properties["방문자 (Visitor)"]?.checkbox || false;
       if (!ds[dept]) ds[dept] = { attended: 0, visitors: 0, total: 0 };
       const _nm = p.properties["이름 (Name)"]?.title?.[0]?.plain_text || "";
-      if (isNew) { ds[dept].visitors++; (ds[dept].visitorNames = ds[dept].visitorNames || []).push(_nm); }
+      const _isMember368 = MEMBER_NAMES368.has(String(_nm||"").trim()); /* Task #368: 명단에 등록되면 방문자에서 제외 */
+      if (isNew && !_isMember368) { ds[dept].visitors++; (ds[dept].visitorNames = ds[dept].visitorNames || []).push(_nm); }
       else { ds[dept].attended++; (ds[dept].attendedNames = ds[dept].attendedNames || []).push(_nm); }
     });
 
