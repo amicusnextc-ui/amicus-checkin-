@@ -591,7 +591,7 @@ let STAFF_LIST = [];
 async function loadAll() {
   try {
     const [roster, sum, staff] = await Promise.all([
-      fetch('/api/roster').then(r=>r.json()),
+      fetch('/api/roster?includeVisitors=true') /* Task #370 */.then(r=>r.json()),
       fetch('/api/weekly-summary').then(r=>r.json()),
       fetch('/api/staff-list').then(r=>r.json()),
     ]);
@@ -1128,6 +1128,47 @@ function renderRoster() {
     </table>`;
   // store filtered list for detail
   window.__filtered = filtered;
+
+  /* Task #370: 미등록 방문자 별도 목록 — 숨기지 않고 따로 보여줌 */
+  try {
+    var _host370 = document.getElementById('visitorBox370');
+    if (!_host370) {
+      var _tbl = document.getElementById('rosterTable');
+      var _card = _tbl && _tbl.closest ? _tbl.closest('.card') : null;
+      if (_card && _card.parentNode) {
+        _host370 = document.createElement('div');
+        _host370.id = 'visitorBox370';
+        _host370.className = 'card';
+        _host370.style.cssText = 'margin-top:14px;padding:0;overflow:hidden';
+        _card.parentNode.insertBefore(_host370, _card.nextSibling);
+      }
+    }
+    if (_host370) {
+      var _myS = getMyDeptShort();
+      var _dp = document.getElementById('rosterDept').value;
+      var _vs = (ROSTER || []).filter(function(s){
+        if (!s.isVisitor) return false;
+        if (_myS && !(s.department || '').includes(_myS)) return false;
+        if (_dp && s.department !== _dp) return false;
+        return true;
+      }).sort(function(a,b){ return String(b.lastAttended||'').localeCompare(String(a.lastAttended||'')); });
+      if (!_vs.length) { _host370.innerHTML = ''; }
+      else {
+        var _open370 = window.__visOpen370 ? '' : 'display:none';
+        _host370.innerHTML =
+          '<div onclick="window.__visOpen370=!window.__visOpen370;renderRoster();" style="cursor:pointer;padding:12px 18px;display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#faf5ff,#fdf2f8);border-bottom:1px solid #f3e8ff">'
+          + '<span style="font-weight:700;font-size:14px;color:#6b21a8">\uD83D\uDE4B 방문자 (아직 미등록) ' + _vs.length + '명</span>'
+          + '<span style="margin-left:auto;font-size:12px;color:#9333ea;font-weight:700">' + (window.__visOpen370 ? '접기 ▲' : '보기 ▼') + '</span></div>'
+          + '<div style="' + _open370 + '"><table class="w-full"><thead><tr><th>이름</th><th>부서</th><th>학년</th><th>보호자</th><th>연락처</th><th>마지막 출석</th></tr></thead><tbody>'
+          + _vs.map(function(s){
+              var _nm = (s.name||'') + (s.nameEN && s.nameEN!==s.name ? ' <span style="color:#9ca3af;font-size:11px">'+s.nameEN+'</span>' : '');
+              var _ct = s.phone || s.fatherPhone || s.motherPhone || '—';
+              return '<tr><td>'+_nm+'</td><td>'+((s.department||'').split(' ')[0])+'</td><td>'+(s.grade||'—')+'</td><td>'+(s.guardian||s.fatherName||s.motherName||'—')+'</td><td>'+_ct+'</td><td>'+(s.lastAttended||'—')+'</td></tr>';
+            }).join('')
+          + '</tbody></table></div>';
+      }
+    }
+  } catch(e) { console.warn('[visitors370]', e); }
 }
 
 function showDetail(i) {
