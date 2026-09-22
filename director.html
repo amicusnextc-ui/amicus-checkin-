@@ -624,13 +624,6 @@ function renderLiability() {
     const notes = (s.notes || '').toString();
     if (/이동|transfer/i.test(notes)) return false;
     if (myShort && !(s.department || '').includes(myShort)) return false;
-    /* Task #369: 방문자는 정식 명단에서 제외 ("방문자만" 선택 시에만 표시) */
-    if (status === 'visitor') { if (!s.isVisitor) return false; }
-    else if (s.isVisitor) return false;
-    var _st369 = String(s.status || '');
-    var _active369 = _st369.indexOf('활성') === 0;
-    if (status === 'active' && !_active369) return false;
-    if (status === 'inactive' && _active369) return false;
     return true;
   });
   window._liabilityList = list;
@@ -1081,6 +1074,13 @@ function applyFilters() {
 
   return ROSTER.filter(s => {
     if (myShort && !(s.department || '').includes(myShort)) return false;
+    /* Task #369: 방문자는 정식 명단에서 제외 ("방문자만" 선택 시에만 표시) */
+    if (status === 'visitor') { if (!s.isVisitor) return false; }
+    else if (s.isVisitor) return false;
+    var _st369 = String(s.status || '');
+    var _active369 = _st369.indexOf('활성') === 0;
+    if (status === 'active' && !_active369) return false;
+    if (status === 'inactive' && _active369) return false;
     if (dept && s.department !== dept) return false;
     if (status === 'long-absent' && weeksSince(s.lastAttended) < 2) return false;
     if (status === 'birthday' && !s.isBirthdayMonth) return false;
