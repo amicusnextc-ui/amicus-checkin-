@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
         else if (req.headers && req.headers['x-api-key']) _provided = String(req.headers['x-api-key']).trim();
         else if (req.query && req.query.apiKey) _provided = String(req.query.apiKey).trim();
       } catch (e) {}
-      if (_provided !== _expected) {
+      if (_provided !== _expected && !(process.env.STAFF_SECRET && _provided === process.env.STAFF_SECRET)) {
         if (_enforce) return res.status(401).json({ error: 'unauthorized' });
         try { console.warn('[auth] missing/invalid token (soft) url=' + (req.url||'?')); } catch(e){}
       }
@@ -95,6 +95,8 @@ module.exports = async (req, res) => {
     return res.status(401).json({ ok: false, error: '\ube44\ubc00\ubc88\ud638\uac00 \ud2c0\ub838\uc2b5\ub2c8\ub2e4' });
   }
 
-  const token = process.env.API_SECRET || null;
+  /* Task #371: 스태프/디렉터에게는 전용 키(STAFF_SECRET)를 발급 — 키오스크 키보다 넓은 권한.
+     STAFF_SECRET 미설정 시 기존대로 API_SECRET 발급 (동작 변화 없음). */
+  const token = process.env.STAFF_SECRET || process.env.API_SECRET || null;
   return res.status(200).json({ ok: true, role, name, dept, token });
 };

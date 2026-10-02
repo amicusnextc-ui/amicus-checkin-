@@ -1172,7 +1172,8 @@ async function doAction(){var isIn=_action==="checkin";if(isIn&&window._ngWaiver
 function checkInfoMissing(s){
   if(!s) return false;
   var hasParent = (s.fatherName||'').trim() || (s.motherName||'').trim() || (s.guardian||'').trim();
-  var hasPhone  = (s.fatherPhone||'').trim() || (s.motherPhone||'').trim() || (s.phone||'').trim();
+  /* Task #371: 키오스크 응답은 번호 대신 hasPhone 플래그만 올 수 있음 */
+  var hasPhone  = (s.fatherPhone||'').trim() || (s.motherPhone||'').trim() || (s.phone||'').trim() || s.hasPhone || s.hasFatherPhone || s.hasMotherPhone;
   return !hasParent || !hasPhone;
 }
 
@@ -1182,8 +1183,9 @@ function ngInfoGaps(s){
   var dept = (s.department||'').toString();
   var isYoung = dept.indexOf('유아부')===0 || dept.indexOf('유치부')===0;
   var gaps = [];
-  if(!((s.fatherEmail||'').trim() || (s.motherEmail||'').trim())) gaps.push('이메일');
-  if(!(s.address||'').trim())  gaps.push('집주소');
+  /* Task #371: 값이 없어도 hasEmail/hasAddress 플래그가 있으면 "채워짐"으로 본다 */
+  if(!((s.fatherEmail||'').trim() || (s.motherEmail||'').trim() || s.hasEmail)) gaps.push('이메일');
+  if(!((s.address||'').trim() || s.hasAddress))  gaps.push('집주소');
   if(!(s.nameEN||'').trim())   gaps.push('영문이름');
   if(!isYoung && !(s.grade||'').trim())  gaps.push('학년');
   if(!isYoung && !(s.school||'').trim()) gaps.push('학교');

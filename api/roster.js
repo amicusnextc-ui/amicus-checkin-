@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
         else if (req.headers && req.headers['x-api-key']) _provided = String(req.headers['x-api-key']).trim();
         else if (req.query && req.query.apiKey) _provided = String(req.query.apiKey).trim();
       } catch (e) {}
-      if (_provided !== _expected) {
+      if (_provided !== _expected && !(process.env.STAFF_SECRET && _provided === process.env.STAFF_SECRET)) {
         if (_enforce) return res.status(401).json({ error: 'unauthorized' });
         try { console.warn('[auth] missing/invalid token (soft) url=' + (req.url||'?')); } catch(e){}
       }
@@ -158,6 +158,38 @@ module.exports = async (req, res) => {
         }
         return true;
       });
+    }
+    /* === Task #371: 키 종류별 필드 축소 ===
+       STAFF_SECRET 이 설정돼 있고 요청 토큰이 그것과 다르면(= 키오스크 키),
+       연락처·이메일·집주소를 값 대신 "있음/없음" 플래그로만 반환한다.
+       STAFF_SECRET 미설정 시에는 아무것도 바뀌지 않음 (기존 동작 유지). */
+    {
+      const _staffSecret = process.env.STAFF_SECRET || '';
+      if (_staffSecret) {
+        let _tok = '';
+        try {
+          const _h2 = String((req.headers && req.headers.authorization) || '');
+          if (_h2.toLowerCase().indexOf('bearer ') === 0) _tok = _h2.slice(7).trim();
+          else if (req.headers && req.headers['x-api-key']) _tok = String(req.headers['x-api-key']).trim();
+          else if (req.query && req.query.apiKey) _tok = String(req.query.apiKey).trim();
+        } catch (e) {}
+        if (_tok !== _staffSecret) {
+          const _has = function (v) { return !!(v && String(v).trim()); };
+          cleanStudents = cleanStudents.map(function (st) {
+            const o = Object.assign({}, st);
+            o.hasFatherPhone = _has(o.fatherPhone);
+            o.hasMotherPhone = _has(o.motherPhone);
+            o.hasPhone       = _has(o.phone) || o.hasFatherPhone || o.hasMotherPhone;
+            o.hasFatherEmail = _has(o.fatherEmail);
+            o.hasMotherEmail = _has(o.motherEmail);
+            o.hasEmail       = o.hasFatherEmail || o.hasMotherEmail;
+            o.hasAddress     = _has(o.address);
+            delete o.fatherPhone; delete o.motherPhone; delete o.phone;
+            delete o.fatherEmail; delete o.motherEmail; delete o.address;
+            return o;
+          });
+        }
+      }
     }
     res.json({ students: cleanStudents });
   } catch(e) {
