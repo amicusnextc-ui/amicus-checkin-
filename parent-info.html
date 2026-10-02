@@ -200,7 +200,12 @@ async function loadStudent() {
     return;
   }
   try {
-    var r = await fetch('/api/roster?password=3&includeVisitors=1', { cache: 'no-store' });
+    /* Task #372: 링크의 HMAC 토큰을 함께 보내면 서버가 본인 자녀 1명만 전체 필드로 돌려준다.
+       (키오스크 키만으로는 연락처·이메일·주소가 빠져 prefill이 비게 됨) */
+    var _qTok = getQueryParam('token') || '';
+    var _rosterUrl = '/api/roster?password=3&includeVisitors=1'
+      + (_qTok ? '&studentId=' + encodeURIComponent(presetId) + '&token=' + encodeURIComponent(_qTok) : '');
+    var r = await fetch(_rosterUrl, { cache: 'no-store' });
     if (!r.ok) throw new Error('학생 정보 조회 실패');
     var d = await r.json();
     var students = d.students || [];

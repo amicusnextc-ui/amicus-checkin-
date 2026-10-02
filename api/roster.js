@@ -173,7 +173,25 @@ module.exports = async (req, res) => {
           else if (req.headers && req.headers['x-api-key']) _tok = String(req.headers['x-api-key']).trim();
           else if (req.query && req.query.apiKey) _tok = String(req.query.apiKey).trim();
         } catch (e) {}
-        if (_tok !== _staffSecret) {
+        /* Task #372: 학부모 HMAC 토큰 예외.
+           parent-info 링크가 가진 토큰이 유효하면, 그 학생 "한 명만" 전체 필드로 반환한다.
+           전체 명단 열람은 여전히 불가 — 축소보다 오히려 더 좁다. */
+        let _parentOk = false;
+        try {
+          const _sid = String((req.query && (req.query.studentId || req.query.student)) || '').trim();
+          const _ptok = String((req.query && req.query.token) || '').trim();
+          if (_sid && _ptok) {
+            const _sec = process.env.REGISTER_TOKEN_SECRET || 'amicus-default-secret-change-me';
+            const _full = require('crypto').createHmac('sha256', _sec).update('info:' + _sid).digest('hex');
+            if (_ptok === _full.slice(0, 16) || _ptok === _full.slice(0, 32)) {
+              cleanStudents = cleanStudents.filter(function (s) {
+                return s.id === _sid || s.studentId === _sid;
+              });
+              _parentOk = true;
+            }
+          }
+        } catch (e) {}
+        if (_tok !== _staffSecret && !_parentOk) {
           const _has = function (v) { return !!(v && String(v).trim()); };
           cleanStudents = cleanStudents.map(function (st) {
             const o = Object.assign({}, st);

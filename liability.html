@@ -505,7 +505,9 @@ function startSign(id){
   document.getElementById('liabStudentDOB').querySelector('span').textContent = s.dob || '-';
   var email = s.fatherEmail || s.motherEmail || '';
   document.getElementById('liabEmail').value = email;
-  document.getElementById('liabStudentEmail').textContent = email ? ('기본 수신: ' + email) : '';
+  /* Task #372: 키오스크 키로는 roster가 이메일을 주지 않을 수 있다.
+     칸이 비어도 서버가 등록된 학부모 이메일로 보내므로 그 사실을 알린다. */
+  document.getElementById('liabStudentEmail').textContent = email ? ('기본 수신: ' + email) : '비워두시면 등록된 학부모 이메일로 발송됩니다';
   document.getElementById('liabGuardian').value = s.fatherName || s.motherName || s.guardian || '';
   document.getElementById('liabSignature').value = '';
   document.getElementById('liabGuardian2').value = s.motherName && s.fatherName ? s.motherName : '';

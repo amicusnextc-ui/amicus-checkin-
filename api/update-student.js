@@ -483,6 +483,18 @@ module.exports = async (req, res) => {
     
     if (action === 'liability') {
       const ts = timestamp || new Date().toISOString();
+      /* Task #372: 영수증 수신 주소 폴백.
+         키오스크 키로는 roster가 이메일을 안 주므로 서명 폼의 이메일 칸이 빌 수 있다.
+         그때는 Notion에 저장된 학부모 이메일로 보낸다. Notion에 되쓰지는 않는다
+         (아래 properties 업데이트는 그대로 `email`만 사용). */
+      let _receiptEmail = email || '';
+      if (!_receiptEmail) {
+        try {
+          const _pg = await notion.pages.retrieve({ page_id: pageId });
+          const _em = function (k) { try { return (_pg.properties[k] || {}).email || ''; } catch (e) { return ''; } };
+          _receiptEmail = _em('어머니 이메일 (Mother Email)') || _em('아버지 이메일 (Father Email)') || '';
+        } catch (e) { console.warn('[liability] receipt email fallback failed:', e.message); }
+      }
       var noteLine = 'Signed by ' + (guardianName||'') + ' on ' + ts + (signature ? ' | Sig: '+signature : '');
       if (guardian2Name && signature2) noteLine += ' | Parent2: ' + guardian2Name + ' Sig: ' + signature2;
       if (email) noteLine += ' | Email: ' + email;
@@ -515,7 +527,7 @@ module.exports = async (req, res) => {
       // 2. Send email via Resend
       let emailSent = false;
       let emailStatus = '발송 안 함';
-      if (process.env.RESEND_API_KEY && email) {
+      if (process.env.RESEND_API_KEY && _receiptEmail) {
         try {
           const html = buildEmailHtml({
             studentName, studentDept, studentDOB,
@@ -532,7 +544,7 @@ module.exports = async (req, res) => {
             },
             body: JSON.stringify({
               from: 'Amicus \uad50\uc721\ubd80 <education@amicuschurch.com>',
-              to: [email],
+              to: [_receiptEmail],
               bcc: [BCC_EMAIL],
               subject: subject,
               html: html
