@@ -1451,6 +1451,14 @@ function showSuccess(isIn,student,time){
   document.getElementById("success").classList.remove("hidden");
   document.getElementById("successPickup").classList.toggle("hidden",!isIn);
 
+  // Reset the two action buttons to their first-time state. printTag() relabels them
+  // ("다시 인쇄" / "종료 후 닫기") and nothing put them back, so every family after the
+  // first print saw "다시 인쇄" before printing anything.
+  var _pb0 = document.getElementById("printBtn");
+  if(_pb0) _pb0.innerHTML = "🖨️ 라벨 인쇄";
+  var _cb0 = document.querySelector('#success button[onclick="closeSuccess()"]');
+  if(_cb0){ _cb0.textContent = "한 명 더 체크인"; _cb0.className = "ng-btn ng-btn-outline"; }
+
   if(isIn){
     document.getElementById("tagContainer").classList.remove("hidden");
     document.getElementById("printBtn").classList.remove("hidden");
@@ -1593,7 +1601,7 @@ function printTag() {
   var _cb = document.getElementById("countdownBanner");
   if(_cb) _cb.classList.add("hidden");
   var _closeBtn = document.querySelector('#success button[onclick="closeSuccess()"]');
-  if(_closeBtn) { _closeBtn.textContent = "✅ 옱료 후 닫기"; _closeBtn.className = "flex-1 py-3.5 rounded-2xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition-colors"; }
+  if(_closeBtn) { _closeBtn.textContent = "✅ 종료 후 닫기"; _closeBtn.className = "flex-1 py-3.5 rounded-2xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition-colors"; }
   var d = window._printData;
   var QR_URL = d.QR_URL || "https://amicus-checkin.vercel.app/";
   var isBday = d.isBday;
