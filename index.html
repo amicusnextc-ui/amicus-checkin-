@@ -546,10 +546,31 @@ function submitLiabilityForm() {
     document.getElementById('liabilitySignature').classList.add('border-red-400');
     return;
   }
+  /* Task #373: 깨진 alert('据 ま동의 …') 제거.
+     법적 동의 체크박스의 유일한 피드백이 한글도 영어도 아닌 문자열이었다.
+     위 두 분기(이름·서명)와 동일하게 인라인 처리로 통일한다. */
+  var _agEl373 = document.getElementById('liabilityAgree');
+  var _agLbl373 = _agEl373 ? _agEl373.closest('label') : null;
   if(!agreed) {
-    alert('据 ま동의 쬬체크화시고 수진 해주세요.');
+    if(_agLbl373){
+      _agLbl373.style.boxShadow = '0 0 0 2px #ef4444';
+      try { _agLbl373.scrollIntoView({block:'center', behavior:'smooth'}); } catch(e) { _agLbl373.scrollIntoView(); }
+      if(!document.getElementById('liabAgreeMsg373')){
+        var _m373 = document.createElement('p');
+        _m373.id = 'liabAgreeMsg373';
+        _m373.setAttribute('role','alert');
+        _m373.style.cssText = "font:600 13px 'Noto Sans KR',sans-serif;color:#dc2626;margin:8px 2px 0";
+        _m373.textContent = '동의 체크가 필요합니다 · Please check the agreement box';
+        _agLbl373.insertAdjacentElement('afterend', _m373);
+      }
+    }
+    if(_agEl373) _agEl373.focus();
     return;
   }
+  /* 통과했으면 이전 경고 흔적을 지운다 */
+  if(_agLbl373) _agLbl373.style.boxShadow = '';
+  var _oldMsg373 = document.getElementById('liabAgreeMsg373');
+  if(_oldMsg373) _oldMsg373.remove();
 
   var btn = document.getElementById('liabilitySubmitBtn');
   btn.disabled = true;
@@ -1000,8 +1021,13 @@ function ngRefreshSubmit(){
   [['ciSubmit','ciSubmitLabel'],['ciNameSubmit','ciNameSubmitLabel']].forEach(function(pair){
     var btn=document.getElementById(pair[0]), lab=document.getElementById(pair[1]);
     if(!btn||!lab) return;
+    /* Task #373: 상태 조회가 실패한 카드가 있으면, 선택할 수 없는 자녀를
+       선택하지 않았다고 부모를 탓하지 말고 실패 자체를 버튼에 드러낸다. */
+    var _fail373 = document.querySelectorAll('[data-loadfail="1"]').length;
     btn.disabled = ids.length===0;
-    lab.textContent = ids.length ? (ids.length+'명 체크인') : '자녀를 선택해주세요';
+    if(ids.length) lab.textContent = ids.length+'명 체크인';
+    else if(_fail373) lab.textContent = '일부 학생 정보를 불러오지 못했습니다 — 다시 확인';
+    else lab.textContent = '자녀를 선택해주세요';
   });
   var note=document.getElementById('ciWaiverNote');
   if(!note) return;
@@ -1057,7 +1083,7 @@ function ngCheckinSelected(){
   familyCheckinStart(ids.join(','), true);
 }
 function loadStatus(s){
-  fetch("/api/check-status?name="+encodeURIComponent(s.name)).then(function(r){return r.json();}).then(function(data){
+  fetch("/api/check-status?name="+encodeURIComponent(s.name)).then(function(r){if(!r.ok) throw new Error('check-status '+r.status);return r.json();}).then(function(data){
     var el=document.getElementById("action-"+s.id); if(!el) return;
     var card=document.getElementById("card-"+s.id);
     var selectable=false, strip='';
@@ -1080,6 +1106,9 @@ function loadStatus(s){
     if(btn) btn.addEventListener("click", function(e){ e.stopPropagation(); openModalById("checkout", this.dataset.sid); });
 
     if(card){
+      /* Task #373: 재시도로 성공했을 때 실패 표시를 걷어낸다 */
+      card.removeAttribute('data-loadfail');
+      card.style.borderLeft = '';
       card.setAttribute('data-selectable', selectable ? '1' : '0');
       if(selectable){
         card.style.cursor='pointer';
@@ -1108,8 +1137,34 @@ function loadStatus(s){
     }
     ngRefreshSubmit();
   }).catch(function(){
+    /* Task #373: 조용한 실패 금지.
+       이전에는 13px 회색 "상태 확인 실패" 한 줄만 쓰고 끝나서, 카드는 멀쩡해
+       보이는데 탭이 무시되고 CTA는 "자녀를 선택해주세요"로 남았다 —
+       선택할 수 없는 아이를 선택 안 했다고 부모를 탓하는 상태.
+       9/20(17명 중 3명만 체크인)이 바로 이 모양이었다. */
     var el2=document.getElementById("action-"+s.id);
-    if(el2) el2.innerHTML='<span style="font:500 13px \'Noto Sans KR\',sans-serif;color:var(--ng-muted)">상태 확인 실패</span>';
+    var card2=document.getElementById("card-"+s.id);
+    if(card2){
+      card2.setAttribute('data-selectable','0');
+      card2.setAttribute('data-loadfail','1');
+      card2.style.opacity='.6';
+      card2.style.borderLeft='4px solid #dc2626';
+      card2.style.cursor='default';
+      window._ngSelected[s.id]=false;
+    }
+    if(el2) el2.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+      '<span style="font:700 13.5px \'Noto Sans KR\',sans-serif;color:#dc2626">상태를 불러오지 못했습니다</span>'+
+      '<button type="button" data-retry373="'+s.id+'" style="min-height:44px;padding:0 18px;border:1.5px solid #dc2626;background:#fff;color:#dc2626;border-radius:12px;font:700 13.5px \'Noto Sans KR\',sans-serif;cursor:pointer">↻ 다시 확인</button>'+
+      '</div>';
+    var rb373 = el2 && el2.querySelector('button[data-retry373]');
+    if(rb373) rb373.addEventListener('click', function(e){
+      e.stopPropagation();
+      this.disabled = true; this.textContent = '확인 중...';
+      if(card2){ card2.removeAttribute('data-loadfail'); card2.style.borderLeft=''; card2.style.opacity=''; }
+      loadStatus(s);
+    });
+    ngRefreshSubmit();
   });
 }
 function openModalById(action,sid){var s=_studentMap[sid];window._currentModalStudent=s;var rec=(action==="checkout")?(_recordMap[sid]||null):null;if(s)openModal(action,s,rec);}
