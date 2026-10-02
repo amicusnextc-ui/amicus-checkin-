@@ -1,5 +1,7 @@
 # 아미쿠스 교육부 체크인 앱 (Amicus Check-In)
 
+[![Architecture diagram](https://gitdiagram.com/diagram-badge.svg)](https://gitdiagram.com/amicusnextc-ui/amicus-checkin-?utm_source=readme&utm_medium=badge)
+
 아미쿠스장로교회 교육부(유아·유치·유년·초등·중고등)의 주일 출석 체크인/체크아웃,
 학생 명단 관리, 주일 마무리 보고를 처리하는 웹 앱입니다.
 
@@ -64,6 +66,25 @@
 | `staff-list.js` | 간사 목록 |
 | `weekly-summary.js` | 주일 마무리 요약 저장·조회 |
 
+## 페이지 → API 호출 매핑
+
+각 HTML이 실제로 fetch 하는 엔드포인트입니다.
+
+| 페이지 | 호출하는 엔드포인트 |
+|---|---|
+| `index.html` | `search-student`, `check-status`, `checkin`, `checkout`, `roster`, `attendance-today`, `update-student`, `visitor-checkin` |
+| `youth.html` | `roster`, `checkin`, `attendance-today`, `visitor-checkin` |
+| `staff-checkout.html` | `roster`, `checkout`, `attendance-today` |
+| `register.html` | `update-student` |
+| `parent-info.html` | `roster`, `update-student` |
+| `liability.html` | `roster`, `search-student`, `update-student` |
+| `staff.html` | `staff-auth`, `roster`, `attendance`, `attendance-today`, `checkin`, `checkout`, `update-student`, `weekly-summary` |
+| `director.html` | `staff-auth`, `staff-list`, `roster`, `attendance`, `attendance-today`, `update-student`, `weekly-summary` |
+| `admin.html` | `attendance-today`, `checkin`, `checkout` |
+| `test.html` | 없음 (라벨 인쇄만) |
+
+모든 API 함수는 Notion API를 직접 호출합니다 (`@notionhq/client`).
+
 ## 자동화 (GitHub Actions)
 
 | 워크플로 | 일정 (PT) | 하는 일 |
@@ -75,6 +96,13 @@
 | `weekly-liability-reminder.yml` | 토 오전 9시 | Liability 미제출자 리마인더 |
 | `health-check.yml` | 매일 / 일요일 | 앱·API 상태 점검 |
 | `yearly-grade-advancement.yml` | 8/15 | 학년 자동 진급 + 부서 전환 |
+
+크론이 쓰는 경로:
+`auto-close-checkout` → `/api/update-student` ·
+`auto-save-summary` / `weekly-reconciliation` → `/api/weekly-summary` ·
+`health-check` → `/api/roster`, `/api/weekly-summary` ·
+`sunday-wrapup-reminder` → `/api/weekly-summary` + Notion·Resend 직접 호출 ·
+`weekly-liability-reminder`, `yearly-grade-advancement` → Notion·Resend 직접 호출 (API 경유 없음)
 
 부서 경계: 유아부 만 2~4세(Pre-K) · 유치부 K · 유년부 1~2학년 · 초등부 ~5학년 · **중고등부 6학년부터**
 
