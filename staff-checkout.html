@@ -275,9 +275,9 @@ function openConfirm(recordId) {
   document.getElementById('confirmModal').classList.remove('hidden');
 }
 /* 2e guardian handoff. The volunteer must say who they handed the child to
-   before the green confirm unlocks. /api/checkout has no field for the
-   relationship, so the payload is unchanged and this stays a floor check —
-   wire it through once the API grows a column for it. */
+   before the green confirm unlocks.
+   Task #374: API에 인계자/인계 방법 컬럼이 생겨 doCheckout()에서 실제로 전송한다.
+   더 이상 화면상의 형식적 확인이 아니라 Notion에 기록으로 남는다. */
 var _handoff = '아버지';
 function ngPickHandoff(btn){
   _handoff = btn.getAttribute('data-handoff');
@@ -304,7 +304,14 @@ async function doCheckout() {
   const card = document.querySelector(`[data-rid="${_currentRecord.id}"]`);
   if (card) card.classList.add('checking-out');
   try {
-    const body = { recordId: _currentRecord.id, studentName: _currentRecord.name, guardianConfirmed: true };
+    /* Task #374: 위 2e 주석이 남긴 숙제 — 이제 API에 인계자/인계 방법 컬럼이 생겨서 실제로 보낸다. */
+    const body = {
+      recordId: _currentRecord.id,
+      studentName: _currentRecord.name,
+      guardianConfirmed: true,
+      releasedTo: _handoff,
+      checkoutMethod: (_handoff === '대리' ? '지정 픽업' : '보호자')
+    };
     // Use cached director password if available (for non-Sunday testing/use)
     const cachedPw = sessionStorage.getItem('_kioskDirectorPw');
     if (cachedPw) body.directorPassword = cachedPw;

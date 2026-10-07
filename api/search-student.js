@@ -158,6 +158,67 @@ module.exports = async (req, res) => {
                             return numStr.endsWith(suffix) || s.studentId.endsWith(suffix);
                   });
           }
+          /* === Task #376: 키 종류별 PII 축소 + householdId ===
+             #371이 /api/roster를 줄였지만 이 엔드포인트가 그대로 열려 있어 같은 정보가 샜다.
+             rate limit은 1차 방어가 아니다 — 끝 4자리는 경우의 수가 1만 개뿐이고
+             서버리스는 인스턴스별로 카운팅돼 사실상 무방비다. 근본 해결은 응답에서 번호를 빼는 것.
+             STAFF_SECRET 미설정 시에는 아무것도 바뀌지 않는다(기존 동작 유지). */
+          {
+            const _staffSecret = process.env.STAFF_SECRET || '';
+            if (_staffSecret) {
+              let _tok = '';
+              try {
+                const _h = String((req.headers && req.headers.authorization) || '');
+                if (_h.toLowerCase().indexOf('bearer ') === 0) _tok = _h.slice(7).trim();
+                else if (req.headers && req.headers['x-api-key']) _tok = String(req.headers['x-api-key']).trim();
+                else if (req.query && req.query.apiKey) _tok = String(req.query.apiKey).trim();
+              } catch (e) {}
+
+              if (_tok !== _staffSecret) {
+                const crypto = require('crypto');
+                /* householdId: 끝 4자리가 아니라 정규화한 전체 번호를 HMAC 한다.
+                   4자리 해시는 값이 1만 개뿐이라 미리 표를 만들면 그대로 복원된다.
+                   REGISTER_TOKEN_SECRET 은 학부모 링크 전용이라 재사용하지 않는다. */
+                const _hhSalt = process.env.HOUSEHOLD_SALT || (_staffSecret + ':household');
+                const _hh = function (raw) {
+                  const d = String(raw || '').replace(/\D/g, '');
+                  if (d.length < 7) return null;
+                  const nat = d.length > 10 ? d.slice(-10) : d;
+                  return crypto.createHmac('sha256', _hhSalt).update('hh:' + nat).digest('hex').slice(0, 16);
+                };
+                /* 요청자가 직접 입력한 끝 4자리일 때만 마스킹 번호를 돌려준다.
+                   id3(AMC 번호) 경로는 입력한 적 없는 4자리를 받게 되므로
+                   AMC-001~999 를 훑으면 전원의 끝 4자리가 수집된다 → 플래그만 준다. */
+                const _asked4 = String(phone4 || '').replace(/\D/g, '').slice(-4);
+                const _has = function (v) { return !!(v && String(v).trim()); };
+
+                students = students.map(function (s) {
+                  const o = Object.assign({}, s);
+                  const _f = String(o.fatherPhone || ''), _m = String(o.motherPhone || ''), _p = String(o.phone || '');
+                  o.householdId = _hh(_f || _m || _p);
+                  o.hasFatherPhone = _has(_f);
+                  o.hasMotherPhone = _has(_m);
+                  o.hasPhone = _has(_p) || o.hasFatherPhone || o.hasMotherPhone;
+                  o.hasFatherEmail = _has(o.fatherEmail);
+                  o.hasMotherEmail = _has(o.motherEmail);
+                  o.hasEmail = o.hasFatherEmail || o.hasMotherEmail;
+                  o.hasAddress = _has(o.address);
+                  if (_asked4.length === 4) {
+                    const _pick = [_f, _m, _p].filter(function (v) {
+                      return String(v).replace(/\D/g, '').slice(-4) === _asked4;
+                    })[0];
+                    o.phoneMasked = _pick ? ('•••-' + _asked4) : null;
+                  } else {
+                    o.phoneMasked = null;
+                  }
+                  delete o.fatherPhone; delete o.motherPhone; delete o.phone;
+                  delete o.fatherEmail; delete o.motherEmail; delete o.address;
+                  delete o.notes;
+                  return o;
+                });
+              }
+            }
+          }
           return res.status(200).json({ students });
     } catch (e) {
           return res.status(500).json({ error: e.message });

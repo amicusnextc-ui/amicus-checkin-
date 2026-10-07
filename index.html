@@ -76,6 +76,12 @@ input, select, textarea, button { font-family: inherit; }
 gmp-place-autocomplete { display: block; width: 100%; }
 #infoAddressContainer gmp-place-autocomplete input { width:100%!important; height:58px!important; padding:0 16px!important; border:1.5px solid var(--ng-hairline)!important; border-radius:var(--ng-r-md)!important; font:500 17px 'Noto Sans KR',sans-serif!important; background:#fff!important; color:var(--ng-ink)!important; box-sizing:border-box!important; }
 </style>
+<style>
+/* Task #374: 인계자 선택 버튼. staff-checkout.html의 .ng-handoff와 같은 감각, 터치 64px. */
+.ng-h374{min-height:64px;padding:0 18px;border:1.5px solid var(--ng-line,#d9d9de);background:#fff;
+  border-radius:14px;font:700 15px 'Noto Sans KR',sans-serif;color:var(--ng-ink,#1d1d1f);cursor:pointer;flex:1 1 auto}
+.ng-h374.is-on{border-color:var(--ng-lav-text,#5b5bd6);background:var(--ng-lav,#eeeefc);color:var(--ng-lav-text,#5b5bd6)}
+</style>
 </head>
 <body>
 
@@ -298,10 +304,19 @@ gmp-place-autocomplete { display: block; width: 100%; }
 
       <div id="guardianRow" class="hidden" style="margin-top:16px">
         <label class="ng-checkbox" style="background:var(--ng-lav);border-radius:var(--ng-r-card);padding:16px 20px">
-          <input type="checkbox" id="guardianCheck"/>
+          <input type="checkbox" id="guardianCheck" onchange="ngGuardianGate374()"/>
           <span class="ng-tick" aria-hidden="true">✓</span>
           <span style="font:600 14.5px 'Noto Sans KR',sans-serif;color:var(--ng-lav-text)">보호자 인계 확인 / Guardian handoff confirmed</span>
         </label>
+        <!-- Task #374: 누가 데려갔는지 한 번 탭으로 고른다. 줄 선 상황이라 타이핑은 피한다. -->
+        <div style="margin:14px 2px 8px;font:600 13px 'Noto Sans KR',sans-serif;color:var(--ng-sub)">데려가시는 분 / Picked up by</div>
+        <div id="handoff374" style="display:flex;gap:10px;flex-wrap:wrap">
+          <button type="button" data-h374="아버지" onclick="ngPickHandoff374(this)" class="ng-h374 is-on">아버지</button>
+          <button type="button" data-h374="어머니" onclick="ngPickHandoff374(this)" class="ng-h374">어머니</button>
+          <button type="button" data-h374="조부모" onclick="ngPickHandoff374(this)" class="ng-h374">조부모</button>
+          <button type="button" data-h374="대리" onclick="ngPickHandoff374(this)" class="ng-h374">그 외 · 대리 픽업</button>
+        </div>
+        <input id="releasedTo374" type="text" autocomplete="off" class="hidden" placeholder="데려가시는 분 성함" style="width:100%;box-sizing:border-box;min-height:52px;margin-top:10px;padding:12px 14px;border:1px solid var(--ng-line,#d9d9de);border-radius:12px;font:500 15px 'Noto Sans KR',sans-serif"/>
       </div>
 
       <div id="liabilityWarning" class="hidden ng-note ng-note-warn" style="margin-top:16px">
@@ -840,6 +855,9 @@ function onNameInput(val) {
           [st.fatherPhone, st.motherPhone, st.phone].forEach(function(v){
             var d = String(v||'').replace(/\D/g,''); if(d.length >= 7) t['p:'+d] = 1;
           });
+          /* Task #376: 서버가 번호 대신 householdId(전체 번호 HMAC)를 주면 그걸로 묶는다.
+             원본 번호가 오는 경우에도 위 p: 토큰이 그대로 동작하므로 양쪽 응답을 다 받아들인다. */
+          if (st.householdId) t['h:' + st.householdId] = 1;
           return Object.keys(t);
         };
 
@@ -959,7 +977,9 @@ var NG_DEPT_TINT = {
 function ngDeptClass(d){ return NG_DEPT[d] || "ng-dept-none"; }
 function ngDeptShort(d){ return String(d||"미지정").split(" ")[0]; }
 function deptBadge(d,grade){var cls=ngDeptClass(d);return'<span class="ng-chip '+cls+'">'+ngDeptShort(d)+(grade?' · '+escapeHtml(grade):'')+'</span>';}
-function guardianStr(s){if(s.fatherName&&s.motherName)return"👨 "+s.fatherName+" / 👩 "+s.motherName;if(s.fatherName)return"👨 "+s.fatherName+(s.fatherPhone?" · "+s.fatherPhone:"");if(s.motherName)return"👩 "+s.motherName+(s.motherPhone?" · "+s.motherPhone:"");if(s.guardian)return s.guardian+(s.phone?" · "+s.phone:"");return"";}
+/* Task #376: 번호가 축소된 응답에서는 phoneMasked(•••-1234)로 대체한다.
+   마스킹 값은 요청자가 직접 입력한 끝 4자리일 때만 서버가 내려준다. */
+function guardianStr(s){var _ph=function(v){return v||s.phoneMasked||"";};if(s.fatherName&&s.motherName)return"👨 "+s.fatherName+" / 👩 "+s.motherName;if(s.fatherName){var a=_ph(s.fatherPhone);return"👨 "+s.fatherName+(a?" · "+a:"");}if(s.motherName){var b=_ph(s.motherPhone);return"👩 "+s.motherName+(b?" · "+b:"");}if(s.guardian){var c=_ph(s.phone);return s.guardian+(c?" · "+c:"");}return"";}
 /* Task #309: XSS defense */
 function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function studentCard(s){
@@ -1196,6 +1216,14 @@ function openModal(action,student,record){
 
   document.getElementById("pickupMsg").classList.toggle("hidden",!isIn);
   document.getElementById("guardianRow").classList.toggle("hidden",isIn);
+  /* Task #374: 체크아웃 모달을 열 때마다 체크박스와 인계자 칸을 초기화하고 확인 버튼을 잠근다.
+     이전 학생의 입력이 다음 학생에게 남아 있으면 안 된다. */
+  (function(){
+    var _gc=document.getElementById("guardianCheck");
+    if(_gc) _gc.checked=false;
+    ngResetHandoff374();
+    ngGuardianGate374();
+  })();
   document.getElementById("guardianCheck").checked=false;
 
   var btn=document.getElementById("confirmBtn");
@@ -1224,6 +1252,42 @@ async function doAction(){var isIn=_action==="checkin";if(isIn&&window._ngWaiver
    when we can get it but never stands between a child and the door — on the
    real roster the full eight-field gate would stop 27 of 46 students, nearly
    all of 중고등부, at the Sunday morning queue. */
+/* Task #374: 체크아웃은 보호자 인계 확인이 체크돼야 확인 버튼이 열린다.
+   이건 1차 방어일 뿐이고, 서버도 같은 조건을 강제한다(400 guardianRequired). */
+/* Task #374: 인계자 선택. 기본은 아버지, "그 외·대리"를 고르면 성함 칸이 열린다. */
+window._handoff374 = "아버지";
+function ngPickHandoff374(btn){
+  window._handoff374 = btn.getAttribute("data-h374");
+  var host = document.getElementById("handoff374");
+  if(host) Array.prototype.forEach.call(host.children, function(b){ b.classList.toggle("is-on", b === btn); });
+  var txt = document.getElementById("releasedTo374");
+  if(txt){
+    var isOther = window._handoff374 === "대리";
+    txt.classList.toggle("hidden", !isOther);
+    if(isOther){ try{ txt.focus(); }catch(e){} } else { txt.value = ""; }
+  }
+}
+function ngResetHandoff374(){
+  window._handoff374 = "아버지";
+  var host = document.getElementById("handoff374");
+  if(host) Array.prototype.forEach.call(host.children, function(b,i){ b.classList.toggle("is-on", i === 0); });
+  var txt = document.getElementById("releasedTo374");
+  if(txt){ txt.value = ""; txt.classList.add("hidden"); }
+}
+function ngGuardianGate374(){
+  var row=document.getElementById("guardianRow");
+  var btn=document.getElementById("confirmBtn");
+  var chk=document.getElementById("guardianCheck");
+  if(!row||!btn) return;
+  var needsGuardian=!row.classList.contains("hidden");
+  if(needsGuardian && chk && !chk.checked){
+    btn.disabled=true; btn.style.opacity="0.45"; btn.style.cursor="not-allowed";
+    btn.textContent="보호자 확인 필요 / Confirm guardian";
+  } else {
+    btn.disabled=false; btn.style.opacity=""; btn.style.cursor="";
+    btn.textContent="확인 / Confirm";
+  }
+}
 function checkInfoMissing(s){
   if(!s) return false;
   var hasParent = (s.fatherName||'').trim() || (s.motherName||'').trim() || (s.guardian||'').trim();
@@ -1426,7 +1490,7 @@ async function proceedWithAction(bypassLiab){var isIn=_action==="checkin";
   /* The emergency-contact requirement is not covered by _skipInfoCheck — it is
      the one field that has to be there before a child is admitted. */
   if(isIn && checkInfoMissing(_student)){window._pendingBypass=bypassLiab;showInfoPopup(_student);return;}
-  if(isIn && !window._skipInfoCheck && ngInfoGaps(_student).length && !_inInfoGracePeriod()){window._pendingBypass=bypassLiab;showInfoPopup(_student);return;}var btn=document.getElementById("confirmBtn");btn.textContent="처리 중...";btn.disabled=true;try{var time;if(isIn){var body={name:_student.name,department:_student.department,isNew:_student.isVisitor===true,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||"",studentId:_student.id};if(bypassLiab)body.bypassLiability=true;var res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});var data=await res.json();if(data.requiresDirectorAuth){var dpw=prompt("⚠️ 오늘은 일요일이 아닙니다.\n체크인을 진행하려면 디렉터 비밀번호가 필요합니다:");if(!dpw){btn.textContent="확인 / Confirm";btn.disabled=false;return;}body.directorPassword=dpw;res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});data=await res.json();if(data.requiresDirectorAuth)throw new Error("디렉터 비밀번호가 틀렸습니다");}if(!res.ok)throw new Error(data.error||"체크인 실패");if(data.alreadyCheckedIn){closeModal(true);loadStatus(_student);if(window._familyQueue && window._familyQueue.length > 0){_familyAdvance();}return;}time=data.checkInTime;}else{var res2=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked})});var data2=await res2.json();if(!res2.ok)throw new Error(data2.error||"체크아웃 실패");time=data2.checkOutTime;}closeModal(true);showSuccess(isIn,_student,time);loadStatus(_student);}catch(e){alert(e.message||"오류가 발생했습니다");}btn.textContent="확인 / Confirm";btn.disabled=false;}
+  if(isIn && !window._skipInfoCheck && ngInfoGaps(_student).length && !_inInfoGracePeriod()){window._pendingBypass=bypassLiab;showInfoPopup(_student);return;}var btn=document.getElementById("confirmBtn");btn.textContent="처리 중...";btn.disabled=true;try{var time;if(isIn){var body={name:_student.name,department:_student.department,isNew:_student.isVisitor===true,hasAllergy:hasAllergy(_student.allergy),notes:_student.notes,staff:sessionStorage.getItem("sName")||"",studentId:_student.id};if(bypassLiab)body.bypassLiability=true;var res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});var data=await res.json();if(data.requiresDirectorAuth){var dpw=prompt("⚠️ 오늘은 일요일이 아닙니다.\n체크인을 진행하려면 디렉터 비밀번호가 필요합니다:");if(!dpw){btn.textContent="확인 / Confirm";btn.disabled=false;return;}body.directorPassword=dpw;res=await fetch("/api/checkin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});data=await res.json();if(data.requiresDirectorAuth)throw new Error("디렉터 비밀번호가 틀렸습니다");}if(!res.ok)throw new Error(data.error||"체크인 실패");if(data.alreadyCheckedIn){closeModal(true);loadStatus(_student);if(window._familyQueue && window._familyQueue.length > 0){_familyAdvance();}return;}time=data.checkInTime;}else{/* Task #374: 인계자 이름을 함께 보내고, 중복/모호/보호자미확인 응답을 구분해 안내한다 */var _h374=window._handoff374||"아버지";var _rt374=(_h374==="대리")?(((document.getElementById("releasedTo374")||{}).value)||"대리 픽업"):_h374;var res2=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pageId:_record.id,guardianConfirmed:document.getElementById("guardianCheck").checked,releasedTo:String(_rt374).trim(),checkoutMethod:(_h374==="대리"?"지정 픽업":"보호자")})});var data2=await res2.json();if(!res2.ok){if(data2.alreadyCheckedOut) throw new Error("이미 체크아웃된 학생입니다 ("+(data2.checkOutTime||"")+").\n잘못된 체크아웃이면 간사님께 문의해주세요.");if(data2.ambiguous) throw new Error("같은 이름의 기록이 여러 건입니다.\n간사님께 문의해주세요.");if(data2.guardianRequired) throw new Error("보호자 인계 확인을 체크해주세요.");throw new Error(data2.error||"체크아웃 실패");}time=data2.checkOutTime;window._released374=data2.releasedTo||"";}closeModal(true);showSuccess(isIn,_student,time);loadStatus(_student);}catch(e){alert(e.message||"오류가 발생했습니다");}btn.textContent="확인 / Confirm";btn.disabled=false;}
 var _successTimer;
 /* Korean vocative: 받침 present → "아", absent → "야". Falls back to a plain
    completion line for names that are not all-Hangul. */
