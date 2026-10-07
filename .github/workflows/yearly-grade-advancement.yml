@@ -25,13 +25,16 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
           SEND_EMAIL: ${{ inputs.send_email || 'true' }}
+          DIRECTOR_EMAIL: ${{ secrets.DIRECTOR_EMAIL }}
         run: |
           cat > advance.js << 'JS'
           const STUDENT_DB = process.env.NOTION_STUDENT_DB_ID || '107828732f784c39bcb0136a4397c758';
           const DRY = String(process.env.DRY_RUN).toLowerCase() === 'true';
           const SEND = String(process.env.SEND_EMAIL).toLowerCase() === 'true';
           const HEADERS = { 'Authorization': 'Bearer ' + process.env.NOTION_TOKEN, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' };
-          const DIRECTOR_EMAIL = 'amicusnextc@gmail.com';
+          /* Task #375: 공개 레포에서 이메일 제거 → GitHub Secrets */
+          const DIRECTOR_EMAIL = process.env.DIRECTOR_EMAIL;
+          if (!DIRECTOR_EMAIL) { console.error('DIRECTOR_EMAIL secret 이 비어 있습니다'); process.exit(1); }
 
           // Grade advancement map (grade STRING -> next grade STRING)
           const GRADE_NEXT = {

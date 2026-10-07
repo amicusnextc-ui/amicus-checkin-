@@ -17,12 +17,15 @@ jobs:
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIRECTOR_EMAIL: ${{ secrets.DIRECTOR_EMAIL }}
         run: |
           cat <<'JS' > check.js
           const NOTION_TOKEN = process.env.NOTION_TOKEN;
           const RESEND_API_KEY = process.env.RESEND_API_KEY;
           const STUDENT_DB = '107828732f784c39bcb0136a4397c758';
-          const DIRECTOR_EMAIL = 'amicusnextc@gmail.com';
+          /* Task #375: 공개 레포에서 이메일 제거 → GitHub Secrets */
+          const DIRECTOR_EMAIL = process.env.DIRECTOR_EMAIL;
+          if (!DIRECTOR_EMAIL) { console.error('DIRECTOR_EMAIL secret 이 비어 있습니다'); process.exit(1); }
           const LIABILITY_URL = 'https://amicus-checkin.vercel.app/liability.html';
           
           async function notionQuery() {

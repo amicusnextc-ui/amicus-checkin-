@@ -18,6 +18,7 @@ jobs:
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          STAFF_EMAILS: ${{ secrets.STAFF_EMAILS }}
         run: |
           cat <<'JS' > check.js
           const NOTION_TOKEN = process.env.NOTION_TOKEN;
@@ -27,19 +28,35 @@ jobs:
           const API_BASE = 'https://amicus-checkin.vercel.app';
           const API_KEY = 'AMICUS-PUBLIC-KIOSK-V1';
 
+          /* Task #375: 수신자 이메일을 공개 레포에서 제거하고 GitHub Secrets로 옮김.
+             STAFF_EMAILS 는 JSON 한 덩어리:
+             {"유아부":"..","유치부":"..","유년부":"..","초등부":"..","중고등부":"..",
+              "director":"..","buJang":"..","wiWonJang":".."} */
+          let _EM = {};
+          try { _EM = JSON.parse(process.env.STAFF_EMAILS || '{}'); }
+          catch (e) { console.error('STAFF_EMAILS JSON 파싱 실패: ' + e.message); process.exit(1); }
+
           const DEPTS = {
-            '유아부': { staff: '이지혜', email: 'wise0331@gmail.com' },
-            '유치부': { staff: '김향숙', email: 'flower5425@gmail.com' },
-            '유년부': { staff: '박은혜', email: '86eunhye@gmail.com' },
-            '초등부': { staff: '백진주', email: 'jinjoopearl19@gmail.com' },
-            '중고등부': { staff: '박명철', email: 'amicusnextc@gmail.com' }
+            '유아부': { staff: '이지혜', email: _EM['유아부'] },
+            '유치부': { staff: '김향숙', email: _EM['유치부'] },
+            '유년부': { staff: '박은혜', email: _EM['유년부'] },
+            '초등부': { staff: '백진주', email: _EM['초등부'] },
+            '중고등부': { staff: '박명철', email: _EM['중고등부'] }
           };
 
           const LEADERS = {
-            director: 'amicusnextc@gmail.com',
-            buJang: 'gunnixe@gmail.com',
-            wiWonJang: 'Drjameschoi@hotmail.com'
+            director: _EM.director,
+            buJang: _EM.buJang,
+            wiWonJang: _EM.wiWonJang
           };
+
+          /* 비면 조용히 아무에게도 안 보내는 대신 즉시 실패시킨다 (이 앱의 지병: 조용한 실패) */
+          const _missing = Object.keys(DEPTS).filter(function(k){ return !DEPTS[k].email; })
+            .concat(Object.keys(LEADERS).filter(function(k){ return !LEADERS[k]; }));
+          if (_missing.length) {
+            console.error('STAFF_EMAILS 에 수신자가 없습니다: ' + _missing.join(', '));
+            process.exit(1);
+          }
 
           const WRAPUP_TITLE = '🗓️ 주일 마무리';
 
