@@ -390,6 +390,26 @@ module.exports = async (req, res) => {
 
     if (action === 'gen-parent-info-link') {
       const crypto = require('crypto');
+      /* === Task #378: 토큰 발급은 스태프만 ===
+         이 엔드포인트가 키오스크 키로도 열려 있어서 #376의 PII 축소가 무력화됐다.
+         학생마다 토큰을 발급받아 roster의 학부모 예외(#372)로 전체 PII를 읽을 수 있었다.
+         (2026-10-07 라이브에서 실제로 재현함: 요청 2번이면 한 학생의 연락처·이메일·주소 전부.)
+         STAFF_SECRET 미설정 시에는 기존대로 동작한다. */
+      {
+        const _staffSecret = process.env.STAFF_SECRET || '';
+        if (_staffSecret) {
+          let _tok = '';
+          try {
+            const _h = String((req.headers && req.headers.authorization) || '');
+            if (_h.toLowerCase().indexOf('bearer ') === 0) _tok = _h.slice(7).trim();
+            else if (req.headers && req.headers['x-api-key']) _tok = String(req.headers['x-api-key']).trim();
+            else if (req.query && req.query.apiKey) _tok = String(req.query.apiKey).trim();
+          } catch (e) {}
+          if (_tok !== _staffSecret) {
+            return res.status(403).json({ error: '학부모 정보 링크 발급은 간사·디렉터만 가능합니다', staffOnly: true });
+          }
+        }
+      }
       const SECRET = process.env.REGISTER_TOKEN_SECRET || 'amicus-default-secret-change-me';
       const sid = req.query.student || req.body?.student || '';
       if (!sid) return res.status(400).json({ error: 'student (studentId/pageId) required' });
