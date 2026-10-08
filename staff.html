@@ -2783,10 +2783,9 @@ async function loadArchivedList() {
   try {
     var _dept = window._dept || (typeof getRole==='function'?(getRole().dept||''):'');
     var _url = '/api/roster?status=archived&includeVisitors=true';
-    /* Task #333: 졸업생은 모든 간사에게 */
     var r = await fetch(_url);
     var d = await r.json();
-    var students = (d.students || []).filter(function(s){ var sd = s.department || ''; if (sd.indexOf('졸업') >= 0) return true; if (!_dept) return true; return sd.indexOf(_dept.split(' ')[0]) >= 0; });
+    var students = (d.students || []).filter(function(s){ var sd = s.department || ''; if (!_dept) return true; if (sd.indexOf('졸업') >= 0) return _dept.indexOf('중고등') >= 0; /* Task #383: 졸업생은 중고등부·전체만 */ return sd.indexOf(_dept.split(' ')[0]) >= 0; });
     count.textContent = students.length + '명';
     if (students.length === 0) {
       list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ng-g400)">archived 학생이 없습니다</div>';
