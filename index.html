@@ -607,16 +607,30 @@ function submitLiabilityForm() {
       timestamp: timestamp,
       signedText: signedText
     })
-  }).then(function(r){ return r.json(); }).then(function(data) {
+  }).then(function(r){
+    /* Task #385: 서버가 확인하지 않은 성공은 성공이 아니다.
+       이전에는 r.ok 를 보지 않고 바로 json() 을 읽어, 401/500 이어도
+       "제출 & 체크인 완료 ✓" 가 떴다. 보호자는 서명했다고 믿는데 기록이 없을 수 있었다. */
+    if (!r.ok) return r.json().catch(function(){ return {}; }).then(function(d){
+      throw new Error((d && d.error) || ('저장 확인 실패 (HTTP ' + r.status + ')'));
+    });
+    return r.json();
+  }).then(function(data) {
     closeLiabilityModal();
     btn.disabled = false;
     btn.textContent = '제출 & 체크인 완료 ✓';
     // Continue with original checkin
     if(window._liabilityCheckinCallback) window._liabilityCheckinCallback();
   }).catch(function(err) {
-    // Even if API fails, allow checkin
+    /* Task #385: 체크인은 계속 허용한다(아이를 문 앞에서 돌려보내지 않는다).
+       다만 "저장됐다"고 말하지는 않는다 — 간사가 종이로 받아둘 수 있어야 한다. */
     closeLiabilityModal();
     btn.disabled = false;
+    try {
+      alert('⚠ 서명은 접수했지만 저장 확인이 안 됐습니다.\n' +
+            ((err && err.message) || '네트워크 오류') +
+            '\n\n체크인은 계속 진행됩니다. 간사님께 꼭 알려주세요.');
+    } catch(_e) {}
     if(window._liabilityCheckinCallback) window._liabilityCheckinCallback();
   });
 }

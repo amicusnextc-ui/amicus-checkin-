@@ -526,8 +526,27 @@ module.exports = async (req, res) => {
         const curNotes = (curPage.properties['특이사항 (Notes)']?.rich_text || [])
           .map(b => b.plain_text || (b.text && b.text.content) || '')
           .join('');
-        const appendPrefix = curNotes ? curNotes + '\n' : '';
-        const newNotes = appendPrefix + '[LIABILITY ' + ts.slice(0,10) + '] ' + noteLine;
+        /* Task #385-(4): cleanNotes 가 학부모 등록 경로(452줄)에만 있어서
+           키오스크·동의서 링크로 서명하면 낡은 "Liability … 필요" 메모가 남았다. 같은 정리를 여기에도 적용. */
+        const _cleaned = curNotes
+          .replace(/Liability(?!\s*20)[^·\[\n]*/g, '')
+          .replace(/·\s*·/g, '·')
+          .replace(/[ \t]*[·+][ \t]*(?=\n|$)/gm, '')
+          .replace(/(^|\n)[ \t]*·[ \t]*/g, '$1')
+          .trim();
+        const _entry = '[LIABILITY ' + ts.slice(0,10) + '] ' + noteLine;
+        /* Task #385-(3): 이전에는 (기존 + 새 기록).slice(0,1900) 이라
+           특이사항이 길면 **새 서명 기록부터** 잘려나갔다. 상태는 "제출 완료"인데 로그만 사라진다.
+           → 새 기록을 먼저 확보하고, 남는 자리에 오래된 기록을 앞에서 잘라 넣는다. */
+        const _LIMIT = 1900;
+        let newNotes;
+        if (_entry.length >= _LIMIT) {
+          newNotes = _entry.slice(0, _LIMIT);
+        } else {
+          const _room = _LIMIT - _entry.length - 1;
+          const _keep = _cleaned.length > _room ? _cleaned.slice(_cleaned.length - _room) : _cleaned;
+          newNotes = (_keep ? _keep + '\n' : '') + _entry;
+        }
         await notion.pages.update({
           page_id: pageId,
           properties: {
@@ -537,11 +556,20 @@ module.exports = async (req, res) => {
             '\uc815\ud68c\uc6d0 \uc804\ud658\uc77c (Converted Date)': { date: { start: new Date().toISOString().slice(0,10) } },
             ...(email ? { '어머니 이메일 (Mother Email)': { email: email } } : {}),
             ...(guardianName ? { '보호자 (Guardian)': { rich_text: [{ text: { content: String(guardianName).slice(0, 200) } }] } } : {}),
-            '특이사항 (Notes)': { rich_text: [{ text: { content: newNotes.slice(0, 1900) } }] }
+            '특이사항 (Notes)': { rich_text: [{ text: { content: newNotes } }] }
           }
         });
       } catch(upE) {
-        console.error('Student update failed (non-fatal):', upE.message);
+        /* Task #385-(2): 이전에는 "non-fatal" 로그만 남기고 영수증 이메일을 보낸 뒤
+           {success:true} 를 반환했다. 부모는 "서명 완료" 메일까지 받는데 Notion 엔 아무것도 없었다.
+           저장이 안 됐으면 성공이 아니다 — 메일 보내지 말고 500 으로 알린다. */
+        /* 상세 오류는 서버 로그에만. 응답에 담으면 Notion 속성명·ID 같은 내부 정보가
+           키오스크 화면까지 나간다. 클라이언트는 "실패했다"만 알면 된다. */
+        console.error('[liability] Notion update failed:', upE.message);
+        return res.status(500).json({
+          error: '서명 저장에 실패했습니다. 간사님께 알려주세요.',
+          saveFailed: true
+        });
       }
 
       // 2. Send email via Resend
