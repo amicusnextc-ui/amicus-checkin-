@@ -72,10 +72,11 @@ button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(
   #rosterTable{display:block}
   #rosterTable tr{display:block;background:#fff;border:1px solid var(--ng-hairline);border-radius:14px;padding:12px 14px;margin:0 0 10px}
   #rosterTable td{display:block;padding:3px 0;border:none;text-align:left}
-  #rosterTable td:nth-child(4),#rosterTable td:nth-child(5),#rosterTable td:nth-child(7),#rosterTable td:nth-child(8){display:none}
+  #rosterTable td:nth-child(4),#rosterTable td:nth-child(5),#rosterTable td:nth-child(7),#rosterTable td:nth-child(8),#rosterTable td:nth-child(10){display:none} /* Task #384: 10열 수정은 이름 아래 ✏️ 수정으로 대체 */
   #rosterTable td:nth-child(2){font-size:12px;color:var(--ng-sub)}
   #rosterTable td:nth-child(6){padding-top:6px}
-  #rosterTable td:nth-child(9),#rosterTable td:nth-child(10){display:inline-block;width:auto;vertical-align:middle;margin:8px 8px 0 0;text-align:left}
+  #rosterTable td:nth-child(9){display:inline-block;width:auto;vertical-align:middle;margin:8px 8px 0 0;text-align:left}
+  table:has(#rosterTable){ min-width:0 !important; } /* Task #384: 카드 레이아웃에선 880px 최소폭 해제 (가로 잘림) */
 }
 
 /* Task #343b: 모바일/태블릿 반응형 */
