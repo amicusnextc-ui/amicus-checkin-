@@ -706,20 +706,30 @@ function renderInfoNeeded() {
   }).join('');
 }
 
-async function copyInfoKakao(pageId, name) {
-  /* Task #300: fetch HMAC token via server; fall back to unsigned URL if API fails */
-  let infoLink;
-  try {
-    const _lr = await fetch('/api/update-student', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({action:'gen-parent-info-link', student: pageId})
-    });
-    const _ld = await _lr.json();
-    infoLink = _ld && _ld.link ? _ld.link : (location.origin + '/parent-info.html?studentId=' + pageId);
-  } catch(_le) {
-    infoLink = location.origin + '/parent-info.html?studentId=' + pageId;
+/* Task #379: 토큰 붙은 링크를 받아오고, 못 받으면 throw — 토큰 없는 링크로 조용히 대체하지 않는다.
+   STAFF_SECRET 이후 토큰 없는 링크는 부모에게 빈칸 양식으로 열린다. 401/403 = 대개 옛 토큰을 든 탭. */
+async function _signedInfoLink379(pageId) {
+  const r = await fetch('/api/update-student', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'gen-parent-info-link', student: pageId})
+  });
+  let d = null; try { d = await r.json(); } catch(_je) {}
+  if (!r.ok || !d || !d.link) {
+    throw new Error((r.status === 401 || r.status === 403)
+      ? '로그인이 만료되었습니다. 로그아웃 후 다시 로그인해주세요.'
+      : '링크 발급 실패 (HTTP ' + r.status + ')');
   }
+  return d.link;
+}
+function _infoLinkFail379(e) {
+  alert('⚠ 카톡 메시지를 복사하지 않았습니다.\n' + ((e && e.message) || '네트워크 오류') + '\n(토큰 없는 링크는 부모님께 빈칸 양식으로 열립니다)');
+}
+
+async function copyInfoKakao(pageId, name) {
+  let infoLink;
+  try { infoLink = await _signedInfoLink379(pageId); }
+  catch (e) { _infoLinkFail379(e); return; }
   const msg = '[아미쿠스 교회] ' + name + ' 학생의 학생 정보 입력 부탁드립니다 🙏\n\n📋 정보 입력 (5분):\n' + infoLink + '\n\n문의: amicusnextc@gmail.com';
   navigator.clipboard.writeText(msg).then(()=>{
     alert('📋 정보 입력 카톡 메시지 복사됨\n부모님께 KakaoTalk으로 paste 해주세요.');
@@ -728,11 +738,15 @@ async function copyInfoKakao(pageId, name) {
   });
 }
 
-function bulkCopyInfoKakao() {
+async function bulkCopyInfoKakao() {
   const list = (window._infoNeededList||[]).filter(s => !(s.fatherEmail||s.motherEmail||'').trim());
   if (!list.length) { alert('이메일 없는 학생이 없습니다.'); return; }
-  const lines = list.map(s => {
-    const infoLink = location.origin + '/parent-info.html?studentId=' + s.id;
+  /* Task #379: 예전엔 토큰 없는 링크만 만들었다 → STAFF_SECRET 이후 전원 빈칸 양식. 학생마다 서명 링크 발급. */
+  let links;
+  try { links = await Promise.all(list.map(s => _signedInfoLink379(s.id))); }
+  catch (e) { _infoLinkFail379(e); return; }
+  const lines = list.map((s, i) => {
+    const infoLink = links[i];
     return s.name + ' (' + (s.department||'').split(' ')[0] + '):\n📋 정보 입력: ' + infoLink;
   });
   const msg = '[아미쿠스 교회] 학생 정보 입력 링크 (' + list.length + '명):\n\n' + lines.join('\n\n') + '\n\n문의: amicusnextc@gmail.com';
@@ -764,9 +778,11 @@ async function sendLiabilityInvite(pageId, name) {
     alert('실패: ' + e.message);
   }
 }
-function copyKakaoLink(pageId, name) {
+async function copyKakaoLink(pageId, name) {
   const link = location.origin + '/liability.html?studentId=' + pageId;
-  const infoLink = location.origin + '/parent-info.html?studentId=' + pageId;
+  let infoLink;
+  try { infoLink = await _signedInfoLink379(pageId); }
+  catch (e) { _infoLinkFail379(e); return; }
   const msg = `[아미쿠스 교회] ${name} 학생의 안전 동의서 + 정보 입력 부탁드립니다 🙏\n\n1️⃣ 안전 동의서 (5분):\n${link}\n\n2️⃣ 학생 정보 입력 (5분):\n${infoLink}\n\n문의: amicusnextc@gmail.com`;
   navigator.clipboard.writeText(msg).then(()=>{
     alert('📋 카톡 메시지 복사됨\n부모님께 KakaoTalk으로 paste 해주세요.');
@@ -789,12 +805,15 @@ async function bulkSendLiabilityInvites() {
     if (typeof loadAllRoster === 'function') loadAllRoster();
   } catch(e) { alert('실패: ' + e.message); }
 }
-function bulkCopyKakaoLinks() {
+async function bulkCopyKakaoLinks() {
   const list = (window._liabilityList||[]).filter(s => !(s.fatherEmail||s.motherEmail||'').trim());
   if (!list.length) { alert('이메일 없는 학생이 없습니다.'); return; }
-  const lines = list.map(s => {
+  let infoLinks;
+  try { infoLinks = await Promise.all(list.map(s => _signedInfoLink379(s.id))); }
+  catch (e) { _infoLinkFail379(e); return; }
+  const lines = list.map((s, i) => {
     const link = location.origin + '/liability.html?studentId=' + s.id;
-    const infoLink = location.origin + '/parent-info.html?studentId=' + s.id;
+    const infoLink = infoLinks[i];
     return `${s.name} (${(s.department||'').split(' ')[0]}):\n1️⃣ 안전 동의서: ${link}\n2️⃣ 정보 입력: ${infoLink}`;
   });
   const msg = `[아미쿠스 교회] 안전 동의서 + 정보 입력 링크 (${list.length}명):\n\n` + lines.join('\n\n') + `\n\n문의: amicusnextc@gmail.com`;
@@ -1306,7 +1325,9 @@ if (savedRole && savedUser && ACCOUNTS[savedRole] && ACCOUNTS[savedRole][savedUs
       studentId = s.studentId;
       studentName = s.name;
     }
-    const link = 'https://amicus-checkin.vercel.app/parent-info.html?studentId=' + encodeURIComponent(studentId);
+    let link;
+    try { link = await _signedInfoLink379(studentId); }
+    catch (e) { _infoLinkFail379(e); return; }
     const msg = '안녕하세요 ' + (studentName || '학생') + ' 학부모님,\n\n' +
       '아미쿠스 교회 교육부입니다. 학생 정보 업데이트를 위해 아래 링크에서 정보를 입력해주세요. 비어있는 항목만 채우셔도 됩니다.\n\n' +
       link + '\n\n감사합니다 🙏';
@@ -2372,8 +2393,8 @@ async function adminForceCheckout(rid, name){
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({action:'gen-parent-info-link', student: sid})
       });
-      var d = await r.json();
-      if (d && d.link) {
+      var d = null; try { d = await r.json(); } catch(_je){}
+      if (r.ok && d && d.link) {
         var newUrl = new URL(d.link, location.href);
         url.searchParams.forEach(function(v, k){
           if (k !== 'studentId' && k !== 'token') newUrl.searchParams.set(k, v);
@@ -2382,9 +2403,13 @@ async function adminForceCheckout(rid, name){
         if (target === '_blank') window.open(newUrl.toString(), '_blank');
         else location.href = newUrl.toString();
       } else {
-        location.href = a.href;
+        /* Task #379: 토큰 없는 링크로 조용히 넘어가지 않는다 — STAFF_SECRET 이후엔 빈칸 양식이 열린다.
+           401/403 = 대개 STAFF_SECRET 켜기 전에 로그인한 탭(옛 토큰). */
+        alert((r.status === 401 || r.status === 403)
+          ? '로그인이 만료되었습니다. 로그아웃 후 다시 로그인해주세요.\n(이대로 열면 학부모 정보가 빈칸으로 보입니다)'
+          : '학부모 정보 링크를 만들지 못했습니다 (HTTP ' + r.status + '). 잠시 후 다시 시도해주세요.');
       }
-    } catch(_te){ location.href = a.href; }
+    } catch(_te){ alert('학부모 정보 링크를 만들지 못했습니다 (네트워크 오류). 잠시 후 다시 시도해주세요.'); }
   }, true);
 })();
 </script>

@@ -3210,8 +3210,8 @@ window.showProfile342 = function(el){
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({action:'gen-parent-info-link', student: sid})
       });
-      var d = await r.json();
-      if (d && d.link) {
+      var d = null; try { d = await r.json(); } catch(_je){}
+      if (r.ok && d && d.link) {
         var newUrl = new URL(d.link, location.href);
         url.searchParams.forEach(function(v, k){
           if (k !== 'studentId' && k !== 'token') newUrl.searchParams.set(k, v);
@@ -3220,9 +3220,13 @@ window.showProfile342 = function(el){
         if (target === '_blank') window.open(newUrl.toString(), '_blank');
         else location.href = newUrl.toString();
       } else {
-        location.href = a.href;
+        /* Task #379: 토큰 없는 링크로 조용히 넘어가지 않는다 — STAFF_SECRET 이후엔 빈칸 양식이 열린다.
+           401/403 = 대개 STAFF_SECRET 켜기 전에 로그인한 탭(옛 토큰). */
+        alert((r.status === 401 || r.status === 403)
+          ? '로그인이 만료되었습니다. 로그아웃 후 다시 로그인해주세요.\n(이대로 열면 학부모 정보가 빈칸으로 보입니다)'
+          : '학부모 정보 링크를 만들지 못했습니다 (HTTP ' + r.status + '). 잠시 후 다시 시도해주세요.');
       }
-    } catch(_te){ location.href = a.href; }
+    } catch(_te){ alert('학부모 정보 링크를 만들지 못했습니다 (네트워크 오류). 잠시 후 다시 시도해주세요.'); }
   }, true);
 })();
 </script>
