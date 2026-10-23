@@ -3,6 +3,7 @@ const notion = new Client({ auth: process.env.NOTION_TOKEN });
 const REQUESTS_DB = 'd25f9fdaeeb748ac97ffda2f68f776bb';
 const ABSENTEES_DB = 'de7bb42e89254fad949dde9123cd4cdb';
 const STUDENT_DB = process.env.NOTION_STUDENT_DB || '107828732f784c39bcb0136a4397c758';
+const ATTENDANCE_DB = process.env.NOTION_ATTENDANCE_DB || process.env.NOTION_ATTENDANCE_DB_ID || '89b6c47f85a842968493ce28ad93f8de';
 const TIMEZONE = 'America/Los_Angeles';
 
 function getServiceSunday() {
@@ -218,6 +219,160 @@ module.exports = async (req, res) => {
       return res.json({ success: true, dept, sentTo: info.email, staff: info.staff, emailId: body.id });
     }
     // ATTENDANCE FIX (director-only attendance record corrections)
+    // VISITOR FUNNEL — 방문자 → 재방문 → 정회원 전환 추적 (director.html 방문자 탭)
+    // GET  ?type=visitors&days=30   → 기간 내 첫 방문자 목록 + 재방문/전환 상태 + 전환율
+    // POST {type:'visitors', action:'convert'|'inactive'|'note', studentId, note?}
+    if (type === 'visitors') {
+      const cleanName = (s) => String(s || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
+      const todayLA = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+      const addDays = (iso, n) => { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+
+      if (req.method === 'GET') {
+        const days = Math.min(365, Math.max(7, parseInt(req.query.days, 10) || 30));
+        const since = addDays(todayLA, -days);
+        // 1) 출석 기록에서 기간 내 방문자 체크인 전부 (페이지네이션)
+        const visitRows = [];
+        let cursor; let guard = 0;
+        do {
+          const r = await notion.databases.query({ database_id: ATTENDANCE_DB,
+            filter: { and: [
+              { property: '방문자 (Visitor)', checkbox: { equals: true } },
+              { property: '주일 날짜 (Date)', date: { on_or_after: since } } ] },
+            page_size: 100, ...(cursor ? { start_cursor: cursor } : {}) });
+          r.results.forEach(p => {
+            const name = p.properties['이름 (Name)']?.title?.[0]?.plain_text || '';
+            if (!name || name.startsWith('🗑️')) return;
+            if (p.properties['체크인 시간 (Check-in)']?.rich_text?.[0]?.plain_text === '요약') return;
+            if (p.properties['부서 (Department)']?.select?.name === '__skip__') return;
+            visitRows.push({ name: cleanName(name), rawName: name,
+              date: p.properties['주일 날짜 (Date)']?.date?.start || '',
+              dept: p.properties['부서 (Department)']?.select?.name || '' });
+          });
+          cursor = r.has_more ? r.next_cursor : null;
+        } while (cursor && ++guard < 10);
+        // 2) 이름별 첫 방문일
+        const byName = {};
+        visitRows.forEach(v => {
+          const cur = byName[v.name];
+          if (!cur || v.date < cur.firstVisit) byName[v.name] = { name: v.name, firstVisit: v.date, dept: v.dept };
+        });
+        // 3) 학생 DB에서 해당 학생 상태 (방문자 플래그 / 마지막 출석 / 전환일 / 보호자)
+        const names = Object.keys(byName);
+        const studentMap = {};
+        if (names.length) {
+          let sc; let sg = 0;
+          do {
+            const sr = await notion.databases.query({ database_id: STUDENT_DB,
+              filter: { or: names.slice(0, 100).map(n => ({ property: '이름 (Name)', title: { contains: n } })) },
+              page_size: 100, ...(sc ? { start_cursor: sc } : {}) });
+            sr.results.forEach(p => {
+              const pr = p.properties;
+              const nm = cleanName(pr['이름 (Name)']?.title?.[0]?.plain_text || '');
+              if (!nm || nm.startsWith('🗑️') || nm.startsWith('🧪')) return;
+              if (!byName[nm]) return;
+              studentMap[nm] = { id: p.id,
+                isVisitor: !!pr['방문자 (Visitor)']?.checkbox,
+                status: pr['상태 (Status)']?.select?.name || '',
+                dept: pr['부서 (Department)']?.select?.name || byName[nm].dept,
+                grade: pr['학년 (Grade)']?.rich_text?.[0]?.plain_text || '',
+                lastAttended: pr['마지막 출석 (Last Attended)']?.date?.start || null,
+                convertedDate: pr['정회원 전환일 (Converted Date)']?.date?.start || null,
+                guardian: pr['보호자 (Guardian)']?.rich_text?.[0]?.plain_text || '',
+                phone: pr['연락처 (Phone)']?.phone_number || pr['어머니 연락처 (Mother Phone)']?.phone_number || pr['아버지 연락처 (Father Phone)']?.phone_number || '',
+                invitedBy: pr['초대자 (Invited By)']?.rich_text?.[0]?.plain_text || '',
+                visitReason: pr['방문 이유 (Visit Reason)']?.select?.name || '',
+                notes: pr['특이사항 (Notes)']?.rich_text?.map(t => t.plain_text).join('') || '' };
+            });
+            sc = sr.has_more ? sr.next_cursor : null;
+          } while (sc && ++sg < 5);
+        }
+        // 4) 이름별 출석 횟수 (방문자 체크인 + 이후 정식 체크인 모두) — 첫 방문 이후 기록
+        const earliest = Object.values(byName).reduce((m, v) => (!m || v.firstVisit < m) ? v.firstVisit : m, null);
+        const visitCount = {}; const lastSeen = {};
+        if (earliest && names.length) {
+          let ac; let ag = 0;
+          do {
+            const ar = await notion.databases.query({ database_id: ATTENDANCE_DB,
+              filter: { and: [
+                { property: '주일 날짜 (Date)', date: { on_or_after: earliest } },
+                { or: names.slice(0, 100).map(n => ({ property: '이름 (Name)', title: { contains: n } })) } ] },
+              page_size: 100, ...(ac ? { start_cursor: ac } : {}) });
+            ar.results.forEach(p => {
+              const nm = cleanName(p.properties['이름 (Name)']?.title?.[0]?.plain_text || '');
+              const dt = p.properties['주일 날짜 (Date)']?.date?.start || '';
+              if (!byName[nm] || !dt || nm.startsWith('🗑️')) return;
+              if (p.properties['체크인 시간 (Check-in)']?.rich_text?.[0]?.plain_text === '요약') return;
+              visitCount[nm] = visitCount[nm] || new Set(); visitCount[nm].add(dt);
+              if (!lastSeen[nm] || dt > lastSeen[nm]) lastSeen[nm] = dt;
+            });
+            ac = ar.has_more ? ar.next_cursor : null;
+          } while (ac && ++ag < 10);
+        }
+        // 5) 상태 판정
+        const visitors = names.map(nm => {
+          const v = byName[nm]; const s = studentMap[nm] || {};
+          const visits = visitCount[nm] ? visitCount[nm].size : 1;
+          const last = [s.lastAttended, lastSeen[nm], v.firstVisit].filter(Boolean).sort().pop();
+          const converted = !!s.convertedDate || !!(s.id && !s.isVisitor);
+          const returned = visits >= 2;
+          const daysSinceFirst = Math.round((new Date(todayLA) - new Date(v.firstVisit)) / 86400000);
+          const daysSinceLast = Math.round((new Date(todayLA) - new Date(last)) / 86400000);
+          let stage;
+          if (s.status && s.status !== '활성 (Active)') stage = 'closed';        // 비활성/교회이동 처리됨
+          else if (converted) stage = 'converted';                                // 정회원 전환
+          else if (returned && daysSinceLast <= 14) stage = 'returning';          // 재방문 중
+          else if (returned) stage = 'returned-lapsed';                            // 재방문했다가 끊김
+          else if (daysSinceFirst <= 14) stage = 'new';                            // 첫 방문 2주 이내 — 아직 판단 보류
+          else stage = 'no-return';                                                // 2주 넘게 재방문 없음 — 연락 필요
+          return { name: nm, studentId: s.id || null, department: s.dept || v.dept, grade: s.grade || '',
+            firstVisit: v.firstVisit, lastAttended: last, visits, daysSinceFirst, daysSinceLast,
+            returned, converted, convertedDate: s.convertedDate || null, stage, status: s.status || '',
+            guardian: s.guardian || '', phone: s.phone || '', invitedBy: s.invitedBy || '', visitReason: s.visitReason || '', notes: s.notes || '' };
+        }).sort((a, b) => (b.firstVisit > a.firstVisit ? 1 : b.firstVisit < a.firstVisit ? -1 : a.name.localeCompare(b.name)));
+        const summary = { days, since, total: visitors.length,
+          returned: visitors.filter(v => v.returned).length,
+          converted: visitors.filter(v => v.converted).length,
+          noReturn: visitors.filter(v => v.stage === 'no-return' || v.stage === 'returned-lapsed').length,
+          pending: visitors.filter(v => v.stage === 'new').length };
+        summary.returnRate = summary.total ? Math.round(summary.returned / summary.total * 100) : 0;
+        summary.conversionRate = summary.total ? Math.round(summary.converted / summary.total * 100) : 0;
+        return res.json({ success: true, summary, visitors });
+      }
+
+      if (req.method === 'POST') {
+        const { action, studentId, note, staff } = req.body || {};
+        if (!action || !studentId) return res.status(400).json({ error: 'action and studentId required' });
+        const stamp = todayLA + (staff ? ' ' + staff : '');
+        if (action === 'convert') {
+          await notion.pages.update({ page_id: studentId, properties: {
+            '방문자 (Visitor)': { checkbox: false },
+            '상태 (Status)': { select: { name: '활성 (Active)' } },
+            '전환 방식 (Convert Type)': { select: { name: '수동' } },
+            '정회원 전환일 (Converted Date)': { date: { start: todayLA } } } });
+          return res.json({ success: true, action: 'converted', studentId, convertedDate: todayLA });
+        }
+        if (action === 'inactive') {
+          const page = await notion.pages.retrieve({ page_id: studentId });
+          const prev = page.properties['특이사항 (Notes)']?.rich_text?.map(t => t.plain_text).join('') || '';
+          const line = '[방문자 종료 ' + stamp + '] ' + (note || '재방문 없음');
+          await notion.pages.update({ page_id: studentId, properties: {
+            '상태 (Status)': { select: { name: '비활성 (Inactive)' } },
+            '특이사항 (Notes)': { rich_text: [{ text: { content: (prev ? prev + '\n' : '') + line } }] } } });
+          return res.json({ success: true, action: 'inactive', studentId });
+        }
+        if (action === 'note') {
+          if (!note) return res.status(400).json({ error: 'note required' });
+          const page = await notion.pages.retrieve({ page_id: studentId });
+          const prev = page.properties['특이사항 (Notes)']?.rich_text?.map(t => t.plain_text).join('') || '';
+          const line = '[방문자 연락 ' + stamp + '] ' + note;
+          await notion.pages.update({ page_id: studentId, properties: {
+            '특이사항 (Notes)': { rich_text: [{ text: { content: (prev ? prev + '\n' : '') + line } }] } } });
+          return res.json({ success: true, action: 'noted', studentId });
+        }
+        return res.status(400).json({ error: 'Unknown action: ' + action });
+      }
+    }
+
     if (type === 'attendance-fix') {
       if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
       const { action, recordId } = req.body || {};
