@@ -87,6 +87,8 @@
 .hover\:bg-purple-200:hover{background:var(--ng-lav-deep)!important}
 input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px var(--ng-lav-deep);border-color:var(--ng-lav-text)!important}
 button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--ng-lav-text);outline-offset:2px}
+#visStageFilter .ng-chip{cursor:pointer;border:1.5px solid transparent}
+#visStageFilter .ng-chip.active{border-color:var(--ng-ink);box-shadow:0 0 0 1px var(--ng-ink)}
 </style>
 <style id="task317-aesthetic-refresh">
 /* Task #317 (2026-08-10): iPad-friendly aesthetic refresh - non-destructive CSS overrides */
@@ -179,6 +181,7 @@ a[href^="tel:"]:hover { background:#e0e7ff; }
     <div class="max-w-7xl mx-auto px-4 pb-2 flex gap-2 overflow-x-auto">
       <button class="tab-btn active" data-view="dashboard">📊 대시보드</button>
       <button class="tab-btn" data-view="registry">📋 명단</button>
+      <button class="tab-btn" data-view="visitors" id="visitorsTabBtn">🙋 방문자 전환 <span id="visBadge" class="hidden" style="margin-left:5px;background:var(--ng-warn-text);color:#fff;font:700 10px 'Poppins',sans-serif;padding:2px 6px;border-radius:99px">0</span></button>
       <button class="tab-btn" data-view="requests">📨 간사 요청 <span id="reqBadge" class="hidden" style="margin-left:5px;background:var(--ng-danger-text);color:#fff;font:700 10px 'Poppins',sans-serif;padding:2px 6px;border-radius:99px">0</span></button>
       <button class="tab-btn" data-view="wrapup">🗓️ 주일 마무리</button>
       <button class="tab-btn" data-view="team">👥 팀</button>
@@ -285,6 +288,64 @@ a[href^="tel:"]:hover { background:#e0e7ff; }
       <div class="card p-0 overflow-hidden">
         <div id="requestsUI" class="divide-y divide-gray-100"><div class="p-6 text-center text-gray-400">불러오는 중…</div></div>
       </div>
+    </section>
+
+    <!-- =========== VISITOR FUNNEL =========== -->
+    <section id="view-visitors" class="view fade-in hidden">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div>
+          <h2 class="text-xl font-bold text-gray-900">🙋 방문자 전환</h2>
+          <p class="text-xs text-gray-500 mt-1">첫 방문 → 2주 내 재방문 → 정회원 전환. 재방문 없이 2주가 지나면 연락 대상으로 올라옵니다.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-gray-500">기간</label>
+          <select id="visDays" class="border rounded-lg px-2 py-1 text-sm">
+            <option value="30">최근 30일</option>
+            <option value="60">최근 60일</option>
+            <option value="90">최근 90일</option>
+            <option value="180">최근 180일</option>
+          </select>
+          <button class="ng-btn ng-btn-ghost" style="min-height:34px;padding:0 12px;font-size:13px" onclick="loadVisitorFunnel(true)">↻</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+        <div class="ng-stat ng-stat-pink"><div class="ng-stat-n" id="visStatTotal">—</div><div class="ng-stat-l">첫 방문</div></div>
+        <div class="ng-stat ng-stat-lav"><div class="ng-stat-n" id="visStatReturned">—</div><div class="ng-stat-l">재방문 <span id="visStatReturnRate" class="text-xs font-normal"></span></div></div>
+        <div class="ng-stat ng-stat-green"><div class="ng-stat-n" id="visStatConverted">—</div><div class="ng-stat-l">정회원 전환 <span id="visStatConvRate" class="text-xs font-normal"></span></div></div>
+        <div class="ng-stat ng-stat-danger"><div class="ng-stat-n" id="visStatNoReturn">—</div><div class="ng-stat-l">연락 필요</div></div>
+      </div>
+
+      <div class="flex gap-2 mb-3 flex-wrap" id="visStageFilter">
+        <button class="ng-chip ng-chip-lg active" data-stage="all">전체</button>
+        <button class="ng-chip ng-chip-lg ng-chip-danger" data-stage="no-return">연락 필요</button>
+        <button class="ng-chip ng-chip-lg ng-chip-lav" data-stage="returning">재방문 중</button>
+        <button class="ng-chip ng-chip-lg" data-stage="new">첫 방문 (2주 이내)</button>
+        <button class="ng-chip ng-chip-lg ng-chip-green" data-stage="converted">전환 완료</button>
+        <button class="ng-chip ng-chip-lg" data-stage="closed">종료</button>
+      </div>
+
+      <div class="card p-0 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" id="visTable">
+            <thead class="bg-gray-50 text-gray-500 text-xs">
+              <tr>
+                <th class="text-left px-4 py-2">이름</th>
+                <th class="text-left px-2 py-2">부서</th>
+                <th class="text-left px-2 py-2">첫 방문</th>
+                <th class="text-right px-2 py-2">출석</th>
+                <th class="text-left px-2 py-2">마지막</th>
+                <th class="text-left px-2 py-2">상태</th>
+                <th class="text-left px-2 py-2">보호자 / 연락처</th>
+                <th class="text-left px-2 py-2">메모</th>
+                <th class="text-right px-4 py-2"></th>
+              </tr>
+            </thead>
+            <tbody id="visRows" class="divide-y divide-gray-100"><tr><td colspan="9" class="px-4 py-8 text-center text-gray-400">탭을 열면 불러옵니다</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-3">판정 기준 — 재방문: 첫 방문 이후 한 번 이상 더 출석. 연락 필요: 재방문 없이 15일 경과, 또는 재방문 후 15일 이상 안 옴. 전환: 학생 DB에서 방문자 플래그 해제(정회원 전환일 기록).</p>
     </section>
 
     <!-- =========== TEAM =========== -->
@@ -530,8 +591,113 @@ document.querySelectorAll('#appScreen header .tab-btn').forEach(b => {
     if (b.dataset.view === 'wrapup' && typeof window.__wrapupReload === 'function') {
       window.__wrapupReload();
     }
+    if (b.dataset.view === 'visitors') loadVisitorFunnel(false);
   };
 });
+
+/* =================== VISITOR FUNNEL (방문자 전환) =================== */
+let _visData = null, _visStage = 'all', _visLoadedDays = null;
+const VIS_STAGE = {
+  'no-return':       { label: '연락 필요',   cls: 'ng-chip-danger', hint: '재방문 없이 2주 경과' },
+  'returned-lapsed': { label: '연락 필요',   cls: 'ng-chip-danger', hint: '재방문했다가 끊김' },
+  'returning':       { label: '재방문 중',   cls: 'ng-chip-lav',    hint: '최근 2주 내 출석' },
+  'new':             { label: '첫 방문',     cls: '',               hint: '2주 이내 — 지켜보는 중' },
+  'converted':       { label: '전환 완료',   cls: 'ng-chip-green',  hint: '정회원' },
+  'closed':          { label: '종료',        cls: '',               hint: '비활성/교회 이동' }
+};
+function _visStageKey(v) { return v.stage === 'returned-lapsed' ? 'no-return' : v.stage; }
+function _fmtD(iso) { if (!iso) return '—'; const [y,m,d] = iso.split('-'); return `${parseInt(m,10)}/${parseInt(d,10)}`; }
+
+async function loadVisitorFunnel(force) {
+  const days = document.getElementById('visDays').value || '30';
+  if (!force && _visData && _visLoadedDays === days) { renderVisitorFunnel(); return; }
+  const tb = document.getElementById('visRows');
+  tb.innerHTML = '<tr><td colspan="9" class="px-4 py-8 text-center text-gray-400">불러오는 중…</td></tr>';
+  try {
+    const r = await fetch('/api/attendance?type=visitors&days=' + days + '&_=' + Date.now());
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || 'load failed');
+    _visData = d; _visLoadedDays = days;
+    renderVisitorFunnel();
+  } catch (e) {
+    tb.innerHTML = '<tr><td colspan="9" class="px-4 py-8 text-center text-red-500">불러오기 실패: ' + (e.message || e) + '</td></tr>';
+  }
+}
+
+function renderVisitorFunnel() {
+  const d = _visData; if (!d) return;
+  const s = d.summary;
+  document.getElementById('visStatTotal').textContent = s.total;
+  document.getElementById('visStatReturned').textContent = s.returned;
+  document.getElementById('visStatReturnRate').textContent = s.total ? `(${s.returnRate}%)` : '';
+  document.getElementById('visStatConverted').textContent = s.converted;
+  document.getElementById('visStatConvRate').textContent = s.total ? `(${s.conversionRate}%)` : '';
+  document.getElementById('visStatNoReturn').textContent = s.noReturn;
+  const badge = document.getElementById('visBadge');
+  if (badge) { if (s.noReturn > 0) { badge.classList.remove('hidden'); badge.textContent = s.noReturn; } else badge.classList.add('hidden'); }
+
+  const rows = d.visitors.filter(v => _visStage === 'all' || _visStageKey(v) === _visStage);
+  const tb = document.getElementById('visRows');
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="9" class="px-4 py-8 text-center text-gray-400">해당 없음</td></tr>'; return; }
+  const esc = (x) => String(x || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  tb.innerHTML = rows.map((v, i) => {
+    const st = VIS_STAGE[v.stage] || { label: v.stage, cls: '' };
+    const dept = (v.department || '').split(' ')[0];
+    const lastNote = (v.notes || '').split('\n').filter(Boolean).pop() || '';
+    const canAct = !!v.studentId && v.stage !== 'converted' && v.stage !== 'closed';
+    const actions = v.studentId ? `
+      <button class="text-xs text-indigo-600 hover:underline" onclick="visAction(${i},'note')">메모</button>
+      ${canAct ? `<button class="text-xs text-green-700 hover:underline ml-2" onclick="visAction(${i},'convert')">전환</button>
+      <button class="text-xs text-gray-500 hover:underline ml-2" onclick="visAction(${i},'inactive')">종료</button>` : ''}`
+      : '<span class="text-xs text-gray-400" title="학생 DB에 없음 — 임시 체크인만 존재">미등록</span>';
+    return `<tr class="${v.stage === 'no-return' || v.stage === 'returned-lapsed' ? 'bg-red-50/40' : ''}">
+      <td class="px-4 py-2 font-semibold text-gray-900">${esc(v.name)}${v.grade ? ` <span class="text-xs text-gray-400 font-normal">${esc(v.grade)}</span>` : ''}</td>
+      <td class="px-2 py-2 text-gray-600">${esc(dept)}</td>
+      <td class="px-2 py-2 text-gray-600">${_fmtD(v.firstVisit)}</td>
+      <td class="px-2 py-2 text-right ${v.visits >= 2 ? 'text-green-700 font-semibold' : 'text-gray-600'}">${v.visits}회</td>
+      <td class="px-2 py-2 text-gray-600">${_fmtD(v.lastAttended)} <span class="text-xs text-gray-400">(${v.daysSinceLast}일 전)</span></td>
+      <td class="px-2 py-2"><span class="ng-chip ${st.cls}" title="${esc(st.hint || '')}">${st.label}</span></td>
+      <td class="px-2 py-2 text-gray-600 text-xs">${esc(v.guardian)}${v.phone ? `<br><a class="text-indigo-600" href="tel:${esc(v.phone)}">${esc(v.phone)}</a>` : ''}${v.invitedBy ? `<br><span class="text-gray-400">초대: ${esc(v.invitedBy)}</span>` : ''}</td>
+      <td class="px-2 py-2 text-gray-500 text-xs max-w-[220px] truncate" title="${esc(v.notes)}">${esc(lastNote)}</td>
+      <td class="px-4 py-2 text-right whitespace-nowrap">${actions}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.querySelectorAll('#visStageFilter .ng-chip').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('#visStageFilter .ng-chip').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    _visStage = b.dataset.stage;
+    renderVisitorFunnel();
+  };
+});
+document.getElementById('visDays').onchange = () => loadVisitorFunnel(true);
+
+async function visAction(idx, action) {
+  const d = _visData; if (!d) return;
+  const rows = d.visitors.filter(v => _visStage === 'all' || _visStageKey(v) === _visStage);
+  const v = rows[idx]; if (!v || !v.studentId) return;
+  let note = '';
+  if (action === 'convert') {
+    if (!confirm(`${v.name} — 정회원으로 전환할까요?\n(방문자 플래그 해제, 전환일 오늘로 기록)`)) return;
+  } else if (action === 'inactive') {
+    note = prompt(`${v.name} — 방문자 추적을 종료합니다. 사유를 적어주세요 (예: 타교회 출석 중, 연락 안 됨):`, '');
+    if (note === null) return;
+  } else {
+    note = prompt(`${v.name} — 연락 메모 (학생 DB 특이사항에 날짜와 함께 저장됩니다):`, '');
+    if (!note) return;
+  }
+  let staff = '';
+  try { staff = (typeof CURRENT_USER === 'string' && CURRENT_USER) || ''; } catch (e) {}
+  try {
+    const r = await fetch('/api/attendance', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'visitors', action, studentId: v.studentId, note, staff }) });
+    const j = await r.json();
+    if (!j.success) throw new Error(j.error || 'failed');
+    await loadVisitorFunnel(true);
+  } catch (e) { alert('처리 실패: ' + (e.message || e)); }
+}
 
 async function loadLiabilityHistory() {
   const tbody = document.getElementById('liabilityRows');
